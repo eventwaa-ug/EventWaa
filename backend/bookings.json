@@ -1,0 +1,27 @@
+[
+    {
+        "id": 1,
+        "eventId": 1,
+        "eventTitle": "sex party",
+        "buyer": {
+            "name": "sia",
+            "email": "sia@gmail.com"
+        },
+        "ticketType": "Regular",
+        "ticketPrice": 10000,
+        "subtotal": 10000,
+        "serviceFee": 500.0,
+        "serviceFeePercent": 5.0,
+        "customerTotal": 10500,
+        "totalPrice": 10000,
+        "ticketId": "EW-1786543634408-1",
+        "checkedIn": false,
+        "refundStatus": "refunded",
+        "createdAt": "2026-08-12 17:07:14",
+        "refundId": 1,
+        "refundRequestedAt": "2026-08-12 17:08:18",
+        "refundedAt": "2026-08-12 17:08:33",
+        "refundAmount": 8000,
+        "refundFee": 2000
+    }
+]

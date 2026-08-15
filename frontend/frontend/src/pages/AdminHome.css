@@ -1,0 +1,114 @@
+admin-home{
+
+    width:100%;
+
+}
+
+.admin-home h1{
+
+    margin-bottom:30px;
+
+}
+
+.dashboard-cards{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+
+    gap:25px;
+
+}
+
+.dashboard-card{
+
+    background:white;
+
+    padding:30px;
+
+    border-radius:15px;
+
+    text-align:center;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.08);
+
+}
+
+.dashboard-card h2{
+
+    margin-bottom:15px;
+
+    color:#666;
+
+}
+
+.dashboard-card h1{
+
+    font-size:45px;
+
+}
+
+.admin-notification {
+
+    background: white;
+    padding: 20px;
+    margin: 25px 0;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+
+.admin-notification h2 {
+
+    margin-bottom: 15px;
+
+}
+
+
+.admin-notification-item {
+
+    background: #f5f5f5;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+
+}
+
+
+.admin-notification-item p {
+
+    margin: 0;
+
+}
+.notification-list{
+
+    margin-top:20px;
+
+}
+
+
+.notification-item{
+
+    background:white;
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+}
+
+
+.notification-item button{
+
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:8px 15px;
+    border-radius:8px;
+    cursor:pointer;
+
+}
+

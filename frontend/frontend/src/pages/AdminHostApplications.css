@@ -1,0 +1,381 @@
+.host-review-page {
+
+    padding: 25px;
+    min-height:100vh;
+
+    background:
+    linear-gradient(
+        135deg,
+        #f4f7ff,
+        #ffffff
+    );
+
+}
+
+
+.host-review-page h1 {
+
+    text-align:center;
+
+    font-size:32px;
+
+    margin-bottom:35px;
+
+    color:#1f2937;
+
+}
+
+
+
+/* Application card */
+
+.application-card {
+
+    background:white;
+
+    padding:25px;
+
+    margin:0 auto 25px;
+
+    max-width:900px;
+
+    border-radius:20px;
+
+    box-shadow:
+    0 10px 30px rgba(0,0,0,0.08);
+
+    transition:.3s;
+
+}
+
+
+.application-card:hover {
+
+    transform:translateY(-3px);
+
+}
+
+
+
+.application-card h2 {
+
+    color:#111827;
+
+    margin-bottom:15px;
+
+}
+
+
+
+.application-card p {
+
+    color:#4b5563;
+
+    margin:8px 0;
+
+}
+
+
+
+/* Status */
+
+.application-card p:last-of-type {
+
+    font-weight:600;
+
+}
+
+
+
+/* Documents */
+
+
+.documents {
+
+    margin-top:25px;
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(180px,1fr));
+
+    gap:20px;
+
+}
+
+
+
+.documents h3 {
+
+    grid-column:1/-1;
+
+    color:#374151;
+
+}
+
+
+
+.documents img {
+
+    width:100%;
+
+    height:170px;
+
+    object-fit:cover;
+
+    border-radius:15px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+
+.documents img:hover {
+
+    transform:scale(1.03);
+
+}
+
+
+
+/* Buttons */
+
+
+.actions {
+
+    margin-top:30px;
+
+    display:flex;
+
+    gap:15px;
+
+}
+
+
+.actions button {
+
+    flex:1;
+
+    padding:14px;
+
+    border:none;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    color:white;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    transition:.3s;
+
+}
+
+
+
+.approve {
+
+    background:#16a34a;
+
+}
+
+
+.approve:hover {
+
+    background:#15803d;
+
+}
+
+
+
+.reject {
+
+    background:#dc2626;
+
+}
+
+
+.reject:hover {
+
+    background:#b91c1c;
+
+}
+
+
+
+/* Phone responsive */
+
+
+@media(max-width:600px){
+
+
+.host-review-page {
+
+    padding:15px;
+
+}
+
+
+
+.host-review-page h1 {
+
+    font-size:25px;
+
+}
+
+
+
+.application-card {
+
+    padding:20px;
+
+    border-radius:15px;
+
+}
+
+
+
+.documents {
+
+    grid-template-columns:1fr;
+
+}
+
+
+
+.documents img {
+
+    height:220px;
+
+}
+
+
+
+.actions {
+
+    flex-direction:column;
+
+}
+
+
+.actions button {
+
+    width:100%;
+
+}
+
+
+}
+.application-controls{
+
+max-width:900px;
+
+margin:0 auto 30px;
+
+display:flex;
+
+gap:15px;
+
+}
+
+
+
+.application-controls input,
+.application-controls select{
+
+flex:1;
+
+padding:14px;
+
+border-radius:12px;
+
+border:1px solid #ddd;
+
+font-size:16px;
+
+background:white;
+
+}
+
+
+
+@media(max-width:600px){
+
+.application-controls{
+
+flex-direction:column;
+
+}
+
+
+}
+.status{
+
+display:inline-block;
+
+padding:8px 18px;
+
+border-radius:20px;
+
+font-weight:600;
+
+text-transform:capitalize;
+
+margin-top:10px;
+
+}
+
+
+.status.pending{
+
+background:#fff3cd;
+
+color:#856404;
+
+}
+
+
+.status.approved{
+
+background:#d4edda;
+
+color:#155724;
+
+}
+
+
+.status.rejected{
+
+background:#f8d7da;
+
+color:#721c24;
+
+}
+
+
+
+.documents a{
+
+transition:0.3s;
+
+}
+
+
+.documents a:hover{
+
+transform:scale(1.05);
+
+}
+
+
+
+.documents img{
+
+cursor:pointer;
+
+}

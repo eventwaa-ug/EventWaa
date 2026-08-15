@@ -1,0 +1,295 @@
+.scanner-page {
+
+    width:100%;
+
+    min-height:100vh;
+
+    padding:20px;
+
+    box-sizing:border-box;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+}
+
+
+
+.scanner-page h1 {
+
+    text-align:center;
+
+    font-size:32px;
+
+    margin-bottom:8px;
+
+}
+
+
+
+.scanner-page p {
+
+    text-align:center;
+
+}
+
+
+
+.scanner-stats {
+
+    width:100%;
+
+    max-width:600px;
+
+    display:flex;
+
+    gap:10px;
+
+    justify-content:center;
+
+    margin:20px 0;
+
+}
+
+
+
+.scanner-stats div {
+
+    flex:1;
+
+    background:white;
+
+    padding:15px 10px;
+
+    border-radius:12px;
+
+    text-align:center;
+
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+
+}
+
+
+
+.scanner-stats h3 {
+
+    font-size:13px;
+
+    margin:0 0 8px;
+
+}
+
+
+
+.scanner-stats strong {
+
+    font-size:26px;
+
+}
+
+
+
+.scanner-box {
+
+    width:100%;
+
+    max-width:450px;
+
+    overflow:hidden;
+
+    border-radius:15px;
+
+}
+
+
+
+.scanner-box video {
+
+    width:100% !important;
+
+    height:auto !important;
+
+    border-radius:15px;
+
+}
+
+
+
+.scan-result {
+
+    width:100%;
+
+    max-width:450px;
+
+    margin-top:20px;
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:15px;
+
+    box-shadow:0 4px 15px rgba(0,0,0,0.1);
+
+    word-break:break-word;
+
+}
+
+
+
+.valid-ticket {
+
+    margin-top:15px;
+
+    padding:15px;
+
+    border-radius:12px;
+
+    background:#e8fff0;
+
+}
+
+
+
+.invalid-ticket {
+
+    margin-top:15px;
+
+    padding:15px;
+
+    border-radius:12px;
+
+    background:#ffecec;
+
+}
+
+
+
+.valid-ticket p,
+.invalid-ticket p {
+
+    text-align:left;
+
+}
+
+
+
+.scan-next-btn {
+
+    margin-top:20px;
+
+    width:100%;
+
+    padding:15px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#2563eb;
+
+    color:white;
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+}
+
+
+
+
+
+/* MOBILE */
+
+@media(max-width:600px){
+
+
+    .scanner-page {
+
+        padding:15px;
+
+    }
+
+
+
+    .scanner-page h1 {
+
+        font-size:24px;
+
+    }
+
+
+
+    .scanner-stats {
+
+        gap:8px;
+
+    }
+
+
+
+    .scanner-stats div {
+
+        padding:12px 5px;
+
+    }
+
+
+
+    .scanner-stats h3 {
+
+        font-size:11px;
+
+    }
+
+
+
+    .scanner-stats strong {
+
+        font-size:22px;
+
+    }
+
+
+
+    .scanner-box {
+
+        max-width:100%;
+
+    }
+
+
+
+    .scan-result {
+
+        padding:15px;
+
+    }
+
+
+
+    .scan-result p {
+
+        font-size:14px;
+
+        text-align:left;
+
+    }
+
+
+
+    .scan-next-btn {
+
+        font-size:16px;
+
+        padding:14px;
+
+    }
+
+}

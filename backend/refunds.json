@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "bookingId": 1,
+        "ticketId": "EW-1786543634408-1",
+        "eventId": 1,
+        "eventTitle": "sex party",
+        "buyer": {
+            "name": "sia",
+            "email": "sia@gmail.com"
+        },
+        "ticketType": "Regular",
+        "quantity": 1,
+        "originalAmount": 10000,
+        "refundFeePercent": 20.0,
+        "refundFee": 2000,
+        "amount": 8000,
+        "reason": "Cannot attend",
+        "details": "",
+        "status": "refunded",
+        "createdAt": "2026-08-12 17:08:18",
+        "refundAmount": 8000,
+        "hostRefundAmount": 8000,
+        "processedBy": "stewardchristo5@gmail.com",
+        "reviewedBy": "stewardchristo5@gmail.com",
+        "processedAt": "2026-08-12 17:08:33",
+        "reviewedAt": "2026-08-12 17:08:33",
+        "reviewNote": "Refund approved by event host."
+    }
+]

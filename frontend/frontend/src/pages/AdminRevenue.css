@@ -1,0 +1,197 @@
+.admin-revenue{
+
+    padding:30px;
+
+    background:#f8fafc;
+
+    min-height:100vh;
+
+}
+
+
+
+.admin-revenue h1{
+
+    font-size:32px;
+
+    margin-bottom:35px;
+
+    color:#111827;
+
+}
+
+
+/* Top cards */
+
+.revenue-cards{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(230px,1fr));
+
+    gap:25px;
+
+    margin-bottom:40px;
+
+}
+
+
+
+.revenue-card{
+
+    background:white;
+
+    padding:30px;
+
+    border-radius:20px;
+
+    box-shadow:
+    0 10px 25px rgba(0,0,0,0.08);
+
+    transition:.3s;
+
+}
+
+
+
+.revenue-card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+
+
+.revenue-card h3{
+
+    color:#6b7280;
+
+    font-size:16px;
+
+    margin-bottom:15px;
+
+}
+
+
+
+.revenue-card h1{
+
+    font-size:36px;
+
+    color:#2563eb;
+
+    margin:0;
+
+}
+
+
+
+/* Event revenue section */
+
+.event-revenue{
+
+    background:white;
+
+    padding:30px;
+
+    border-radius:20px;
+
+    box-shadow:
+    0 10px 25px rgba(0,0,0,0.08);
+
+}
+
+
+
+.event-revenue h2{
+
+    margin-bottom:25px;
+
+    color:#111827;
+
+}
+
+
+
+.revenue-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:18px;
+
+    border-bottom:1px solid #e5e7eb;
+
+    gap:20px;
+
+}
+
+
+
+.revenue-row:last-child{
+
+    border-bottom:none;
+
+}
+
+
+
+.revenue-row h3{
+
+    margin:0;
+
+    color:#111827;
+
+}
+
+
+
+.revenue-row p{
+
+    margin:0;
+
+    color:#6b7280;
+
+}
+
+
+
+
+@media(max-width:700px){
+
+
+    .admin-revenue{
+
+        padding:20px;
+
+    }
+
+
+    .admin-revenue h1{
+
+        font-size:26px;
+
+    }
+
+
+    .revenue-row{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+
+    .revenue-card h1{
+
+        font-size:30px;
+
+    }
+
+
+}

@@ -1,0 +1,92 @@
+[
+    {
+        "id": 1,
+        "userId": 1784987628896,
+        "title": "New booking",
+        "message": "sia booked 1 ticket(s) for breast party.",
+        "type": "booking",
+        "link": "/attendees/2",
+        "read": false,
+        "createdAt": "2026-08-11 17:34:40"
+    },
+    {
+        "id": 2,
+        "userId": 1784987628896,
+        "title": "New booking",
+        "message": "sia booked 1 ticket(s) for breast party.",
+        "type": "booking",
+        "link": "/attendees/2",
+        "read": false,
+        "createdAt": "2026-08-11 18:59:31"
+    },
+    {
+        "id": 3,
+        "userId": 1784987628896,
+        "title": "New booking",
+        "message": "sia booked 1 ticket(s) for house party.",
+        "type": "booking",
+        "link": "/attendees/1",
+        "read": false,
+        "createdAt": "2026-08-11 19:05:20"
+    },
+    {
+        "id": 4,
+        "userId": 1784987628896,
+        "title": "New refund request",
+        "message": "A refund request of UGX 0 was submitted for house party.",
+        "type": "refund_request",
+        "link": "/host/refunds",
+        "read": false,
+        "createdAt": "2026-08-11 19:06:10"
+    },
+    {
+        "id": 5,
+        "userId": 1784987628896,
+        "title": "New booking",
+        "message": "sia booked 1 ticket(s) for sex party.",
+        "type": "booking",
+        "link": "/attendees/1",
+        "read": false,
+        "createdAt": "2026-08-11 20:10:54"
+    },
+    {
+        "id": 6,
+        "userId": 1784987628896,
+        "title": "New refund request",
+        "message": "A refund request of UGX 16,000 was submitted for sex party.",
+        "type": "refund_request",
+        "link": "/host/refunds",
+        "read": false,
+        "createdAt": "2026-08-11 20:12:11"
+    },
+    {
+        "id": 7,
+        "userId": 1784987628896,
+        "title": "New refund request",
+        "message": "A refund request of UGX 8,000 was submitted for sexx parrty.",
+        "type": "refund_request",
+        "link": "/host/refunds",
+        "read": false,
+        "createdAt": "2026-08-12 15:39:36"
+    },
+    {
+        "id": 8,
+        "userId": 1784987628896,
+        "title": "New refund request",
+        "message": "A refund request of UGX 8,000 was submitted for sex party.",
+        "type": "refund_request",
+        "link": "/host/refunds",
+        "read": false,
+        "createdAt": "2026-08-12 16:38:17"
+    },
+    {
+        "id": 9,
+        "userId": 1784987628896,
+        "title": "New refund request",
+        "message": "A refund request of UGX 8,000 was submitted for sex party.",
+        "type": "refund_request",
+        "link": "/host/refunds",
+        "read": false,
+        "createdAt": "2026-08-12 17:08:18"
+    }
+]

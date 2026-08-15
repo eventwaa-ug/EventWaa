@@ -1,0 +1,243 @@
+.host-messages{
+
+    padding:30px;
+
+}
+
+
+
+.host-messages h1{
+
+    margin-bottom:25px;
+
+}
+
+
+
+
+.message-card{
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:15px;
+
+    margin-bottom:15px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+
+
+
+.message-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+
+
+.message-header h3{
+
+    margin:0;
+
+    font-size:18px;
+
+}
+
+
+
+
+
+.message-text{
+
+    margin:15px 0;
+
+    color:#555;
+
+    font-size:15px;
+
+}
+
+
+
+
+
+.message-card small{
+
+    color:#999;
+
+}
+
+
+
+
+.unread-badge{
+
+    background:#ff4757;
+
+    color:white;
+
+    padding:5px 12px;
+
+    border-radius:20px;
+
+    font-size:12px;
+
+    font-weight:bold;
+
+}
+
+
+
+
+
+.message-actions{
+
+    display:flex;
+
+    gap:12px;
+
+    margin-top:18px;
+
+}
+
+
+
+
+.message-actions button{
+
+    border:none;
+
+    padding:9px 18px;
+
+    border-radius:20px;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+}
+
+
+
+
+
+.message-actions button:first-child{
+
+    background:#2ecc71;
+
+    color:white;
+
+}
+
+
+
+
+
+.delete-button{
+
+    background:#e74c3c;
+
+    color:white;
+
+}
+
+
+
+
+.message-actions button:hover{
+
+    opacity:0.85;
+
+}
+@media (max-width: 600px){
+
+
+    .host-messages{
+
+        padding:15px;
+
+    }
+
+
+
+    .host-messages h1{
+
+        font-size:24px;
+
+    }
+
+
+
+
+    .message-card{
+
+        padding:15px;
+
+        border-radius:12px;
+
+    }
+
+
+
+
+    .message-header h3{
+
+        font-size:16px;
+
+    }
+
+
+
+
+
+    .message-text{
+
+        font-size:14px;
+
+    }
+
+
+
+
+
+    .message-actions{
+
+        flex-direction:column;
+
+        gap:10px;
+
+    }
+
+
+
+
+    .message-actions button{
+
+        width:100%;
+
+        padding:12px;
+
+    }
+
+
+
+
+    .unread-badge{
+
+        font-size:11px;
+
+        padding:4px 10px;
+
+    }
+
+
+}

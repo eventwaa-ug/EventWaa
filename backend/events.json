@@ -1,0 +1,35 @@
+[
+    {
+        "id": 1,
+        "title": "sex partyyyyyyyyyyyy",
+        "description": "",
+        "venue": "",
+        "city": "gulu",
+        "category": "",
+        "date": "2026-09-20",
+        "startTime": "",
+        "endTime": "",
+        "capacity": "",
+        "contact": "",
+        "eventType": "Paid",
+        "ticketType": "Paid",
+        "tickets": [
+            {
+                "name": "Regular",
+                "price": "10000",
+                "quantity": "18"
+            }
+        ],
+        "organizerName": "",
+        "hostId": 1784987628896,
+        "hostName": "STEWARD CHRISTO",
+        "hostEmail": "stewardchristo5@gmail.com",
+        "verifiedHost": true,
+        "eventPoster": "/uploads/events/1786543563658_picnic.jpeg",
+        "image": "/uploads/events/1786543563658_picnic.jpeg",
+        "ticketsSold": 0,
+        "revenue": 1000,
+        "status": "published",
+        "featured": false
+    }
+]

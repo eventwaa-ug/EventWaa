@@ -1,0 +1,35 @@
+[
+    {
+        "id": 1784987628896,
+        "name": "STEWARD CHRISTO",
+        "email": "stewardchristo5@gmail.com",
+        "provider": "google",
+        "role": "host",
+        "verifiedHost": true,
+        "organizerName": "",
+        "description": "we bring to you beautiful events in Gulu.",
+        "location": "",
+        "contact": "",
+        "image": ""
+    },
+    {
+        "name": "sia",
+        "email": "sia@gmail.com",
+        "password": "scrypt:32768:8:1$wyYMjpu5cUQucV5H$f21dac7c0eb5ce5745f556d3fe2b5d74037a149c2ab82f649aa7aee67a776af1eb61583b8e0f8adb0a0bdddeb2285f930492abf769d94458e839864d4647c89f",
+        "id": 1786450860836,
+        "role": "user",
+        "status": "active",
+        "verifiedHost": false,
+        "hostMode": false
+    },
+    {
+        "name": "opiro steward",
+        "email": "opirosteward5@gmail.com",
+        "password": "scrypt:32768:8:1$mIbgPRGgZAfMtV9M$5ec01da5a1f3ffb7579d0cfaba18627714cdaf33fc9ea0c648721c1149e48972ce7fca603a34367eb8116c9fbe680410c55d7a55141552eece398731d3407d79",
+        "id": 1786631683343,
+        "role": "user",
+        "status": "active",
+        "verifiedHost": false,
+        "hostMode": false
+    }
+]

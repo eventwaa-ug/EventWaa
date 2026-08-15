@@ -1,0 +1,433 @@
+.community {
+  width: 100%;
+  padding: 80px 20px;
+  background: #f9fafb;
+  box-sizing: border-box;
+}
+
+.community-header {
+  max-width: 750px;
+  margin: 0 auto 50px;
+  text-align: center;
+}
+
+.community-eyebrow {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: #16a34a;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.community-header h2 {
+  margin: 0 0 15px;
+  color: #111827;
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.community-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+
+/* ============================================================
+   REVIEW GRID
+============================================================ */
+
+.community-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 25px;
+}
+
+
+/* ============================================================
+   REVIEW CARD
+============================================================ */
+
+.community-card {
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 18px;
+
+  padding: 28px;
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.05);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.community-card:hover {
+  transform: translateY(-5px);
+
+  box-shadow:
+    0 15px 35px rgba(0, 0, 0, 0.08);
+}
+
+
+/* ============================================================
+   USER
+============================================================ */
+
+.community-card-top {
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+  margin-bottom: 22px;
+}
+
+.profile-circle {
+  width: 48px;
+  height: 48px;
+
+  min-width: 48px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #dcfce7;
+
+  color: #15803d;
+
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.community-card h3 {
+  margin: 0 0 5px;
+
+  color: #111827;
+
+  font-size: 17px;
+  font-weight: 700;
+}
+
+
+/* ============================================================
+   STARS
+============================================================ */
+
+.stars {
+  display: flex;
+
+  gap: 2px;
+}
+
+.star {
+  color: #d1d5db;
+
+  font-size: 17px;
+}
+
+.star.active {
+  color: #f59e0b;
+}
+
+
+/* ============================================================
+   REVIEW TEXT
+============================================================ */
+
+.community-review {
+  margin: 0 0 24px;
+
+  color: #4b5563;
+
+  font-size: 15px;
+
+  line-height: 1.75;
+}
+
+
+/* ============================================================
+   EVENT
+============================================================ */
+
+.review-event {
+  padding-top: 17px;
+
+  border-top:
+    1px solid #f0f0f0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.review-event span {
+  color: #9ca3af;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.8px;
+}
+
+.review-event strong {
+  color: #374151;
+
+  font-size: 14px;
+}
+
+
+/* ============================================================
+   EMPTY STATE
+============================================================ */
+
+.community-empty {
+  max-width: 600px;
+
+  margin: 0 auto;
+
+  padding: 45px 30px;
+
+  text-align: center;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.04);
+}
+
+.community-empty-icon {
+  width: 65px;
+  height: 65px;
+
+  margin: 0 auto 18px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #fef3c7;
+
+  font-size: 30px;
+}
+
+.community-empty h3 {
+  margin: 0 0 10px;
+
+  color: #111827;
+
+  font-size: 21px;
+}
+
+.community-empty p {
+  margin: 0 auto 25px;
+
+  max-width: 480px;
+
+  color: #6b7280;
+
+  line-height: 1.7;
+}
+
+
+/* ============================================================
+   DISCOVER EVENTS BUTTON
+============================================================ */
+
+.community-events-btn {
+  display: inline-block;
+
+  padding: 12px 20px;
+
+  border-radius: 9px;
+
+  background: #16a34a;
+
+  color: #ffffff;
+
+  text-decoration: none;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  transition: 0.25s ease;
+}
+
+.community-events-btn:hover {
+  background: #15803d;
+
+  transform: translateY(-1px);
+}
+
+
+/* ============================================================
+   LOADING
+============================================================ */
+
+.community-loading {
+  min-height: 180px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 15px;
+}
+
+.community-loading p {
+  margin: 0;
+
+  color: #6b7280;
+
+  font-size: 15px;
+}
+
+.community-spinner {
+  width: 32px;
+  height: 32px;
+
+  border: 3px solid #e5e7eb;
+
+  border-top-color: #16a34a;
+
+  border-radius: 50%;
+
+  animation:
+    communitySpin 0.8s linear infinite;
+}
+
+@keyframes communitySpin {
+
+  to {
+    transform: rotate(360deg);
+  }
+
+}
+
+
+/* ============================================================
+   FOOTER
+============================================================ */
+
+.community-footer {
+  margin-top: 35px;
+
+  text-align: center;
+}
+
+.view-reviews-btn {
+  display: inline-block;
+
+  color: #16a34a;
+
+  text-decoration: none;
+
+  font-size: 15px;
+
+  font-weight: 700;
+}
+
+.view-reviews-btn:hover {
+  text-decoration: underline;
+}
+
+
+/* ============================================================
+   TABLET
+============================================================ */
+
+@media (max-width: 900px) {
+
+  .community {
+    padding: 65px 20px;
+  }
+
+  .community-header h2 {
+    font-size: 32px;
+  }
+
+  .community-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 20px;
+  }
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 600px) {
+
+  .community {
+    padding: 55px 16px;
+  }
+
+  .community-header {
+    margin-bottom: 35px;
+  }
+
+  .community-eyebrow {
+    font-size: 11px;
+  }
+
+  .community-header h2 {
+    font-size: 28px;
+  }
+
+  .community-header p {
+    font-size: 15px;
+  }
+
+  .community-grid {
+    grid-template-columns: 1fr;
+
+    gap: 16px;
+  }
+
+  .community-card {
+    padding: 22px;
+  }
+
+  .community-empty {
+    padding: 35px 20px;
+  }
+
+}

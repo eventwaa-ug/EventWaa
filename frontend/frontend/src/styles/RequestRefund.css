@@ -1,0 +1,418 @@
+/* ============================================================
+   REFUND PAGE
+============================================================ */
+.refund-page {
+    min-height: 100vh;
+    background: #f8fafc;
+    padding: 35px;
+    box-sizing: border-box;
+}
+/* ============================================================
+   HEADER
+============================================================ */
+.refund-header {
+    max-width: 900px;
+    margin: 0 auto 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.refund-header h1 {
+    margin: 0;
+    color: #111827;
+    font-size: 28px;
+}
+.refund-header p {
+    margin: 5px 0 0;
+    color: #6b7280;
+}
+.refund-back-button {
+    width: 44px;
+    height: 44px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    border-radius: 10px;
+    font-size: 22px;
+    cursor: pointer;
+}
+.refund-back-button:hover {
+    background: #f3f4f6;
+}
+/* ============================================================
+   CONTAINER
+============================================================ */
+.refund-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+/* ============================================================
+   TICKET CARD
+============================================================ */
+.refund-ticket-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 22px;
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 20px;
+    box-shadow:
+        0 3px 15px rgba(0, 0, 0, 0.04);
+}
+.refund-ticket-icon {
+    width: 55px;
+    height: 55px;
+    border-radius: 13px;
+    background: #eff6ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+    flex-shrink: 0;
+}
+.refund-ticket-info {
+    min-width: 0;
+}
+.refund-ticket-info > span {
+    font-size: 11px;
+    font-weight: 700;
+    color: #9ca3af;
+    letter-spacing: 1px;
+}
+.refund-ticket-info h2 {
+    margin: 5px 0 12px;
+    color: #111827;
+    font-size: 21px;
+}
+.refund-ticket-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+}
+.refund-ticket-details p {
+    margin: 0;
+    color: #4b5563;
+    font-size: 14px;
+}
+/* ============================================================
+   WARNING
+============================================================ */
+.refund-warning {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 12px;
+    padding: 15px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: #9a3412;
+}
+.refund-warning.pending {
+    background: #fffbeb;
+    border-color: #fde68a;
+    color: #92400e;
+}
+.refund-warning.success {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #047857;
+}
+/* ============================================================
+   FORM
+============================================================ */
+.refund-form {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow:
+        0 3px 15px rgba(0, 0, 0, 0.04);
+}
+.refund-form-header {
+    margin-bottom: 25px;
+}
+.refund-form-header h2 {
+    margin: 0;
+    color: #111827;
+    font-size: 20px;
+}
+.refund-form-header p {
+    margin: 6px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+/* ============================================================
+   FIELDS
+============================================================ */
+.refund-field {
+    margin-bottom: 20px;
+}
+.refund-field label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #374151;
+}
+.refund-field label span {
+    font-weight: 400;
+    color: #9ca3af;
+    font-size: 12px;
+}
+.refund-field select,
+.refund-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 12px 13px;
+    background: white;
+    color: #111827;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.2s ease;
+}
+.refund-field select:focus,
+.refund-field textarea:focus {
+    border-color: #2563eb;
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+.refund-field textarea {
+    resize: vertical;
+    min-height: 110px;
+    font-family: inherit;
+}
+/* ============================================================
+   AMOUNT
+============================================================ */
+.refund-amount-card {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 17px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.refund-amount-card span {
+    color: #6b7280;
+    font-size: 14px;
+}
+.refund-amount-card strong {
+    color: #111827;
+    font-size: 20px;
+}
+/* ============================================================
+   ERROR
+============================================================ */
+.refund-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    font-size: 14px;
+}
+/* ============================================================
+   ACTIONS
+============================================================ */
+.refund-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 5px;
+}
+.refund-cancel-btn,
+.refund-submit-btn {
+    border: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.refund-cancel-btn {
+    background: #f3f4f6;
+    color: #374151;
+}
+.refund-cancel-btn:hover {
+    background: #e5e7eb;
+}
+.refund-submit-btn {
+    background: #2563eb;
+    color: white;
+}
+.refund-submit-btn:hover {
+    background: #1d4ed8;
+}
+.refund-submit-btn:disabled,
+.refund-cancel-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+/* ============================================================
+   EMPTY
+============================================================ */
+.refund-empty {
+    max-width: 500px;
+    margin: 100px auto;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 50px 25px;
+    text-align: center;
+}
+.refund-empty-icon {
+    font-size: 45px;
+    margin-bottom: 10px;
+}
+.refund-empty h2 {
+    margin: 0;
+    color: #111827;
+}
+.refund-empty p {
+    color: #6b7280;
+    margin: 8px 0 20px;
+}
+.refund-empty button {
+    border: none;
+    background: #2563eb;
+    color: white;
+    padding: 11px 18px;
+    border-radius: 9px;
+    font-weight: 700;
+    cursor: pointer;
+}
+/* ============================================================
+   MOBILE
+============================================================ */
+@media (max-width: 768px) {
+    .refund-page {
+        padding: 25px 15px 40px;
+    }
+    .refund-header {
+        align-items: flex-start;
+    }
+    .refund-header h1 {
+        font-size: 23px;
+    }
+    .refund-header p {
+        font-size: 13px;
+    }
+    .refund-ticket-card {
+        padding: 18px;
+    }
+    .refund-ticket-info h2 {
+        font-size: 18px;
+    }
+    .refund-ticket-details {
+        flex-direction: column;
+        gap: 7px;
+    }
+    .refund-form {
+        padding: 18px;
+    }
+    .refund-actions {
+        flex-direction: column-reverse;
+    }
+    .refund-cancel-btn,
+    .refund-submit-btn {
+        width: 100%;
+    }
+}
+/* ============================================================
+   SMALL PHONES
+============================================================ */
+@media (max-width: 480px) {
+    .refund-page {
+        padding: 20px 12px 35px;
+    }
+    .refund-ticket-card {
+        gap: 12px;
+    }
+    .refund-ticket-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 21px;
+    }
+    .refund-header {
+        gap: 10px;
+    }
+    .refund-back-button {
+        width: 40px;
+        height: 40px;
+    }
+}
+/* ============================================================
+   REFUND AMOUNT & POLICY
+============================================================ */
+
+.refund-amount-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 20px;
+    margin: 24px 0;
+}
+
+.refund-amount-card span {
+    display: block;
+    color: #6b7280;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.refund-amount-card strong {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.refund-amount-card hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 18px 0;
+}
+
+.refund-policy {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.refund-policy-title {
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.refund-policy p {
+    margin: 0;
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 768px) {
+    .refund-amount-card {
+        padding: 18px;
+    }
+
+    .refund-amount-card strong {
+        font-size: 24px;
+    }
+
+    .refund-policy p {
+        font-size: 13px;
+    }
+}

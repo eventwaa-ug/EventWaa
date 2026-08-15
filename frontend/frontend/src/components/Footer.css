@@ -1,0 +1,393 @@
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer {
+  background: #111827;
+  color: #ffffff;
+  padding: 65px 24px 24px;
+  margin-top: 60px;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
+  gap: 45px;
+
+  align-items: start;
+}
+
+/* =========================================================
+   BRAND
+========================================================= */
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.footer-logo {
+  width: 130px;
+  height: auto;
+  object-fit: contain;
+}
+
+.footer-brand h3 {
+  font-size: 24px;
+  margin: 0;
+  font-weight: 800;
+}
+
+.footer-brand p {
+  color: #d1d5db;
+  line-height: 1.7;
+  font-size: 15px;
+  max-width: 300px;
+  margin: 0;
+}
+
+/* =========================================================
+   FOOTER LINKS
+========================================================= */
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.footer-links h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #ffffff;
+}
+
+.footer-links a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 15px;
+  line-height: 1.5;
+
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.footer-links a:hover {
+  color: #22c55e;
+  transform: translateX(3px);
+}
+
+/* =========================================================
+   CONTACT
+========================================================= */
+
+.footer-contact {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-contact h3 {
+  font-size: 17px;
+  margin: 0 0 18px;
+}
+
+.footer-contact p {
+  color: #cbd5e1;
+  margin: 0 0 12px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   FOOTER BOTTOM
+========================================================= */
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 50px auto 0;
+
+  padding-top: 22px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 20px;
+}
+
+.footer-bottom p {
+  color: #9ca3af;
+  font-size: 14px;
+  margin: 0;
+}
+
+.footer-bottom-links {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.footer-bottom-links a {
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.25s ease;
+}
+
+.footer-bottom-links a:hover {
+  color: #22c55e;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1000px) {
+
+  .footer-container {
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 40px;
+  }
+
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+
+  .footer-brand p {
+    max-width: 500px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+
+  .footer {
+    padding: 45px 20px 20px;
+    margin-top: 45px;
+  }
+
+  /*
+     IMPORTANT:
+
+     Instead of putting every section underneath
+     the previous one, we create a compact 2-column
+     layout for the footer sections.
+
+     The links inside each section remain vertical.
+  */
+
+  .footer-container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 38px 25px;
+
+    text-align: left;
+  }
+
+  /* -----------------------------------------
+     BRAND
+  ----------------------------------------- */
+
+  .footer-brand {
+    grid-column: 1 / -1;
+
+    align-items: flex-start;
+    text-align: left;
+
+    padding-bottom: 5px;
+  }
+
+  .footer-logo {
+    width: 115px;
+  }
+
+  .footer-brand h3 {
+    font-size: 22px;
+  }
+
+  .footer-brand p {
+    font-size: 14px;
+    max-width: 100%;
+    line-height: 1.7;
+  }
+
+  /* -----------------------------------------
+     LINKS
+
+     Heading stays on top.
+     Links underneath stay vertical.
+  ----------------------------------------- */
+
+  .footer-links {
+    align-items: flex-start;
+    text-align: left;
+
+    gap: 10px;
+  }
+
+  .footer-links h3 {
+    font-size: 16px;
+    margin-bottom: 7px;
+  }
+
+  .footer-links a {
+    font-size: 14px;
+  }
+
+  /* -----------------------------------------
+     CONTACT
+  ----------------------------------------- */
+
+  .footer-contact {
+    grid-column: 1 / -1;
+
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .footer-contact h3 {
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+
+  .footer-contact p {
+    font-size: 14px;
+  }
+
+  /* -----------------------------------------
+     BOTTOM
+  ----------------------------------------- */
+
+  .footer-bottom {
+    margin-top: 38px;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    text-align: center;
+
+    gap: 16px;
+  }
+
+  .footer-bottom p {
+    font-size: 13px;
+  }
+
+  .footer-bottom-links {
+    gap: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .footer-bottom-links a {
+    font-size: 13px;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL PHONES
+========================================================= */
+
+@media (max-width: 380px) {
+
+  .footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .footer-container {
+    gap: 32px 18px;
+  }
+
+  .footer-links h3 {
+    font-size: 15px;
+  }
+
+  .footer-links a {
+    font-size: 13px;
+  }
+
+  .footer-brand p {
+    font-size: 13px;
+  }
+
+}
+
+
+/* =========================================================
+   LOGO PREVIEW
+   (Keep this if used elsewhere in your app)
+========================================================= */
+
+.logo-preview {
+  margin-top: 16px;
+
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.preview-image {
+  height: 60px;
+  width: auto;
+
+  object-fit: contain;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  padding: 8px;
+
+  background: white;
+}
+
+.remove-logo {
+  background: #ef4444;
+  color: white;
+
+  border: none;
+
+  padding: 10px 14px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+.remove-logo:hover {
+  background: #dc2626;
+}
+
+.email-support-link {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 15px;
+  cursor: pointer;
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.email-support-link:hover {
+  color: #22c55e;
+  transform: translateX(3px);
+}
+
+.email-support-link:active {
+  color: #16a34a;
+}

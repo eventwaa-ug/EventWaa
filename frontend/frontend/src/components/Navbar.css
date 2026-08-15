@@ -1,0 +1,214 @@
+/* =========================
+   NAVBAR
+========================= */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 40px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+/* =========================
+   BRAND / LOGO
+========================= */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+.navbar-logo {
+    width: 150px;
+    max-height: 55px;
+    height: auto;
+    object-fit: contain;
+    display: block;
+}
+.logo-text {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #111827;
+    white-space: nowrap;
+}
+/* =========================
+   NAV LINKS
+========================= */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+.nav-links a {
+    text-decoration: none;
+    color: #111827;
+    font-weight: 600;
+    transition: color 0.25s ease;
+}
+.nav-links a:hover {
+    color: #2563eb;
+}
+/* =========================
+   REGISTER BUTTON
+========================= */
+.register-button {
+    background: #2563eb;
+    color: white !important;
+    padding: 9px 16px;
+    border-radius: 8px;
+    transition: 0.25s ease;
+}
+.register-button:hover {
+    background: #1d4ed8;
+    color: white !important;
+}
+/* =========================
+   LOGOUT BUTTON
+========================= */
+.logout-button {
+    border: none;
+    background: #ef4444;
+    color: white;
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+.logout-button:hover {
+    background: #dc2626;
+}
+/* =========================
+   NOTIFICATION
+========================= */
+.notification-icon {
+    position: relative;
+    cursor: pointer;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* =========================
+   MOBILE MENU BUTTON
+========================= */
+.mobile-menu-button {
+    display: none;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 6px;
+    flex-direction: column;
+    gap: 5px;
+}
+.mobile-menu-button span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background: #111827;
+    border-radius: 3px;
+}
+/* =========================
+   TABLET
+========================= */
+@media (max-width: 900px) {
+    .navbar {
+        padding: 12px 25px;
+    }
+    .nav-links {
+        gap: 15px;
+    }
+    .navbar-logo {
+        width: 130px;
+    }
+}
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 768px) {
+    .navbar {
+        position: sticky;
+        top: 0;
+        padding: 10px 18px;
+        min-height: 65px;
+    }
+    /* Larger mobile logo */
+    .navbar-logo {
+        width: 135px;
+        max-height: 50px;
+    }
+    .logo-text {
+        font-size: 1.4rem;
+    }
+    /* Show hamburger */
+    .mobile-menu-button {
+        display: flex;
+        z-index: 1002;
+    }
+    /* Hide menu by default */
+    .nav-links {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        box-sizing: border-box;
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 10px 18px;
+    }
+    /* Show menu */
+    .nav-links-open {
+        display: flex;
+    }
+    .nav-links a {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 13px 10px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .nav-links a:hover {
+        background: #f8fafc;
+    }
+    /* Buttons */
+    .register-button {
+        margin: 8px 0;
+        text-align: center;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+    .logout-button {
+        width: 100%;
+        margin: 10px 0;
+        padding: 12px;
+    }
+    .notification-icon {
+        justify-content: flex-start;
+        font-size: 22px;
+    }
+}
+/* =========================
+   SMALL PHONES
+========================= */
+@media (max-width: 400px) {
+    .navbar {
+        padding: 9px 14px;
+    }
+    .navbar-logo {
+        width: 120px;
+        max-height: 45px;
+    }
+    .logo-text {
+        font-size: 1.25rem;
+    }
+}

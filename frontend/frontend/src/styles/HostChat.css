@@ -1,0 +1,131 @@
+.host-chat-page{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#f5f7fb;
+    min-height:100vh;
+    padding:30px;
+}
+
+.host-chat-container{
+    width:100%;
+    max-width:750px;
+    height:85vh;
+    background:#fff;
+    border-radius:16px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    box-shadow:0 10px 35px rgba(0,0,0,.12);
+}
+
+.host-chat-container h2{
+    margin:0;
+    padding:20px;
+    background:#2563eb;
+    color:white;
+    font-size:22px;
+}
+
+.host-chat-messages{
+    flex:1;
+    overflow-y:auto;
+    padding:20px;
+    background:#f8fafc;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+.customer-message{
+    align-self:flex-start;
+    max-width:75%;
+    background:white;
+    padding:12px 16px;
+    border-radius:18px 18px 18px 6px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    word-break:break-word;
+}
+
+.host-message{
+    align-self:flex-end;
+    max-width:75%;
+    background:#2563eb;
+    color:white;
+    padding:12px 16px;
+    border-radius:18px 18px 6px 18px;
+    margin-top:8px;
+    word-break:break-word;
+}
+
+.host-chat-input{
+    display:flex;
+    gap:12px;
+    padding:18px;
+    border-top:1px solid #e5e7eb;
+    background:white;
+}
+
+.host-chat-input textarea{
+    flex:1;
+    resize:none;
+    height:60px;
+    border:1px solid #d1d5db;
+    border-radius:12px;
+    padding:12px;
+    font-size:15px;
+    outline:none;
+}
+
+.host-chat-input textarea:focus{
+    border-color:#2563eb;
+}
+
+.host-chat-input button{
+    width:120px;
+    border:none;
+    border-radius:12px;
+    background:#2563eb;
+    color:white;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.host-chat-input button:hover{
+    background:#1d4ed8;
+}
+
+@media(max-width:768px){
+
+    .host-chat-page{
+        padding:0;
+    }
+
+    .host-chat-container{
+        height:100vh;
+        border-radius:0;
+    }
+
+    .customer-message,
+    .host-message{
+        max-width:90%;
+    }
+
+    .host-chat-input{
+        flex-direction:column;
+    }
+
+    .host-chat-input button{
+        width:100%;
+        height:50px;
+    }
+
+}
+.chat-message-group{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    width:100%;
+}

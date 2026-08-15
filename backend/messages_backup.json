@@ -1,0 +1,41 @@
+[
+    {
+        "id": 1785238342841,
+        "conversationId": "1785149878258-1784987628896",
+        "senderId": 1785149878258,
+        "senderRole": "user",
+        "senderName": "okello kal",
+        "senderEmail": "okelokal@gmail.com",
+        "hostId": 1784987628896,
+        "message": "helo chrsto",
+        "hostStatus": "read",
+        "replyStatus": "read",
+        "createdAt": 1785238342
+    },
+    {
+        "id": 1785238419922,
+        "conversationId": "1785149878258-1784987628896",
+        "senderId": 1784987628896,
+        "senderRole": "host",
+        "senderName": "STEWARD CHRISTO",
+        "senderEmail": "stewardchristo5@gmail.com",
+        "hostId": 1784987628896,
+        "message": "hello okelo",
+        "hostStatus": "read",
+        "replyStatus": "read",
+        "createdAt": 1785238419
+    },
+    {
+        "id": 1785238566795,
+        "conversationId": "1784987628896-1784987628896",
+        "senderId": 1784987628896,
+        "senderRole": "host",
+        "senderName": "STEWARD CHRISTO",
+        "senderEmail": "stewardchristo5@gmail.com",
+        "hostId": 1784987628896,
+        "message": "hey",
+        "hostStatus": "read",
+        "replyStatus": "read",
+        "createdAt": 1785238566
+    }
+]

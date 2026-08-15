@@ -1,0 +1,39 @@
+.paid-events {
+  padding: 80px 8%;
+  background: #f8fafc;
+}
+
+.paid-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+@media (max-width: 992px) {
+  .paid-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .paid-events {
+    padding: 60px 5%;
+  }
+
+  .paid-grid {
+    display: flex;
+    overflow-x: auto;
+    gap: 18px;
+    padding-bottom: 10px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .paid-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .paid-grid > * {
+    flex: 0 0 85%;
+    scroll-snap-align: start;
+  }
+}

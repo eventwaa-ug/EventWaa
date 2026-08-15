@@ -1,0 +1,168 @@
+.tickets-page {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.tickets-page h1 {
+  margin-bottom: 25px;
+}
+
+.ticket-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-left: 5px solid #2563eb;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.ticket-card h2 {
+  margin-bottom: 15px;
+}
+
+.ticket-card p {
+  margin: 8px 0;
+}
+.refunded-ticket {
+    opacity: 0.75;
+    border: 2px solid #ef4444;
+    background: #fef2f2;
+}
+.refund-banner {
+    margin: 12px 0;
+    padding: 10px;
+    border-radius: 10px;
+    background: #16a34a;
+    color: white;
+    font-weight: 700;
+    text-align: center;
+}
+.refund-banner.pending {
+    background: #f59e0b;
+}
+.view-ticket-btn.disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+.refund-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #dc2626;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.refund-btn:hover {
+  background: #b91c1c;
+}
+
+.refund-btn.pending {
+  background: #f59e0b;
+  cursor: not-allowed;
+}
+
+.refund-btn:disabled {
+  opacity: 0.8;
+}
+.ticket-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.review-ticket-btn {
+    border: none;
+    background: #f59e0b;
+    color: #ffffff;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+.review-ticket-btn:hover {
+    background: #d97706;
+    transform: translateY(-1px);
+}
+
+.review-ticket-btn:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 600px) {
+
+    .ticket-actions {
+        flex-direction: column;
+    }
+
+    .ticket-actions a,
+    .ticket-actions button {
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+}
+/* ============================================================
+   REVIEW BUTTON
+============================================================ */
+
+.review-ticket-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 12px;
+
+  padding: 12px 18px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #f59e0b;
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.review-ticket-btn:hover {
+  background: #d97706;
+
+  transform: translateY(-2px);
+
+  box-shadow: 0 6px 15px rgba(245, 158, 11, 0.25);
+}
+
+.review-ticket-btn:active {
+  transform: translateY(0);
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+  .review-ticket-btn {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+}

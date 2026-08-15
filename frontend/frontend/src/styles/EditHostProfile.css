@@ -1,0 +1,67 @@
+.edit-host-page{
+
+max-width:600px;
+margin:40px auto;
+padding:30px;
+background:white;
+border-radius:20px;
+box-shadow:0 5px 20px rgba(0,0,0,0.08);
+
+}
+
+
+.edit-host-page h1{
+
+text-align:center;
+margin-bottom:30px;
+
+}
+
+
+.edit-host-page form{
+
+display:flex;
+flex-direction:column;
+gap:12px;
+
+}
+
+
+.edit-host-page input,
+.edit-host-page textarea{
+
+padding:12px;
+border-radius:10px;
+border:1px solid #ddd;
+font-size:16px;
+
+}
+
+
+.edit-host-page textarea{
+
+height:120px;
+resize:none;
+
+}
+
+
+.edit-host-page button{
+
+margin-top:20px;
+padding:14px;
+border:none;
+border-radius:25px;
+background:#0077cc;
+color:white;
+font-size:16px;
+cursor:pointer;
+
+}
+
+
+.edit-host-page button:hover{
+
+opacity:0.85;
+
+}

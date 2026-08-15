@@ -1,0 +1,383 @@
+.host-page{
+
+    min-height:100vh;
+
+    background:#f5f7fb;
+
+    padding:50px 20px;
+
+}
+
+
+
+.host-container{
+
+    max-width:850px;
+
+    margin:auto;
+
+    background:white;
+
+    padding:45px;
+
+    border-radius:24px;
+
+    box-shadow:0 15px 40px rgba(0,0,0,0.08);
+
+}
+
+
+
+.host-header{
+
+    text-align:center;
+
+}
+
+
+
+.host-header h1{
+
+    font-size:36px;
+
+    color:#111827;
+
+}
+
+
+
+.main-text{
+
+    font-size:20px;
+
+    font-weight:600;
+
+    color:#2563eb;
+
+}
+
+
+
+.description{
+
+    color:#6b7280;
+
+    line-height:1.7;
+
+}
+
+
+
+
+
+.progress-section{
+
+    margin:40px 0;
+
+    text-align:center;
+
+}
+
+
+
+.progress-section h3{
+
+    color:#374151;
+
+}
+
+
+
+.progress-bar{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+}
+
+
+
+.circle{
+
+    width:40px;
+
+    height:40px;
+
+    border-radius:50%;
+
+    background:#d1d5db;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-weight:bold;
+
+}
+
+
+
+.circle.active{
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+
+
+.line{
+
+    width:150px;
+
+    height:4px;
+
+    background:#d1d5db;
+
+}
+
+
+
+.progress-labels{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:150px;
+
+    margin-top:10px;
+
+    color:#6b7280;
+
+}
+
+
+
+
+
+.benefits h2,
+
+form h2{
+
+    margin-top:35px;
+
+    color:#111827;
+
+}
+
+
+
+.benefit-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:20px;
+
+}
+
+
+
+.benefit-card{
+
+    background:#eff6ff;
+
+    padding:20px;
+
+    border-radius:15px;
+
+    color:#1e3a8a;
+
+    font-weight:600;
+
+}
+
+
+
+
+
+form{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+
+
+label{
+
+    margin-top:15px;
+
+    margin-bottom:8px;
+
+    font-weight:600;
+
+}
+
+
+
+input,
+
+select,
+
+textarea{
+
+    padding:15px;
+
+    border-radius:12px;
+
+    border:1px solid #d1d5db;
+
+    font-size:15px;
+
+}
+
+
+
+input:focus,
+
+select:focus,
+
+textarea:focus{
+
+    outline:none;
+
+    border-color:#2563eb;
+
+}
+
+
+
+textarea{
+
+    min-height:140px;
+
+}
+
+
+
+
+
+.process-box{
+
+    margin-top:30px;
+
+    background:#fff7ed;
+
+    padding:25px;
+
+    border-radius:15px;
+
+    border-left:5px solid #f97316;
+
+}
+
+
+
+.process-box h3{
+
+    color:#c2410c;
+
+}
+
+
+
+
+
+button{
+
+    margin-top:30px;
+
+    padding:17px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#2563eb;
+
+    color:white;
+
+    font-size:17px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+}
+
+
+
+button:hover{
+
+    background:#1d4ed8;
+
+}
+
+
+
+.terms{
+
+    text-align:center;
+
+    color:#6b7280;
+
+    margin-top:20px;
+
+    font-size:14px;
+
+}
+
+
+
+
+
+@media(max-width:700px){
+
+
+.host-container{
+
+    padding:25px;
+
+}
+
+
+.host-header h1{
+
+    font-size:28px;
+
+}
+
+
+.benefit-grid{
+
+    grid-template-columns:1fr;
+
+}
+
+
+.line{
+
+    width:80px;
+
+}
+
+
+.progress-labels{
+
+    gap:60px;
+
+}
+
+
+}

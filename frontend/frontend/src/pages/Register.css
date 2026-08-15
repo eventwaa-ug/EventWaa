@@ -1,0 +1,214 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 16px;
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+}
+
+.register-card {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 32px 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+.register-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.register-header h1 {
+  font-size: 2rem;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.register-header p {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.input-group input {
+  width: 100%;
+  height: 52px;
+  padding: 0 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.25s ease;
+  background: #ffffff;
+}
+
+.input-group input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+}
+
+.password-field {
+  position: relative;
+  width: 100%;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 50px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle:hover {
+  color: #7c3aed;
+}
+
+.form-error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 0.9rem;
+}
+
+.form-success {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 0.9rem;
+}
+
+.register-btn {
+  width: 100%;
+  height: 52px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.register-btn:hover {
+  transform: translateY(-2px);
+}
+
+.register-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.register-footer {
+  text-align: center;
+  margin-top: 24px;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.register-footer a {
+  color: #7c3aed;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.register-footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .register-page {
+    padding: 16px;
+  }
+
+  .register-card {
+    max-width: 360px;
+    padding: 24px 18px;
+    border-radius: 20px;
+  }
+
+  .register-header h1 {
+    font-size: 1.7rem;
+  }
+
+  .input-group input,
+  .register-btn {
+    height: 50px;
+    font-size: 16px;
+  }
+}
+
+.event-logo-container {
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  margin-bottom:15px;
+
+}
+
+
+.eventwaa-logo {
+
+  width:180px;
+
+  height:auto;
+
+  object-fit:contain;
+
+}
+
+
+@media(max-width:480px){
+
+  .eventwaa-logo {
+
+    width:140px;
+
+  }
+
+}

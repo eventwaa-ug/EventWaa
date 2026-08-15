@@ -1,0 +1,257 @@
+.platform-stats {
+  width: 100%;
+  padding: 90px 20px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+
+.stats-header {
+  max-width: 700px;
+  margin: 0 auto 50px;
+  text-align: center;
+}
+
+
+.stats-header h2 {
+  margin: 0 0 14px;
+  font-size: 2.4rem;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+
+.stats-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+
+.stats-grid {
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 25px;
+}
+
+
+.stat-card {
+  background: #ffffff;
+
+  padding: 35px 25px;
+
+  border-radius: 18px;
+
+  text-align: center;
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.07);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+
+  border: 1px solid #f1f5f9;
+}
+
+
+.stat-card:hover {
+
+  transform: translateY(-7px);
+
+  box-shadow:
+    0 16px 35px rgba(37, 99, 235, 0.12);
+
+}
+
+
+.stat-icon {
+
+  width: 75px;
+  height: 75px;
+
+  margin: 0 auto 22px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background: #2563eb;
+
+  color: #ffffff;
+
+  border-radius: 50%;
+
+  font-size: 1.8rem;
+
+}
+
+
+.stat-card h3 {
+
+  margin: 0 0 8px;
+
+  color: #2563eb;
+
+  font-size: 2.2rem;
+
+  font-weight: 700;
+
+}
+
+
+.stat-card p {
+
+  margin: 0;
+
+  color: #6b7280;
+
+  font-size: 0.95rem;
+
+  line-height: 1.5;
+
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .platform-stats {
+
+    padding: 70px 20px;
+
+  }
+
+
+  .stats-grid {
+
+    grid-template-columns:
+      repeat(2, 1fr);
+
+    gap: 20px;
+
+  }
+
+
+  .stats-header h2 {
+
+    font-size: 2.1rem;
+
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .platform-stats {
+
+    padding: 60px 16px;
+
+  }
+
+
+  .stats-header {
+
+    margin-bottom: 35px;
+
+  }
+
+
+  .stats-header h2 {
+
+    font-size: 1.8rem;
+
+  }
+
+
+  .stats-header p {
+
+    font-size: 0.9rem;
+
+  }
+
+
+  .stats-grid {
+
+    grid-template-columns:
+      repeat(2, 1fr);
+
+    gap: 15px;
+
+  }
+
+
+  .stat-card {
+
+    padding: 25px 15px;
+
+    border-radius: 15px;
+
+  }
+
+
+  .stat-icon {
+
+    width: 58px;
+    height: 58px;
+
+    font-size: 1.4rem;
+
+    margin-bottom: 15px;
+
+  }
+
+
+  .stat-card h3 {
+
+    font-size: 1.7rem;
+
+  }
+
+
+  .stat-card p {
+
+    font-size: 0.8rem;
+
+  }
+
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+  .stats-grid {
+
+    grid-template-columns: 1fr;
+
+  }
+
+
+  .stat-card {
+
+    padding: 25px 20px;
+
+  }
+
+}

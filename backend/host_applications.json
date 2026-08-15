@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1784987769582,
+        "userId": "1784987628896",
+        "fullName": "STEWARD CHRISTO",
+        "email": "stewardchristo5@gmail.com",
+        "phone": "0764339958",
+        "location": "gulu",
+        "hasPreviousEvents": "yes",
+        "fullLegalName": "opiro",
+        "dateOfBirth": "3333-03-31",
+        "country": "Uganda",
+        "idNumber": "dfzfgbadgbadgb",
+        "idFront": "uploads/1784987769582_picnic.jpeg",
+        "idBack": "uploads/1784987769583_concert.jpeg",
+        "proofImage": "uploads/1784987769584_tech.jpeg",
+        "status": "approved",
+        "submittedAt": 1784987769
+    },
+    {
+        "id": 1785335482676,
+        "userId": "1785333277334",
+        "fullName": "okelo",
+        "email": "okelo@gmail.com",
+        "phone": "0747474747",
+        "location": "gulu",
+        "hasPreviousEvents": "no",
+        "fullLegalName": "dfshfhfgh",
+        "dateOfBirth": "44444-04-04",
+        "country": "Uganda",
+        "idNumber": "fgbfsdgbbfsdg",
+        "idFront": "uploads/1785335482676_art.jpeg",
+        "idBack": "uploads/1785335482677_tech.jpeg",
+        "proofImage": null,
+        "status": "approved",
+        "submittedAt": 1785335482
+    }
+]

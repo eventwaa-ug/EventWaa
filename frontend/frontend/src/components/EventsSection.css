@@ -1,0 +1,55 @@
+.events-section {
+    margin: 40px 0;
+}
+
+.section-header {
+    margin-bottom: 20px;
+    justify-content: space-between;
+    align-items: center;
+}
+.see-all-btn {
+    background: none;
+    border: none;
+    color: #5b3bf5;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 15px;
+}
+.see-all-btn:hover {
+    text-decoration: underline;
+
+}
+.section-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #222;
+    margin: 0;
+
+}
+
+.section-header p {
+    color: #777;
+    margin-top: 6px;
+    font-size: 16px;
+}
+.events-scroll {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scroll-behavior: smooth;
+    
+}
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+.events-scroll .event-card {
+    max-width: 280PX;
+    min-width: 280px;
+    flex-shrink: 0;
+}
+.events-scroll::-webkit-scrollbar {
+    display: none;
+}

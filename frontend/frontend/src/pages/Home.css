@@ -1,0 +1,127 @@
+.featured-events {
+    padding: 80px 8%;
+}
+.section-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+.section-header h2 {
+    font-size: 2.3rem;
+    margin-bottom: 10px;
+}
+.section-header p {
+    color: #666;
+}
+.view-all {
+    text-align: center;
+    margin-top: 40px;
+}
+.view-all-btn {
+    padding: 14ppx 28px;
+    display: inline-block;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+.view-all-btn:hover {
+    background: #1d4ed8;
+}
+
+.cta-section {
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #1d4ed8
+    );
+    color: white;
+    text-align: center;
+    padding: 100px 20px;
+    border-radius: 8px;
+    margin-bottom: 40px;
+}
+.cta-section h2 {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 3rem;
+    font-weight: 700;
+}
+.cta-section p {
+    max-width: 700px;
+    margin: 0 auto 35px;
+    line-height: 1.7;
+}
+.cta-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.primary-btn {
+    background: white;
+    color: #2563eb;
+    padding: 14px 28px;
+    border: 2px solid #2563eb;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.primary-btn:hover {
+    color: white;
+    background: blue;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+.secondary-btn {
+    background: white;
+    color: #2563eb;
+    padding: 14px 28px;
+    border: 2px solid #2563eb;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+
+}
+.secondary-btn:hover {
+    color: white;
+    background: #8B5CF6;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+@media (max-width:768px){
+     .section-header h2{
+        font-size: 2rem;
+     }
+     .section-header p{
+        font-size: 2rem;
+     }
+}
+section {
+
+    overflow:hidden;
+
+}
+
+
+
+@media(max-width:768px){
+
+
+.hero {
+
+    padding:60px 20px;
+
+}
+
+
+
+section {
+
+    margin-bottom:20px;
+
+}
+
+
+}

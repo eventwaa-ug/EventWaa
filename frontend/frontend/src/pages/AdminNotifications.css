@@ -1,0 +1,285 @@
+.admin-notifications-page {
+padding: 30px;
+max-width: 1000px;
+margin: 0 auto;
+}
+
+.admin-notifications-page h1 {
+font-size: 32px;
+margin-bottom: 25px;
+color: #111827;
+}
+
+.notification-filters {
+display: flex;
+gap: 12px;
+margin-bottom: 25px;
+}
+
+.notification-filters button {
+padding: 10px 18px;
+border: none;
+border-radius: 10px;
+background: #e5e7eb;
+cursor: pointer;
+font-weight: 600;
+transition: 0.3s;
+}
+
+.notification-filters button:hover {
+background: #d1d5db;
+}
+
+.notification-filters .active {
+background: #2563eb;
+color: white;
+}
+
+.notification-card {
+background: white;
+border-radius: 16px;
+padding: 20px;
+margin-bottom: 18px;
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+border: 1px solid #e5e7eb;
+transition: 0.3s;
+}
+
+.notification-card:hover {
+transform: translateY(-2px);
+box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.notification-card.unread {
+border-left: 6px solid #2563eb;
+background: #f8fbff;
+}
+
+.notification-card.read {
+opacity: 0.9;
+}
+
+.notification-content {
+flex: 1;
+}
+
+.notification-content h3 {
+margin: 0 0 8px;
+color: #111827;
+font-size: 18px;
+}
+
+.notification-content p {
+margin: 0 0 10px;
+color: #4b5563;
+line-height: 1.5;
+}
+
+.notification-content small {
+color: #9ca3af;
+}
+
+.notification-actions {
+display: flex;
+flex-direction: column;
+gap: 10px;
+margin-left: 20px;
+}
+
+.notification-actions button {
+padding: 10px 14px;
+border: none;
+border-radius: 10px;
+cursor: pointer;
+font-weight: 600;
+transition: 0.3s;
+}
+
+.notification-actions button:first-child {
+background: #2563eb;
+color: white;
+}
+
+.notification-actions button:first-child:hover {
+background: #1d4ed8;
+}
+
+.notification-actions button:nth-child(2) {
+background: #10b981;
+color: white;
+}
+
+.notification-actions button:nth-child(2):hover {
+background: #059669;
+}
+
+.delete-btn {
+background: #ef4444 !important;
+color: white;
+}
+
+.delete-btn:hover {
+background: #dc2626 !important;
+}
+
+@media (max-width: 768px) {
+.notification-card {
+flex-direction: column;
+gap: 20px;
+}
+
+.notification-actions {
+    width: 100%;
+    margin-left: 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+.notification-actions button {
+    flex: 1;
+}
+
+} .admin-notifications-page {
+padding: 30px;
+max-width: 1000px;
+margin: 0 auto;
+}
+
+.admin-notifications-page h1 {
+font-size: 32px;
+margin-bottom: 25px;
+color: #111827;
+}
+
+.notification-filters {
+display: flex;
+gap: 12px;
+margin-bottom: 25px;
+}
+
+.notification-filters button {
+padding: 10px 18px;
+border: none;
+border-radius: 10px;
+background: #e5e7eb;
+cursor: pointer;
+font-weight: 600;
+transition: 0.3s;
+}
+
+.notification-filters button:hover {
+background: #d1d5db;
+}
+
+.notification-filters .active {
+background: #2563eb;
+color: white;
+}
+
+.notification-card {
+background: white;
+border-radius: 16px;
+padding: 20px;
+margin-bottom: 18px;
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+border: 1px solid #e5e7eb;
+transition: 0.3s;
+}
+
+.notification-card:hover {
+transform: translateY(-2px);
+box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.notification-card.unread {
+border-left: 6px solid #2563eb;
+background: #f8fbff;
+}
+
+.notification-card.read {
+opacity: 0.9;
+}
+
+.notification-content {
+flex: 1;
+}
+
+.notification-content h3 {
+margin: 0 0 8px;
+color: #111827;
+font-size: 18px;
+}
+
+.notification-content p {
+margin: 0 0 10px;
+color: #4b5563;
+line-height: 1.5;
+}
+
+.notification-content small {
+color: #9ca3af;
+}
+
+.notification-actions {
+display: flex;
+flex-direction: column;
+gap: 10px;
+margin-left: 20px;
+}
+
+.notification-actions button {
+padding: 10px 14px;
+border: none;
+border-radius: 10px;
+cursor: pointer;
+font-weight: 600;
+transition: 0.3s;
+}
+
+.notification-actions button:first-child {
+background: #2563eb;
+color: white;
+}
+
+.notification-actions button:first-child:hover {
+background: #1d4ed8;
+}
+
+.notification-actions button:nth-child(2) {
+background: #10b981;
+color: white;
+}
+
+.notification-actions button:nth-child(2):hover {
+background: #059669;
+}
+
+.delete-btn {
+background: #ef4444 !important;
+color: white;
+}
+
+.delete-btn:hover {
+background: #dc2626 !important;
+}
+
+@media (max-width: 768px) {
+.notification-card {
+flex-direction: column;
+gap: 20px;
+}
+
+.notification-actions {
+    width: 100%;
+    margin-left: 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+.notification-actions button {
+    flex: 1;
+}
+
+}

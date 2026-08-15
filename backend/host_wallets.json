@@ -1,0 +1,32 @@
+[
+    {
+        "hostId": 1784987628896,
+        "availableBalance": 0,
+        "pendingPayouts": 9000,
+        "totalEarned": 9000,
+        "totalWithdrawn": 0,
+        "withdrawals": [],
+        "scheduledPayouts": [
+            {
+                "amount": 9000,
+                "availableAt": 1786630034.856145,
+                "createdAt": "2026-08-12 17:07:14"
+            }
+        ],
+        "transactions": [
+            {
+                "type": "sale",
+                "eventId": 1,
+                "eventTitle": "sex party",
+                "amount": 9000,
+                "grossAmount": 10000,
+                "commission": 1000,
+                "commissionPercent": 10.0,
+                "serviceFee": 500,
+                "customerTotal": 10500,
+                "date": "2026-08-12 17:07:14"
+            }
+        ],
+        "refunds": 0
+    }
+]

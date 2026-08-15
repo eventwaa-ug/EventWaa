@@ -1,0 +1,296 @@
+.event-card {
+
+
+    background:white;
+
+
+    border-radius:20px;
+
+
+    overflow:hidden;
+
+
+    border:1px solid #e5e7eb;
+
+
+    transition:.3s;
+
+
+}
+
+
+
+.event-card:hover {
+
+
+    transform:translateY(-6px);
+
+
+    box-shadow:
+    0 15px 30px rgba(0,0,0,.1);
+
+
+}
+
+
+
+
+
+.event-image-wrapper {
+
+
+    position:relative;
+
+
+    height:220px;
+
+
+}
+
+
+
+
+.event-image {
+
+
+    width:100%;
+
+
+    height:100%;
+
+
+    object-fit:cover;
+
+
+}
+
+
+
+
+
+
+
+.event-type {
+
+
+    position:absolute;
+
+
+    top:15px;
+
+
+    left:15px;
+
+
+    padding:7px 14px;
+
+
+    border-radius:20px;
+
+
+    font-size:.8rem;
+
+
+    font-weight:700;
+
+
+}
+
+
+
+.event-type.free {
+
+
+    background:#dcfce7;
+
+
+    color:#166534;
+
+
+}
+
+
+
+.event-type.paid {
+
+
+    background:#fee2e2;
+
+
+    color:#991b1b;
+
+
+}
+
+
+
+
+
+.verified-host {
+
+
+    position:absolute;
+
+
+    top:15px;
+
+
+    right:15px;
+
+
+    background:white;
+
+
+    padding:7px 12px;
+
+
+    border-radius:20px;
+
+
+    font-size:.8rem;
+
+
+    font-weight:600;
+
+
+}
+
+
+
+
+
+
+
+.event-card-content {
+
+
+    padding:20px;
+
+
+}
+
+
+
+
+.event-card-content h3 {
+
+
+    font-size:1.2rem;
+
+
+    color:#0f172a;
+
+
+    margin-bottom:12px;
+
+
+}
+
+
+
+
+
+.event-location,
+.event-date {
+
+
+    color:#64748b;
+
+
+    margin:8px 0;
+
+
+}
+
+
+
+
+
+.event-price {
+
+
+    font-weight:700;
+
+
+    color:#7c3aed;
+
+
+    margin:15px 0;
+
+
+}
+
+
+
+
+
+
+.view-details-btn {
+
+
+    display:block;
+
+
+    text-align:center;
+
+
+    background:#7c3aed;
+
+
+    color:white;
+
+
+    text-decoration:none;
+
+
+    padding:12px;
+
+
+    border-radius:12px;
+
+
+    font-weight:600;
+
+
+}
+
+
+
+
+
+
+
+@media(max-width:768px){
+
+
+
+.event-card {
+
+
+    border-radius:18px;
+
+
+}
+
+
+
+.event-image-wrapper {
+
+
+    height:200px;
+
+
+}
+
+
+
+.event-card-content {
+
+
+    padding:18px;
+
+
+}
+
+
+}

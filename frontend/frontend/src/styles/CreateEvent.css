@@ -1,0 +1,173 @@
+.create-event-page {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.create-event-page h1 {
+    margin-bottom: 10px;
+    color: #222;
+}
+
+.create-event-page p {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.create-event-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #5b3df5;
+    box-shadow: 0 0 0 3px rgba(91, 61, 245, 0.15);
+}
+
+textarea {
+    resize: vertical;
+}
+
+.publish-btn {
+    background: #5b3df5;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.publish-btn:hover {
+    background: #4328d7;
+}
+.ticket-builder{
+
+display:flex;
+
+gap:10px;
+
+margin-bottom:15px;
+
+flex-wrap:wrap;
+
+}
+
+
+.ticket-builder input{
+
+padding:12px;
+
+border-radius:8px;
+
+border:1px solid #ddd;
+
+}
+
+
+.ticket-builder button{
+
+background:#ff4d4d;
+
+color:white;
+
+border:none;
+
+padding:10px;
+
+border-radius:8px;
+
+}
+
+
+.ticket-builder + button{
+
+background:#2563eb;
+
+color:white;
+
+padding:12px;
+
+border:none;
+
+border-radius:10px;
+
+cursor:pointer;
+
+}
+
+.form-group input[type="file"] {
+
+    width:100%;
+
+    padding:12px;
+
+    border:1px solid #ddd;
+
+    border-radius:12px;
+
+    background:white;
+
+    cursor:pointer;
+
+}
+
+
+
+.poster-preview-container {
+
+    margin-top:20px;
+
+    display:flex;
+
+    justify-content:center;
+
+}
+
+
+
+.poster-preview {
+
+    width:300px;
+
+    height:200px;
+
+    object-fit:cover;
+
+    border-radius:18px;
+
+    border:2px solid #eee;
+
+    box-shadow:0 8px 20px rgba(0,0,0,0.1);
+
+}

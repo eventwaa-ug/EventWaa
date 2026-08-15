@@ -1,0 +1,38 @@
+.no-week-events {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 50px 20px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+.no-week-events h3 {
+  font-size: 1.3rem;
+  color: #1e293b;
+  margin-bottom: 10px;
+}
+
+.no-week-events p {
+  color: #64748b;
+  margin-bottom: 25px;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+
+  .section-header-row {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .see-all-link {
+    align-self: flex-start;
+  }
+
+  .no-week-events {
+    padding: 40px 20px;
+  }
+
+}
