@@ -121,7 +121,7 @@ user?.verifiedHost
 
 </div>
     <div className="menu-item"
-    onClick={() => navigate("/upcoming")}
+    onClick={() => navigate("/events")}
     >
       <span>📅 Upcoming Events</span>
       <span>›</span>

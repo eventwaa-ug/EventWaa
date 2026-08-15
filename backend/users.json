@@ -25,7 +25,7 @@
     {
         "name": "opiro steward",
         "email": "opirosteward5@gmail.com",
-        "password": "scrypt:32768:8:1$mIbgPRGgZAfMtV9M$5ec01da5a1f3ffb7579d0cfaba18627714cdaf33fc9ea0c648721c1149e48972ce7fca603a34367eb8116c9fbe680410c55d7a55141552eece398731d3407d79",
+        "password": "scrypt:32768:8:1$JHozUeXqadqEObod$39557873f447f2e44393a4f39f57375bf3ecc2ab615d3dfeb5cb553b57ded1a883c146c7c062753eead1422eb8836971a06a14486cdcb32665c7dbec5a1aa194",
         "id": 1786631683343,
         "role": "user",
         "status": "active",

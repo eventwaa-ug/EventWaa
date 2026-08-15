@@ -44,7 +44,7 @@ function ResetPassword() {
         return;
       }
 
-      if (!/^\\d{6}$/.test(otp)) {
+      if (!/^\d{6}$/.test(otp)) {
         setError("The verification code must contain 6 digits.");
         return;
       }
@@ -249,7 +249,7 @@ function ResetPassword() {
               placeholder="Enter 6-digit code"
               value={otp}
               onChange={(e) =>
-                setOtp(e.target.value.replace(/\\D/g, ""))
+                setOtp(e.target.value.replace(/\D/g, ""))
               }
               autoComplete="one-time-code"
               disabled={otpVerified || loading}

@@ -18,6 +18,11 @@
                 "name": "Regular",
                 "price": "10000",
                 "quantity": "18"
+            },
+            {
+                "name": "VIP",
+                "price": "20000",
+                "quantity": "50"
             }
         ],
         "organizerName": "",
@@ -30,6 +35,7 @@
         "ticketsSold": 0,
         "revenue": 1000,
         "status": "published",
-        "featured": false
+        "featured": false,
+        "poster": "/uploads/events/1786543563658_picnic.jpeg"
     }
 ]
