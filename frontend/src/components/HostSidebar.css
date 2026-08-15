@@ -15,6 +15,7 @@
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.04);
     box-sizing: border-box;
 }
+
 /* ============================================================
    HEADER
 ============================================================ */
@@ -27,20 +28,24 @@
     border-bottom: 1px solid #f0f0f0;
     flex-shrink: 0;
 }
+
 .host-sidebar-logo {
     display: flex;
     align-items: center;
     gap: 10px;
     cursor: pointer;
 }
+
 .host-logo-icon {
     font-size: 27px;
 }
+
 .host-logo-text {
     font-size: 21px;
     font-weight: 800;
     color: #111827;
 }
+
 /* ============================================================
    CLOSE BUTTON
 ============================================================ */
@@ -53,6 +58,7 @@
     color: #374151;
     padding: 0;
 }
+
 /* ============================================================
    HOST ACCOUNT
 ============================================================ */
@@ -65,6 +71,7 @@
     flex-shrink: 0;
     min-width: 0;
 }
+
 .host-avatar {
     width: 43px;
     height: 43px;
@@ -78,11 +85,14 @@
     font-weight: 700;
     flex-shrink: 0;
 }
+
 .host-profile-info {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    flex: 1;
 }
+
 .host-profile-info strong {
     color: #111827;
     font-size: 14px;
@@ -90,11 +100,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 .host-profile-info span {
     color: #6b7280;
     font-size: 12px;
     margin-top: 3px;
 }
+
 /* ============================================================
    NAVIGATION
 ============================================================ */
@@ -103,6 +115,7 @@
     padding: 20px 12px;
     overflow-y: auto;
 }
+
 .host-menu-title {
     margin: 0 10px 10px;
     font-size: 11px;
@@ -110,6 +123,7 @@
     letter-spacing: 1px;
     color: #9ca3af;
 }
+
 .host-nav-item {
     width: 100%;
     display: flex;
@@ -125,18 +139,19 @@
     font-weight: 600;
     text-align: left;
     cursor: pointer;
-    transition:
-        background 0.2s ease,
-        color 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease;
 }
+
 .host-nav-item:hover {
     background: #f3f4f6;
     color: #2563eb;
 }
+
 .host-nav-item.active {
     background: #eff6ff;
     color: #2563eb;
 }
+
 .host-nav-icon {
     width: 25px;
     font-size: 19px;
@@ -145,6 +160,7 @@
     justify-content: center;
     flex-shrink: 0;
 }
+
 /* ============================================================
    BOTTOM
 ============================================================ */
@@ -153,13 +169,16 @@
     border-top: 1px solid #f0f0f0;
     flex-shrink: 0;
 }
+
 .logout-item {
     color: #dc2626;
 }
+
 .logout-item:hover {
     background: #fef2f2;
     color: #dc2626;
 }
+
 /* ============================================================
    MOBILE HAMBURGER
 ============================================================ */
@@ -182,12 +201,14 @@
     justify-content: center;
     gap: 5px;
 }
+
 .host-menu-button span {
     width: 21px;
     height: 2px;
     background: #111827;
     border-radius: 2px;
 }
+
 /* ============================================================
    OVERLAY
 ============================================================ */
@@ -197,6 +218,7 @@
     background: rgba(0, 0, 0, 0.45);
     z-index: 1999;
 }
+
 /* ============================================================
    MOBILE
 ============================================================ */
@@ -204,6 +226,7 @@
     .host-menu-button {
         display: flex;
     }
+
     .host-sidebar {
         width: 280px;
         max-width: 85vw;
@@ -211,21 +234,25 @@
         transition: transform 0.3s ease;
         box-shadow: none;
     }
+
     .host-sidebar.host-sidebar-open {
         transform: translateX(0);
-        box-shadow:
-            8px 0 30px rgba(0, 0, 0, 0.15);
+        box-shadow: 8px 0 30px rgba(0, 0, 0, 0.15);
     }
+
     .host-sidebar-close {
         display: block;
     }
+
     .host-profile {
         padding: 18px;
     }
+
     .host-navigation {
         padding-top: 15px;
     }
 }
+
 /* ============================================================
    SMALL PHONES
 ============================================================ */
@@ -236,6 +263,7 @@
         width: 43px;
         height: 43px;
     }
+
     .host-sidebar {
         width: 290px;
         max-width: 88vw;

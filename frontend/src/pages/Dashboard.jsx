@@ -6,21 +6,23 @@ import { useAuth } from "../context/AuthContext";
 import HostSidebar from "../components/HostSidebar";
 
 function Dashboard() {
-
   const navigate = useNavigate();
 
   const { events, deleteEvent } = useContext(EventContext);
   const { user } = useAuth();
 
   const [unreadCount, setUnreadCount] = useState(0);
-
   const [bookings, setBookings] = useState([]);
-
   const [checkedInTickets, setCheckedInTickets] = useState([]);
 
+  /* =========================================================
+     BACKEND URL
+  ========================================================= */
+
+  const BACKEND_URL = "http://localhost:5000";
 
   /* =========================================================
-     FIND ALL EVENTS BELONGING TO THIS HOST
+     HOST EVENTS
   ========================================================= */
 
   const myEvents = (events || []).filter(
@@ -29,11 +31,8 @@ function Dashboard() {
       String(user?.email || "").toLowerCase()
   );
 
-
   /* =========================================================
-     FIND CURRENT EVENT
-     
-     The newest event is treated as the current event.
+     CURRENT EVENT
   ========================================================= */
 
   const currentEvent =
@@ -43,31 +42,52 @@ function Dashboard() {
         )[0]
       : null;
 
+  /* =========================================================
+     EVENT IMAGE
+     
+     THIS IS THE SAME LOGIC USED BY EventCard.jsx
+  ========================================================= */
+
+  const getImageUrl = () => {
+    if (!currentEvent) {
+      return "/default-event.jpg";
+    }
+
+    const image =
+      currentEvent.eventPoster ||
+      currentEvent.image;
+
+    if (!image) {
+      return "/default-event.jpg";
+    }
+
+    // Already a full URL
+    if (
+      image.startsWith("http://") ||
+      image.startsWith("https://")
+    ) {
+      return image;
+    }
+
+    // Relative path from backend
+    return `${BACKEND_URL}${image}`;
+  };
 
   /* =========================================================
-     LOAD BOOKINGS + CHECKED-IN TICKETS
+     LOAD BOOKINGS
   ========================================================= */
 
   useEffect(() => {
-
     const loadDashboardData = async () => {
-
-      /* -------------------------------------------------------
-         LOAD BOOKINGS
-      ------------------------------------------------------- */
-
       try {
-
         const bookingsResponse = await fetch(
           "http://localhost:5000/bookings"
         );
 
         if (!bookingsResponse.ok) {
-
           throw new Error(
             `Bookings request failed: ${bookingsResponse.status}`
           );
-
         }
 
         const bookingsData =
@@ -78,35 +98,24 @@ function Dashboard() {
             ? bookingsData
             : []
         );
-
       } catch (error) {
-
         console.error(
           "BOOKINGS LOAD ERROR:",
           error
         );
 
         setBookings([]);
-
       }
 
-
-      /* -------------------------------------------------------
-         LOAD CHECKED-IN TICKETS
-      ------------------------------------------------------- */
-
       try {
-
         const checkedInResponse = await fetch(
           "http://localhost:5000/bookings/checked-in"
         );
 
         if (!checkedInResponse.ok) {
-
           throw new Error(
             `Checked-in request failed: ${checkedInResponse.status}`
           );
-
         }
 
         const checkedInData =
@@ -117,109 +126,71 @@ function Dashboard() {
             ? checkedInData
             : []
         );
-
       } catch (error) {
-
         console.error(
           "CHECKED-IN LOAD ERROR:",
           error
         );
 
         setCheckedInTickets([]);
-
       }
-
     };
 
-
     loadDashboardData();
-
   }, []);
-
 
   /* =========================================================
      UNREAD MESSAGES
   ========================================================= */
 
   useEffect(() => {
-
     if (!user?.id) return;
 
-
     const loadUnread = async () => {
-
       try {
-
         const response = await fetch(
           `http://localhost:5000/messages/unread/${user.id}`
         );
 
-
         if (!response.ok) return;
 
-
         const data = await response.json();
-
 
         setUnreadCount(
           Number(data?.unread || 0)
         );
-
-
       } catch (error) {
-
         console.error(
           "UNREAD MESSAGE ERROR:",
           error
         );
-
       }
-
     };
 
-
     loadUnread();
-
 
     const interval = setInterval(
       loadUnread,
       3000
     );
 
-
     return () =>
       clearInterval(interval);
-
   }, [user]);
 
-
   /* =========================================================
-     HELPER
-     
-     A booking object represents ONE actual ticket because
-     /bookings creates an individual booking for every ticket.
-     
-     Refunded tickets should no longer count as sold.
+     ACTIVE BOOKING
   ========================================================= */
 
-  const isActiveBooking = (booking) => {
-
-    return (
-      booking?.refundStatus !== "refunded"
-    );
-
-  };
-
+  const isActiveBooking = (booking) =>
+    booking?.refundStatus !== "refunded";
 
   /* =========================================================
      HOST BOOKINGS
-     
-     Only bookings belonging to this host's events.
   ========================================================= */
 
   const hostBookings = bookings.filter(
     (booking) => {
-
       const belongsToHost = myEvents.some(
         (event) =>
           String(event.id) ===
@@ -230,42 +201,18 @@ function Dashboard() {
         belongsToHost &&
         isActiveBooking(booking)
       );
-
     }
   );
 
-
   /* =========================================================
-     DASHBOARD STATISTICS
+     GENERAL STATISTICS
   ========================================================= */
 
   const totalEvents =
     myEvents.length;
 
-
-  /* ---------------------------------------------------------
-     TICKETS SOLD
-     
-     IMPORTANT:
-     Each object in bookings.json represents ONE ticket.
-     
-     DO NOT use:
-     
-     booking.quantity
-     
-     because your backend creates individual ticket records.
-  --------------------------------------------------------- */
-
   const totalTicketsSold =
     hostBookings.length;
-
-
-  /* ---------------------------------------------------------
-     REVENUE
-     
-     Revenue comes from the event records because your backend
-     updates event.revenue after booking/payment processing.
-  --------------------------------------------------------- */
 
   const totalRevenue =
     myEvents.reduce(
@@ -275,11 +222,6 @@ function Dashboard() {
       0
     );
 
-
-  /* ---------------------------------------------------------
-     CAPACITY
-  --------------------------------------------------------- */
-
   const totalCapacity =
     myEvents.reduce(
       (total, event) =>
@@ -287,13 +229,6 @@ function Dashboard() {
         Number(event.capacity || 0),
       0
     );
-
-
-  /* ---------------------------------------------------------
-     CHECKED-IN COUNT
-     
-     Only count checked-in tickets belonging to this host.
-  --------------------------------------------------------- */
 
   const checkedInCount =
     checkedInTickets.filter(
@@ -305,24 +240,15 @@ function Dashboard() {
         )
     ).length;
 
-
   /* =========================================================
-     CURRENT EVENT CALCULATIONS
+     CURRENT EVENT DATA
   ========================================================= */
 
   let soldTickets = 0;
-
   let checkedIn = 0;
-
   let ticketStats = [];
 
-
   if (currentEvent) {
-
-    /* -------------------------------------------------------
-       BOOKINGS FOR CURRENT EVENT
-    ------------------------------------------------------- */
-
     const currentEventBookings =
       bookings.filter(
         (booking) =>
@@ -331,20 +257,8 @@ function Dashboard() {
           isActiveBooking(booking)
       );
 
-
-    /* -------------------------------------------------------
-       TOTAL TICKETS SOLD FOR CURRENT EVENT
-       
-       Every booking record = one ticket.
-    ------------------------------------------------------- */
-
     soldTickets =
       currentEventBookings.length;
-
-
-    /* -------------------------------------------------------
-       CHECKED-IN TICKETS
-    ------------------------------------------------------- */
 
     checkedIn =
       checkedInTickets.filter(
@@ -353,20 +267,9 @@ function Dashboard() {
           String(currentEvent.id)
       ).length;
 
-
-    /* -------------------------------------------------------
-       TICKET TYPES
-    ------------------------------------------------------- */
-
     ticketStats =
       (currentEvent.tickets || []).map(
         (ticket) => {
-
-          /* -----------------------------------------------
-             Count actual booking records for this ticket
-             type.
-          ------------------------------------------------ */
-
           const sold =
             currentEventBookings.filter(
               (booking) =>
@@ -378,49 +281,23 @@ function Dashboard() {
                 ).toLowerCase()
             ).length;
 
-
-          /* -----------------------------------------------
-             Original ticket quantity
-          ------------------------------------------------ */
-
-          const originalQuantity =
-            Number(
-              ticket.quantity || 0
-            );
-
-
-          /* -----------------------------------------------
-             Remaining
-             
-             We calculate this from actual bookings instead
-             of relying only on the JSON remaining field.
-          ------------------------------------------------ */
-
-          const remaining =
-            Math.max(
-              0,
-              originalQuantity - sold
-            );
-
+          const quantity =
+            Number(ticket.quantity || 0);
 
           return {
-
             ...ticket,
-
             sold,
-
-            remaining
-
+            remaining: Math.max(
+              0,
+              quantity - sold
+            ),
           };
-
         }
       );
-
   }
 
-
   /* =========================================================
-     CURRENT EVENT REMAINING
+     REMAINING TICKETS
   ========================================================= */
 
   const currentEventRemaining =
@@ -433,36 +310,42 @@ function Dashboard() {
         )
       : 0;
 
+  /* =========================================================
+     STARTING PRICE
+  ========================================================= */
+
+  const ticketPrices =
+    (currentEvent?.tickets || [])
+      .map((ticket) =>
+        Number(ticket.price || 0)
+      )
+      .filter(
+        (price) => price > 0
+      );
+
+  const startingPrice =
+    ticketPrices.length > 0
+      ? Math.min(...ticketPrices)
+      : Number(
+          currentEvent?.price || 0
+        );
 
   /* =========================================================
      RENDER
   ========================================================= */
 
   return (
-
     <div className="host-dashboard-layout">
-
-
-      {/* =====================================================
-          HOST SIDEBAR / HAMBURGER
-      ===================================================== */}
 
       <HostSidebar />
 
-
-      {/* =====================================================
-          MAIN CONTENT
-      ===================================================== */}
-
       <main className="host-dashboard-content">
 
-
         {/* ===================================================
-            HEADER
+            WELCOME HEADER
         =================================================== */}
 
-        <div className="dashboard-header">
-
+        <header className="dashboard-header">
 
           <div className="dashboard-welcome">
 
@@ -478,12 +361,9 @@ function Dashboard() {
 
             </div>
 
-
             <p>
-
               Manage your events and track
               their performance.
-
             </p>
 
           </div>
@@ -491,55 +371,35 @@ function Dashboard() {
 
           <div className="dashboard-header-actions">
 
-
-            {/* CREATE EVENT */}
-
             <button
-
               className="create-event-btn"
-
               onClick={() =>
                 navigate("/create-event")
               }
-
             >
-
               + Create Event
-
             </button>
 
 
-            {/* INBOX */}
-
             <button
-
               className="inbox-btn"
-
               onClick={() =>
                 navigate("/host-messages")
               }
-
             >
-
               💬 Inbox
 
-
               {unreadCount > 0 && (
-
                 <span className="inbox-badge">
-
                   {unreadCount}
-
                 </span>
-
               )}
 
             </button>
 
-
           </div>
 
-        </div>
+        </header>
 
 
         {/* ===================================================
@@ -548,19 +408,15 @@ function Dashboard() {
 
         <section className="stats-section">
 
-
           <div className="stats-grid">
-
-
-            {/* TOTAL EVENTS */}
 
             <div className="stat-card">
 
-              <span className="stat-icon">
+              <div className="stat-icon">
                 📅
-              </span>
+              </div>
 
-              <div>
+              <div className="stat-content">
 
                 <h2>
                   {totalEvents}
@@ -575,15 +431,13 @@ function Dashboard() {
             </div>
 
 
-            {/* TICKETS SOLD */}
-
             <div className="stat-card">
 
-              <span className="stat-icon">
+              <div className="stat-icon">
                 🎟️
-              </span>
+              </div>
 
-              <div>
+              <div className="stat-content">
 
                 <h2>
                   {totalTicketsSold}
@@ -598,15 +452,13 @@ function Dashboard() {
             </div>
 
 
-            {/* CHECKED IN */}
-
             <div className="stat-card">
 
-              <span className="stat-icon">
+              <div className="stat-icon">
                 ✅
-              </span>
+              </div>
 
-              <div>
+              <div className="stat-content">
 
                 <h2>
                   {checkedInCount}
@@ -621,15 +473,13 @@ function Dashboard() {
             </div>
 
 
-            {/* CAPACITY */}
-
             <div className="stat-card">
 
-              <span className="stat-icon">
+              <div className="stat-icon">
                 👥
-              </span>
+              </div>
 
-              <div>
+              <div className="stat-content">
 
                 <h2>
                   {totalCapacity.toLocaleString()}
@@ -644,22 +494,17 @@ function Dashboard() {
             </div>
 
 
-            {/* REVENUE */}
-
             <div className="stat-card revenue-stat">
 
-              <span className="stat-icon">
+              <div className="stat-icon">
                 💰
-              </span>
+              </div>
 
-              <div>
+              <div className="stat-content">
 
                 <h2>
-
                   UGX{" "}
-
                   {totalRevenue.toLocaleString()}
-
                 </h2>
 
                 <p>
@@ -669,7 +514,6 @@ function Dashboard() {
               </div>
 
             </div>
-
 
           </div>
 
@@ -682,11 +526,7 @@ function Dashboard() {
 
         <section className="my-events">
 
-
-          {/* SECTION HEADER */}
-
           <div className="section-title">
-
 
             <div>
 
@@ -701,345 +541,395 @@ function Dashboard() {
             </div>
 
 
-            {/* VIEW ALL */}
-
             <button
-
               className="view-all-events-btn"
-
               onClick={() =>
                 navigate("/host-events")
               }
-
             >
-
               View All Events →
-
             </button>
-
 
           </div>
 
 
           {/* =================================================
-              NO EVENTS
+              NO EVENT
           ================================================= */}
 
           {!currentEvent ? (
 
             <div className="empty-events">
 
-
               <div className="empty-events-icon">
                 📅
               </div>
-
 
               <h3>
                 No events published yet
               </h3>
 
-
               <p>
-
                 Create your first event
                 and start selling tickets.
-
               </p>
 
-
               <button
-
                 className="create-event-btn"
-
                 onClick={() =>
                   navigate("/create-event")
                 }
-
               >
-
                 + Create Event
-
               </button>
-
 
             </div>
 
           ) : (
 
-
             /* =================================================
-               CURRENT EVENT CARD
+               EVENT CARD
             ================================================= */
 
-            <article
+            <article className="dashboard-event-card">
 
-              className="dashboard-event-card"
+              {/* =============================================
+                  EVENT POSTER
 
-              key={currentEvent.id}
+                  THIS MATCHES EventCard.jsx
+              ============================================= */}
 
-            >
+              <div className="event-poster-wrapper">
+
+                <img
+                  src={getImageUrl()}
+                  alt={
+                    currentEvent.title ||
+                    "Event poster"
+                  }
+                  className="event-poster"
+                  onError={(e) => {
+                    e.currentTarget.src =
+                      "/default-event.jpg";
+                  }}
+                />
+
+                {/* EVENT TYPE */}
+
+                <span
+                  className={`event-type ${
+                    currentEvent.eventType === "Free"
+                      ? "free"
+                      : "paid"
+                  }`}
+                >
+                  {currentEvent.eventType === "Free"
+                    ? "FREE"
+                    : "PAID"}
+                </span>
+
+
+                {/* VERIFIED HOST */}
+
+                {currentEvent.verifiedHost && (
+
+                  <span className="verified-host">
+                    ✅ Verified
+                  </span>
+
+                )}
+
+              </div>
 
 
               {/* =============================================
-                  EVENT INFORMATION
+                  EVENT BODY
               ============================================= */}
 
               <div className="event-main-info">
 
-
                 <div className="event-card-header">
 
-
-                  <div>
-
+                  <div className="event-title-area">
 
                     <h3>
                       {currentEvent.title}
                     </h3>
 
-
                     <span
-
                       className={
                         currentEvent.status ===
                         "published"
-
                           ? "event-status published"
-
                           : "event-status"
                       }
-
                     >
-
                       {currentEvent.status ||
                         "Published"}
-
                     </span>
 
-
                   </div>
-
 
                 </div>
 
 
-                {/* EVENT DETAILS */}
+                {/* ===========================================
+                    EVENT DETAILS
+                =========================================== */}
 
                 <div className="event-details">
 
-
                   <p>
+                    <span>📍</span>
 
-                    📍{" "}
+                    <span>
+                      {currentEvent.venue
+                        ? `${currentEvent.venue}, `
+                        : ""}
 
-                    {currentEvent.venue
-                      ? `${currentEvent.venue}, `
-                      : ""}
-
-                    {currentEvent.city ||
-                      currentEvent.location ||
-                      "Location not specified"}
+                      {currentEvent.city ||
+                        currentEvent.location ||
+                        "Location not specified"}
+                    </span>
 
                   </p>
 
 
                   <p>
 
-                    📅{" "}
+                    <span>📅</span>
 
-                    {currentEvent.date ||
-                      "Date not specified"}
-
-                  </p>
-
-
-                  <p>
-
-                    ⏰{" "}
-
-                    {currentEvent.startTime ||
-                      currentEvent.time ||
-                      "Time not specified"}
-
-                    {currentEvent.endTime
-                      ? ` - ${currentEvent.endTime}`
-                      : ""}
+                    <span>
+                      {currentEvent.date ||
+                        "Date not specified"}
+                    </span>
 
                   </p>
 
 
                   <p>
 
-                    🏷️{" "}
+                    <span>⏰</span>
 
-                    {currentEvent.category ||
-                      "Uncategorized"}
+                    <span>
+
+                      {currentEvent.startTime ||
+                        currentEvent.time ||
+                        "Time not specified"}
+
+                      {currentEvent.endTime
+                        ? ` - ${currentEvent.endTime}`
+                        : ""}
+
+                    </span>
 
                   </p>
-
-
-                  {currentEvent.eventType ===
-                  "Free" ? (
-
-                    <p>
-
-                      🎉 Free Event
-
-                    </p>
-
-                  ) : (
-
-                    <p>
-
-                      💰 Starting Price:{" "}
-
-                      UGX{" "}
-
-                      {currentEvent.tickets?.length > 0
-
-                        ? Math.min(
-                            ...currentEvent.tickets
-                              .map(
-                                (ticket) =>
-                                  Number(
-                                    ticket.price || 0
-                                  )
-                              )
-                              .filter(
-                                (price) =>
-                                  price > 0
-                              )
-                          ).toLocaleString()
-
-                        : Number(
-                            currentEvent.price || 0
-                          ).toLocaleString()}
-
-                    </p>
-
-                  )}
 
 
                   <p>
 
-                    👥 Capacity:{" "}
+                    <span>🏷️</span>
 
-                    {Number(
-                      currentEvent.capacity || 0
-                    ).toLocaleString()}
+                    <span>
+                      {currentEvent.category ||
+                        "Uncategorized"}
+                    </span>
 
                   </p>
 
+
+                  <p>
+
+                    <span>
+                      {currentEvent.eventType ===
+                      "Free"
+                        ? "🎉"
+                        : "💰"}
+                    </span>
+
+                    <span>
+
+                      {currentEvent.eventType ===
+                      "Free"
+                        ? "Free Event"
+                        : `Starting Price: UGX ${startingPrice.toLocaleString()}`}
+
+                    </span>
+
+                  </p>
+
+
+                  <p>
+
+                    <span>👥</span>
+
+                    <span>
+
+                      Capacity:{" "}
+
+                      {Number(
+                        currentEvent.capacity || 0
+                      ).toLocaleString()}
+
+                    </span>
+
+                  </p>
 
                 </div>
 
 
-                {/* =========================================
-                    EVENT PERFORMANCE
-                ========================================= */}
+                {/* ===========================================
+                    PERFORMANCE
+                =========================================== */}
 
                 <div className="event-performance">
 
+                  <div className="performance-card sold-card">
 
-                  <div>
+                    <div className="performance-icon">
+                      🎟️
+                    </div>
 
-                    <span>
-                      🎟️ Tickets Sold
-                    </span>
+                    <div>
 
-                    <strong>
-                      {soldTickets}
-                    </strong>
+                      <span>
+                        Tickets Sold
+                      </span>
 
-                  </div>
+                      <strong>
+                        {soldTickets}
+                      </strong>
 
-
-                  <div>
-
-                    <span>
-                      ✅ Checked In
-                    </span>
-
-                    <strong>
-                      {checkedIn}
-                    </strong>
+                    </div>
 
                   </div>
 
 
-                  <div>
+                  <div className="performance-card checked-card">
 
-                    <span>
-                      ⏳ Remaining
-                    </span>
+                    <div className="performance-icon">
+                      ✅
+                    </div>
 
-                    <strong>
-                      {currentEventRemaining}
-                    </strong>
+                    <div>
+
+                      <span>
+                        Checked In
+                      </span>
+
+                      <strong>
+                        {checkedIn}
+                      </strong>
+
+                    </div>
 
                   </div>
 
+
+                  <div className="performance-card remaining-card">
+
+                    <div className="performance-icon">
+                      ⏳
+                    </div>
+
+                    <div>
+
+                      <span>
+                        Remaining
+                      </span>
+
+                      <strong>
+                        {currentEventRemaining}
+                      </strong>
+
+                    </div>
+
+                  </div>
 
                 </div>
 
 
-                {/* =========================================
-                    TICKET BREAKDOWN
-                ========================================= */}
+                {/* ===========================================
+                    TICKET TYPES
+                =========================================== */}
 
                 {ticketStats.length > 0 && (
 
                   <div className="ticket-breakdown-card">
 
+                    <div className="ticket-breakdown-header">
 
-                    <h4>
-                      🎟️ Ticket Types
-                    </h4>
+                      <div>
+
+                        <h4>
+                          🎟️ Ticket Types
+                        </h4>
+
+                        <p>
+                          Ticket sales breakdown
+                        </p>
+
+                      </div>
+
+                    </div>
 
 
                     <div className="ticket-breakdown-grid">
 
-
                       {ticketStats.map(
-                        (ticket) => (
+                        (ticket, index) => (
 
                           <div
-
-                            key={ticket.name}
-
                             className="ticket-breakdown-item"
-
+                            key={
+                              ticket.name ||
+                              index
+                            }
                           >
 
-                            <strong>
-                              {ticket.name}
-                            </strong>
+                            <div className="ticket-type-header">
+
+                              <strong>
+                                {ticket.name ||
+                                  "Ticket"}
+                              </strong>
+
+                            </div>
 
 
-                            <span>
+                            <div className="ticket-type-numbers">
 
-                              Sold:{" "}
+                              <div>
 
-                              {ticket.sold}
+                                <span>
+                                  Sold
+                                </span>
 
-                            </span>
+                                <strong>
+                                  {ticket.sold}
+                                </strong>
+
+                              </div>
 
 
-                            <span>
+                              <div>
 
-                              Remaining:{" "}
+                                <span>
+                                  Remaining
+                                </span>
 
-                              {ticket.remaining}
+                                <strong>
+                                  {ticket.remaining}
+                                </strong>
 
-                            </span>
+                              </div>
 
+                            </div>
 
                           </div>
 
                         )
                       )}
-
 
                     </div>
 
@@ -1047,23 +937,17 @@ function Dashboard() {
 
                 )}
 
-
               </div>
 
 
               {/* =============================================
-                  EVENT ACTIONS
+                  ACTION BAR
               ============================================= */}
 
               <div className="event-actions">
 
-
-                {/* EDIT */}
-
                 <button
-
                   className="edit-btn"
-
                   onClick={() =>
                     navigate(
                       "/create-event",
@@ -1074,20 +958,13 @@ function Dashboard() {
                       }
                     )
                   }
-
                 >
-
                   ✏️ Edit
-
                 </button>
 
 
-                {/* DUPLICATE */}
-
                 <button
-
                   className="duplicate-btn"
-
                   onClick={() =>
                     navigate(
                       "/create-event",
@@ -1099,89 +976,58 @@ function Dashboard() {
                       }
                     )
                   }
-
                 >
-
                   📋 Duplicate
-
                 </button>
 
 
-                {/* SCAN */}
-
                 <button
-
                   className="scan-btn"
-
                   onClick={() =>
                     navigate(
                       `/scanner/${currentEvent.id}`
                     )
                   }
-
                 >
-
                   🎟️ Scan Tickets
-
                 </button>
 
 
-                {/* ATTENDEES */}
-
                 <button
-
                   className="attendees-btn"
-
                   onClick={() =>
                     navigate(
                       `/attendees/${currentEvent.id}`
                     )
                   }
-
                 >
-
                   👥 View Attendees
-
                 </button>
 
 
-                {/* DELETE */}
-
                 <button
-
                   className="delete-btn"
-
                   onClick={() =>
                     deleteEvent(
                       currentEvent.id
                     )
                   }
-
                 >
-
                   🗑️ Delete
-
                 </button>
 
-
               </div>
-
 
             </article>
 
           )}
 
-
         </section>
-
 
       </main>
 
     </div>
-
   );
-
 }
-
 
 export default Dashboard;
