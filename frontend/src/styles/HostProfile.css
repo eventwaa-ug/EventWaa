@@ -1,0 +1,394 @@
+.host-profile {
+
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #f7f7f7;
+    font-family: Arial, sans-serif;
+
+}
+
+
+/* =========================
+   HOST COVER SECTION
+========================= */
+
+.host-cover {
+
+    background: white;
+    padding: 40px 20px;
+    border-radius: 25px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+
+}
+
+
+.host-avatar {
+
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+
+}
+
+
+
+.host-name-row {
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+
+}
+
+
+
+.host-name-row h1 {
+
+    font-size: 34px;
+    margin: 0;
+
+}
+
+
+
+/* VERIFIED BADGE */
+
+.verified-badge {
+
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    background: #e8f7ee;
+    color: #16803c;
+
+    padding: 7px 15px;
+
+    border-radius: 25px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+}
+
+
+
+.host-cover h3 {
+
+    margin-top: 15px;
+    font-size: 20px;
+
+}
+
+
+
+.host-cover p {
+
+    color: #666;
+    margin-top: 8px;
+
+}
+
+
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+
+
+.host-actions {
+
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    margin-top:25px;
+
+}
+
+
+
+.host-actions button {
+
+    padding:12px 25px;
+
+    border:none;
+
+    border-radius:25px;
+
+    cursor:pointer;
+
+    background:#0077cc;
+
+    color:white;
+
+    font-size:15px;
+
+}
+
+
+
+.host-actions button:hover {
+
+    opacity:0.85;
+
+}
+
+
+
+
+/* =========================
+   ABOUT SECTION
+========================= */
+
+
+.host-about {
+
+    background:white;
+
+    margin-top:25px;
+
+    padding:30px;
+
+    border-radius:20px;
+
+}
+
+
+
+.host-about h2 {
+
+    margin-bottom:10px;
+
+}
+
+
+
+.host-about p {
+
+    color:#666;
+
+    line-height:1.6;
+
+}
+
+
+
+/* =========================
+   STATISTICS
+========================= */
+
+
+.host-stats {
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:20px;
+
+    margin:30px 0;
+
+}
+
+
+
+.host-stats div {
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:20px;
+
+    text-align:center;
+
+    box-shadow:0 5px 15px rgba(0,0,0,0.05);
+
+}
+
+
+
+.host-stats h3 {
+
+    font-size:32px;
+
+    margin:0 0 10px;
+
+}
+
+
+
+.host-stats p {
+
+    color:#666;
+
+}
+
+
+
+/* =========================
+   EVENTS SECTION
+========================= */
+
+
+.host-events {
+
+    margin-top:40px;
+
+}
+
+
+
+.host-events h2 {
+
+    font-size:28px;
+
+    margin-bottom:25px;
+
+}
+
+
+
+/* EVENT CARD */
+
+
+.public-event-card {
+
+    display:flex;
+
+    align-items:center;
+
+    gap:25px;
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:20px;
+
+    margin-bottom:20px;
+
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+
+}
+
+
+
+.public-event-card img {
+
+    width:220px;
+
+    height:150px;
+
+    object-fit:cover;
+
+    border-radius:15px;
+
+}
+
+
+
+.public-event-card h3 {
+
+    font-size:22px;
+
+    margin-bottom:12px;
+
+}
+
+
+
+.public-event-card p {
+
+    color:#666;
+
+    margin:8px 0;
+
+}
+
+
+
+.public-event-card button {
+
+    margin-top:12px;
+
+    padding:12px 25px;
+
+    border:none;
+
+    border-radius:25px;
+
+    background:#0077cc;
+
+    color:white;
+
+    cursor:pointer;
+
+}
+
+
+
+.public-event-card button:hover {
+
+    opacity:0.85;
+
+}
+
+
+
+/* =========================
+   MOBILE RESPONSIVE
+========================= */
+
+
+@media(max-width:700px){
+
+
+    .host-profile{
+
+        padding:15px;
+
+    }
+
+
+    .host-name-row h1{
+
+        font-size:26px;
+
+    }
+
+
+    .host-stats{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+
+    .public-event-card{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+
+
+    .public-event-card img{
+
+        width:100%;
+
+        height:200px;
+
+    }
+
+
+}
