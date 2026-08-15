@@ -159,6 +159,28 @@ function HostEvents() {
       </div>
     );
   }
+
+  const BACKEND_URL = "http://localhost:5000";
+
+const getImageUrl = (event) => {
+    const image =
+        event?.eventPoster ||
+        event?.image;
+
+    if (!image) {
+        return "/default-event.jpg";
+    }
+
+    if (
+        image.startsWith("http://") ||
+        image.startsWith("https://")
+    ) {
+        return image;
+    }
+
+    return `${BACKEND_URL}${image}`;
+};
+
   return (
     <div className="host-events-page">
       {/* ==================================================
@@ -273,61 +295,97 @@ function HostEvents() {
             </button>
           </div>
           <div className="current-event-card">
+
+            {/* EVENT POSTER */}
+            <div className="current-event-poster-wrapper">
+
+                <img
+                    src={getImageUrl(upcomingEvent)}
+                    alt={
+                        upcomingEvent.title ||
+                        "Event poster"
+                    }
+                    className="current-event-poster"
+                    onError={(e) => {
+                        e.currentTarget.src =
+                            "/default-event.jpg";
+                    }}
+                />
+
+            </div>
+
+
+            {/* EXISTING EVENT INFO */}
+
             <div className="current-event-info">
-              <h2>
-                {upcomingEvent.title}
-              </h2>
-              <p>
-                📍{" "}
-                {upcomingEvent.venue},{" "}
-                {upcomingEvent.city}
-              </p>
-              <p>
-                📅{" "}
-                {upcomingEvent.date}
-              </p>
-              <p>
-                ⏰{" "}
-                {upcomingEvent.startTime}
-                {" - "}
-                {upcomingEvent.endTime}
-              </p>
+
+                <h2>
+                    {upcomingEvent.title}
+                </h2>
+
+                <p>
+                    📍{" "}
+                    {upcomingEvent.venue},{" "}
+                    {upcomingEvent.city}
+                </p>
+
+                <p>
+                    📅{" "}
+                    {upcomingEvent.date}
+                </p>
+
+                <p>
+                    ⏰{" "}
+                    {upcomingEvent.startTime}
+                    {" - "}
+                    {upcomingEvent.endTime}
+                </p>
+
             </div>
+
+
             <div className="current-event-stats">
-              <div>
-                <strong>
-                  {getSoldTickets(
-                    upcomingEvent
-                  )}
-                </strong>
-                <span>
-                  Tickets Sold
-                </span>
-              </div>
-              <div>
-                <strong>
-                  {getRemaining(
-                    upcomingEvent
-                  )}
-                </strong>
-                <span>
-                  Remaining
-                </span>
-              </div>
-              <div>
-                <strong>
-                  UGX{" "}
-                  {Number(
-                    upcomingEvent.revenue ||
-                      0
-                  ).toLocaleString()}
-                </strong>
-                <span>
-                  Revenue
-                </span>
-              </div>
+
+                <div>
+                    <strong>
+                        {getSoldTickets(
+                            upcomingEvent
+                        )}
+                    </strong>
+
+                    <span>
+                        Tickets Sold
+                    </span>
+                </div>
+
+                <div>
+                    <strong>
+                        {getRemaining(
+                            upcomingEvent
+                        )}
+                    </strong>
+
+                    <span>
+                        Remaining
+                    </span>
+                </div>
+
+                <div>
+                    <strong>
+                        UGX{" "}
+                        {Number(
+                            upcomingEvent.revenue || 0
+                        ).toLocaleString()}
+                    </strong>
+
+                    <span>
+                        Revenue
+                    </span>
+                </div>
+
             </div>
-          </div>
+
+        </div>
         </section>
       )}
       {/* ==================================================
@@ -435,6 +493,20 @@ function HostEvents() {
                 >
                   {/* EVENT MAIN INFO */}
                   <div className="host-event-main">
+
+                    <div className="host-event-poster-wrapper">
+
+                        <img
+                            src={getImageUrl(event)}
+                            alt={event.title || "Event poster"}
+                            className="host-event-poster"
+                            onError={(e) => {
+                                e.currentTarget.src =
+                                    "/default-event.jpg";
+                            }}
+                        />
+
+                    </div>
                     <div className="host-event-title-row">
                       <div>
                         <span

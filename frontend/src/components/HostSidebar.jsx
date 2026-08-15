@@ -48,6 +48,7 @@ function HostSidebar() {
         setIsOpen(false);
         navigate("/login");
     };
+
     return (
         <>
             {/* =================================================
