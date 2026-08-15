@@ -1,66 +1,98 @@
-import { Routes, Route } from 'react-router-dom';
-import MainLayout from './layouts/MainLayout';
-import AuthLayout from './layouts/AuthLayout';
+import { Routes, Route } from "react-router-dom";
 
-import Tickets from './pages/Tickets';
-import UpcomingEvents from './pages/UpcomingEvents';
-import PaymentProcessing from './pages/PaymentProcessing';
+import MainLayout from "./layouts/MainLayout";
+import AuthLayout from "./layouts/AuthLayout";
+import HostLayout from "./layouts/HostLayout";
+import AdminLayout from "./layouts/AdminLayout";
+
+/* =========================================================
+   MAIN / USER PAGES
+========================================================= */
+
+import Home from "./pages/home";
+import Events from "./pages/Events";
+import EventDetails from "./pages/EventDetails";
 import Profile from "./pages/Profile";
-import Dashboard from './pages/Dashboard';
-import PaymentSuccess from './pages/PaymentSuccess';
-import Home from './pages/home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Events from './pages/Events';
-import EventDetails from './pages/EventDetails';
-import CreateEvent from "./pages/CreateEvent";
-import ProtectedRoute from './components/ProtectedRoute';
-import MaintenanceGuard from './components/MaintenanceGuard';
-import RequestRefund from './pages/RequestRefund';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
+import Notifications from "./pages/Notifications";
+import UserMessages from "./pages/UserMessages";
 
-import Booking from './pages/Booking';
-import Favorites from './pages/Favorites';
-import Settings from './pages/Settings';
-import TicketDetails from './pages/TicketDetails';
-import TicketScanner from './pages/TicketScanner';
-import Attendees from './pages/Attendees';
-import HostApplication from "./pages/HostApplication";
-import HostVerification from './pages/HostVerification';
-import HostWallet from './pages/HostWallet';
-import FreeAttendance from './pages/FreeAttendance';
-import AttendancePass from './pages/AttendancePass';
-import FreeTicketDetails from './pages/FreeTicketsDetails';
+import Tickets from "./pages/Tickets";
+import Favorites from "./pages/Favorites";
+import UpcomingEvents from "./pages/UpcomingEvents";
+import Settings from "./pages/Settings";
+
+import Booking from "./pages/Booking";
 import Review from "./pages/Review";
 
-import AdminHostApplications from './pages/AdminHostApplications';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminHome from './pages/AdminHome';
-import AdminLayout from './layouts/AdminLayout';
-import AdminEvents from './pages/AdminEvents';
-import AdminUsers from './pages/AdminUsers';
-import AdminSettings from './pages/AdminSettings';
-import AdminWallet from './pages/AdminWallet';
+import FreeAttendance from "./pages/FreeAttendance";
+import AttendancePass from "./pages/AttendancePass";
+import FreeTicketDetails from "./pages/FreeTicketsDetails";
+
+import TicketDetails from "./pages/TicketDetails";
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+
+/* =========================================================
+   HOST
+========================================================= */
+
+import Dashboard from "./pages/Dashboard";
+import CreateEvent from "./pages/CreateEvent";
+import HostEvents from "./pages/HostEvents";
+import HostWallet from "./pages/HostWallet";
+import HostRefunds from "./pages/HostRefunds";
+
+import HostApplication from "./pages/HostApplication";
+import HostVerification from "./pages/HostVerification";
+
+import HostProfile from "./pages/HostProfile";
+import EditHostProfile from "./pages/EditHostProfile";
+
+import HostMessages from "./pages/HostMessages";
+import ChatWithHost from "./pages/ChatWithHost";
+import HostChat from "./pages/HostChat";
+
+import TicketScanner from "./pages/TicketScanner";
+import Attendees from "./pages/Attendees";
+
+import RequestRefund from "./pages/RequestRefund";
+
+/* =========================================================
+   PAYMENTS
+========================================================= */
+
+import PaymentProcessing from "./pages/PaymentProcessing";
+import PaymentSuccess from "./pages/PaymentSuccess";
+
+/* =========================================================
+   ADMIN
+========================================================= */
+
+import AdminHome from "./pages/AdminHome";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminHostApplications from "./pages/AdminHostApplications";
+import AdminEvents from "./pages/AdminEvents";
+import AdminUsers from "./pages/AdminUsers";
+import AdminRevenue from "./pages/AdminRevenue";
+import AdminSettings from "./pages/AdminSettings";
+import AdminWallet from "./pages/AdminWallet";
 import AdminWithdrawals from "./pages/AdminWithdrawals";
-import AdminNotifications from './pages/AdminNotifications';
+import AdminNotifications from "./pages/AdminNotifications";
 import AdminReports from "./pages/AdminReports";
-import AdminCreateEvent from './pages/AdminCreateEvent';
-import AdminEditEvent from './pages/AdminEditEvent';
-import AdminRefunds from './pages/AdminRefunds';
+import AdminCreateEvent from "./pages/AdminCreateEvent";
+import AdminEditEvent from "./pages/AdminEditEvent";
+import AdminRefunds from "./pages/AdminRefunds";
 
-import HostProfile from './pages/HostProfile';
-import EditHostProfile from './pages/EditHostProfile';
-import HostMessages from './pages/HostMessages';
-import UserMessages from './pages/UserMessages';
-import ChatWithHost from './pages/ChatWithHost';
-import HostChat from './pages/HostChat';
-import Notifications from './pages/Notifications';
-import AdminRevenue from './pages/AdminRevenue';
-import HostRefunds from './pages/HostRefunds';
-import HostEvents from './pages/HostEvents';
-import HostLayout from './layouts/HostLayout';
-
+/* =========================================================
+   PUBLIC INFORMATION PAGES
+========================================================= */
 
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
@@ -70,6 +102,13 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Support from "./pages/Support";
 
+/* =========================================================
+   GUARDS
+========================================================= */
+
+import ProtectedRoute from "./components/ProtectedRoute";
+import MaintenanceGuard from "./components/MaintenanceGuard";
+
 
 function App() {
   return (
@@ -77,97 +116,180 @@ function App() {
 
       <Routes>
 
-        {/* =========================
+        {/* =====================================================
             MAIN WEBSITE
-        ========================= */}
+        ===================================================== */}
 
-        <Route path='/' element={<MainLayout />}>
+        <Route path="/" element={<MainLayout />}>
 
-          <Route index element={<Home />} />
-
-          <Route path='events' element={<Events />} />
+          {/* ---------------------------------------------------
+              HOME
+          --------------------------------------------------- */}
 
           <Route
-            path="/events/:id"
+            index
+            element={<Home />}
+          />
+
+          {/* ---------------------------------------------------
+              EVENTS
+          --------------------------------------------------- */}
+
+          <Route
+            path="events"
+            element={<Events />}
+          />
+
+          <Route
+            path="events/:id"
             element={<EventDetails />}
           />
 
+          {/* ---------------------------------------------------
+              PROFILE
+          --------------------------------------------------- */}
+
           <Route
-            path="/profile"
+            path="profile"
             element={<Profile />}
           />
 
+          {/* ---------------------------------------------------
+              NOTIFICATIONS
+          --------------------------------------------------- */}
+
           <Route
-            path="/notifications"
+            path="notifications"
             element={<Notifications />}
           />
 
+          {/* ---------------------------------------------------
+              USER MESSAGES
+          --------------------------------------------------- */}
+
           <Route
-            path="/messages"
+            path="messages"
             element={<UserMessages />}
           />
 
+          {/* ---------------------------------------------------
+              MY TICKETS
+              
+              MOVED HERE FROM AUTH LAYOUT
+              SO IT GETS NAVBAR + SCROLL CONTROLS
+          --------------------------------------------------- */}
+
           <Route
-            path="/host/:id/chat-with-host/:hostId"
+            path="tickets"
+            element={<Tickets />}
+          />
+
+          {/* ---------------------------------------------------
+              FAVORITES
+              
+              MOVED HERE FROM AUTH LAYOUT
+          --------------------------------------------------- */}
+
+          <Route
+            path="favorites"
+            element={<Favorites />}
+          />
+
+          {/* ---------------------------------------------------
+              UPCOMING EVENTS
+              
+              MOVED HERE FROM AUTH LAYOUT
+          --------------------------------------------------- */}
+
+          <Route
+            path="upcoming"
+            element={<UpcomingEvents />}
+          />
+
+          {/* ---------------------------------------------------
+              SETTINGS
+              
+              MOVED HERE FROM AUTH LAYOUT
+          --------------------------------------------------- */}
+
+          <Route
+            path="settings"
+            element={<Settings />}
+          />
+
+          {/* ---------------------------------------------------
+              HOST / USER CHAT
+          --------------------------------------------------- */}
+
+          <Route
+            path="host/:id/chat-with-host/:hostId"
             element={<ChatWithHost />}
           />
 
           <Route
-            path="/host-chat/:userId"
+            path="host-chat/:userId"
             element={<HostChat />}
           />
 
+          {/* ---------------------------------------------------
+              FREE EVENT ATTENDANCE
+          --------------------------------------------------- */}
+
           <Route
-            path="/free-attendance/:id"
+            path="free-attendance/:id"
             element={<FreeAttendance />}
           />
 
           <Route
-            path="/attendance-pass/:attendanceId"
+            path="attendance-pass/:attendanceId"
             element={<AttendancePass />}
           />
 
-          {/* PUBLIC PAGES */}
+          {/* ---------------------------------------------------
+              PUBLIC INFORMATION PAGES
+          --------------------------------------------------- */}
 
           <Route
-            path="/privacy-policy"
+            path="privacy-policy"
             element={<PrivacyPolicy />}
           />
 
           <Route
-            path="/terms"
+            path="terms"
             element={<TermsConditions />}
           />
 
           <Route
-            path="/refund-policy"
+            path="refund-policy"
             element={<RefundPolicy />}
           />
 
           <Route
-            path="/contact-us"
+            path="contact-us"
             element={<ContactUs />}
           />
 
           <Route
-            path="/about"
+            path="about"
             element={<About />}
           />
 
           <Route
-            path="/contact"
+            path="contact"
             element={<Contact />}
           />
 
           <Route
-            path="/support"
+            path="support"
             element={<Support />}
           />
 
-          {/* HOST MESSAGES */}
+          {/* =================================================
+              HOST MESSAGES
+          ================================================= */}
 
           <Route
-            path="/host-messages"
+            path="host-messages"
             element={
               <ProtectedRoute>
                 <HostMessages />
@@ -175,235 +297,354 @@ function App() {
             }
           />
 
-          {/* HOST DASHBOARD */}
-        <Route element={<HostLayout />}>
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
+          {/* =================================================
+              HOST DASHBOARD
+              
+              KEEPING YOUR EXISTING HOST LAYOUT
+          ================================================= */}
 
-          <Route
-            path="/create-event"
-            element={
-              <ProtectedRoute>
-                <CreateEvent />
-              </ProtectedRoute>
-            }
-          />
+          <Route element={<HostLayout />}>
 
-          <Route
-            path="/host-wallet"
-            element={
-              <ProtectedRoute>
-                <HostWallet />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/host-events"
-            element={
-              <ProtectedRoute>
-                <HostEvents />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/host-refunds"
-            element={
-            <ProtectedRoute>
-              <HostRefunds />
-              </ProtectedRoute>
-            }
-          />
-  
+            {/* -------------------------------------------------
+                HOST DASHBOARD
+            ------------------------------------------------- */}
+
+            <Route
+              path="dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* -------------------------------------------------
+                CREATE / EDIT EVENT
+            ------------------------------------------------- */}
+
+            <Route
+              path="create-event"
+              element={
+                <ProtectedRoute>
+                  <CreateEvent />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* -------------------------------------------------
+                HOST WALLET
+            ------------------------------------------------- */}
+
+            <Route
+              path="host-wallet"
+              element={
+                <ProtectedRoute>
+                  <HostWallet />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* -------------------------------------------------
+                HOST EVENTS
+            ------------------------------------------------- */}
+
+            <Route
+              path="host-events"
+              element={
+                <ProtectedRoute>
+                  <HostEvents />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* -------------------------------------------------
+                HOST REFUNDS
+            ------------------------------------------------- */}
+
+            <Route
+              path="host-refunds"
+              element={
+                <ProtectedRoute>
+                  <HostRefunds />
+                </ProtectedRoute>
+              }
+            />
+
+          </Route>
+
         </Route>
-      </Route>
 
-        {/* =========================
-            AUTH / USER PAGES
-        ========================= */}
+
+        {/* =====================================================
+            AUTH / SPECIAL USER PAGES
+        ===================================================== */}
 
         <Route element={<AuthLayout />}>
+
+          {/* ---------------------------------------------------
+              LOGIN
+          --------------------------------------------------- */}
 
           <Route
             path="login"
             element={<Login />}
           />
 
+          {/* ---------------------------------------------------
+              REGISTER
+          --------------------------------------------------- */}
+
           <Route
             path="register"
             element={<Register />}
           />
+
+          {/* ---------------------------------------------------
+              BOOKING
+              
+              LEFT HERE TO PRESERVE YOUR PAYMENT FLOW
+          --------------------------------------------------- */}
 
           <Route
             path="booking/:id"
             element={<Booking />}
           />
 
+          {/* ---------------------------------------------------
+              REVIEW
+          --------------------------------------------------- */}
+
           <Route
-            path="/review/:eventId"
+            path="review/:eventId"
             element={<Review />}
           />
 
-          <Route
-            path="/tickets"
-            element={<Tickets />}
-          />
+          {/* ---------------------------------------------------
+              TICKET DETAILS
+          --------------------------------------------------- */}
 
           <Route
-            path="/favorites"
-            element={<Favorites />}
-          />
-
-          <Route
-            path="/upcoming"
-            element={<UpcomingEvents />}
-          />
-
-          <Route
-            path="/settings"
-            element={<Settings />}
-          />
-
-          <Route
-            path="/tickets/:ticketId"
+            path="tickets/:ticketId"
             element={<TicketDetails />}
           />
 
+          {/* ---------------------------------------------------
+              FREE TICKET DETAILS
+          --------------------------------------------------- */}
+
           <Route
-            path="/free-ticket/:attendanceId"
+            path="free-ticket/:attendanceId"
             element={<FreeTicketDetails />}
           />
 
+          {/* ---------------------------------------------------
+              TICKET SCANNER
+          --------------------------------------------------- */}
+
           <Route
-            path="/scanner/:id"
+            path="scanner/:id"
             element={<TicketScanner />}
           />
 
+          {/* ---------------------------------------------------
+              ATTENDEES
+          --------------------------------------------------- */}
+
           <Route
-            path="/attendees/:id"
+            path="attendees/:id"
             element={<Attendees />}
           />
 
+          {/* ---------------------------------------------------
+              PAYMENT PROCESSING
+          --------------------------------------------------- */}
+
           <Route
-            path="/payment-processing/"
+            path="payment-processing/"
             element={<PaymentProcessing />}
           />
 
+          {/* ---------------------------------------------------
+              PAYMENT SUCCESS
+          --------------------------------------------------- */}
+
           <Route
-            path="/payment-success/"
+            path="payment-success/"
             element={<PaymentSuccess />}
           />
 
+          {/* ---------------------------------------------------
+              HOST APPLICATION
+          --------------------------------------------------- */}
+
           <Route
-            path="/host-application/"
+            path="host-application/"
             element={<HostApplication />}
           />
 
+          {/* ---------------------------------------------------
+              HOST PROFILE
+          --------------------------------------------------- */}
+
           <Route
-            path="/edit-host-profile"
+            path="edit-host-profile"
             element={<EditHostProfile />}
           />
 
           <Route
-            path="/host-verification/"
+            path="host-verification/"
             element={<HostVerification />}
           />
 
           <Route
-            path="/host/:id"
+            path="host/:id"
             element={<HostProfile />}
           />
 
+          {/* ---------------------------------------------------
+              REFUNDS
+          --------------------------------------------------- */}
+
           <Route
-            path="/request-refund"
+            path="request-refund"
             element={<RequestRefund />}
           />
 
+          {/* ---------------------------------------------------
+              PASSWORD RECOVERY
+          --------------------------------------------------- */}
+
           <Route
-            path="/forgot-password"
-            element ={<ForgotPassword/>} 
-            
+            path="forgot-password"
+            element={<ForgotPassword />}
           />
 
           <Route
-            path="/reset-password"
-            element ={<ResetPassword/>} 
-            
+            path="reset-password"
+            element={<ResetPassword />}
           />
 
-          {/* =========================
+
+          {/* =================================================
               ADMIN DASHBOARD
-          ========================= */}
+          ================================================= */}
 
           <Route
-            path="/admin"
+            path="admin"
             element={<AdminLayout />}
           >
+
+            {/* -------------------------------------------------
+                ADMIN HOME
+            ------------------------------------------------- */}
 
             <Route
               index
               element={<AdminHome />}
             />
 
+            {/* -------------------------------------------------
+                HOST APPLICATIONS
+            ------------------------------------------------- */}
+
             <Route
               path="host-applications"
               element={<AdminHostApplications />}
             />
+
+            {/* -------------------------------------------------
+                EVENTS
+            ------------------------------------------------- */}
 
             <Route
               path="events"
               element={<AdminEvents />}
             />
 
+            {/* -------------------------------------------------
+                USERS
+            ------------------------------------------------- */}
+
             <Route
               path="users"
               element={<AdminUsers />}
             />
+
+            {/* -------------------------------------------------
+                REVENUE
+            ------------------------------------------------- */}
 
             <Route
               path="revenue"
               element={<AdminRevenue />}
             />
 
+            {/* -------------------------------------------------
+                SETTINGS
+            ------------------------------------------------- */}
+
             <Route
               path="settings"
               element={<AdminSettings />}
             />
+
+            {/* -------------------------------------------------
+                WALLET
+            ------------------------------------------------- */}
 
             <Route
               path="wallet"
               element={<AdminWallet />}
             />
 
+            {/* -------------------------------------------------
+                WITHDRAWALS
+            ------------------------------------------------- */}
+
             <Route
               path="withdrawals"
               element={<AdminWithdrawals />}
             />
+
+            {/* -------------------------------------------------
+                NOTIFICATIONS
+            ------------------------------------------------- */}
 
             <Route
               path="notifications"
               element={<AdminNotifications />}
             />
 
+            {/* -------------------------------------------------
+                REPORTS
+            ------------------------------------------------- */}
+
             <Route
               path="reports"
               element={<AdminReports />}
             />
+
+            {/* -------------------------------------------------
+                REFUNDS
+            ------------------------------------------------- */}
 
             <Route
               path="refunds"
               element={<AdminRefunds />}
             />
 
+            {/* -------------------------------------------------
+                EDIT EVENT
+            ------------------------------------------------- */}
+
             <Route
               path="events/edit/:id"
               element={<AdminEditEvent />}
             />
+
+            {/* -------------------------------------------------
+                CREATE EVENT
+            ------------------------------------------------- */}
 
             <Route
               path="create-event"

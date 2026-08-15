@@ -1,119 +1,178 @@
-.payment-success-page{
-
-    min-height:100vh;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    background:#f5f7fb;
-
-    padding:40px;
-
+.payment-success-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 20px;
+  background: #f7f8fa;
 }
 
-.success-card{
-
-    width:500px;
-
-    background:white;
-
-    border-radius:20px;
-
-    padding:40px;
-
-    text-align:center;
-
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
-
+.payment-success-card {
+  width: 100%;
+  max-width: 520px;
+  background: white;
+  border-radius: 22px;
+  padding: 45px 35px;
+  text-align: center;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
 }
 
-.success-icon{
-
-    width:100px;
-
-    height:100px;
-
-    margin:auto;
-
-    border-radius:50%;
-
-    background:#22c55e;
-
-    color:white;
-
-    font-size:50px;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
+.payment-success-card h1 {
+  margin: 20px 0 10px;
+  font-size: 30px;
+  color: #222;
 }
 
-.success-card h1{
-
-    margin-top:25px;
-
-    color:#222;
-
+.payment-success-card p {
+  color: #666;
+  line-height: 1.6;
+  margin: 8px 0;
 }
 
-.success-card p{
+/* =========================================================
+   LOADER
+   ========================================================= */
 
-    color:#666;
-
+.payment-loader {
+  width: 55px;
+  height: 55px;
+  margin: 0 auto;
+  border: 5px solid #e8e8e8;
+  border-top: 5px solid #111;
+  border-radius: 50%;
+  animation: paymentSpin 0.9s linear infinite;
 }
 
-.receipt{
-
-    margin-top:30px;
-
-    text-align:left;
-
+@keyframes paymentSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.row{
+/* =========================================================
+   STATUS ICON
+   ========================================================= */
 
-    display:flex;
-
-    justify-content:space-between;
-
-    padding:14px 0;
-
-    border-bottom:1px solid #eee;
-
+.payment-status-icon {
+  width: 75px;
+  height: 75px;
+  margin: 0 auto;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffe8e8;
+  color: #d93025;
+  font-size: 40px;
+  font-weight: 700;
 }
 
-.tickets-btn{
-
-    margin-top:35px;
-
-    width:100%;
-
-    padding:15px;
-
-    border:none;
-
-    background:#2563eb;
-
-    color:white;
-
-    border-radius:10px;
-
-    cursor:pointer;
-
-    font-size:16px;
-
-    transition:.3s;
-
+.success-icon {
+  background: #e7f8ee;
+  color: #1b9b55;
 }
 
-.tickets-btn:hover{
+/* =========================================================
+   BOOKING DETAILS
+   ========================================================= */
 
-    background:#1d4ed8;
+.booking-success-details {
+  margin-top: 25px;
+  border: 1px solid #e8e8e8;
+  border-radius: 15px;
+  overflow: hidden;
+  text-align: left;
+}
 
+.success-detail {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.success-detail:last-child {
+  border-bottom: none;
+}
+
+.success-detail span {
+  color: #777;
+}
+
+.success-detail strong {
+  color: #222;
+  text-align: right;
+  word-break: break-word;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.payment-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.payment-actions button {
+  flex: 1;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 18px;
+  background: #111;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.payment-actions button:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+.payment-actions .secondary-payment-button {
+  background: #eeeeee;
+  color: #222;
+}
+
+.payment-small-text {
+  margin-top: 22px !important;
+  font-size: 13px;
+  color: #888 !important;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+  .payment-success-page {
+    padding: 20px 14px;
+  }
+
+  .payment-success-card {
+    padding: 35px 20px;
+    border-radius: 18px;
+  }
+
+  .payment-success-card h1 {
+    font-size: 25px;
+  }
+
+  .payment-actions {
+    flex-direction: column;
+  }
+
+  .success-detail {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .success-detail strong {
+    text-align: left;
+  }
 }

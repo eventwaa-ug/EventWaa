@@ -1,431 +1,369 @@
-import {
-  useEffect,
-  useState
-} from "react";
-
-import {
-  useNavigate,
-  useLocation
-} from "react-router-dom";
-
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import "../styles/PaymentSuccess.css";
 
-
-const API_URL =
-  "http://localhost:5000";
-
+const API_URL = "http://localhost:5000";
 
 function PaymentSuccess() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const navigate =
-    useNavigate();
+  const [status, setStatus] = useState("processing");
+  const [message, setMessage] = useState(
+    "Confirming your payment..."
+  );
 
-  const location =
-    useLocation();
-
-
-  // ============================================================
-  // STATE
-  // ============================================================
-
-  const [status, setStatus] =
-    useState("verifying");
-
-  const [message, setMessage] =
-    useState(
-      "Verifying your payment..."
-    );
-
-  const [booking, setBooking] =
-    useState(null);
-
-
-  // ============================================================
-  // VERIFY PAYMENT
-  // ============================================================
+  const [booking, setBooking] = useState(null);
+  const [payment, setPayment] = useState(null);
 
   useEffect(() => {
+    verifyPayment();
+  }, []);
 
-    const verifyPayment = async () => {
+  // ==========================================================
+  // VERIFY PAYMENT
+  // ==========================================================
 
-      try {
+  const verifyPayment = async () => {
+    try {
+      // --------------------------------------------------------
+      // GET FLUTTERWAVE REDIRECT PARAMETERS
+      // --------------------------------------------------------
 
-        // ======================================================
-        // FLUTTERWAVE RETURNS THESE IN THE URL
-        // ======================================================
+      const transactionId =
+        searchParams.get("transaction_id");
 
-        const params =
-          new URLSearchParams(
-            location.search
-          );
+      const flutterwaveTxRef =
+        searchParams.get("tx_ref");
 
+      const transactionStatus =
+        searchParams.get("status");
 
-        const transactionId =
-          params.get(
-            "transaction_id"
-          );
-
-
-        const txRef =
-          params.get(
-            "tx_ref"
-          );
-
-
-        const flutterwaveStatus =
-          params.get(
-            "status"
-          );
-
-
-        console.log(
-          "FLUTTERWAVE RETURN:",
-          {
-            transactionId,
-            txRef,
-            flutterwaveStatus
-          }
-        );
-
-
-        // ======================================================
-        // CHECK REQUIRED VALUES
-        // ======================================================
-
-        if (!transactionId) {
-
-          setStatus("failed");
-
-          setMessage(
-            "No Flutterwave transaction was returned."
-          );
-
-          return;
-
+      console.log(
+        "FLUTTERWAVE REDIRECT:",
+        {
+          transactionId,
+          flutterwaveTxRef,
+          transactionStatus,
         }
+      );
 
+      // --------------------------------------------------------
+      // GET OUR SAVED PAYMENT DATA
+      // --------------------------------------------------------
 
-        if (!txRef) {
-
-          setStatus("failed");
-
-          setMessage(
-            "Payment reference is missing."
-          );
-
-          return;
-
-        }
-
-
-        // ======================================================
-        // CUSTOMER DID NOT COMPLETE PAYMENT
-        // ======================================================
-
-        if (
-          flutterwaveStatus &&
-          flutterwaveStatus !== "successful"
-        ) {
-
-          setStatus("failed");
-
-          setMessage(
-            "The payment was not completed."
-          );
-
-          return;
-
-        }
-
-
-        // ======================================================
-        // VERIFY WITH OUR BACKEND
-        //
-        // IMPORTANT:
-        // The frontend NEVER decides whether
-        // payment succeeded.
-        //
-        // Backend verifies directly with Flutterwave.
-        // ======================================================
-
-        const response =
-          await fetch(
-
-            `${API_URL}/payments/verify/` +
-            `${encodeURIComponent(transactionId)}` +
-            `?tx_ref=${encodeURIComponent(txRef)}`,
-
-            {
-              method: "GET"
-            }
-
-          );
-
-
-        const data =
-          await response.json();
-
-
-        console.log(
-          "PAYMENT VERIFICATION:",
-          data
-        );
-
-
-        // ======================================================
-        // VERIFICATION FAILED
-        // ======================================================
-
-        if (
-          !response.ok ||
-          !data.success
-        ) {
-
-          setStatus("failed");
-
-          setMessage(
-            data.message ||
-            "Payment verification failed."
-          );
-
-          return;
-
-        }
-
-
-        // ======================================================
-        // PAYMENT ALREADY PROCESSED
-        //
-        // This is NOT an error.
-        //
-        // It means the customer refreshed,
-        // returned twice, or Flutterwave called
-        // the verification again.
-        // ======================================================
-
-        if (
-          data.alreadyProcessed
-        ) {
-
-          setStatus("success");
-
-          setMessage(
-            "Your payment was already processed successfully."
-          );
-
-        } else {
-
-          setStatus("success");
-
-          setMessage(
-            "Your payment was verified successfully."
-          );
-
-        }
-
-
-        // ======================================================
-        // SAVE BOOKING FOR DISPLAY
-        // ======================================================
-
-        if (data.booking) {
-
-          setBooking(
-            data.booking
-          );
-
-        }
-
-
-        // ======================================================
-        // CLEAR TEMPORARY PAYMENT DATA
-        // ======================================================
-
-        sessionStorage.removeItem(
+      const pendingPaymentRaw =
+        sessionStorage.getItem(
           "eventwaa_pending_payment"
         );
 
+      let pendingPayment = null;
 
-        // ======================================================
-        // GO TO TICKETS
-        // ======================================================
-
-        setTimeout(() => {
-
-          navigate(
-            "/tickets"
+      if (pendingPaymentRaw) {
+        try {
+          pendingPayment =
+            JSON.parse(pendingPaymentRaw);
+        } catch (error) {
+          console.error(
+            "INVALID PENDING PAYMENT DATA:",
+            error
           );
+        }
+      }
 
-        }, 2500);
+      console.log(
+        "EVENTWAA PENDING PAYMENT:",
+        pendingPayment
+      );
 
+      // --------------------------------------------------------
+      // WE NEED A TRANSACTION ID
+      // --------------------------------------------------------
 
-      } catch (error) {
+      if (!transactionId) {
+        setStatus("failed");
 
-        console.error(
-          "PAYMENT VERIFICATION ERROR:",
-          error
+        setMessage(
+          "Flutterwave did not return a transaction ID."
         );
 
+        return;
+      }
+
+      // --------------------------------------------------------
+      // DETERMINE TX REF
+      //
+      // Prefer the tx_ref returned by Flutterwave.
+      //
+      // If it is not present, use the txRef we saved
+      // before redirecting to Flutterwave.
+      // --------------------------------------------------------
+
+      const txRef =
+        flutterwaveTxRef ||
+        pendingPayment?.txRef;
+
+      if (!txRef) {
+        setStatus("failed");
+
+        setMessage(
+          "Transaction reference could not be found."
+        );
+
+        return;
+      }
+
+      // --------------------------------------------------------
+      // CHECK FLUTTERWAVE REDIRECT STATUS
+      //
+      // This is only an early indication.
+      //
+      // The backend still performs the REAL verification
+      // directly with Flutterwave.
+      // --------------------------------------------------------
+
+      if (
+        transactionStatus &&
+        transactionStatus.toLowerCase() !==
+          "successful"
+      ) {
+        setStatus("failed");
+
+        setMessage(
+          "Flutterwave reports that the payment was not successful."
+        );
+
+        return;
+      }
+
+      // ========================================================
+      // CALL EVENTWAA BACKEND
+      //
+      // GET:
+      //
+      // /payments/verify/<transaction_id>?tx_ref=<tx_ref>
+      // ========================================================
+
+      const verificationUrl =
+        `${API_URL}/payments/verify/` +
+        `${encodeURIComponent(transactionId)}` +
+        `?tx_ref=${encodeURIComponent(txRef)}`;
+
+      console.log(
+        "VERIFYING PAYMENT:",
+        verificationUrl
+      );
+
+      const response = await fetch(
+        verificationUrl,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+
+      // --------------------------------------------------------
+      // READ SERVER RESPONSE
+      // --------------------------------------------------------
+
+      let result;
+
+      try {
+        result = await response.json();
+      } catch (error) {
+        console.error(
+          "INVALID VERIFICATION RESPONSE:",
+          error
+        );
 
         setStatus("failed");
 
         setMessage(
-          "Unable to verify your payment. Please contact EventWaa support."
+          "The server returned an invalid verification response."
         );
 
+        return;
       }
 
-    };
+      console.log(
+        "PAYMENT VERIFICATION RESULT:",
+        result
+      );
 
+      // ========================================================
+      // VERIFICATION FAILED
+      // ========================================================
 
-    verifyPayment();
+      if (
+        !response.ok ||
+        !result.success
+      ) {
+        setStatus("failed");
 
-  }, [
-    location.search,
-    navigate
-  ]);
+        setMessage(
+          result.message ||
+            "Payment verification failed."
+        );
 
+        return;
+      }
 
-  // ============================================================
-  // VERIFYING
-  // ============================================================
+      // ========================================================
+      // PAYMENT SUCCESSFUL
+      // ========================================================
 
-  if (
-    status === "verifying"
-  ) {
+      setBooking(
+        result.booking || null
+      );
 
+      setPayment(
+        result.payment || null
+      );
+
+      setStatus("success");
+
+      setMessage(
+        result.message ||
+          "Payment verified and booking created successfully."
+      );
+
+      // --------------------------------------------------------
+      // PAYMENT HAS NOW BEEN PROCESSED
+      //
+      // Remove the temporary frontend payment data.
+      // --------------------------------------------------------
+
+      sessionStorage.removeItem(
+        "eventwaa_pending_payment"
+      );
+
+    } catch (error) {
+      console.error(
+        "PAYMENT VERIFICATION ERROR:",
+        error
+      );
+
+      setStatus("failed");
+
+      setMessage(
+        "Unable to verify your payment. Please try again."
+      );
+    }
+  };
+
+  // ==========================================================
+  // GO TO TICKET
+  // ==========================================================
+
+  const handleViewTicket = () => {
+    if (!booking) return;
+
+    navigate("/tickets", {
+      state: {
+        booking,
+      },
+    });
+  };
+
+  // ==========================================================
+  // PROCESSING
+  // ==========================================================
+
+  if (status === "processing") {
     return (
-
       <div className="payment-success-page">
 
-        <div className="success-card">
+        <div className="payment-success-card">
 
-          <div className="success-circle">
-
-            <div className="success-check">
-              ⏳
-            </div>
-
-          </div>
-
+          <div className="payment-loader"></div>
 
           <h1>
-            Verifying Payment...
+            Confirming Payment...
           </h1>
 
+          <p>
+            We're verifying your payment
+            with Flutterwave.
+          </p>
 
-          <p className="success-message">
-            Please wait while EventWaa
-            confirms your payment with
-            Flutterwave.
+          <p>
+            Please don't close this page.
           </p>
 
         </div>
 
       </div>
-
     );
-
   }
 
-
-  // ============================================================
+  // ==========================================================
   // FAILED
-  // ============================================================
+  // ==========================================================
 
-  if (
-    status === "failed"
-  ) {
-
+  if (status === "failed") {
     return (
-
       <div className="payment-success-page">
 
-        <div className="success-card">
+        <div className="payment-success-card payment-failed">
 
-          <div className="success-circle">
-
-            <div className="success-check">
-              ✕
-            </div>
-
+          <div className="payment-status-icon">
+            ✕
           </div>
-
 
           <h1>
             Payment Not Confirmed
           </h1>
 
-
-          <p className="success-message">
+          <p>
             {message}
           </p>
 
-
-          <div className="redirect-section">
-
-            <button
-              className="pay-btn"
-              onClick={() =>
-                navigate(-1)
-              }
-            >
-              Go Back
-            </button>
-
-          </div>
+          <button
+            type="button"
+            onClick={() =>
+              navigate("/events")
+            }
+          >
+            Back to Events
+          </button>
 
         </div>
 
       </div>
-
     );
-
   }
 
-
-  // ============================================================
+  // ==========================================================
   // SUCCESS
-  // ============================================================
+  // ==========================================================
 
   return (
-
     <div className="payment-success-page">
 
-      <div className="success-card">
+      <div className="payment-success-card">
 
-
-        <div className="success-circle">
-
-          <div className="success-check">
-            ✓
-          </div>
-
+        <div className="payment-status-icon">
+          ✓
         </div>
-
 
         <h1>
           Payment Successful!
         </h1>
 
-
-        <p className="success-message">
-
+        <p>
           {message}
-
         </p>
 
+        {/* ====================================================
+            BOOKING INFORMATION
+        ==================================================== */}
 
         {booking && (
+          <div className="payment-booking-details">
 
-          <div className="booking-summary">
-
-            <h2>
-              Booking Confirmed
-            </h2>
-
-
-            <div className="summary-row">
+            <div className="payment-detail-row">
 
               <span>
                 Event
@@ -437,8 +375,7 @@ function PaymentSuccess() {
 
             </div>
 
-
-            <div className="summary-row">
+            <div className="payment-detail-row">
 
               <span>
                 Ticket
@@ -450,8 +387,7 @@ function PaymentSuccess() {
 
             </div>
 
-
-            <div className="summary-row">
+            <div className="payment-detail-row">
 
               <span>
                 Quantity
@@ -463,8 +399,24 @@ function PaymentSuccess() {
 
             </div>
 
+            <div className="payment-detail-row">
 
-            <div className="summary-row">
+              <span>
+                Total Paid
+              </span>
+
+              <strong>
+                UGX{" "}
+                {Number(
+                  booking.customerTotal ||
+                    booking.totalPrice ||
+                    0
+                ).toLocaleString()}
+              </strong>
+
+            </div>
+
+            <div className="payment-detail-row">
 
               <span>
                 Ticket ID
@@ -477,33 +429,38 @@ function PaymentSuccess() {
             </div>
 
           </div>
-
         )}
 
+        {/* ====================================================
+            ACTIONS
+        ==================================================== */}
 
-        <div className="redirect-section">
+        <div className="payment-success-actions">
 
-          <div className="progress-ring">
+          <button
+            type="button"
+            onClick={handleViewTicket}
+            disabled={!booking}
+          >
+            View My Ticket
+          </button>
 
-            <div className="progress-fill"></div>
-
-          </div>
-
-
-          <p className="redirect-text">
-            Opening My Tickets...
-          </p>
+          <button
+            type="button"
+            className="secondary-btn"
+            onClick={() =>
+              navigate("/events")
+            }
+          >
+            Browse More Events
+          </button>
 
         </div>
-
 
       </div>
 
     </div>
-
   );
-
 }
-
 
 export default PaymentSuccess;
