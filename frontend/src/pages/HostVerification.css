@@ -1,0 +1,96 @@
+.verification-page{
+    display:flex;
+    justify-content:center;
+    padding:40px 20px;
+    background:#f5f7fb;
+    min-height:100vh;
+}
+
+.verification-card{
+    width:100%;
+    max-width:700px;
+    background:#fff;
+    border-radius:18px;
+    padding:35px;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+.stepper{
+    display:flex;
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.step{
+    flex:1;
+    text-align:center;
+    padding:12px;
+    border-radius:10px;
+    background:#e5e7eb;
+    font-weight:600;
+}
+
+.completed{
+    background:#16a34a;
+    color:white;
+}
+
+.active{
+    background:#2563eb;
+    color:white;
+}
+
+.verification-card h1{
+    margin-bottom:10px;
+}
+
+.verification-card p{
+    color:#666;
+    margin-bottom:25px;
+}
+
+.verification-card form{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+.verification-card input{
+    padding:12px;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    font-size:15px;
+}
+
+.verification-card input:focus{
+    outline:none;
+    border-color:#2563eb;
+}
+
+.checkbox{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+}
+
+.verification-card button{
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:14px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:bold;
+}
+
+.verification-card button:hover{
+    background:#1d4ed8;
+}
+.upload-note{
+    margin-top: -8px;
+    margin-bottom: 15px;
+    color:#666;
+    font-size: 14px;
+    line-height: 1.5;
+}

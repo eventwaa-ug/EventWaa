@@ -1,0 +1,265 @@
+.support-page{
+
+    padding:60px 20px;
+
+    background:#f8fafc;
+
+}
+
+
+.support-header{
+
+    text-align:center;
+
+    max-width:700px;
+
+    margin:auto;
+
+    margin-bottom:50px;
+
+}
+
+
+.support-header h1{
+
+    font-size:42px;
+
+    color:#111827;
+
+}
+
+
+.support-header p{
+
+    font-size:18px;
+
+    color:#64748b;
+
+}
+
+
+
+
+.support-topics{
+
+    max-width:1100px;
+
+    margin:auto;
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:25px;
+
+}
+
+
+
+.support-card{
+
+    background:white;
+
+    padding:30px 20px;
+
+    border-radius:18px;
+
+    text-align:center;
+
+    box-shadow:0 10px 25px rgba(0,0,0,0.06);
+
+}
+
+
+
+.support-icon{
+
+    font-size:40px;
+
+    margin-bottom:15px;
+
+}
+
+
+
+.support-card h3{
+
+    margin-bottom:10px;
+
+}
+
+
+.support-card p{
+
+    color:#64748b;
+
+    line-height:1.6;
+
+}
+
+
+
+
+
+
+/* FAQ */
+
+
+.faq-section{
+
+    max-width:900px;
+
+    margin:70px auto;
+
+}
+
+
+
+.faq-section h2{
+
+    text-align:center;
+
+    margin-bottom:35px;
+
+}
+
+
+
+.faq-container{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:20px;
+
+}
+
+
+
+.faq-card{
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:15px;
+
+    box-shadow:0 8px 20px rgba(0,0,0,0.05);
+
+}
+
+
+
+.faq-card h3{
+
+    margin-bottom:10px;
+
+}
+
+
+.faq-card p{
+
+    color:#64748b;
+
+    line-height:1.6;
+
+}
+
+
+
+
+
+/* Contact CTA */
+
+
+.support-contact{
+
+    text-align:center;
+
+    background:white;
+
+    max-width:700px;
+
+    margin:auto;
+
+    padding:40px;
+
+    border-radius:20px;
+
+}
+
+
+.support-contact a{
+
+
+    display:inline-block;
+
+    margin-top:20px;
+
+    padding:14px 30px;
+
+    background:#2563eb;
+
+    color:white;
+
+    text-decoration:none;
+
+    border-radius:10px;
+
+}
+
+
+
+
+
+
+@media(max-width:900px){
+
+
+.support-topics{
+
+    grid-template-columns:1fr 1fr;
+
+}
+
+
+}
+
+
+
+@media(max-width:600px){
+
+
+.support-page{
+
+    padding:40px 15px;
+
+}
+
+
+
+.support-header h1{
+
+    font-size:32px;
+
+}
+
+
+
+.support-topics{
+
+    grid-template-columns:1fr;
+
+}
+
+
+
+.support-contact{
+
+    padding:25px;
+
+}
+
+
+}

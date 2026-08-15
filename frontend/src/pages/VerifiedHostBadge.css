@@ -1,0 +1,21 @@
+.verified-badge {
+
+    display:inline-flex;
+
+    align-items:center;
+
+    margin-left:8px;
+
+    padding:5px 10px;
+
+    border-radius:20px;
+
+    background:#e0f2fe;
+
+    color:#0369a1;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
