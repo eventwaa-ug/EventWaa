@@ -1,0 +1,235 @@
+/* =========================================
+   CITY CHIPS SECTION
+========================================= */
+
+.city-chips-section {
+    width: 100%;
+    padding: 55px 8%;
+    background: #f8fafc;
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.city-chips-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+
+.city-chips-header h2 {
+    margin: 0 0 8px;
+
+    color: #0f172a;
+
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+
+.city-chips-header p {
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 0.95rem;
+}
+
+
+/* =========================================
+   CITY CONTAINER
+========================================= */
+
+.city-chips {
+    display: flex;
+
+    gap: 15px;
+
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    overflow-x: auto;
+
+    padding: 5px 2px 12px;
+
+    scroll-snap-type: x mandatory;
+
+    -ms-overflow-style: none;
+}
+
+
+/* Hide scrollbar */
+
+.city-chips::-webkit-scrollbar {
+    display: none;
+}
+
+
+/* =========================================
+   CITY BUTTON
+========================================= */
+
+.city-chip {
+    flex: 0 0 auto;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    white-space: nowrap;
+
+    padding: 12px 22px;
+
+    border-radius: 999px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    color: #334155;
+
+    cursor: pointer;
+
+    font-family: inherit;
+
+    font-size: 0.95rem;
+
+    font-weight: 600;
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        color 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+
+    scroll-snap-align: start;
+}
+
+
+/* =========================================
+   ICON
+========================================= */
+
+.city-icon {
+    font-size: 15px;
+}
+
+
+/* =========================================
+   HOVER
+========================================= */
+
+.city-chip:hover {
+    transform: translateY(-3px);
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    border-color: #2563eb;
+
+    box-shadow:
+        0 7px 18px rgba(37, 99, 235, 0.18);
+}
+
+
+/* =========================================
+   ACTIVE CITY
+========================================= */
+
+.city-chip.active {
+    background: #2563eb;
+
+    color: #ffffff;
+
+    border-color: #2563eb;
+
+    box-shadow:
+        0 7px 18px rgba(37, 99, 235, 0.18);
+}
+
+
+/* =========================================
+   ACTIVE HOVER
+========================================= */
+
+.city-chip.active:hover {
+    background: #1d4ed8;
+
+    border-color: #1d4ed8;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 768px) {
+
+    .city-chips-section {
+        padding: 40px 20px;
+    }
+
+
+    .city-chips-header {
+        text-align: left;
+
+        margin-bottom: 22px;
+    }
+
+
+    .city-chips-header h2 {
+        font-size: 1.5rem;
+    }
+
+
+    .city-chips-header p {
+        line-height: 1.5;
+    }
+
+
+    .city-chips {
+        gap: 10px;
+
+        padding-bottom: 10px;
+    }
+
+
+    .city-chip {
+        padding: 10px 17px;
+
+        font-size: 0.88rem;
+    }
+
+}
+
+
+/* =========================================
+   SMALL PHONES
+========================================= */
+
+@media (max-width: 400px) {
+
+    .city-chips-section {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+
+    .city-chips-header h2 {
+        font-size: 1.4rem;
+    }
+
+
+    .city-chip {
+        padding: 9px 15px;
+    }
+
+}
