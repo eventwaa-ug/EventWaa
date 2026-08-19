@@ -40,6 +40,13 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 
 /* =========================================================
+   ADMIN AUTH
+========================================================= */
+
+import AdminLogin from "./pages/AdminLogin";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
+
+/* =========================================================
    HOST
 ========================================================= */
 
@@ -72,7 +79,7 @@ import PaymentProcessing from "./pages/PaymentProcessing";
 import PaymentSuccess from "./pages/PaymentSuccess";
 
 /* =========================================================
-   ADMIN
+   ADMIN PAGES
 ========================================================= */
 
 import AdminHome from "./pages/AdminHome";
@@ -111,16 +118,37 @@ import MaintenanceGuard from "./components/MaintenanceGuard";
 
 
 function App() {
+
   return (
+
     <MaintenanceGuard>
 
       <Routes>
 
         {/* =====================================================
+            ADMIN LOGIN
+            -----------------------------------------------------
+            IMPORTANT:
+            This is outside MainLayout and AuthLayout.
+
+            It must remain publicly accessible so an admin
+            without an active session can reach the login page.
+        ===================================================== */}
+
+        <Route
+          path="/admin/login"
+          element={<AdminLogin />}
+        />
+
+
+        {/* =====================================================
             MAIN WEBSITE
         ===================================================== */}
 
-        <Route path="/" element={<MainLayout />}>
+        <Route
+          path="/"
+          element={<MainLayout />}
+        >
 
           {/* ---------------------------------------------------
               HOME
@@ -130,6 +158,7 @@ function App() {
             index
             element={<Home />}
           />
+
 
           {/* ---------------------------------------------------
               EVENTS
@@ -145,6 +174,7 @@ function App() {
             element={<EventDetails />}
           />
 
+
           {/* ---------------------------------------------------
               PROFILE
           --------------------------------------------------- */}
@@ -153,6 +183,7 @@ function App() {
             path="profile"
             element={<Profile />}
           />
+
 
           {/* ---------------------------------------------------
               NOTIFICATIONS
@@ -163,6 +194,7 @@ function App() {
             element={<Notifications />}
           />
 
+
           {/* ---------------------------------------------------
               USER MESSAGES
           --------------------------------------------------- */}
@@ -172,11 +204,9 @@ function App() {
             element={<UserMessages />}
           />
 
+
           {/* ---------------------------------------------------
               MY TICKETS
-              
-              MOVED HERE FROM AUTH LAYOUT
-              SO IT GETS NAVBAR + SCROLL CONTROLS
           --------------------------------------------------- */}
 
           <Route
@@ -184,10 +214,9 @@ function App() {
             element={<Tickets />}
           />
 
+
           {/* ---------------------------------------------------
               FAVORITES
-              
-              MOVED HERE FROM AUTH LAYOUT
           --------------------------------------------------- */}
 
           <Route
@@ -195,10 +224,9 @@ function App() {
             element={<Favorites />}
           />
 
+
           {/* ---------------------------------------------------
               UPCOMING EVENTS
-              
-              MOVED HERE FROM AUTH LAYOUT
           --------------------------------------------------- */}
 
           <Route
@@ -206,16 +234,16 @@ function App() {
             element={<UpcomingEvents />}
           />
 
+
           {/* ---------------------------------------------------
               SETTINGS
-              
-              MOVED HERE FROM AUTH LAYOUT
           --------------------------------------------------- */}
 
           <Route
             path="settings"
             element={<Settings />}
           />
+
 
           {/* ---------------------------------------------------
               HOST / USER CHAT
@@ -231,6 +259,7 @@ function App() {
             element={<HostChat />}
           />
 
+
           {/* ---------------------------------------------------
               FREE EVENT ATTENDANCE
           --------------------------------------------------- */}
@@ -244,6 +273,7 @@ function App() {
             path="attendance-pass/:attendanceId"
             element={<AttendancePass />}
           />
+
 
           {/* ---------------------------------------------------
               PUBLIC INFORMATION PAGES
@@ -284,6 +314,7 @@ function App() {
             element={<Support />}
           />
 
+
           {/* =================================================
               HOST MESSAGES
           ================================================= */}
@@ -297,13 +328,14 @@ function App() {
             }
           />
 
+
           {/* =================================================
               HOST DASHBOARD
-              
-              KEEPING YOUR EXISTING HOST LAYOUT
           ================================================= */}
 
-          <Route element={<HostLayout />}>
+          <Route
+            element={<HostLayout />}
+          >
 
             {/* -------------------------------------------------
                 HOST DASHBOARD
@@ -318,8 +350,9 @@ function App() {
               }
             />
 
+
             {/* -------------------------------------------------
-                CREATE / EDIT EVENT
+                CREATE EVENT
             ------------------------------------------------- */}
 
             <Route
@@ -330,6 +363,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
 
             {/* -------------------------------------------------
                 HOST WALLET
@@ -344,6 +378,7 @@ function App() {
               }
             />
 
+
             {/* -------------------------------------------------
                 HOST EVENTS
             ------------------------------------------------- */}
@@ -356,6 +391,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
 
             {/* -------------------------------------------------
                 HOST REFUNDS
@@ -379,7 +415,9 @@ function App() {
             AUTH / SPECIAL USER PAGES
         ===================================================== */}
 
-        <Route element={<AuthLayout />}>
+        <Route
+          element={<AuthLayout />}
+        >
 
           {/* ---------------------------------------------------
               LOGIN
@@ -390,6 +428,7 @@ function App() {
             element={<Login />}
           />
 
+
           {/* ---------------------------------------------------
               REGISTER
           --------------------------------------------------- */}
@@ -399,16 +438,16 @@ function App() {
             element={<Register />}
           />
 
+
           {/* ---------------------------------------------------
               BOOKING
-              
-              LEFT HERE TO PRESERVE YOUR PAYMENT FLOW
           --------------------------------------------------- */}
 
           <Route
             path="booking/:id"
             element={<Booking />}
           />
+
 
           {/* ---------------------------------------------------
               REVIEW
@@ -419,6 +458,7 @@ function App() {
             element={<Review />}
           />
 
+
           {/* ---------------------------------------------------
               TICKET DETAILS
           --------------------------------------------------- */}
@@ -427,6 +467,7 @@ function App() {
             path="tickets/:ticketId"
             element={<TicketDetails />}
           />
+
 
           {/* ---------------------------------------------------
               FREE TICKET DETAILS
@@ -437,6 +478,7 @@ function App() {
             element={<FreeTicketDetails />}
           />
 
+
           {/* ---------------------------------------------------
               TICKET SCANNER
           --------------------------------------------------- */}
@@ -445,6 +487,7 @@ function App() {
             path="scanner/:id"
             element={<TicketScanner />}
           />
+
 
           {/* ---------------------------------------------------
               ATTENDEES
@@ -455,32 +498,36 @@ function App() {
             element={<Attendees />}
           />
 
+
           {/* ---------------------------------------------------
               PAYMENT PROCESSING
           --------------------------------------------------- */}
 
           <Route
-            path="payment-processing/"
+            path="payment-processing"
             element={<PaymentProcessing />}
           />
+
 
           {/* ---------------------------------------------------
               PAYMENT SUCCESS
           --------------------------------------------------- */}
 
           <Route
-            path="payment-success/"
+            path="payment-success"
             element={<PaymentSuccess />}
           />
+
 
           {/* ---------------------------------------------------
               HOST APPLICATION
           --------------------------------------------------- */}
 
           <Route
-            path="host-application/"
+            path="host-application"
             element={<HostApplication />}
           />
+
 
           {/* ---------------------------------------------------
               HOST PROFILE
@@ -492,7 +539,7 @@ function App() {
           />
 
           <Route
-            path="host-verification/"
+            path="host-verification"
             element={<HostVerification />}
           />
 
@@ -500,6 +547,7 @@ function App() {
             path="host/:id"
             element={<HostProfile />}
           />
+
 
           {/* ---------------------------------------------------
               REFUNDS
@@ -509,6 +557,7 @@ function App() {
             path="request-refund"
             element={<RequestRefund />}
           />
+
 
           {/* ---------------------------------------------------
               PASSWORD RECOVERY
@@ -527,11 +576,24 @@ function App() {
 
           {/* =================================================
               ADMIN DASHBOARD
+
+              IMPORTANT:
+              EVERYTHING INSIDE /admin IS NOW PROTECTED.
+
+              User must have:
+              eventwaa_admin_token
+
+              Otherwise AdminProtectedRoute sends them
+              to /admin/login.
           ================================================= */}
 
           <Route
             path="admin"
-            element={<AdminLayout />}
+            element={
+              <AdminProtectedRoute>
+                <AdminLayout />
+              </AdminProtectedRoute>
+            }
           >
 
             {/* -------------------------------------------------
@@ -543,6 +605,17 @@ function App() {
               element={<AdminHome />}
             />
 
+
+            {/* -------------------------------------------------
+                ADMIN DASHBOARD
+            ------------------------------------------------- */}
+
+            <Route
+              path="dashboard"
+              element={<AdminDashboard />}
+            />
+
+
             {/* -------------------------------------------------
                 HOST APPLICATIONS
             ------------------------------------------------- */}
@@ -551,6 +624,7 @@ function App() {
               path="host-applications"
               element={<AdminHostApplications />}
             />
+
 
             {/* -------------------------------------------------
                 EVENTS
@@ -561,6 +635,7 @@ function App() {
               element={<AdminEvents />}
             />
 
+
             {/* -------------------------------------------------
                 USERS
             ------------------------------------------------- */}
@@ -569,6 +644,7 @@ function App() {
               path="users"
               element={<AdminUsers />}
             />
+
 
             {/* -------------------------------------------------
                 REVENUE
@@ -579,6 +655,7 @@ function App() {
               element={<AdminRevenue />}
             />
 
+
             {/* -------------------------------------------------
                 SETTINGS
             ------------------------------------------------- */}
@@ -587,6 +664,7 @@ function App() {
               path="settings"
               element={<AdminSettings />}
             />
+
 
             {/* -------------------------------------------------
                 WALLET
@@ -597,6 +675,7 @@ function App() {
               element={<AdminWallet />}
             />
 
+
             {/* -------------------------------------------------
                 WITHDRAWALS
             ------------------------------------------------- */}
@@ -605,6 +684,7 @@ function App() {
               path="withdrawals"
               element={<AdminWithdrawals />}
             />
+
 
             {/* -------------------------------------------------
                 NOTIFICATIONS
@@ -615,6 +695,7 @@ function App() {
               element={<AdminNotifications />}
             />
 
+
             {/* -------------------------------------------------
                 REPORTS
             ------------------------------------------------- */}
@@ -623,6 +704,7 @@ function App() {
               path="reports"
               element={<AdminReports />}
             />
+
 
             {/* -------------------------------------------------
                 REFUNDS
@@ -633,6 +715,7 @@ function App() {
               element={<AdminRefunds />}
             />
 
+
             {/* -------------------------------------------------
                 EDIT EVENT
             ------------------------------------------------- */}
@@ -641,6 +724,7 @@ function App() {
               path="events/edit/:id"
               element={<AdminEditEvent />}
             />
+
 
             {/* -------------------------------------------------
                 CREATE EVENT
@@ -658,6 +742,7 @@ function App() {
       </Routes>
 
     </MaintenanceGuard>
+
   );
 }
 

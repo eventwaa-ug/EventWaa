@@ -6,14 +6,24 @@ import CreatableSelect from "react-select/creatable";
 import "../styles/CreateEvent.css";
 
 function CreateEvent() {
+
     const { user } = useContext(AuthContext);
-    const { updateEvent } = useContext(EventContext);
+
+    const { updateEvent } =
+        useContext(EventContext);
 
     const location = useLocation();
+
     const navigate = useNavigate();
 
-    const editingEvent = location.state?.event;
-    const duplicateEvent = location.state?.duplicateEvent;
+    const editingEvent =
+        location.state?.event;
+
+    const duplicateEvent =
+        location.state?.duplicateEvent;
+
+    const BACKEND_URL =
+        "http://localhost:5000";
 
     // ============================================================
     // OPTIONS
@@ -43,8 +53,11 @@ function CreateEvent() {
     // STATE
     // ============================================================
 
-    const [selectedCity, setSelectedCity] = useState(null);
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedCity, setSelectedCity] =
+        useState(null);
+
+    const [selectedCategory, setSelectedCategory] =
+        useState(null);
 
     const [tickets, setTickets] = useState([
         {
@@ -74,26 +87,51 @@ function CreateEvent() {
         hostId: user?.id || "",
         hostName: user?.name || "",
         hostEmail: user?.email || "",
-        verifiedHost: user?.verifiedHost || false
+        verifiedHost:
+            user?.verifiedHost || false
     });
 
-    const [submitting, setSubmitting] = useState(false);
+    const [submitting, setSubmitting] =
+        useState(false);
 
     // ============================================================
     // LOAD EDIT / DUPLICATE DATA
     // ============================================================
 
     useEffect(() => {
+
+        // ========================================================
+        // EDIT EVENT
+        // ========================================================
+
         if (editingEvent) {
+
             setEventData({
                 ...editingEvent,
-                poster: editingEvent.poster || editingEvent.eventPoster || ""
+
+                poster:
+                    editingEvent.eventPoster ||
+                    editingEvent.image ||
+                    ""
             });
 
             setTickets(
-                Array.isArray(editingEvent.tickets) &&
+                Array.isArray(
+                    editingEvent.tickets
+                ) &&
                 editingEvent.tickets.length > 0
-                    ? editingEvent.tickets
+
+                    ? editingEvent.tickets.map(
+                        (ticket) => ({
+                            name:
+                                ticket.name || "",
+                            price:
+                                ticket.price ?? "",
+                            quantity:
+                                ticket.quantity ?? ""
+                        })
+                    )
+
                     : [
                         {
                             name: "Regular",
@@ -106,8 +144,11 @@ function CreateEvent() {
             setSelectedCity(
                 editingEvent.city
                     ? {
-                        value: editingEvent.city.toLowerCase(),
-                        label: editingEvent.city
+                        value:
+                            editingEvent.city
+                                .toLowerCase(),
+                        label:
+                            editingEvent.city
                     }
                     : null
             );
@@ -115,24 +156,41 @@ function CreateEvent() {
             setSelectedCategory(
                 editingEvent.category
                     ? {
-                        value: editingEvent.category.toLowerCase(),
-                        label: editingEvent.category
+                        value:
+                            editingEvent.category
+                                .toLowerCase(),
+                        label:
+                            editingEvent.category
                     }
                     : null
             );
+
+            return;
         }
 
-        else if (duplicateEvent) {
+        // ========================================================
+        // DUPLICATE EVENT
+        // ========================================================
+
+        if (duplicateEvent) {
+
             setEventData({
+
                 ...duplicateEvent,
 
-                id: Date.now(),
+                id: undefined,
 
-                title: `${duplicateEvent.title} (Copy)`,
+                title:
+                    `${duplicateEvent.title} (Copy)`,
 
                 date: "",
 
+                // New duplicate should NOT reuse the old
+                // poster automatically.
                 poster: "",
+
+                eventPoster: "",
+                image: "",
 
                 featured: false,
 
@@ -140,18 +198,40 @@ function CreateEvent() {
 
                 revenue: 0,
 
+                checkedIn: 0,
+
                 status: "published",
 
-                hostId: user?.id || "",
-                hostName: user?.name || "",
-                hostEmail: user?.email || "",
-                verifiedHost: user?.verifiedHost || false
+                hostId:
+                    user?.id || "",
+
+                hostName:
+                    user?.name || "",
+
+                hostEmail:
+                    user?.email || "",
+
+                verifiedHost:
+                    user?.verifiedHost || false
             });
 
             setTickets(
-                Array.isArray(duplicateEvent.tickets) &&
+                Array.isArray(
+                    duplicateEvent.tickets
+                ) &&
                 duplicateEvent.tickets.length > 0
-                    ? duplicateEvent.tickets
+
+                    ? duplicateEvent.tickets.map(
+                        (ticket) => ({
+                            name:
+                                ticket.name || "",
+                            price:
+                                ticket.price ?? "",
+                            quantity:
+                                ticket.quantity ?? ""
+                        })
+                    )
+
                     : [
                         {
                             name: "Regular",
@@ -164,8 +244,11 @@ function CreateEvent() {
             setSelectedCity(
                 duplicateEvent.city
                     ? {
-                        value: duplicateEvent.city.toLowerCase(),
-                        label: duplicateEvent.city
+                        value:
+                            duplicateEvent.city
+                                .toLowerCase(),
+                        label:
+                            duplicateEvent.city
                     }
                     : null
             );
@@ -173,34 +256,49 @@ function CreateEvent() {
             setSelectedCategory(
                 duplicateEvent.category
                     ? {
-                        value: duplicateEvent.category.toLowerCase(),
-                        label: duplicateEvent.category
+                        value:
+                            duplicateEvent.category
+                                .toLowerCase(),
+                        label:
+                            duplicateEvent.category
                     }
                     : null
             );
         }
-    }, [editingEvent, duplicateEvent, user]);
+
+    }, [
+        editingEvent,
+        duplicateEvent,
+        user
+    ]);
 
     // ============================================================
     // HANDLE EVENT INPUT
     // ============================================================
 
     const handleChange = (e) => {
+
         setEventData((previous) => ({
             ...previous,
-            [e.target.name]: e.target.value
+            [e.target.name]:
+                e.target.value
         }));
     };
 
     // ============================================================
-    // POSTER
+    // POSTER UPLOAD
     // ============================================================
 
     const handlePosterUpload = (e) => {
-        const file = e.target.files[0];
 
-        if (!file) return;
+        const file =
+            e.target.files?.[0];
 
+        if (!file) {
+            return;
+        }
+
+        // Store the actual File object.
         setEventData((previous) => ({
             ...previous,
             poster: file
@@ -208,25 +306,82 @@ function CreateEvent() {
     };
 
     // ============================================================
+    // GET POSTER PREVIEW
+    // ============================================================
+
+    const getPosterPreview = () => {
+
+        if (!eventData.poster) {
+            return "";
+        }
+
+        // --------------------------------------------------------
+        // NEW FILE
+        // --------------------------------------------------------
+
+        if (
+            eventData.poster instanceof File
+        ) {
+
+            return URL.createObjectURL(
+                eventData.poster
+            );
+        }
+
+        // --------------------------------------------------------
+        // EXISTING URL / PATH
+        // --------------------------------------------------------
+
+        if (
+            typeof eventData.poster === "string"
+        ) {
+
+            if (
+                eventData.poster.startsWith(
+                    "http://"
+                ) ||
+                eventData.poster.startsWith(
+                    "https://"
+                )
+            ) {
+
+                return eventData.poster;
+            }
+
+            return `${BACKEND_URL}${eventData.poster}`;
+        }
+
+        return "";
+    };
+
+    // ============================================================
     // TICKETS
     // ============================================================
 
-    const handleTicketChange = (index, field, value) => {
+    const handleTicketChange = (
+        index,
+        field,
+        value
+    ) => {
+
         setTickets((previous) =>
-            previous.map((ticket, ticketIndex) =>
-                ticketIndex === index
-                    ? {
-                        ...ticket,
-                        [field]: value
-                    }
-                    : ticket
+            previous.map(
+                (ticket, ticketIndex) =>
+                    ticketIndex === index
+                        ? {
+                            ...ticket,
+                            [field]: value
+                        }
+                        : ticket
             )
         );
     };
 
     const addTicket = () => {
+
         setTickets((previous) => [
             ...previous,
+
             {
                 name: "",
                 price: "",
@@ -236,8 +391,12 @@ function CreateEvent() {
     };
 
     const removeTicket = (index) => {
+
         setTickets((previous) =>
-            previous.filter((_, ticketIndex) => ticketIndex !== index)
+            previous.filter(
+                (_, ticketIndex) =>
+                    ticketIndex !== index
+            )
         );
     };
 
@@ -246,11 +405,15 @@ function CreateEvent() {
     // ============================================================
 
     const handleSubmit = async (e) => {
+
         e.preventDefault();
 
-        if (submitting) return;
+        if (submitting) {
+            return;
+        }
 
         try {
+
             setSubmitting(true);
 
             // ====================================================
@@ -258,42 +421,146 @@ function CreateEvent() {
             // ====================================================
 
             if (editingEvent) {
-                const response = await fetch(
-                    `http://localhost:5000/events/${editingEvent.id}`,
-                    {
-                        method: "PUT",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            ...eventData,
 
-                            // Remove old event-level price
-                            price: undefined,
+                const formData =
+                    new FormData();
 
-                            tickets:
-                                eventData.eventType === "Paid"
-                                    ? tickets
-                                    : [],
+                // ------------------------------------------------
+                // EVENT FIELDS
+                // ------------------------------------------------
 
-                            id: editingEvent.id
-                        })
-                    }
+                formData.append(
+                    "title",
+                    eventData.title || ""
                 );
 
-                const result = await response.json();
+                formData.append(
+                    "description",
+                    eventData.description || ""
+                );
 
-                if (!response.ok || !result.success) {
-                    throw new Error(
-                        result.message || "Failed to update event."
+                formData.append(
+                    "venue",
+                    eventData.venue || ""
+                );
+
+                formData.append(
+                    "city",
+                    eventData.city || ""
+                );
+
+                formData.append(
+                    "category",
+                    eventData.category || ""
+                );
+
+                formData.append(
+                    "date",
+                    eventData.date || ""
+                );
+
+                formData.append(
+                    "startTime",
+                    eventData.startTime || ""
+                );
+
+                formData.append(
+                    "endTime",
+                    eventData.endTime || ""
+                );
+
+                formData.append(
+                    "capacity",
+                    eventData.capacity || ""
+                );
+
+                formData.append(
+                    "contact",
+                    eventData.contact || ""
+                );
+
+                formData.append(
+                    "eventType",
+                    eventData.eventType || "Paid"
+                );
+
+                formData.append(
+                    "organizerName",
+                    eventData.organizerName || ""
+                );
+
+                // ------------------------------------------------
+                // TICKETS
+                // ------------------------------------------------
+
+                formData.append(
+                    "tickets",
+                    JSON.stringify(
+                        eventData.eventType === "Paid"
+                            ? tickets
+                            : []
+                    )
+                );
+
+                // ------------------------------------------------
+                // NEW POSTER
+                //
+                // Only send a poster when the host selected
+                // a NEW File.
+                // ------------------------------------------------
+
+                if (
+                    eventData.poster instanceof File
+                ) {
+
+                    formData.append(
+                        "poster",
+                        eventData.poster
                     );
                 }
 
-                updateEvent(result.event);
+                // ------------------------------------------------
+                // UPDATE EVENT
+                // ------------------------------------------------
 
-                alert("Event updated successfully!");
+                const response =
+                    await fetch(
+                        `${BACKEND_URL}/events/${editingEvent.id}`,
+                        {
+                            method: "PUT",
+                            body: formData
+                        }
+                    );
 
-                navigate("/dashboard");
+                const result =
+                    await response.json();
+
+                if (
+                    !response.ok ||
+                    !result.success
+                ) {
+
+                    throw new Error(
+                        result.message ||
+                        "Failed to update event."
+                    );
+                }
+
+                // ------------------------------------------------
+                // UPDATE REACT EVENT STATE
+                // ------------------------------------------------
+
+                updateEvent(
+                    result.event
+                );
+
+                alert(
+                    "Event updated successfully!"
+                );
+
+                navigate(
+                    "/dashboard"
+                );
 
                 return;
             }
@@ -302,18 +569,50 @@ function CreateEvent() {
             // CREATE / DUPLICATE EVENT
             // ====================================================
 
-            const formData = new FormData();
+            const formData =
+                new FormData();
 
-            Object.keys(eventData).forEach((key) => {
-                // Do NOT send the old event-level price
-                if (key === "price") return;
+            // ----------------------------------------------------
+            // EVENT DATA
+            // ----------------------------------------------------
 
-                formData.append(key, eventData[key] ?? "");
-            });
+            Object.keys(eventData).forEach(
+                (key) => {
 
-            // ====================================================
-            // SEND TICKET TYPES TO BACKEND
-            // ====================================================
+                    // poster is handled separately
+                    if (key === "poster") {
+                        return;
+                    }
+
+                    // Never send old event-level price
+                    if (key === "price") {
+                        return;
+                    }
+
+                    formData.append(
+                        key,
+                        eventData[key] ?? ""
+                    );
+                }
+            );
+
+            // ----------------------------------------------------
+            // POSTER
+            // ----------------------------------------------------
+
+            if (
+                eventData.poster instanceof File
+            ) {
+
+                formData.append(
+                    "poster",
+                    eventData.poster
+                );
+            }
+
+            // ----------------------------------------------------
+            // TICKETS
+            // ----------------------------------------------------
 
             formData.append(
                 "tickets",
@@ -324,9 +623,9 @@ function CreateEvent() {
                 )
             );
 
-            // ====================================================
+            // ----------------------------------------------------
             // HOST INFORMATION
-            // ====================================================
+            // ----------------------------------------------------
 
             formData.set(
                 "hostId",
@@ -345,26 +644,47 @@ function CreateEvent() {
 
             formData.set(
                 "verifiedHost",
-                String(user?.verifiedHost || false)
+                String(
+                    user?.verifiedHost ||
+                    false
+                )
             );
 
-            // ====================================================
+            // ----------------------------------------------------
             // CREATE EVENT
-            // ====================================================
+            // ----------------------------------------------------
 
-            const response = await fetch(
-                "http://localhost:5000/events",
-                {
-                    method: "POST",
-                    body: formData
-                }
-            );
+            const response =
+                await fetch(
+                    `${BACKEND_URL}/events`,
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
 
-            const result = await response.json();
+            const result =
+                await response.json();
 
-            if (!response.ok || !result.success) {
+            if (
+                !response.ok ||
+                !result.success
+            ) {
+
                 throw new Error(
-                    result.message || "Failed to create event."
+                    result.message ||
+                    "Failed to create event."
+                );
+            }
+
+            // ----------------------------------------------------
+            // UPDATE FRONTEND STATE
+            // ----------------------------------------------------
+
+            if (result.event) {
+
+                updateEvent(
+                    result.event
                 );
             }
 
@@ -374,9 +694,12 @@ function CreateEvent() {
                     : "Event published successfully!"
             );
 
-            navigate("/dashboard");
+            navigate(
+                "/dashboard"
+            );
 
         } catch (error) {
+
             console.error(
                 "CREATE / UPDATE EVENT ERROR:",
                 error
@@ -386,28 +709,42 @@ function CreateEvent() {
                 error.message ||
                 "Something went wrong while saving the event."
             );
+
         } finally {
+
             setSubmitting(false);
         }
     };
+
+    // ============================================================
+    // POSTER PREVIEW URL
+    // ============================================================
+
+    const posterPreview =
+        getPosterPreview();
 
     // ============================================================
     // RENDER
     // ============================================================
 
     return (
+
         <div className="create-event-page">
 
             <h1>
+
                 {editingEvent
                     ? "Edit Event"
                     : duplicateEvent
                         ? "Duplicate Event"
                         : "Create a New Event"}
+
             </h1>
 
             <p>
-                Fill in the details below to publish your event.
+                {editingEvent
+                    ? "Update your event details below."
+                    : "Fill in the details below to publish your event."}
             </p>
 
             <form
@@ -420,14 +757,22 @@ function CreateEvent() {
                 ================================================= */}
 
                 <div className="form-group">
-                    <label>Event Title</label>
+
+                    <label>
+                        Event Title
+                    </label>
 
                     <input
                         name="title"
-                        value={eventData.title}
-                        onChange={handleChange}
+                        value={
+                            eventData.title
+                        }
+                        onChange={
+                            handleChange
+                        }
                         required
                     />
+
                 </div>
 
                 {/* =================================================
@@ -443,25 +788,34 @@ function CreateEvent() {
                     <input
                         type="file"
                         accept="image/*"
-                        onChange={handlePosterUpload}
+                        onChange={
+                            handlePosterUpload
+                        }
                     />
 
-                    {eventData.poster && (
+                    {posterPreview && (
+
                         <div className="poster-preview-container">
 
                             <img
                                 src={
-                                    typeof eventData.poster === "string"
-                                        ? eventData.poster
-                                        : URL.createObjectURL(
-                                            eventData.poster
-                                        )
+                                    posterPreview
                                 }
-                                alt="Event Poster Preview"
+                                alt={
+                                    eventData.title ||
+                                    "Event Poster Preview"
+                                }
                                 className="poster-preview"
+                                onError={(e) => {
+
+                                    e.currentTarget.src =
+                                        "/default-event.jpg";
+
+                                }}
                             />
 
                         </div>
+
                     )}
 
                 </div>
@@ -472,12 +826,18 @@ function CreateEvent() {
 
                 <div className="form-group">
 
-                    <label>Venue</label>
+                    <label>
+                        Venue
+                    </label>
 
                     <input
                         name="venue"
-                        value={eventData.venue}
-                        onChange={handleChange}
+                        value={
+                            eventData.venue
+                        }
+                        onChange={
+                            handleChange
+                        }
                     />
 
                 </div>
@@ -495,8 +855,12 @@ function CreateEvent() {
                     <input
                         name="organizerName"
                         placeholder="Example: Watwero Dance Company"
-                        value={eventData.organizerName}
-                        onChange={handleChange}
+                        value={
+                            eventData.organizerName
+                        }
+                        onChange={
+                            handleChange
+                        }
                     />
 
                 </div>
@@ -507,42 +871,64 @@ function CreateEvent() {
 
                 <div className="form-group">
 
-                    <label>Date</label>
+                    <label>
+                        Date
+                    </label>
 
                     <input
                         type="date"
                         name="date"
-                        value={eventData.date}
-                        onChange={handleChange}
+                        value={
+                            eventData.date
+                        }
+                        onChange={
+                            handleChange
+                        }
                         required
                     />
 
                 </div>
 
                 {/* =================================================
-                    TIME
+                    START TIME
                 ================================================= */}
 
                 <div className="form-group">
 
-                    <label>Start Time</label>
+                    <label>
+                        Start Time
+                    </label>
 
                     <input
                         name="startTime"
-                        value={eventData.startTime}
-                        onChange={handleChange}
+                        value={
+                            eventData.startTime
+                        }
+                        onChange={
+                            handleChange
+                        }
                     />
 
                 </div>
 
+                {/* =================================================
+                    END TIME
+                ================================================= */}
+
                 <div className="form-group">
 
-                    <label>End Time</label>
+                    <label>
+                        End Time
+                    </label>
 
                     <input
                         name="endTime"
-                        value={eventData.endTime}
-                        onChange={handleChange}
+                        value={
+                            eventData.endTime
+                        }
+                        onChange={
+                            handleChange
+                        }
                     />
 
                 </div>
@@ -553,18 +939,34 @@ function CreateEvent() {
 
                 <div className="form-group">
 
-                    <label>Category</label>
+                    <label>
+                        Category
+                    </label>
 
                     <CreatableSelect
-                        options={categoryOptions}
-                        value={selectedCategory}
-                        onChange={(option) => {
-                            setSelectedCategory(option);
+                        options={
+                            categoryOptions
+                        }
+                        value={
+                            selectedCategory
+                        }
+                        onChange={(
+                            option
+                        ) => {
 
-                            setEventData((previous) => ({
-                                ...previous,
-                                category: option?.label || ""
-                            }));
+                            setSelectedCategory(
+                                option
+                            );
+
+                            setEventData(
+                                (previous) => ({
+                                    ...previous,
+                                    category:
+                                        option?.label ||
+                                        ""
+                                })
+                            );
+
                         }}
                     />
 
@@ -576,12 +978,18 @@ function CreateEvent() {
 
                 <div className="form-group">
 
-                    <label>Description</label>
+                    <label>
+                        Description
+                    </label>
 
                     <textarea
                         name="description"
-                        value={eventData.description}
-                        onChange={handleChange}
+                        value={
+                            eventData.description
+                        }
+                        onChange={
+                            handleChange
+                        }
                     />
 
                 </div>
@@ -592,13 +1000,20 @@ function CreateEvent() {
 
                 <div className="form-group">
 
-                    <label>Capacity</label>
+                    <label>
+                        Capacity
+                    </label>
 
                     <input
                         type="number"
                         name="capacity"
-                        value={eventData.capacity}
-                        onChange={handleChange}
+                        min="1"
+                        value={
+                            eventData.capacity
+                        }
+                        onChange={
+                            handleChange
+                        }
                     />
 
                 </div>
@@ -609,12 +1024,18 @@ function CreateEvent() {
 
                 <div className="form-group">
 
-                    <label>Contact</label>
+                    <label>
+                        Contact
+                    </label>
 
                     <input
                         name="contact"
-                        value={eventData.contact}
-                        onChange={handleChange}
+                        value={
+                            eventData.contact
+                        }
+                        onChange={
+                            handleChange
+                        }
                     />
 
                 </div>
@@ -625,18 +1046,34 @@ function CreateEvent() {
 
                 <div className="form-group">
 
-                    <label>City</label>
+                    <label>
+                        City
+                    </label>
 
                     <CreatableSelect
-                        options={cityOptions}
-                        value={selectedCity}
-                        onChange={(option) => {
-                            setSelectedCity(option);
+                        options={
+                            cityOptions
+                        }
+                        value={
+                            selectedCity
+                        }
+                        onChange={(
+                            option
+                        ) => {
 
-                            setEventData((previous) => ({
-                                ...previous,
-                                city: option?.label || ""
-                            }));
+                            setSelectedCity(
+                                option
+                            );
+
+                            setEventData(
+                                (previous) => ({
+                                    ...previous,
+                                    city:
+                                        option?.label ||
+                                        ""
+                                })
+                            );
+
                         }}
                     />
 
@@ -653,12 +1090,17 @@ function CreateEvent() {
                     </label>
 
                     <select
-                        value={eventData.eventType}
+                        value={
+                            eventData.eventType
+                        }
                         onChange={(e) =>
-                            setEventData((previous) => ({
-                                ...previous,
-                                eventType: e.target.value
-                            }))
+                            setEventData(
+                                (previous) => ({
+                                    ...previous,
+                                    eventType:
+                                        e.target.value
+                                })
+                            )
                         }
                     >
 
@@ -678,23 +1120,28 @@ function CreateEvent() {
                     FREE EVENT
                 ================================================= */}
 
-                {eventData.eventType === "Free" && (
+                {eventData.eventType ===
+                    "Free" && (
+
                     <div className="free-event-info">
 
                         <p>
-                            ✅ This is a free event. Guests will
-                            confirm attendance instead of buying
-                            tickets.
+                            ✅ This is a free event.
+                            Guests will confirm
+                            attendance instead of
+                            buying tickets.
                         </p>
 
                     </div>
+
                 )}
 
                 {/* =================================================
                     PAID EVENT / TICKETS
                 ================================================= */}
 
-                {eventData.eventType === "Paid" && (
+                {eventData.eventType ===
+                    "Paid" && (
 
                     <div className="form-group">
 
@@ -702,80 +1149,99 @@ function CreateEvent() {
                             🎟️ Ticket Options
                         </h3>
 
-                        {tickets.map((ticket, index) => (
+                        {tickets.map(
+                            (
+                                ticket,
+                                index
+                            ) => (
 
-                            <div
-                                className="ticket-builder"
-                                key={index}
-                            >
+                                <div
+                                    className="ticket-builder"
+                                    key={index}
+                                >
 
-                                <input
-                                    type="text"
-                                    placeholder="Ticket Name"
-                                    value={ticket.name}
-                                    onChange={(e) =>
-                                        handleTicketChange(
-                                            index,
-                                            "name",
-                                            e.target.value
-                                        )
-                                    }
-                                    required
-                                />
-
-                                <input
-                                    type="number"
-                                    min="0"
-                                    placeholder="Price UGX"
-                                    value={ticket.price}
-                                    onChange={(e) =>
-                                        handleTicketChange(
-                                            index,
-                                            "price",
-                                            e.target.value
-                                        )
-                                    }
-                                    required
-                                />
-
-                                <input
-                                    type="number"
-                                    min="1"
-                                    placeholder="Available Quantity"
-                                    value={ticket.quantity}
-                                    onChange={(e) =>
-                                        handleTicketChange(
-                                            index,
-                                            "quantity",
-                                            e.target.value
-                                        )
-                                    }
-                                    required
-                                />
-
-                                {tickets.length > 1 && (
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            removeTicket(index)
+                                    <input
+                                        type="text"
+                                        placeholder="Ticket Name"
+                                        value={
+                                            ticket.name
                                         }
-                                    >
-                                        Remove
-                                    </button>
-                                )}
+                                        onChange={(e) =>
+                                            handleTicketChange(
+                                                index,
+                                                "name",
+                                                e.target.value
+                                            )
+                                        }
+                                        required
+                                    />
 
-                            </div>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="Price UGX"
+                                        value={
+                                            ticket.price
+                                        }
+                                        onChange={(e) =>
+                                            handleTicketChange(
+                                                index,
+                                                "price",
+                                                e.target.value
+                                            )
+                                        }
+                                        required
+                                    />
 
-                        ))}
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        placeholder="Available Quantity"
+                                        value={
+                                            ticket.quantity
+                                        }
+                                        onChange={(e) =>
+                                            handleTicketChange(
+                                                index,
+                                                "quantity",
+                                                e.target.value
+                                            )
+                                        }
+                                        required
+                                    />
+
+                                    {tickets.length >
+                                        1 && (
+
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                removeTicket(
+                                                    index
+                                                )
+                                            }
+                                        >
+                                            Remove
+                                        </button>
+
+                                    )}
+
+                                </div>
+
+                            )
+                        )}
 
                         <button
                             type="button"
-                            onClick={addTicket}
+                            onClick={
+                                addTicket
+                            }
                         >
                             + Add Ticket Type
                         </button>
 
                     </div>
+
                 )}
 
                 {/* =================================================
@@ -785,15 +1251,23 @@ function CreateEvent() {
                 <button
                     type="submit"
                     className="publish-btn"
-                    disabled={submitting}
+                    disabled={
+                        submitting
+                    }
                 >
 
                     {submitting
+
                         ? "Saving..."
+
                         : editingEvent
+
                             ? "Update Event"
+
                             : duplicateEvent
+
                                 ? "Publish Duplicate"
+
                                 : "Publish Event"}
 
                 </button>
