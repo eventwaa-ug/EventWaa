@@ -1,0 +1,608 @@
+/* ============================================================
+   ADMIN SCAN PAGE
+   ============================================================ */
+
+.admin-scan-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 35px;
+  box-sizing: border-box;
+  background: #f7f8fc;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.admin-scan-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.admin-scan-header-text {
+  min-width: 0;
+}
+
+.admin-scan-eyebrow {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #6c63ff;
+}
+
+.admin-scan-header h1 {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.15;
+  color: #151827;
+}
+
+.admin-scan-header p {
+  margin: 10px 0 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #687083;
+}
+
+.admin-scan-header-icon {
+  width: 65px;
+  height: 65px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 8px 25px rgba(20, 25, 50, 0.08);
+  font-size: 30px;
+}
+
+
+/* ============================================================
+   SEARCH + FILTER
+   ============================================================ */
+
+.admin-scan-controls {
+  width: 100%;
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.admin-scan-search {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.admin-scan-search > span {
+  position: absolute;
+  left: 17px;
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.admin-scan-search input {
+  width: 100%;
+  height: 54px;
+  padding: 0 48px;
+  box-sizing: border-box;
+  border: 1px solid #e1e4ed;
+  border-radius: 13px;
+  background: #ffffff;
+  color: #1b1e2d;
+  font-size: 15px;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.admin-scan-search input:focus {
+  border-color: #6c63ff;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+}
+
+.admin-scan-search input::placeholder {
+  color: #9aa0ae;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 13px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: #eef0f5;
+  color: #555b6d;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.admin-scan-filter {
+  width: 220px;
+  height: 54px;
+  padding: 0 15px;
+  border: 1px solid #e1e4ed;
+  border-radius: 13px;
+  background: #ffffff;
+  color: #202334;
+  font-size: 15px;
+  cursor: pointer;
+  outline: none;
+}
+
+.admin-scan-filter:focus {
+  border-color: #6c63ff;
+}
+
+
+/* ============================================================
+   RESULTS
+   ============================================================ */
+
+.admin-scan-results {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  color: #747b8c;
+  font-size: 14px;
+}
+
+.admin-scan-results strong {
+  color: #202334;
+}
+
+.clear-filters-btn {
+  border: none;
+  background: transparent;
+  color: #6c63ff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+/* ============================================================
+   EVENT GRID
+   ============================================================ */
+
+.admin-scan-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(340px, 1fr)
+  );
+  gap: 24px;
+}
+
+
+/* ============================================================
+   EVENT CARD
+   ============================================================ */
+
+.admin-scan-event-card {
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e9ebf2;
+  border-radius: 20px;
+  box-shadow: 0 8px 28px rgba(25, 30, 55, 0.06);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-scan-event-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 35px rgba(25, 30, 55, 0.1);
+}
+
+
+/* ============================================================
+   POSTER
+   ============================================================ */
+
+.admin-scan-poster {
+  position: relative;
+  width: 100%;
+  height: 270px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #eef0f5;
+}
+
+.admin-scan-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #eef0f5;
+}
+
+.admin-scan-poster-fallback {
+  position: absolute;
+  inset: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #7b8190;
+}
+
+.admin-scan-poster-fallback span {
+  font-size: 38px;
+}
+
+.admin-scan-poster-fallback strong {
+  font-size: 17px;
+  color: #34394b;
+}
+
+.admin-scan-poster-fallback small {
+  font-size: 13px;
+}
+
+.admin-scan-featured {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #5149d9;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+}
+
+
+/* ============================================================
+   CARD CONTENT
+   ============================================================ */
+
+.admin-scan-card-content {
+  padding: 22px;
+}
+
+.admin-scan-event-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.admin-scan-event-heading h2 {
+  margin: 0;
+  color: #171a29;
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+.admin-scan-event-heading p {
+  margin: 5px 0 0;
+  color: #969cab;
+  font-size: 12px;
+}
+
+.event-type {
+  flex-shrink: 0;
+  padding: 6px 9px;
+  border-radius: 7px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
+.event-type.paid {
+  background: #fff2df;
+  color: #b66a00;
+}
+
+.event-type.free {
+  background: #eaf9ef;
+  color: #238348;
+}
+
+
+/* ============================================================
+   EVENT INFO
+   ============================================================ */
+
+.admin-scan-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 22px;
+}
+
+.admin-scan-info div {
+  min-width: 0;
+}
+
+.admin-scan-info span,
+.admin-scan-attendance span {
+  display: block;
+  margin-bottom: 5px;
+  color: #9298a7;
+  font-size: 12px;
+}
+
+.admin-scan-info strong {
+  display: block;
+  overflow: hidden;
+  color: #303547;
+  font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+   ATTENDANCE
+   ============================================================ */
+
+.admin-scan-attendance {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 13px;
+  background: #f7f8fc;
+}
+
+.admin-scan-attendance div {
+  min-width: 0;
+}
+
+.admin-scan-attendance strong {
+  color: #252a3a;
+  font-size: 18px;
+}
+
+
+/* ============================================================
+   SCAN BUTTON
+   ============================================================ */
+
+.select-event-scan-btn {
+  width: 100%;
+  height: 50px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 12px;
+  background: #6c63ff;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.select-event-scan-btn:hover {
+  background: #584ff0;
+  transform: translateY(-1px);
+}
+
+.select-event-scan-btn:active {
+  transform: translateY(0);
+}
+
+
+/* ============================================================
+   STATES
+   ============================================================ */
+
+.admin-scan-state {
+  min-height: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 30px;
+}
+
+.admin-scan-state-icon {
+  margin-bottom: 15px;
+  font-size: 48px;
+}
+
+.admin-scan-state h2 {
+  margin: 0;
+  color: #202334;
+  font-size: 24px;
+}
+
+.admin-scan-state p {
+  max-width: 500px;
+  margin: 10px 0 20px;
+  color: #7a8090;
+  line-height: 1.6;
+}
+
+.admin-scan-error {
+  min-height: 500px;
+}
+
+.admin-scan-retry {
+  min-height: 45px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 10px;
+  background: #6c63ff;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+/* ============================================================
+   LOADING SPINNER
+   ============================================================ */
+
+.admin-scan-spinner {
+  width: 42px;
+  height: 42px;
+  margin-bottom: 20px;
+  border: 4px solid #e5e6ef;
+  border-top-color: #6c63ff;
+  border-radius: 50%;
+  animation: adminScanSpin 0.8s linear infinite;
+}
+
+@keyframes adminScanSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+  .admin-scan-page {
+    padding: 28px 22px;
+  }
+
+  .admin-scan-grid {
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  }
+
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 650px) {
+
+  .admin-scan-page {
+    padding: 22px 15px 35px;
+  }
+
+  .admin-scan-header {
+    align-items: flex-start;
+  }
+
+  .admin-scan-header h1 {
+    font-size: 28px;
+  }
+
+  .admin-scan-header p {
+    font-size: 14px;
+  }
+
+  .admin-scan-header-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    font-size: 24px;
+  }
+
+  .admin-scan-controls {
+    flex-direction: column;
+  }
+
+  .admin-scan-filter {
+    width: 100%;
+  }
+
+  .admin-scan-results {
+    font-size: 13px;
+  }
+
+  .admin-scan-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .admin-scan-poster {
+    height: auto;
+    min-height: 280px;
+    max-height: 480px;
+  }
+
+  .admin-scan-poster img {
+    height: auto;
+    max-height: 480px;
+    object-fit: contain;
+  }
+
+  .admin-scan-card-content {
+    padding: 18px;
+  }
+
+  .admin-scan-event-heading h2 {
+    font-size: 19px;
+  }
+
+  .admin-scan-info {
+    gap: 13px;
+  }
+
+  .admin-scan-attendance {
+    padding: 13px 10px;
+  }
+
+  .admin-scan-attendance strong {
+    font-size: 16px;
+  }
+
+}
+
+
+/* ============================================================
+   SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 390px) {
+
+  .admin-scan-page {
+    padding: 18px 12px 30px;
+  }
+
+  .admin-scan-header h1 {
+    font-size: 25px;
+  }
+
+  .admin-scan-header-icon {
+    display: none;
+  }
+
+  .admin-scan-poster {
+    min-height: 250px;
+  }
+
+  .admin-scan-info {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-scan-attendance {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+}

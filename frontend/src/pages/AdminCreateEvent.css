@@ -1,227 +1,603 @@
-.admin-create-event {
-  min-height: 100vh;
-  background: #f8fafc;
-  padding: 32px;
+/* ============================================================
+   ADMIN CREATE EVENT
+   ============================================================ */
+
+.admin-create-event-page {
+    min-height: 100vh;
+    background: #f8fafc;
+    padding: 40px 24px 60px;
 }
 
-.create-header {
-  max-width: 900px;
-  margin: 0 auto 28px;
+/* ============================================================
+   PAGE HEADER
+   ============================================================ */
+
+.admin-create-event-page > h1 {
+    max-width: 900px;
+    margin: 0 auto 4px;
+    color: #111827;
+    font-size: 36px;
+    line-height: 1.2;
+    font-weight: 800;
 }
 
-.create-header h1 {
-  font-size: 36px;
-  color: #111827;
-  margin-bottom: 10px;
+.admin-create-event-page > h1:nth-of-type(2) {
+    margin-bottom: 12px;
 }
 
-.create-header p {
-  color: #6b7280;
-  font-size: 17px;
-  line-height: 1.6;
+.admin-create-event-page > p {
+    max-width: 900px;
+    margin: 0 auto 30px;
+    color: #6b7280;
+    font-size: 17px;
+    line-height: 1.6;
 }
+
+/* ============================================================
+   FORM
+   ============================================================ */
 
 .create-event-form {
-  max-width: 900px;
-  margin: auto;
-  background: white;
-  border-radius: 20px;
-  padding: 32px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+
+    background: #ffffff;
+
+    border-radius: 20px;
+
+    padding: 32px;
+
+    border: 1px solid #e5e7eb;
+
+    box-shadow:
+        0 12px 30px rgba(15, 23, 42, 0.08);
 }
 
+/* ============================================================
+   BASIC EVENT FIELDS
+   ============================================================ */
+
 .form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 18px;
 }
 
 .form-grid input,
 .create-event-form textarea,
 .form-row select,
 .form-row input[type="file"] {
-  width: 100%;
-  padding: 14px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  font-size: 15px;
-  background: white;
-  transition: 0.25s ease;
+    width: 100%;
+
+    padding: 14px 16px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 12px;
+
+    font-size: 16px;
+
+    background: #ffffff;
+
+    color: #111827;
+
+    box-sizing: border-box;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.form-grid input::placeholder,
+.create-event-form textarea::placeholder {
+    color: #9ca3af;
 }
 
 .form-grid input:focus,
 .create-event-form textarea:focus,
 .form-row select:focus {
-  border-color: #2563eb;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    border-color: #2563eb;
+
+    outline: none;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.12);
 }
+
+/* ============================================================
+   DESCRIPTION
+   ============================================================ */
 
 .create-event-form textarea {
-  margin-top: 18px;
-  resize: vertical;
-  min-height: 150px;
+    margin-top: 18px;
+
+    min-height: 150px;
+
+    resize: vertical;
+
+    line-height: 1.5;
 }
+
+/* ============================================================
+   EVENT TYPE + POSTER
+   ============================================================ */
 
 .form-row {
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 16px;
-  margin-top: 18px;
+    display: grid;
+
+    grid-template-columns:
+        220px minmax(0, 1fr);
+
+    gap: 16px;
+
+    margin-top: 18px;
 }
 
+.form-row input[type="file"] {
+    cursor: pointer;
+}
+
+/* ============================================================
+   TICKETS
+   ============================================================ */
+
 .ticket-section {
-  margin-top: 28px;
-  padding-top: 24px;
-  border-top: 1px solid #e5e7eb;
+    margin-top: 30px;
+
+    padding-top: 25px;
+
+    border-top:
+        1px solid #e5e7eb;
 }
 
 .ticket-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 18px;
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 18px;
 }
 
 .ticket-header h2 {
+    margin: 0;
+
+    color: #111827;
+
+    font-size: 22px;
+}
+
+.ticket-header button {
+    background: #2563eb;
+
+    color: #ffffff;
+
+    border: none;
+
+    padding: 11px 16px;
+
+    border-radius: 10px;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.ticket-header button:hover {
+    background: #1d4ed8;
+
+    transform: translateY(-1px);
+}
+
+/* ============================================================
+   TICKET ROW
+   ============================================================ */
+
+.ticket-row {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 2fr)
+        minmax(0, 1fr)
+        minmax(0, 1fr)
+        auto;
+
+    gap: 14px;
+
+    align-items: center;
+
+    padding: 16px;
+
+    margin-bottom: 14px;
+
+    background: #f9fafb;
+
+    border:
+        1px solid #e5e7eb;
+
+    border-radius: 14px;
+}
+
+.ticket-row input {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 12px 14px;
+
+    border:
+        1px solid #d1d5db;
+
+    border-radius: 10px;
+
+    font-size: 15px;
+
+    background: #ffffff;
+
+    color: #111827;
+
+    outline: none;
+}
+
+.ticket-row input:focus {
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+/* ============================================================
+   REMOVE TICKET
+   ============================================================ */
+
+.remove-ticket-btn {
+    background: #fee2e2;
+
+    color: #dc2626;
+
+    border: none;
+
+    padding: 11px 14px;
+
+    border-radius: 10px;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition:
+        background 0.2s ease;
+}
+
+.remove-ticket-btn:hover {
+    background: #fecaca;
+}
+
+/* ============================================================
+   FEATURED
+   ============================================================ */
+
+.featured-toggle {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 24px;
+
+    color: #111827;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.featured-toggle input {
+    width: 18px;
+
+    height: 18px;
+
+    cursor: pointer;
+}
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+
+.form-actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 14px;
+
+    margin-top: 32px;
+
+    padding-top: 24px;
+
+    border-top:
+        1px solid #e5e7eb;
+}
+
+.form-actions button {
+    min-width: 130px;
+
+    padding: 13px 20px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.form-actions button:hover {
+    transform: translateY(-1px);
+}
+
+.form-actions button:first-child {
+    background: #e5e7eb;
+
+    color: #111827;
+}
+
+.form-actions button:first-child:hover {
+    background: #d1d5db;
+}
+
+.form-actions button:last-child {
+    background: #2563eb;
+
+    color: #ffffff;
+}
+
+.form-actions button:last-child:hover {
+    background: #1d4ed8;
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 768px) {
+
+    .admin-create-event-page {
+        padding:
+            25px 15px 45px;
+    }
+
+    .admin-create-event-page > h1 {
+        font-size: 30px;
+    }
+
+    .admin-create-event-page > p {
+        font-size: 16px;
+    }
+
+    .create-event-form {
+        padding: 22px 18px;
+
+        border-radius: 16px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+
+        gap: 15px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+
+        gap: 15px;
+    }
+
+    .ticket-header {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .ticket-header button {
+        width: 100%;
+    }
+
+    .ticket-row {
+        grid-template-columns: 1fr;
+
+        gap: 12px;
+
+        padding: 14px;
+    }
+
+    .remove-ticket-btn {
+        width: 100%;
+    }
+
+    .form-actions {
+        flex-direction: column;
+
+        gap: 10px;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+}
+
+/* ============================================================
+   SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 420px) {
+
+    .admin-create-event-page {
+        padding:
+            20px 12px 35px;
+    }
+
+    .admin-create-event-page > h1 {
+        font-size: 27px;
+    }
+
+    .create-event-form {
+        padding: 18px 14px;
+    }
+
+    .form-grid input,
+    .create-event-form textarea,
+    .form-row select,
+    .form-row input[type="file"] {
+        font-size: 16px;
+    }
+}
+/* ============================================================
+   EDIT EVENT POSTER
+   ============================================================ */
+
+.edit-poster-section {
+  margin-top: 28px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #f9fafb;
+}
+
+.edit-section-heading {
+  margin-bottom: 18px;
+}
+
+.edit-section-heading h2 {
+  margin: 0 0 6px;
   font-size: 22px;
   color: #111827;
 }
 
-.ticket-header button {
-  background: #2563eb;
-  color: white;
+.edit-section-heading p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.existing-poster-wrapper {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.existing-event-poster {
+  width: 100%;
+  max-width: 360px;
+  max-height: 420px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.remove-poster-btn {
   border: none;
+  background: #fee2e2;
+  color: #dc2626;
   padding: 10px 14px;
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
 }
 
-.ticket-header button:hover {
-  background: #1d4ed8;
-}
-
-.ticket-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr auto;
-  gap: 14px;
-  align-items: center;
-  padding: 16px;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  margin-bottom: 14px;
-  background: #f9fafb;
-}
-
-.ticket-row input {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
-  font-size: 14px;
-  background: white;
-}
-
-.remove-ticket-btn {
-  background: #fee2e2;
-  color: #dc2626;
-  border: none;
-  padding: 10px 12px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.remove-ticket-btn:hover {
+.remove-poster-btn:hover {
   background: #fecaca;
 }
 
-.featured-toggle {
-  display: flex;
+.selected-poster-name {
+  margin-top: 10px;
+  color: #2563eb;
+  font-size: 14px;
+}
+
+
+/* ============================================================
+   TICKET SECTION TEXT
+   ============================================================ */
+
+.ticket-header > div p {
+  margin: 5px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+
+/* ============================================================
+   ADMIN EVENT TYPE BADGES
+   ============================================================ */
+
+.admin-event-type-row {
+  margin: 10px 0 16px;
+}
+
+.event-type-badge {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 24px;
-  color: #111827;
-  font-weight: 500;
+  padding: 6px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
 }
 
-.featured-toggle input {
-  width: 18px;
-  height: 18px;
+.event-type-badge.free {
+  background: #dcfce7;
+  color: #15803d;
 }
 
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 14px;
-  margin-top: 32px;
+.event-type-badge.paid {
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
-.form-actions button {
-  padding: 13px 20px;
-  border-radius: 12px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.25s ease;
-}
 
-.form-actions button:first-child {
-  background: #e5e7eb;
-  color: #111827;
-}
-
-.form-actions button:first-child:hover {
-  background: #d1d5db;
-}
-
-.form-actions button:last-child {
-  background: #2563eb;
-  color: white;
-}
-
-.form-actions button:last-child:hover {
-  background: #1d4ed8;
-}
+/* ============================================================
+   EDIT MOBILE
+   ============================================================ */
 
 @media (max-width: 768px) {
-  .admin-create-event {
-    padding: 20px;
+
+  .edit-poster-section {
+    padding: 18px;
   }
 
-  .create-header h1 {
-    font-size: 30px;
+  .existing-event-poster {
+    max-width: 100%;
   }
 
-  .create-event-form {
-    padding: 24px;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .ticket-row {
-    grid-template-columns: 1fr;
-  }
-
-  .ticket-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .form-actions {
-    flex-direction: column;
-  }
-
-  .form-actions button {
-    width: 100%;
-  }
 }

@@ -1,220 +1,1516 @@
 /* ============================================================
-   EVENTWAA HOST DASHBOARD - FINAL
-   POSTER ON TOP FOR DESKTOP + CENTERED + BIG FONTS
-============================================================ */
+   EVENTWAA HOST DASHBOARD
+   FULL CSS REPLACEMENT
+   ============================================================ */
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
+
+/* ============================================================
+   MAIN LAYOUT
+   ============================================================ */
 
 .host-dashboard-layout {
-    width: 100%;
-    min-height: 100vh;
-    background: #f7f8fc;
-    display: flex;
-    justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+  background: #f7f8fc;
+  display: flex;
 }
 
 .host-dashboard-content {
-    width: 100%;
-    max-width: 1200px; /* smaller container so it looks centered */
-    min-height: 100vh;
-    margin-left: 250px;
-    padding: 40px 40px 60px;
-    overflow-x: hidden;
+  width: 100%;
+  max-width: 1200px;
+  min-height: 100vh;
+
+  margin-left: 250px;
+
+  padding: 40px 40px 70px;
+
+  overflow-x: hidden;
 }
-
-@media (min-width: 1500px) {
-    .host-dashboard-content {
-        margin-left: calc((100% - 1100px) / 2 + 250px);
-        margin-right: calc((100% - 1100px) / 2);
-    }
-}
-
-
-/* HEADER */
-.dashboard-header {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 30px;
-    margin-bottom: 35px;
-}
-.welcome-heading span { color: #374151; font-size: 28px; font-weight: 500; }
-.welcome-heading strong { color: #111827; font-size: 30px; font-weight: 800; }
-.dashboard-welcome p { margin: 0; color: #6b7280; font-size: 16px; }
-
-.create-event-btn, .inbox-btn {
-    min-height: 48px; padding: 0 18px; display: inline-flex;
-    align-items: center; gap: 8px; border-radius: 11px;
-    font-size: 15px; font-weight: 700; cursor: pointer;
-}
-.create-event-btn { border: none; background: #2563eb; color: #fff; }
-.inbox-btn { border: 1px solid #e5e7eb; background: #fff; color: #374151; position: relative; }
-.inbox-badge {
-    min-width: 22px; height: 22px; padding: 0 6px; display: inline-flex;
-    align-items: center; justify-content: center; border-radius: 50%;
-    background: #dc2626; color: #fff; font-size: 12px; font-weight: 800;
-    position: absolute; top: -6px; right: -6px;
-}
-
-
-/* STATS */
-.stats-section { margin-bottom: 45px; }
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 16px;
-}
-.stat-card {
-    padding: 20px; display: flex; flex-direction: column; align-items: center;
-    justify-content: center; gap: 10px; background: #fff; border: 1px solid #e8eaf0;
-    border-radius: 15px; text-align: center;
-}
-.stat-icon { width: 50px; height: 50px; display: flex; align-items: center;
-    justify-content: center; border-radius: 13px; background: #eff6ff; font-size: 22px; }
-.stat-content h2 { margin: 0 0 5px; color: #111827; font-size: 26px; font-weight: 800; }
-.stat-content p { margin: 0; color: #6b7280; font-size: 14px; font-weight: 600; }
-.revenue-stat h2 { white-space: nowrap; }
-
-
-/* SECTION TITLE */
-.section-title { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; }
-.section-title h2 { margin: 0 0 6px; color: #111827; font-size: 26px; }
-.section-title p { margin: 0; color: #6b7280; font-size: 15px; }
-.view-all-events-btn { border: none; background: transparent; color: #2563eb; font-size: 15px; font-weight: 700; }
 
 
 /* ============================================================
-   EVENT CARD - POSTER ON TOP
-============================================================ */
-.dashboard-event-card {
-    width: 100%;
-    display: flex;
-    flex-direction: column; /* THIS MAKES POSTER ON TOP */
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 8px 30px rgba(15, 23, 42, .055);
+   LARGE DESKTOP
+   ============================================================ */
+
+@media (min-width: 150px) {
+  .host-dashboard-content {
+    margin-left: calc((75% - 1100px) / 2 + 250px);
+    margin-right: calc((100% - 1100px) / 2);
+  }
 }
+
+
+/* ============================================================
+   DASHBOARD HEADER
+   ============================================================ */
+
+.dashboard-header {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 30px;
+
+  margin-bottom: 38px;
+}
+
+.dashboard-welcome {
+  min-width: 0;
+}
+
+.welcome-heading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+
+  gap: 8px;
+}
+
+.welcome-heading span {
+  color: #374151;
+
+  font-size: 28px;
+  font-weight: 500;
+
+  line-height: 1.3;
+}
+
+.welcome-heading strong {
+  color: #111827;
+
+  font-size: 30px;
+  font-weight: 800;
+
+  line-height: 1.3;
+
+  word-break: break-word;
+}
+
+.dashboard-welcome p {
+  margin: 8px 0 0;
+
+  color: #6b7280;
+
+  font-size: 16px;
+  font-weight: 500;
+
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   HEADER BUTTONS
+   ============================================================ */
+
+.dashboard-header-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  flex-shrink: 0;
+}
+
+.create-event-btn,
+.inbox-btn {
+  min-height: 50px;
+
+  padding: 0 20px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  border-radius: 12px;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.create-event-btn {
+  border: none;
+
+  background: #2563eb;
+
+  color: #ffffff;
+}
+
+.create-event-btn:hover {
+  background: #1d4ed8;
+
+  transform: translateY(-1px);
+
+  box-shadow: 0 7px 18px rgba(37, 99, 235, 0.2);
+}
+
+.inbox-btn {
+  position: relative;
+
+  border: 1px solid #e5e7eb;
+
+  background: #ffffff;
+
+  color: #374151;
+}
+
+.inbox-btn:hover {
+  background: #f9fafb;
+
+  border-color: #d1d5db;
+}
+
+
+/* ============================================================
+   INBOX BADGE
+   ============================================================ */
+
+.inbox-badge {
+  min-width: 23px;
+  height: 23px;
+
+  padding: 0 6px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #dc2626;
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  position: absolute;
+
+  top: -7px;
+  right: -7px;
+}
+
+
+/* ============================================================
+   STATISTICS SECTION
+   ============================================================ */
+
+.stats-section {
+  width: 100%;
+
+  margin-bottom: 48px;
+}
+
+.stats-grid {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+
+  gap: 16px;
+}
+
+
+/* ============================================================
+   STAT CARD
+   ============================================================ */
+
+.stat-card {
+  min-width: 0;
+
+  padding: 22px 16px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  background: #ffffff;
+
+  border: 1px solid #e8eaf0;
+
+  border-radius: 16px;
+
+  text-align: center;
+
+  box-shadow:
+    0 4px 15px rgba(15, 23, 42, 0.025);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.07);
+}
+
+
+/* ============================================================
+   STAT ICON
+   ============================================================ */
+
+.stat-icon {
+  width: 52px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
+
+  background: #eff6ff;
+
+  font-size: 23px;
+
+  flex-shrink: 0;
+}
+
+
+/* ============================================================
+   STAT CONTENT
+   ============================================================ */
+
+.stat-content {
+  min-width: 0;
+  width: 100%;
+}
+
+.stat-content h2 {
+  margin: 0 0 6px;
+
+  color: #111827;
+
+  font-size: 27px;
+  font-weight: 800;
+
+  line-height: 1.2;
+
+  word-break: break-word;
+}
+
+.stat-content p {
+  margin: 0;
+
+  color: #6b7280;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  line-height: 1.4;
+}
+
+.revenue-stat h2 {
+  white-space: normal;
+}
+
+
+/* ============================================================
+   SECTION TITLE
+   ============================================================ */
+
+.section-title {
+  display: flex;
+
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 22px;
+}
+
+.section-title h2 {
+  margin: 0 0 7px;
+
+  color: #111827;
+
+  font-size: 27px;
+  font-weight: 800;
+
+  line-height: 1.3;
+}
+
+.section-title p {
+  margin: 0;
+
+  color: #6b7280;
+
+  font-size: 15px;
+  font-weight: 500;
+
+  line-height: 1.5;
+}
+
+.view-all-events-btn {
+  border: none;
+
+  background: transparent;
+
+  color: #2563eb;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+}
+
+.view-all-events-btn:hover {
+  text-decoration: underline;
+}
+
+
+/* ============================================================
+   EMPTY EVENTS
+   ============================================================ */
+
+.empty-events {
+  width: 100%;
+
+  padding: 60px 30px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 20px;
+
+  box-shadow:
+    0 8px 30px rgba(15, 23, 42, 0.045);
+}
+
+.empty-events-icon {
+  width: 65px;
+  height: 65px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 18px;
+
+  border-radius: 18px;
+
+  background: #eff6ff;
+
+  font-size: 28px;
+}
+
+.empty-events h3 {
+  margin: 0 0 8px;
+
+  color: #111827;
+
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.empty-events p {
+  margin: 0 0 22px;
+
+  color: #6b7280;
+
+  font-size: 15px;
+
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   CURRENT EVENT CARD
+   POSTER ON TOP
+   ============================================================ */
+
+.dashboard-event-card {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 20px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 8px 30px rgba(15, 23, 42, 0.055);
+}
+
+
+/* ============================================================
+   EVENT POSTER
+   ============================================================ */
 
 .event-poster-wrapper {
-    width: 100%;
-    height: 400px; /* fixed height on desktop */
-    position: relative;
-    background: #eef1f6;
-    overflow: hidden;
-}
-.event-poster { width: 100%; height: 100%; object-fit: cover; }
+  width: 100%;
 
-.event-type {
-    position: absolute; top: 12px; left: 12px;
-    padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 800; color: #fff;
-}
-.event-type.paid { background: #2563eb; }
-.event-type.free { background: #059669; }
+  height: 400px;
 
-.verified-host {
-    position: absolute; top: 12px; right: 12px;
-    padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 700;
-    background: #dcfce7; color: #166534;
+  position: relative;
+
+  background: #eef1f6;
+
+  overflow: hidden;
 }
 
-.event-main-info { padding: 30px; }
-.event-card-header h3 { margin: 0 0 9px; color: #111827; font-size: 28px; word-break: break-word; }
-.event-status { display: inline-flex; padding: 6px 11px; border-radius: 8px;
-    background: #f3f4f6; color: #6b7280; font-size: 13px; font-weight: 700; }
-.event-status.published { background: #dcfce7; color: #166534; }
+.event-poster {
+  width: 100%;
+  height: 100%;
 
-.event-details {
-    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 15px 22px; margin: 20px 0 25px;
-}
-.event-details p { margin: 0; display: flex; gap: 9px; color: #374151; font-size: 15px; font-weight: 600; }
+  display: block;
 
-.event-performance {
-    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px; margin-bottom: 25px;
+  object-fit: cover;
 }
-.performance-card {
-    padding: 15px 12px; display: flex; align-items: center; gap: 10px;
-    border: 1px solid #e5e7eb; border-radius: 13px;
-}
-.performance-card strong { font-size: 22px; font-weight: 800; }
-.performance-card span { font-size: 12px; font-weight: 600; color: #6b7280; }
-
-.ticket-breakdown-card { padding: 17px; background: #fafbfc; border: 1px solid #e5e7eb; border-radius: 15px; }
-.ticket-breakdown-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.ticket-type-header strong { font-size: 15px; }
-.ticket-type-numbers strong { font-size: 18px; }
-
-.event-actions {
-    width: 100%; padding: 0 30px 30px;
-    display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px;
-}
-.event-actions button {
-    min-height: 46px; padding: 10px; display: flex; align-items: center; justify-content: center;
-    gap: 6px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fff;
-    color: #374151; font-size: 13px; font-weight: 700; cursor: pointer;
-}
-.delete-btn { color: #dc2626; }
 
 
 /* ============================================================
-   RESPONSIVE
-============================================================ */
+   EVENT TYPE BADGE
+   ============================================================ */
 
-/* DESKTOP 1200-1499 */
+.event-type {
+  position: absolute;
+
+  top: 15px;
+  left: 15px;
+
+  padding: 7px 11px;
+
+  border-radius: 8px;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  color: #ffffff;
+
+  z-index: 2;
+}
+
+.event-type.paid {
+  background: #2563eb;
+}
+
+.event-type.free {
+  background: #059669;
+}
+
+
+/* ============================================================
+   VERIFIED HOST
+   ============================================================ */
+
+.verified-host {
+  position: absolute;
+
+  top: 15px;
+  right: 15px;
+
+  padding: 7px 11px;
+
+  border-radius: 8px;
+
+  background: #dcfce7;
+
+  color: #166534;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  z-index: 2;
+}
+
+
+/* ============================================================
+   EVENT MAIN INFORMATION
+   ============================================================ */
+
+.event-main-info {
+  width: 100%;
+
+  padding: 32px;
+}
+
+
+/* ============================================================
+   EVENT TITLE
+   ============================================================ */
+
+.event-card-header {
+  width: 100%;
+}
+
+.event-title-area {
+  min-width: 0;
+}
+
+.event-card-header h3 {
+  margin: 0 0 10px;
+
+  color: #111827;
+
+  font-size: 29px;
+  font-weight: 800;
+
+  line-height: 1.25;
+
+  word-break: break-word;
+}
+
+
+/* ============================================================
+   EVENT STATUS
+   ============================================================ */
+
+.event-status {
+  display: inline-flex;
+
+  align-items: center;
+
+  padding: 6px 11px;
+
+  border-radius: 8px;
+
+  background: #f3f4f6;
+
+  color: #6b7280;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  text-transform: capitalize;
+}
+
+.event-status.published {
+  background: #dcfce7;
+
+  color: #166534;
+}
+
+
+/* ============================================================
+   EVENT DETAILS
+   ============================================================ */
+
+.event-details {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 16px 25px;
+
+  margin: 22px 0 28px;
+}
+
+.event-details p {
+  min-width: 0;
+
+  margin: 0;
+
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 10px;
+
+  color: #374151;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  line-height: 1.5;
+}
+
+.event-details p > span:first-child {
+  flex-shrink: 0;
+}
+
+
+/* ============================================================
+   PERFORMANCE SECTION
+   ============================================================ */
+
+.event-performance {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+
+  margin-bottom: 28px;
+}
+
+.performance-card {
+  min-width: 0;
+
+  padding: 17px 15px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 14px;
+
+  background: #ffffff;
+}
+
+.performance-icon {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background: #f3f4f6;
+
+  font-size: 19px;
+
+  flex-shrink: 0;
+}
+
+.performance-card > div:last-child {
+  min-width: 0;
+}
+
+.performance-card span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #6b7280;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.performance-card strong {
+  display: block;
+
+  color: #111827;
+
+  font-size: 23px;
+  font-weight: 800;
+
+  line-height: 1.2;
+}
+
+
+/* ============================================================
+   TICKET BREAKDOWN
+   ============================================================ */
+
+.ticket-breakdown-card {
+  width: 100%;
+
+  padding: 20px;
+
+  background: #fafbfc;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 16px;
+}
+
+.ticket-breakdown-header {
+  margin-bottom: 17px;
+}
+
+.ticket-breakdown-header h4 {
+  margin: 0 0 5px;
+
+  color: #111827;
+
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.ticket-breakdown-header p {
+  margin: 0;
+
+  color: #6b7280;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ticket-breakdown-grid {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.ticket-breakdown-item {
+  min-width: 0;
+
+  padding: 15px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 12px;
+}
+
+.ticket-type-header {
+  margin-bottom: 13px;
+}
+
+.ticket-type-header strong {
+  display: block;
+
+  color: #111827;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  word-break: break-word;
+}
+
+.ticket-type-numbers {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+}
+
+.ticket-type-numbers div {
+  min-width: 0;
+}
+
+.ticket-type-numbers span {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #6b7280;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ticket-type-numbers strong {
+  display: block;
+
+  color: #111827;
+
+  font-size: 19px;
+  font-weight: 800;
+}
+
+
+/* ============================================================
+   ACTION BAR
+   ============================================================ */
+
+.event-actions {
+  width: 100%;
+
+  padding: 0 32px 32px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+
+  gap: 10px;
+}
+
+.event-actions button {
+  min-height: 48px;
+
+  padding: 10px 12px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 11px;
+
+  background: #ffffff;
+
+  color: #374151;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.event-actions button:hover {
+  background: #f9fafb;
+
+  border-color: #d1d5db;
+
+  transform: translateY(-1px);
+}
+
+.edit-btn:hover {
+  color: #2563eb;
+}
+
+.duplicate-btn:hover {
+  color: #7c3aed;
+}
+
+.scan-btn:hover {
+  color: #059669;
+}
+
+.attendees-btn:hover {
+  color: #0891b2;
+}
+
+.delete-btn {
+  color: #dc2626 !important;
+}
+
+.delete-btn:hover {
+  background: #fef2f2 !important;
+
+  border-color: #fecaca !important;
+}
+
+
+/* ============================================================
+   DESKTOP 1200 - 1499
+   ============================================================ */
+
 @media (min-width: 1200px) and (max-width: 1499px) {
-    .stats-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .event-poster-wrapper { height: 380px; }
+
+  .stats-grid {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr));
+  }
+
+  .event-poster-wrapper {
+    height: 380px;
+  }
+
 }
 
-/* SMALL LAPTOP 1000-1199 */
+
+/* ============================================================
+   LAPTOP 1000 - 1199
+   ============================================================ */
+
 @media (min-width: 1000px) and (max-width: 1199px) {
-    .stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .event-details { grid-template-columns: 1fr; }
-    .event-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+  .host-dashboard-content {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+
+  .stats-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+  .event-details {
+    grid-template-columns: 1fr;
+  }
+
+  .event-actions {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
 }
 
-/* TABLET < 1000px */
+
+/* ============================================================
+   TABLET / SMALL LAPTOP
+   BELOW 1000
+   ============================================================ */
+
 @media (max-width: 999px) {
-    .host-dashboard-content { width: 100%; margin-left: 0; padding: 80px 25px 50px; }
-    .dashboard-header { flex-direction: column; align-items: stretch; }
-    .stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .event-poster-wrapper { height: auto; aspect-ratio: 16 / 9; }
-    .event-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+  .host-dashboard-content {
+    width: 100%;
+
+    margin-left: 0;
+
+    padding: 82px 25px 55px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+
+    align-items: stretch;
+
+    gap: 22px;
+  }
+
+  .dashboard-header-actions {
+    width: 100%;
+  }
+
+  .dashboard-header-actions button {
+    flex: 1;
+  }
+
+  .stats-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+  .event-poster-wrapper {
+    height: auto;
+
+    aspect-ratio: 16 / 9;
+  }
+
 }
 
-/* MOBILE < 768px */
+
+/* ============================================================
+   TABLET
+   BELOW 768
+   ============================================================ */
+
 @media (max-width: 768px) {
-    .host-dashboard-content { padding: 78px 18px 40px; }
-    .welcome-heading span { font-size: 22px; }
-    .welcome-heading strong { font-size: 26px; }
-    .dashboard-welcome p { font-size: 15px; }
-    .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .stat-content h2 { font-size: 22px; }
-    .stat-content p { font-size: 13px; }
-    .event-card-header h3 { font-size: 22px; }
-    .event-details { grid-template-columns: 1fr; }
-    .event-details p { font-size: 14px; }
-    .event-performance { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-    .performance-card strong { font-size: 19px; }
-    .performance-card span { font-size: 11px; }
-    .ticket-breakdown-grid { grid-template-columns: 1fr; }
-    .event-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 20px 20px; }
-    .delete-btn { grid-column: 1 / -1; }
+
+  .host-dashboard-content {
+    padding: 80px 18px 45px;
+  }
+
+
+  /* HEADER */
+
+  .welcome-heading {
+    gap: 5px;
+  }
+
+  .welcome-heading span {
+    font-size: 23px;
+  }
+
+  .welcome-heading strong {
+    font-size: 27px;
+  }
+
+  .dashboard-welcome p {
+    font-size: 15px;
+  }
+
+
+  /* BUTTONS */
+
+  .dashboard-header-actions {
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 10px;
+  }
+
+  .create-event-btn,
+  .inbox-btn {
+    width: 100%;
+
+    min-height: 50px;
+  }
+
+
+  /* STATS */
+
+  .stats-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 20px 12px;
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+
+    font-size: 21px;
+  }
+
+  .stat-content h2 {
+    font-size: 23px;
+  }
+
+  .stat-content p {
+    font-size: 13px;
+  }
+
+
+  /* SECTION */
+
+  .section-title {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 10px;
+  }
+
+  .section-title h2 {
+    font-size: 25px;
+  }
+
+
+  /* POSTER */
+
+  .event-poster-wrapper {
+    aspect-ratio: 16 / 9;
+
+    height: auto;
+  }
+
+
+  /* EVENT BODY */
+
+  .event-main-info {
+    padding: 24px 20px;
+  }
+
+  .event-card-header h3 {
+    font-size: 24px;
+  }
+
+
+  /* DETAILS */
+
+  .event-details {
+    grid-template-columns: 1fr;
+
+    gap: 13px;
+
+    margin: 20px 0 24px;
+  }
+
+  .event-details p {
+    font-size: 14px;
+  }
+
+
+  /* PERFORMANCE */
+
+  .event-performance {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+
+    gap: 8px;
+  }
+
+  .performance-card {
+    padding: 13px 9px;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    text-align: center;
+
+    gap: 7px;
+  }
+
+  .performance-icon {
+    width: 38px;
+    height: 38px;
+
+    font-size: 17px;
+  }
+
+  .performance-card strong {
+    font-size: 20px;
+  }
+
+  .performance-card span {
+    font-size: 11px;
+  }
+
+
+  /* TICKET TYPES */
+
+  .ticket-breakdown-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  /* ACTIONS */
+
+  .event-actions {
+    padding: 0 20px 20px;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 9px;
+  }
+
+  .event-actions button {
+    min-height: 47px;
+
+    font-size: 12px;
+  }
+
+  .delete-btn {
+    grid-column: 1 / -1;
+  }
+
 }
 
-/* SMALL PHONE < 480px */
+
+/* ============================================================
+   SMALL PHONES
+   BELOW 480
+   ============================================================ */
+
 @media (max-width: 480px) {
-    .host-dashboard-content { padding: 76px 14px 30px; }
-    .dashboard-header-actions { display: grid; grid-template-columns: 1fr; }
-    .stat-content h2 { font-size: 20px; }
-    .stat-content p { font-size: 12px; }
-    .event-card-header h3 { font-size: 20px; }
-    .event-details p { font-size: 13px; }
-    .performance-card strong { font-size: 18px; }
-    .performance-card span { font-size: 10px; }
-    .event-actions button { font-size: 12px; }
+
+  .host-dashboard-content {
+    padding: 76px 14px 35px;
+  }
+
+
+  /* HEADER */
+
+  .welcome-heading {
+    display: block;
+  }
+
+  .welcome-heading span,
+  .welcome-heading strong {
+    display: block;
+  }
+
+  .welcome-heading span {
+    font-size: 21px;
+
+    margin-bottom: 2px;
+  }
+
+  .welcome-heading strong {
+    font-size: 25px;
+  }
+
+  .dashboard-welcome p {
+    font-size: 14px;
+
+    margin-top: 7px;
+  }
+
+
+  /* HEADER BUTTONS */
+
+  .dashboard-header-actions {
+    grid-template-columns: 1fr;
+  }
+
+
+  /* STATS */
+
+  .stats-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 10px;
+  }
+
+  .stat-card {
+    min-height: 135px;
+
+    padding: 17px 9px;
+  }
+
+  .stat-icon {
+    width: 44px;
+    height: 44px;
+
+    border-radius: 12px;
+
+    font-size: 19px;
+  }
+
+  .stat-content h2 {
+    font-size: 20px;
+
+    line-height: 1.2;
+  }
+
+  .stat-content p {
+    font-size: 12px;
+  }
+
+
+  /* SECTION */
+
+  .section-title h2 {
+    font-size: 23px;
+  }
+
+  .section-title p {
+    font-size: 14px;
+  }
+
+  .view-all-events-btn {
+    font-size: 14px;
+  }
+
+
+  /* EVENT CARD */
+
+  .dashboard-event-card {
+    border-radius: 17px;
+  }
+
+
+  /* POSTER */
+
+  .event-poster-wrapper {
+    aspect-ratio: 4 / 3;
+  }
+
+
+  /* EVENT INFO */
+
+  .event-main-info {
+    padding: 21px 16px;
+  }
+
+  .event-card-header h3 {
+    font-size: 21px;
+
+    line-height: 1.3;
+  }
+
+  .event-status {
+    font-size: 12px;
+
+    padding: 5px 9px;
+  }
+
+
+  /* DETAILS */
+
+  .event-details {
+    gap: 12px;
+
+    margin: 18px 0 22px;
+  }
+
+  .event-details p {
+    font-size: 13px;
+
+    line-height: 1.45;
+  }
+
+
+  /* PERFORMANCE */
+
+  .event-performance {
+    gap: 6px;
+  }
+
+  .performance-card {
+    padding: 12px 6px;
+  }
+
+  .performance-icon {
+    width: 34px;
+    height: 34px;
+
+    font-size: 15px;
+  }
+
+  .performance-card strong {
+    font-size: 18px;
+  }
+
+  .performance-card span {
+    font-size: 10px;
+  }
+
+
+  /* TICKET BREAKDOWN */
+
+  .ticket-breakdown-card {
+    padding: 15px;
+  }
+
+  .ticket-breakdown-header h4 {
+    font-size: 16px;
+  }
+
+  .ticket-breakdown-header p {
+    font-size: 12px;
+  }
+
+  .ticket-breakdown-item {
+    padding: 13px;
+  }
+
+  .ticket-type-header strong {
+    font-size: 14px;
+  }
+
+  .ticket-type-numbers strong {
+    font-size: 18px;
+  }
+
+
+  /* ACTIONS */
+
+  .event-actions {
+    padding: 0 16px 16px;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 8px;
+  }
+
+  .event-actions button {
+    min-height: 46px;
+
+    padding: 8px 5px;
+
+    font-size: 11px;
+  }
+
+  .delete-btn {
+    grid-column: 1 / -1;
+  }
+
+
+  /* EMPTY STATE */
+
+  .empty-events {
+    padding: 45px 20px;
+  }
+
+  .empty-events h3 {
+    font-size: 19px;
+  }
+
+  .empty-events p {
+    font-size: 14px;
+  }
+
+}
+
+
+/* ============================================================
+   VERY SMALL PHONES
+   BELOW 360
+   ============================================================ */
+
+@media (max-width: 360px) {
+
+  .host-dashboard-content {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .welcome-heading span {
+    font-size: 19px;
+  }
+
+  .welcome-heading strong {
+    font-size: 22px;
+  }
+
+  .stats-grid {
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 14px 6px;
+  }
+
+  .stat-content h2 {
+    font-size: 18px;
+  }
+
+  .stat-content p {
+    font-size: 11px;
+  }
+
+  .event-main-info {
+    padding: 18px 13px;
+  }
+
+  .event-card-header h3 {
+    font-size: 19px;
+  }
+
+  .event-actions {
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+
+  .event-actions button {
+    font-size: 10px;
+  }
+
 }

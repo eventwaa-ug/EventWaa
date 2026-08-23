@@ -1,388 +1,1089 @@
+/* ============================================================
+   EVENTWAA USER LOGIN
+   PROFESSIONAL RESPONSIVE LOGIN
+   JSX STRUCTURE UNCHANGED
+============================================================ */
+
+
+/* ============================================================
+   FOUNDATION
+============================================================ */
+
+.auth-container,
+.auth-container * {
+  box-sizing: border-box;
+}
+
+
+/* ============================================================
+   MAIN PAGE
+============================================================ */
+
 .auth-container {
   min-height: 100vh;
+  width: 100%;
+
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f8fafc;
-  padding: 20px;
-  background: linear-gradient(135deg, #7c3aed, #ec4899);
+
+  padding: 30px 20px;
+
+  background:
+    radial-gradient(
+      circle at 10% 10%,
+      rgba(255, 255, 255, 0.18),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 90% 90%,
+      rgba(255, 255, 255, 0.12),
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      #7c3aed 0%,
+      #ec4899 100%
+    );
+
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  color: #111827;
+
+  overflow-x: hidden;
 }
 
+
+/* ============================================================
+   LOGIN CARD
+============================================================ */
 
 .auth-card {
   width: 100%;
-  max-width: 420px;
-  background: white;
-  padding: 35px;
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  max-width: 460px;
+
+  background: #ffffff;
+
+  padding: 42px 40px;
+
+  border-radius: 22px;
+
+  border: 1px solid rgba(255, 255, 255, 0.7);
+
+  box-shadow:
+    0 25px 70px rgba(31, 16, 68, 0.22);
+
+  position: relative;
+
+  animation: loginCardAppear 0.35s ease;
 }
 
 
-.auth-card h2 {
+@keyframes loginCardAppear {
+
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+}
+
+
+/* ============================================================
+   BRAND / LOGO AREA
+============================================================ */
+
+.auth-brand {
+  width: 100%;
+
   text-align: center;
-  font-size: 30px;
-  margin-bottom: 10px;
+
+  margin-bottom: 28px;
+}
+
+
+.auth-brand h1 {
+  margin: 0 0 10px;
+
+  color: #111827;
+
+  font-size: 32px;
+
+  line-height: 1.15;
+
+  font-weight: 800;
+
+  letter-spacing: -0.8px;
+}
+
+
+.auth-brand p {
+  margin: 0;
+
+  color: #667085;
+
+  font-size: 16px;
+
+  line-height: 1.6;
+
+  font-weight: 500;
+}
+
+
+/*
+   Your JSX currently has:
+   <br></br><br></br>
+
+   We don't remove it from JSX.
+   This keeps the visual spacing under control.
+*/
+
+.auth-brand br {
+  display: none;
+}
+
+
+/* ============================================================
+   EVENTWAA LOGO
+============================================================ */
+
+.event-logo-container {
+  width: 100%;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  margin-bottom: 20px;
+}
+
+
+.eventwaa-logo {
+  display: block;
+
+  width: 180px;
+  max-width: 80%;
+
+  height: auto;
+
+  object-fit: contain;
+}
+
+
+/* ============================================================
+   AUTH LOGO
+============================================================ */
+
+.auth-logo {
+  display: block;
+
+  width: auto;
+  max-width: 190px;
+
+  max-height: 75px;
+
+  height: auto;
+
+  margin: 0 auto 18px;
+
+  object-fit: contain;
+}
+
+
+/* ============================================================
+   OLD AUTH HEADER SUPPORT
+============================================================ */
+
+.auth-header {
+  text-align: center;
+
+  margin-bottom: 28px;
+}
+
+
+.auth-header h1 {
+  margin: 15px 0 0;
+
+  font-size: 32px;
+
+  line-height: 1.2;
+
+  font-weight: 800;
+
   color: #111827;
 }
 
 
-.auth-subtitle {
-  text-align: center;
+.auth-header p {
   color: #6b7280;
-  margin-bottom: 25px;
+
   font-size: 15px;
+
+  line-height: 1.5;
+
+  margin: 7px 0 0;
 }
 
 
+/* ============================================================
+   SUBTITLE SUPPORT
+============================================================ */
 
-/* ERROR MESSAGE */
+.auth-subtitle {
+  text-align: center;
+
+  color: #667085;
+
+  margin-bottom: 25px;
+
+  font-size: 16px;
+
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   ERROR MESSAGE
+============================================================ */
 
 .error-message {
+  width: 100%;
 
-  background: #fee2e2;
-  color: #b91c1c;
+  background: #fff1f2;
 
-  padding: 12px;
-  border-radius: 10px;
+  color: #b42318;
+
+  border: 1px solid #fecdd3;
+
+  padding: 14px 15px;
+
+  border-radius: 11px;
 
   margin-bottom: 20px;
 
   text-align: center;
 
-  font-size: 14px;
-
-}
-
-
-
-/* INPUTS */
-
-.auth-card input {
-
-  width: 100%;
-
-  padding: 14px 15px;
-
-  border: 1px solid #d1d5db;
-
-  border-radius: 10px;
-
-  margin-bottom: 18px;
-
   font-size: 15px;
 
-  outline: none;
-
-  transition: 0.3s;
-
-}
-
-
-
-.auth-card input:focus {
-
-  border-color: #2563eb;
-
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
-
-}
-
-
-
-/* PASSWORD FIELD */
-
-
-.password-wrapper {
-
-  position: relative;
-
-}
-
-
-
-.password-wrapper input {
-
-  padding-right: 45px;
-
-}
-
-
-
-.password-toggle {
-
-  position: absolute;
-
-  right: 15px;
-
-  top: 50%;
-
-  transform: translateY(-50%);
-
-  cursor: pointer;
-
-  font-size: 18px;
-
-}
-
-
-
-/* BUTTON */
-
-
-.auth-button {
-
-  width: 100%;
-
-  padding: 14px;
-
-  background: #2563eb;
-
-  color: white;
-
-  border: none;
-
-  border-radius: 10px;
-
-  font-size: 16px;
+  line-height: 1.5;
 
   font-weight: 600;
 
-  cursor: pointer;
-
-  transition: 0.3s;
-
+  overflow-wrap: anywhere;
 }
 
 
+/* ============================================================
+   FORM
+============================================================ */
 
-.auth-button:hover {
-
-  background: #1d4ed8;
-
+.auth-card form {
+  width: 100%;
 }
 
 
+/* ============================================================
+   STANDARD INPUTS
+============================================================ */
 
-.auth-button:disabled {
+.auth-card input {
+  width: 100%;
 
-  opacity: 0.7;
+  height: 56px;
+
+  padding: 0 17px;
+
+  border: 1.5px solid #d1d5db;
+
+  border-radius: 12px;
+
+  margin-bottom: 18px;
+
+  background: #ffffff;
+
+  color: #111827;
+
+  font-family: inherit;
+
+  font-size: 17px;
+
+  line-height: 1;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+
+.auth-card input::placeholder {
+  color: #9ca3af;
+
+  font-size: 16px;
+
+  opacity: 1;
+}
+
+
+.auth-card input:hover {
+  border-color: #b9c0cc;
+}
+
+
+.auth-card input:focus {
+  border-color: #7c3aed;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 0 0 4px rgba(124, 58, 237, 0.11);
+}
+
+
+.auth-card input:disabled {
+  background: #f3f4f6;
 
   cursor: not-allowed;
 
+  opacity: 0.75;
 }
 
 
+/* ============================================================
+   PASSWORD FIELD
+============================================================ */
 
-/* FORGOT PASSWORD */
+.password-wrapper {
+  position: relative;
 
-
-.forgot-password {
-
-  text-align: right;
-
-  margin-top: 15px;
-
+  width: 100%;
 }
 
 
+/*
+   The normal input rule gives password input
+   its bottom margin.
 
-.forgot-password a {
+   Remove it here because the wrapper controls
+   the password field spacing.
+*/
 
-  color: #2563eb;
+.password-wrapper input {
+  width: 100%;
 
-  text-decoration: none;
+  padding-right: 58px;
 
-  font-size: 14px;
-
+  margin-bottom: 18px;
 }
 
 
+/* ============================================================
+   PASSWORD EYE
+============================================================ */
 
+.password-toggle {
+  position: absolute;
 
-/* DIVIDER */
+  top: 0;
 
+  right: 5px;
 
-.divider {
+  width: 48px;
+  height: 56px;
 
   display: flex;
 
   align-items: center;
-
   justify-content: center;
 
-  margin: 25px 0;
+  border-radius: 10px;
 
-  color: #9ca3af;
-
-  font-size: 14px;
-
-}
-
-
-
-/* GOOGLE BUTTON AREA */
-
-.google-login {
-
-  width: 100%;
-
-}
-
-
-
-/* SWITCH */
-
-
-.switch-auth {
-
-  text-align: center;
-
-  margin-top: 25px;
-
-  color: #6b7280;
-
-}
-
-
-
-.switch-auth span {
-
-  color: #2563eb;
-
-  font-weight: 600;
+  color: #667085;
 
   cursor: pointer;
 
-  margin-left: 5px;
+  z-index: 5;
 
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
 }
 
 
+/*
+   IMPORTANT:
+   This makes the Lucide eye actually visible
+   and properly sized.
+*/
 
-/* MOBILE */
+.password-toggle svg {
+  display: block;
 
+  width: 23px;
+  height: 23px;
 
-@media(max-width:480px){
+  min-width: 23px;
+  min-height: 23px;
 
-  .auth-container{
+  stroke: currentColor;
 
-    padding:15px;
+  stroke-width: 2.2;
 
-  }
+  visibility: visible;
 
-
-  .auth-card{
-
-    padding:25px;
-
-    border-radius:15px;
-
-  }
-
-
-  .auth-card h2{
-
-    font-size:25px;
-
-  }
-
-
-}
-.auth-header {
-
-text-align:center;
-
-margin-bottom:25px;
-
+  opacity: 1;
 }
 
 
-.auth-logo {
+.password-toggle:hover {
+  color: #7c3aed;
 
-width:65px;
-
-height:65px;
-
-margin:auto;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-background:#2563eb;
-
-border-radius:18px;
-
-font-size:32px;
-
+  background: #f3e8ff;
 }
 
 
-.auth-header h1 {
-
-margin-top:15px;
-
-font-size:32px;
-
-font-weight:800;
-
-color:#111827;
-
+.password-toggle:active {
+  transform: scale(0.94);
 }
 
 
-.auth-header p {
+.password-toggle:focus-visible {
+  outline: 3px solid rgba(124, 58, 237, 0.18);
 
-color:#6b7280;
-
-font-size:14px;
-
-margin-top:5px;
-
-}
-.event-logo-container {
-
-  display:flex;
-
-  justify-content:center;
-
-  align-items:center;
-
-  margin-bottom:15px;
-
+  outline-offset: 2px;
 }
 
 
-.eventwaa-logo {
+/* ============================================================
+   LOGIN BUTTON
+============================================================ */
 
-  width:180px;
+.auth-button {
+  width: 100%;
 
-  height:auto;
+  min-height: 57px;
 
-  object-fit:contain;
+  padding: 0 18px;
 
+  margin-top: 2px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #ec4899
+    );
+
+  color: #ffffff;
+
+  border: none;
+
+  border-radius: 12px;
+
+  font-family: inherit;
+
+  font-size: 18px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 20px rgba(124, 58, 237, 0.20);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
 }
 
 
-@media(max-width:480px){
+.auth-button:hover {
+  transform: translateY(-1px);
 
-  .eventwaa-logo {
-
-    width:140px;
-
-  }
-
+  box-shadow:
+    0 11px 25px rgba(124, 58, 237, 0.28);
 }
+
+
+.auth-button:active {
+  transform: translateY(0);
+
+  box-shadow:
+    0 5px 14px rgba(124, 58, 237, 0.18);
+}
+
+
+.auth-button:disabled {
+  opacity: 0.7;
+
+  cursor: not-allowed;
+
+  transform: none;
+
+  box-shadow: none;
+}
+
+
+/* ============================================================
+   FORGOT PASSWORD
+============================================================ */
+
+.forgot-password {
+  width: 100%;
+
+  text-align: right;
+
+  margin-top: 16px;
+
+  margin-bottom: 4px;
+}
+
+
 .forgot-password-link {
-  color: #2563eb;
+  color: #6d28d9;
+
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 600;
+
+  font-size: 15px;
+
+  line-height: 1.5;
+
+  font-weight: 700;
+
+  transition:
+    color 0.2s ease;
 }
+
 
 .forgot-password-link:hover {
+  color: #ec4899;
+
   text-decoration: underline;
+}
+
+
+.forgot-password-link:focus-visible {
+  outline: 3px solid rgba(124, 58, 237, 0.16);
+
+  outline-offset: 4px;
+
+  border-radius: 4px;
+}
+
+
+/* ============================================================
+   DIVIDER
+============================================================ */
+
+.divider {
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+
+  margin: 27px 0;
+
+  color: #98a2b3;
+
+  font-size: 13px;
+
+  line-height: 1;
+
+  font-weight: 700;
+
+  letter-spacing: 0.5px;
+}
+
+
+.divider::before,
+.divider::after {
+  content: "";
+
+  height: 1px;
+
+  flex: 1;
+
+  background: #e5e7eb;
+}
+
+
+/* ============================================================
+   GOOGLE LOGIN
+============================================================ */
+
+.google-login {
+  width: 100%;
+
+  display: flex;
+
+  justify-content: center;
+
+  overflow: hidden;
+}
+
+
+/*
+   GoogleLogin is rendered by Google's component.
+   These rules prevent it from causing horizontal
+   overflow on smaller screens.
+*/
+
+.google-login > div {
+  max-width: 100%;
+
+  width: 100%;
+}
+
+
+.google-login iframe {
+  max-width: 100%;
+}
+
+
+/* ============================================================
+   SWITCH AUTH
+============================================================ */
+
+.switch-auth {
+  text-align: center;
+
+  margin: 27px 0 0;
+
+  color: #667085;
+
+  font-size: 15px;
+
+  line-height: 1.6;
+
+  font-weight: 500;
+}
+
+
+.switch-auth span {
+  color: #6d28d9;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  margin-left: 6px;
+
+  transition:
+    color 0.2s ease;
+}
+
+
+.switch-auth span:hover {
+  color: #ec4899;
+
+  text-decoration: underline;
+}
+
+
+.switch-auth span:focus-visible {
+  outline: 3px solid rgba(124, 58, 237, 0.16);
+
+  outline-offset: 3px;
+
+  border-radius: 4px;
+}
+
+
+/* ============================================================
+   TABLET
+============================================================ */
+
+@media (max-width: 600px) {
+
+  .auth-container {
+    min-height: 100vh;
+
+    padding: 25px 16px;
+  }
+
+
+  .auth-card {
+    max-width: 450px;
+
+    padding: 35px 30px;
+
+    border-radius: 20px;
+  }
+
+
+  .auth-brand {
+    margin-bottom: 25px;
+  }
+
+
+  .auth-brand p {
+    font-size: 16px;
+  }
+
+
+  .auth-logo {
+    max-width: 175px;
+
+    max-height: 70px;
+  }
+
+
+  .eventwaa-logo {
+    width: 160px;
+  }
+
+
+  .auth-card input {
+    height: 56px;
+
+    font-size: 17px;
+  }
+
+
+  .auth-card input::placeholder {
+    font-size: 16px;
+  }
+
+
+  .password-toggle {
+    width: 48px;
+
+    height: 56px;
+
+    right: 4px;
+  }
+
+
+  .password-toggle svg {
+    width: 23px;
+
+    height: 23px;
+  }
+
+
+  .auth-button {
+    min-height: 57px;
+
+    font-size: 17px;
+  }
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 480px) {
+
+  .auth-container {
+    min-height: 100vh;
+
+    align-items: center;
+
+    padding: 18px 13px;
+  }
+
+
+  .auth-card {
+    width: 100%;
+
+    max-width: 100%;
+
+    padding: 31px 23px;
+
+    border-radius: 18px;
+
+    box-shadow:
+      0 18px 45px rgba(31, 16, 68, 0.20);
+  }
+
+
+  /* ----------------------------------------------------------
+     BRAND
+  ---------------------------------------------------------- */
+
+  .auth-brand {
+    margin-bottom: 24px;
+  }
+
+
+  .auth-brand h1 {
+    font-size: 29px;
+
+    letter-spacing: -0.6px;
+  }
+
+
+  .auth-brand p {
+    font-size: 15px;
+
+    line-height: 1.55;
+  }
+
+
+  .auth-logo {
+    max-width: 160px;
+
+    max-height: 65px;
+
+    margin-bottom: 15px;
+  }
+
+
+  .event-logo-container {
+    margin-bottom: 16px;
+  }
+
+
+  .eventwaa-logo {
+    width: 145px;
+  }
+
+
+  /* ----------------------------------------------------------
+     ERROR
+  ---------------------------------------------------------- */
+
+  .error-message {
+    padding: 13px;
+
+    margin-bottom: 18px;
+
+    font-size: 14px;
+  }
+
+
+  /* ----------------------------------------------------------
+     INPUTS
+  ---------------------------------------------------------- */
+
+  .auth-card input {
+    height: 55px;
+
+    padding: 0 15px;
+
+    margin-bottom: 17px;
+
+    font-size: 16px;
+  }
+
+
+  .auth-card input::placeholder {
+    font-size: 15px;
+  }
+
+
+  /* ----------------------------------------------------------
+     PASSWORD EYE
+  ---------------------------------------------------------- */
+
+  .password-wrapper input {
+    padding-right: 57px;
+  }
+
+
+  .password-toggle {
+    right: 3px;
+
+    width: 48px;
+
+    height: 55px;
+  }
+
+
+  .password-toggle svg {
+    width: 23px;
+
+    height: 23px;
+  }
+
+
+  /* ----------------------------------------------------------
+     BUTTON
+  ---------------------------------------------------------- */
+
+  .auth-button {
+    min-height: 55px;
+
+    font-size: 17px;
+
+    border-radius: 11px;
+  }
+
+
+  /* ----------------------------------------------------------
+     FORGOT
+  ---------------------------------------------------------- */
+
+  .forgot-password {
+    margin-top: 15px;
+  }
+
+
+  .forgot-password-link {
+    font-size: 15px;
+  }
+
+
+  /* ----------------------------------------------------------
+     DIVIDER
+  ---------------------------------------------------------- */
+
+  .divider {
+    margin: 24px 0;
+
+    font-size: 12px;
+  }
+
+
+  /* ----------------------------------------------------------
+     SWITCH
+  ---------------------------------------------------------- */
+
+  .switch-auth {
+    margin-top: 24px;
+
+    font-size: 14px;
+  }
+
+}
+
+
+/* ============================================================
+   SMALL PHONES
+============================================================ */
+
+@media (max-width: 360px) {
+
+  .auth-container {
+    padding: 14px 10px;
+  }
+
+
+  .auth-card {
+    padding: 27px 18px;
+
+    border-radius: 16px;
+  }
+
+
+  .auth-brand h1 {
+    font-size: 27px;
+  }
+
+
+  .auth-brand p {
+    font-size: 14px;
+  }
+
+
+  .auth-logo {
+    max-width: 145px;
+
+    max-height: 60px;
+  }
+
+
+  .eventwaa-logo {
+    width: 135px;
+  }
+
+
+  .auth-card input {
+    height: 53px;
+
+    font-size: 16px;
+  }
+
+
+  .auth-card input::placeholder {
+    font-size: 14px;
+  }
+
+
+  .password-toggle {
+    height: 53px;
+
+    width: 46px;
+  }
+
+
+  .password-toggle svg {
+    width: 22px;
+
+    height: 22px;
+  }
+
+
+  .auth-button {
+    min-height: 53px;
+
+    font-size: 16px;
+  }
+
+
+  .forgot-password-link {
+    font-size: 14px;
+  }
+
+
+  .switch-auth {
+    font-size: 13px;
+  }
+
+}
+
+
+/* ============================================================
+   ACCESSIBILITY
+============================================================ */
+
+.auth-card button:focus-visible,
+.auth-card a:focus-visible,
+.password-toggle:focus-visible {
+  outline: 3px solid rgba(124, 58, 237, 0.22);
+
+  outline-offset: 3px;
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .auth-container *,
+  .auth-container {
+    animation: none !important;
+
+    transition: none !important;
+  }
+
 }

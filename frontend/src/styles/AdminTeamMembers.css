@@ -1,0 +1,2656 @@
+/* ============================================================
+   ADMIN TEAM MEMBERS
+   ============================================================ */
+.admin-team-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 36px;
+    box-sizing: border-box;
+    background: #f7f8fc;
+    color: #171827;
+}
+/* ============================================================
+   HEADER
+   ============================================================ */
+.admin-team-header {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto 30px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+}
+.admin-team-eyebrow {
+    display: block;
+    margin-bottom: 9px;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+    color: #6c3df4;
+}
+.admin-team-header h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.15;
+    font-weight: 850;
+    color: #171827;
+}
+.admin-team-header p {
+    margin: 10px 0 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: #686d80;
+}
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.admin-add-member-btn,
+.admin-panel-add-btn,
+.admin-empty-add-btn,
+.admin-team-submit-btn,
+.admin-team-invite-btn {
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+}
+.admin-add-member-btn {
+    min-height: 52px;
+    padding: 0 23px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 13px;
+    background: #6c3df4;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    box-shadow: 0 8px 22px rgba(108, 61, 244, 0.18);
+}
+.admin-add-member-btn span {
+    font-size: 23px;
+    line-height: 1;
+}
+.admin-add-member-btn:hover,
+.admin-panel-add-btn:hover,
+.admin-empty-add-btn:hover,
+.admin-team-submit-btn:hover,
+.admin-team-invite-btn:hover {
+    transform: translateY(-1px);
+}
+.admin-add-member-btn:hover {
+    box-shadow: 0 11px 28px rgba(108, 61, 244, 0.25);
+}
+/* ============================================================
+   ALERTS
+   ============================================================ */
+.admin-team-alert {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto 22px;
+    padding: 17px 19px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    border-radius: 13px;
+    box-sizing: border-box;
+}
+.admin-team-alert strong {
+    font-size: 16px;
+    white-space: nowrap;
+}
+.admin-team-alert span {
+    flex: 1;
+    font-size: 16px;
+    line-height: 1.5;
+}
+.admin-team-alert button {
+    width: 30px;
+    height: 30px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 1;
+}
+.admin-team-error {
+    background: #fff1f1;
+    border: 1px solid #ffd2d2;
+    color: #a42b2b;
+}
+.admin-team-success {
+    background: #effcf4;
+    border: 1px solid #c9efd8;
+    color: #18733c;
+}
+/* ============================================================
+   STATS
+   ============================================================ */
+.admin-team-stats {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto 30px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 17px;
+}
+.admin-team-stat-card {
+    min-height: 118px;
+    padding: 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #fff;
+    border: 1px solid #e9eaf1;
+    border-radius: 17px;
+    box-shadow: 0 6px 20px rgba(24, 25, 38, 0.04);
+    box-sizing: border-box;
+}
+.admin-team-stat-icon {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: #f3f0ff;
+    font-size: 24px;
+}
+.admin-team-stat-card strong {
+    display: block;
+    font-size: 30px;
+    line-height: 1.1;
+    font-weight: 850;
+    color: #171827;
+}
+.admin-team-stat-card span {
+    display: block;
+    margin-top: 6px;
+    font-size: 15px;
+    line-height: 1.3;
+    font-weight: 650;
+    color: #707588;
+}
+/* ============================================================
+   MAIN PANEL
+   ============================================================ */
+.admin-team-panel {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 29px;
+    background: #fff;
+    border: 1px solid #e9eaf1;
+    border-radius: 21px;
+    box-shadow: 0 8px 28px rgba(24, 25, 38, 0.045);
+    box-sizing: border-box;
+}
+.admin-team-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+.admin-team-panel-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 850;
+}
+.admin-team-panel-header p {
+    margin: 7px 0 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #707588;
+}
+.admin-panel-add-btn {
+    min-height: 46px;
+    padding: 0 18px;
+    border-radius: 11px;
+    background: #f0edff;
+    color: #5d32dc;
+    font-size: 15px;
+    font-weight: 800;
+}
+/* ============================================================
+   FILTERS
+   ============================================================ */
+.admin-team-filters {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) 190px 190px;
+    gap: 13px;
+    margin-bottom: 17px;
+}
+.admin-team-search {
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 0 15px;
+    border: 1px solid #dedfea;
+    border-radius: 12px;
+    background: #fff;
+    box-sizing: border-box;
+}
+.admin-team-search span {
+    font-size: 19px;
+}
+.admin-team-search input {
+    width: 100%;
+    border: 0;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 16px;
+    color: #202131;
+}
+.admin-team-search input::placeholder {
+    color: #979aaa;
+}
+.admin-team-filters select {
+    width: 100%;
+    min-height: 50px;
+    padding: 0 13px;
+    border: 1px solid #dedfea;
+    border-radius: 12px;
+    background: #fff;
+    color: #303244;
+    font-family: inherit;
+    font-size: 16px;
+    outline: none;
+    cursor: pointer;
+}
+/* ============================================================
+   RESULT COUNT
+   ============================================================ */
+.admin-team-result-count {
+    padding: 5px 0 18px;
+    font-size: 15px;
+    color: #707588;
+}
+.admin-team-result-count strong {
+    color: #303244;
+}
+/* ============================================================
+   MEMBER LIST
+   ============================================================ */
+.admin-team-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.admin-team-member {
+    display: grid;
+    grid-template-columns:
+        minmax(230px, 1.1fr)
+        minmax(320px, 1.5fr)
+        minmax(290px, auto);
+    align-items: center;
+    gap: 24px;
+    padding: 22px;
+    border: 1px solid #e5e6ee;
+    border-radius: 16px;
+    background: #fff;
+    box-sizing: border-box;
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+.admin-team-member:hover {
+    border-color: #dcd7f7;
+    box-shadow: 0 6px 22px rgba(35, 28, 72, 0.06);
+}
+/* ============================================================
+   MEMBER PERSON
+   ============================================================ */
+.admin-team-member-person {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.admin-team-avatar {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #eeeaff;
+    color: #6037df;
+    font-size: 19px;
+    font-weight: 850;
+}
+.admin-team-member-person h3 {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 17px;
+    line-height: 1.35;
+    font-weight: 850;
+}
+.admin-team-member-person p {
+    margin: 5px 0 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 15px;
+    line-height: 1.4;
+    color: #74788b;
+}
+/* ============================================================
+   MEMBER INFORMATION
+   ============================================================ */
+.admin-team-member-info {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+.admin-team-member-info div {
+    min-width: 0;
+}
+.admin-team-member-info span {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    letter-spacing: 0.8px;
+    font-weight: 850;
+    color: #9094a5;
+}
+.admin-team-member-info strong {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 750;
+    color: #363849;
+}
+/* ============================================================
+   MEMBER ACTIONS
+   ============================================================ */
+.admin-team-member-actions {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+}
+.admin-team-action-top,
+.admin-team-action-bottom {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 9px;
+}
+.admin-team-action-bottom button {
+    min-height: 39px;
+    padding: 0 13px;
+    border: 1px solid #dddfea;
+    border-radius: 9px;
+    background: #fff;
+    color: #55586a;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 750;
+}
+.admin-team-action-bottom button:hover {
+    background: #f7f7fb;
+}
+.admin-team-action-bottom button.danger {
+    border-color: #ffd2d2;
+    background: #fff5f5;
+    color: #c03939;
+}
+/* ============================================================
+   STATUS
+   ============================================================ */
+.admin-team-status {
+    min-height: 34px;
+    padding: 5px 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border-radius: 999px;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 850;
+    white-space: nowrap;
+}
+.admin-team-status.active {
+    background: #e9f9ef;
+    border: 1px solid #bfe9ce;
+    color: #14743b;
+}
+.admin-team-status.active::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #20a957;
+    box-shadow: 0 0 0 3px rgba(32, 169, 87, 0.12);
+}
+.admin-team-status.disabled {
+    background: #f1f2f5;
+    border: 1px solid #dfe1e7;
+    color: #777b89;
+}
+.admin-team-status.disabled::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #9b9fab;
+}
+/* ============================================================
+   INVITATION BUTTON
+   ============================================================ */
+.admin-team-invite-btn {
+    min-height: 42px;
+    padding: 0 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 10px;
+    background: #6c3df4;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 850;
+    box-shadow: 0 5px 15px rgba(108, 61, 244, 0.15);
+}
+.admin-team-invite-btn:hover {
+    background: #5d32dc;
+}
+.admin-team-invite-btn.pending {
+    background: #f1efff;
+    color: #5d32dc;
+    border: 1px solid #ddd6ff;
+    box-shadow: none;
+}
+.admin-team-invite-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+/* ============================================================
+   INVITATION STATUS
+   ============================================================ */
+.admin-team-invitation {
+    min-height: 38px;
+    padding: 6px 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 850;
+}
+.admin-team-invitation.accepted {
+    background: #e9f9ef;
+    color: #197440;
+    border: 1px solid #bfe9ce;
+}
+.admin-team-invitation.pending {
+    background: #f1efff;
+    color: #5d32dc;
+    border: 1px solid #ddd6ff;
+}
+/* ============================================================
+   LOADING
+   ============================================================ */
+.admin-team-loading {
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #707588;
+}
+.admin-team-spinner {
+    width: 34px;
+    height: 34px;
+    margin-bottom: 14px;
+    border: 3px solid #e7e4f8;
+    border-top-color: #6c3df4;
+    border-radius: 50%;
+    animation: adminTeamSpin 0.8s linear infinite;
+}
+.admin-team-loading p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 650;
+}
+.admin-team-button-spinner {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: adminTeamSpin 0.7s linear infinite;
+}
+@keyframes adminTeamSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.admin-team-empty {
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.admin-team-empty-icon {
+    width: 68px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    border-radius: 18px;
+    background: #f1efff;
+    font-size: 29px;
+}
+.admin-team-empty h3 {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 850;
+}
+.admin-team-empty p {
+    max-width: 460px;
+    margin: 9px 0 20px;
+    font-size: 15px;
+    line-height: 1.65;
+    color: #74788b;
+}
+.admin-empty-add-btn {
+    min-height: 46px;
+    padding: 0 18px;
+    border-radius: 11px;
+    background: #6c3df4;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 850;
+}
+/* ============================================================
+   MODAL
+   ============================================================ */
+.admin-team-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(19, 19, 30, 0.58);
+    box-sizing: border-box;
+}
+.admin-team-modal {
+    width: min(680px, 100%);
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 21px;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.22);
+    box-sizing: border-box;
+}
+.admin-team-modal-header {
+    padding: 27px 28px 22px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    border-bottom: 1px solid #ececf2;
+}
+.admin-team-modal-header > div {
+    min-width: 0;
+}
+.admin-team-modal-header span {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    font-weight: 850;
+    color: #6c3df4;
+}
+.admin-team-modal-header h2 {
+    margin: 0;
+    font-size: 25px;
+    line-height: 1.25;
+    font-weight: 850;
+}
+.admin-team-modal-header p {
+    margin: 8px 0 0;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #74788b;
+}
+.admin-team-modal-close {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border: 0;
+    border-radius: 10px;
+    background: #f5f5f8;
+    color: #55586a;
+    cursor: pointer;
+    font-size: 24px;
+    line-height: 1;
+}
+.admin-team-modal-close:hover {
+    background: #ececf2;
+}
+/* ============================================================
+   FORM
+   ============================================================ */
+.admin-team-form {
+    padding: 27px 28px 29px;
+}
+.admin-team-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+.admin-team-form-full {
+    grid-column: 1 / -1;
+}
+.admin-team-form-group {
+    min-width: 0;
+}
+.admin-team-form-group label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 15px;
+    font-weight: 850;
+    color: #383a4b;
+}
+.admin-team-form-group label span {
+    font-size: 13px;
+    font-weight: 650;
+    color: #8f93a2;
+}
+.admin-team-form-group input,
+.admin-team-form-group select {
+    width: 100%;
+    min-height: 50px;
+    padding: 0 14px;
+    border: 1px solid #dddfea;
+    border-radius: 11px;
+    background: #fff;
+    outline: none;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 16px;
+    color: #252737;
+}
+.admin-team-form-group input:focus,
+.admin-team-form-group select:focus {
+    border-color: #8e6df0;
+    box-shadow: 0 0 0 3px rgba(108, 61, 244, 0.09);
+}
+.admin-team-form-group input::placeholder {
+    color: #a0a3af;
+}
+/* ============================================================
+   FORM NOTICE
+   ============================================================ */
+.admin-team-form-notice {
+    margin-top: 22px;
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    border: 1px solid #e4defd;
+    border-radius: 12px;
+    background: #f7f5ff;
+}
+.admin-team-form-notice > span {
+    font-size: 19px;
+}
+.admin-team-form-notice p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #625d77;
+}
+.admin-team-form-notice strong {
+    color: #4f2fc4;
+}
+/* ============================================================
+   FORM ACTIONS
+   ============================================================ */
+.admin-team-form-actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 11px;
+}
+
+
+.admin-team-cancel-btn,
+.admin-team-submit-btn {
+    min-height: 48px;
+    padding: 0 19px;
+    border-radius: 11px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 850;
+    cursor: pointer;
+}
+.admin-team-cancel-btn {
+    border: 1px solid #dddfea;
+    background: #fff;
+    color: #55586a;
+}
+.admin-team-cancel-btn:hover {
+    background: #f7f7fa;
+}
+.admin-team-submit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 0;
+    background: #6c3df4;
+    color: #fff;
+    box-shadow: 0 7px 18px rgba(108, 61, 244, 0.17);
+}
+.admin-team-submit-btn:disabled,
+.admin-team-cancel-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+/* ============================================================
+   TABLET
+   ============================================================ */
+@media (max-width: 1150px) {
+    .admin-team-member {
+        grid-template-columns: 1fr;
+        gap: 19px;
+    }
+    .admin-team-member-actions {
+        align-items: stretch;
+    }
+    .admin-team-action-top,
+    .admin-team-action-bottom {
+        justify-content: flex-start;
+    }
+    .admin-team-member-info {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+/* ============================================================
+   TABLET / SMALL LAPTOP
+   ============================================================ */
+@media (max-width: 900px) {
+    .admin-team-page {
+        padding: 28px 21px;
+    }
+    .admin-team-header h1 {
+        font-size: 34px;
+    }
+    .admin-team-header p {
+        font-size: 16px;
+    }
+    .admin-team-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .admin-team-filters {
+        grid-template-columns: 1fr 1fr;
+    }
+    .admin-team-search {
+        grid-column: 1 / -1;
+    }
+    .admin-team-panel {
+        padding: 25px;
+    }
+}
+/* ============================================================
+   MOBILE
+   ============================================================ */
+@media (max-width: 650px) {
+    .admin-team-page {
+        padding: 22px 14px;
+    }
+    .admin-team-header {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 18px;
+    }
+    .admin-team-eyebrow {
+        font-size: 13px;
+    }
+    .admin-team-header h1 {
+        font-size: 30px;
+    }
+    .admin-team-header p {
+        font-size: 16px;
+    }
+    .admin-add-member-btn {
+        width: 100%;
+        min-height: 52px;
+        font-size: 16px;
+    }
+    .admin-team-stats {
+        grid-template-columns: 1fr;
+        gap: 13px;
+    }
+    .admin-team-stat-card {
+        min-height: 105px;
+        padding: 19px;
+    }
+    .admin-team-stat-card strong {
+        font-size: 28px;
+    }
+    .admin-team-stat-card span {
+        font-size: 15px;
+    }
+    .admin-team-panel {
+        padding: 19px;
+        border-radius: 17px;
+    }
+    .admin-team-panel-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .admin-team-panel-header h2 {
+        font-size: 22px;
+    }
+    .admin-team-panel-header p {
+        font-size: 15px;
+    }
+    .admin-panel-add-btn {
+        width: 100%;
+        min-height: 48px;
+        font-size: 15px;
+    }
+    .admin-team-filters {
+        grid-template-columns: 1fr;
+    }
+    .admin-team-search {
+        grid-column: auto;
+    }
+    .admin-team-search input {
+        font-size: 16px;
+    }
+    .admin-team-filters select {
+        font-size: 16px;
+    }
+    .admin-team-member {
+        padding: 18px;
+        gap: 20px;
+    }
+    .admin-team-member-person {
+        align-items: flex-start;
+    }
+    .admin-team-avatar {
+        width: 50px;
+        height: 50px;
+        flex-basis: 50px;
+    }
+    .admin-team-member-person h3 {
+        font-size: 17px;
+    }
+    .admin-team-member-person p {
+        font-size: 14px;
+    }
+    .admin-team-member-info {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+    .admin-team-member-info span {
+        font-size: 12px;
+    }
+    .admin-team-member-info strong {
+        font-size: 15px;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+    }
+    .admin-team-action-top,
+    .admin-team-action-bottom {
+        justify-content: stretch;
+    }
+    .admin-team-action-top {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .admin-team-action-bottom {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+    .admin-team-invite-btn,
+    .admin-team-invitation {
+        width: 100%;
+    }
+    .admin-team-invite-btn {
+        min-height: 46px;
+        font-size: 15px;
+    }
+    .admin-team-invitation {
+        min-height: 42px;
+        font-size: 14px;
+    }
+    .admin-team-status {
+        align-self: flex-start;
+        font-size: 14px;
+    }
+    .admin-team-action-bottom button {
+        min-height: 42px;
+        font-size: 14px;
+    }
+    .admin-team-form {
+        padding: 22px 18px;
+    }
+    .admin-team-form-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+    .admin-team-form-full {
+        grid-column: auto;
+    }
+    .admin-team-form-group label {
+        font-size: 15px;
+    }
+    .admin-team-form-group input,
+    .admin-team-form-group select {
+        min-height: 50px;
+        font-size: 16px;
+    }
+    .admin-team-form-actions {
+        flex-direction: column-reverse;
+    }
+    .admin-team-cancel-btn,
+    .admin-team-submit-btn {
+        width: 100%;
+        min-height: 50px;
+        font-size: 15px;
+    }
+    .admin-team-alert {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+    .admin-team-alert strong {
+        font-size: 15px;
+    }
+    .admin-team-alert span {
+        flex-basis: calc(100% - 35px);
+        font-size: 15px;
+    }
+}
+/* ============================================================
+   VERY SMALL PHONES
+   ============================================================ */
+@media (max-width: 420px) {
+    .admin-team-page {
+        padding: 18px 10px;
+    }
+    .admin-team-header h1 {
+        font-size: 27px;
+    }
+    .admin-team-header p {
+        font-size: 15px;
+    }
+    .admin-team-panel {
+        padding: 15px;
+    }
+    .admin-team-stat-card {
+        padding: 16px;
+    }
+    .admin-team-stat-icon {
+        width: 48px;
+        height: 48px;
+        flex-basis: 48px;
+    }
+    .admin-team-member {
+        padding: 16px;
+    }
+    .admin-team-action-bottom {
+        grid-template-columns: 1fr;
+    }
+    .admin-team-form-notice {
+        padding: 14px;
+    }
+    .admin-team-form-notice p {
+        font-size: 13px;
+    }
+}
+/* =========================================================
+   ASSIGNMENT HISTORY
+   DESKTOP RESPONSIVE
+   ========================================================= */
+
+.admin-team-history {
+    width: 100%;
+    margin-top: 24px;
+    padding: 24px 28px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   HISTORY HEADER
+   ========================================================= */
+
+.admin-team-history-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 22px;
+}
+
+
+.admin-team-history-eyebrow {
+    display: block;
+    margin-bottom: 6px;
+
+    font-size: 12px;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+
+    color: #64748b;
+}
+
+
+.admin-team-history-header h4 {
+    margin: 0;
+
+    font-size: 21px;
+    line-height: 1.35;
+    font-weight: 800;
+
+    color: #111827;
+}
+
+
+.admin-team-history-count {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background: #111827;
+    color: #ffffff;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   HISTORY LIST
+   ========================================================= */
+
+.admin-team-history-list {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =========================================================
+   HISTORY ITEM
+   ========================================================= */
+
+.admin-team-history-item {
+    width: 100%;
+
+    display: flex;
+    align-items: stretch;
+
+    gap: 16px;
+
+    position: relative;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   TIMELINE
+   ========================================================= */
+
+.admin-team-history-timeline {
+    position: relative;
+
+    width: 26px;
+    min-width: 26px;
+
+    display: flex;
+    justify-content: center;
+
+    flex-shrink: 0;
+}
+
+
+.admin-team-history-dot {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #16a34a;
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 900;
+
+    position: relative;
+    z-index: 2;
+}
+
+
+.admin-team-history-line {
+    position: absolute;
+
+    top: 26px;
+    bottom: 0;
+
+    left: 50%;
+
+    width: 2px;
+
+    transform: translateX(-50%);
+
+    background: #dbe3ea;
+}
+
+
+/* =========================================================
+   HISTORY CONTENT
+   ========================================================= */
+
+.admin-team-history-content {
+    flex: 1;
+    min-width: 0;
+
+    padding: 0 0 28px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   EVENT TITLE ROW
+   ========================================================= */
+
+.admin-team-history-event-row {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 9px;
+}
+
+
+.admin-team-history-event-row strong {
+    min-width: 0;
+
+    font-size: 17px;
+    line-height: 1.4;
+    font-weight: 800;
+
+    color: #111827;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   COMPLETED BADGE
+   ========================================================= */
+
+.admin-team-history-completed {
+    flex-shrink: 0;
+
+    padding: 6px 10px;
+
+    border-radius: 999px;
+
+    background: #dcfce7;
+    color: #166534;
+
+    font-size: 11px;
+    line-height: 1;
+    font-weight: 800;
+
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+
+/* =========================================================
+   HOST
+   ========================================================= */
+
+.admin-team-history-host {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+    margin-bottom: 11px;
+
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+
+.admin-team-history-host span {
+    color: #64748b;
+    font-weight: 600;
+}
+
+
+.admin-team-history-host strong {
+    color: #334155;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   DATES
+   ========================================================= */
+
+.admin-team-history-dates {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 22px;
+}
+
+
+.admin-team-history-dates span {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 7px;
+
+    color: #475569;
+
+    font-size: 13px;
+    line-height: 1.4;
+    font-weight: 600;
+}
+
+
+.admin-team-history-dates small {
+    color: #94a3b8;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   EMPTY HISTORY
+   ========================================================= */
+
+.admin-team-history-empty {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 20px;
+
+    background: #ffffff;
+
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+
+    box-sizing: border-box;
+}
+
+
+.admin-team-history-empty-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #f1f5f9;
+
+    font-size: 21px;
+}
+
+
+.admin-team-history-empty strong {
+    display: block;
+
+    margin-bottom: 4px;
+
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 800;
+
+    color: #334155;
+}
+
+
+.admin-team-history-empty p {
+    margin: 0;
+
+    font-size: 14px;
+    line-height: 1.5;
+
+    color: #64748b;
+}
+
+
+/* =========================================================
+   LARGE DESKTOP
+   ========================================================= */
+
+@media (min-width: 1200px) {
+
+    .admin-team-history {
+        padding: 26px 30px;
+    }
+
+
+    .admin-team-history-header {
+        margin-bottom: 24px;
+    }
+
+
+    .admin-team-history-header h4 {
+        font-size: 22px;
+    }
+
+
+    .admin-team-history-event-row strong {
+        font-size: 18px;
+    }
+
+
+    .admin-team-history-content {
+        padding-bottom: 30px;
+    }
+
+}
+
+
+/* =========================================================
+   TABLET / SMALL DESKTOP
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .admin-team-history {
+        padding: 22px;
+    }
+
+
+    .admin-team-history-event-row {
+        gap: 14px;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .admin-team-history {
+        margin-top: 20px;
+
+        padding: 18px;
+
+        border-radius: 15px;
+    }
+
+
+    .admin-team-history-header {
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+
+    .admin-team-history-header h4 {
+        font-size: 18px;
+    }
+
+
+    .admin-team-history-count {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+
+        font-size: 14px;
+    }
+
+
+    .admin-team-history-event-row {
+        align-items: flex-start;
+        flex-direction: column;
+
+        gap: 7px;
+    }
+
+
+    .admin-team-history-event-row strong {
+        font-size: 16px;
+    }
+
+
+    .admin-team-history-completed {
+        font-size: 10px;
+    }
+
+
+    .admin-team-history-dates {
+        align-items: flex-start;
+        flex-direction: column;
+
+        gap: 7px;
+    }
+
+
+    .admin-team-history-empty {
+        align-items: flex-start;
+
+        padding: 16px;
+    }
+
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+    .admin-team-history {
+        padding: 15px;
+    }
+
+
+    .admin-team-history-header h4 {
+        font-size: 17px;
+    }
+
+
+    .admin-team-history-item {
+        gap: 12px;
+    }
+
+
+    .admin-team-history-timeline {
+        width: 22px;
+        min-width: 22px;
+    }
+
+
+    .admin-team-history-dot {
+        width: 22px;
+        height: 22px;
+        min-width: 22px;
+
+        font-size: 11px;
+    }
+
+
+    .admin-team-history-line {
+        top: 22px;
+    }
+
+
+    .admin-team-history-content {
+        padding-bottom: 22px;
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   TEAM MEMBER CARD + HISTORY
+   FINAL RESPONSIVE OVERRIDE
+   ========================================================= */
+
+.admin-team-member {
+    width: 100%;
+    box-sizing: border-box;
+
+    display: grid;
+    grid-template-columns: minmax(260px, 1.1fr) minmax(300px, 1.5fr) minmax(240px, 0.9fr);
+    grid-template-areas:
+        "person info actions"
+        "history history history";
+
+    gap: 24px;
+
+    padding: 26px;
+
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   PERSON
+   ========================================================= */
+
+.admin-team-member-person {
+    grid-area: person;
+
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+}
+
+
+.admin-team-member-person > div:last-child {
+    min-width: 0;
+}
+
+
+.admin-team-member-person h3 {
+    margin: 0 0 5px;
+
+    font-size: 18px;
+    line-height: 1.35;
+    font-weight: 800;
+
+    color: #111827;
+
+    overflow-wrap: anywhere;
+}
+
+
+.admin-team-member-person p {
+    margin: 0;
+
+    font-size: 14px;
+    line-height: 1.5;
+
+    color: #64748b;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   AVATAR
+   ========================================================= */
+
+.admin-team-avatar {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 15px;
+
+    background: #eef2ff;
+    color: #3730a3;
+
+    font-size: 20px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   MEMBER INFORMATION
+   ========================================================= */
+
+.admin-team-member-info {
+    grid-area: info;
+
+    min-width: 0;
+
+    display: grid;
+    grid-template-columns: minmax(100px, 0.5fr) minmax(180px, 1.5fr);
+
+    gap: 22px;
+
+    align-items: center;
+}
+
+
+.admin-team-member-info > div {
+    min-width: 0;
+}
+
+
+.admin-team-member-info > div > span {
+    display: block;
+
+    margin-bottom: 6px;
+
+    font-size: 11px;
+    line-height: 1.2;
+    font-weight: 800;
+
+    letter-spacing: 0.08em;
+
+    color: #94a3b8;
+}
+
+
+.admin-team-member-info > div > strong {
+    display: block;
+
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 800;
+
+    color: #334155;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   CURRENT ASSIGNMENT
+   ========================================================= */
+
+.admin-team-assignment-column {
+    min-width: 0;
+}
+
+
+.admin-team-current-assignment,
+.admin-team-no-assignment {
+    min-width: 0;
+}
+
+
+.admin-team-current-assignment strong {
+    display: block;
+
+    font-size: 16px;
+    line-height: 1.4;
+    font-weight: 800;
+
+    color: #111827;
+
+    overflow-wrap: anywhere;
+}
+
+
+.admin-team-current-assignment small {
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: 13px;
+    line-height: 1.4;
+
+    color: #64748b;
+
+    overflow-wrap: anywhere;
+}
+
+
+.admin-team-assignment-label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    font-size: 10px;
+    line-height: 1.2;
+    font-weight: 800;
+
+    letter-spacing: 0.08em;
+
+    color: #94a3b8;
+}
+
+
+.admin-team-no-assignment span {
+    display: block;
+
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 700;
+
+    color: #475569;
+}
+
+
+.admin-team-no-assignment small {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 13px;
+    line-height: 1.4;
+
+    color: #94a3b8;
+}
+
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.admin-team-member-actions {
+    grid-area: actions;
+
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 14px;
+
+    justify-content: center;
+}
+
+
+.admin-team-action-top {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+}
+
+
+.admin-team-action-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+}
+
+
+.admin-team-action-bottom button {
+    min-height: 38px;
+
+    padding: 8px 13px;
+
+    border: 1px solid #dbe1e8;
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 13px;
+    line-height: 1.2;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+}
+
+
+.admin-team-action-bottom button:hover {
+    background: #f8fafc;
+}
+
+
+.admin-team-action-bottom .admin-team-assign-action {
+    background: #111827;
+    border-color: #111827;
+    color: #ffffff;
+}
+
+
+.admin-team-action-bottom .admin-team-assign-action:hover {
+    background: #1f2937;
+}
+
+
+.admin-team-action-bottom button.danger {
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+
+.admin-team-status {
+    font-size: 13px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+
+.admin-team-status.active {
+    color: #16a34a;
+}
+
+
+.admin-team-status.disabled {
+    color: #94a3b8;
+}
+
+
+/* =========================================================
+   INVITATION BUTTON
+   ========================================================= */
+
+.admin-team-invite-btn {
+    min-height: 36px;
+
+    padding: 8px 12px;
+
+    border: 1px solid #dbe1e8;
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 12px;
+    line-height: 1.2;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+}
+
+
+.admin-team-invite-btn:hover {
+    background: #f8fafc;
+}
+
+
+.admin-team-invite-btn.pending {
+    color: #92400e;
+    border-color: #fde68a;
+    background: #fffbeb;
+}
+
+
+/* =========================================================
+   HISTORY
+   ========================================================= */
+
+.admin-team-history-wrapper {
+    grid-area: history;
+
+    width: 100%;
+    min-width: 0;
+
+    box-sizing: border-box;
+}
+
+
+.admin-team-history {
+    width: 100%;
+    min-width: 0;
+
+    margin-top: 0;
+
+    padding: 24px 28px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 17px;
+
+    box-sizing: border-box;
+}
+
+
+.admin-team-history-header {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 20px;
+}
+
+
+.admin-team-history-eyebrow {
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 11px;
+    line-height: 1.2;
+    font-weight: 800;
+
+    letter-spacing: 0.08em;
+
+    color: #64748b;
+}
+
+
+.admin-team-history-header h4 {
+    margin: 0;
+
+    font-size: 20px;
+    line-height: 1.35;
+    font-weight: 800;
+
+    color: #111827;
+}
+
+
+.admin-team-history-count {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #111827;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   HISTORY ITEMS
+   ========================================================= */
+
+.admin-team-history-list {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.admin-team-history-item {
+    width: 100%;
+    min-width: 0;
+
+    display: flex;
+
+    gap: 15px;
+
+    box-sizing: border-box;
+}
+
+
+.admin-team-history-timeline {
+    position: relative;
+
+    width: 26px;
+    min-width: 26px;
+
+    display: flex;
+    justify-content: center;
+}
+
+
+.admin-team-history-dot {
+    width: 25px;
+    height: 25px;
+    min-width: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #16a34a;
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 900;
+
+    position: relative;
+    z-index: 2;
+}
+
+
+.admin-team-history-line {
+    position: absolute;
+
+    top: 25px;
+    bottom: 0;
+
+    left: 50%;
+
+    width: 2px;
+
+    transform: translateX(-50%);
+
+    background: #dbe3ea;
+}
+
+
+.admin-team-history-content {
+    flex: 1;
+    min-width: 0;
+
+    padding-bottom: 25px;
+}
+
+
+.admin-team-history-event-row {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    margin-bottom: 8px;
+}
+
+
+.admin-team-history-event-row strong {
+    min-width: 0;
+
+    font-size: 16px;
+    line-height: 1.4;
+    font-weight: 800;
+
+    color: #111827;
+
+    overflow-wrap: anywhere;
+}
+
+
+.admin-team-history-completed {
+    flex-shrink: 0;
+
+    padding: 5px 9px;
+
+    border-radius: 999px;
+
+    background: #dcfce7;
+    color: #166534;
+
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+
+.admin-team-history-host {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+    margin-bottom: 8px;
+
+    font-size: 13px;
+}
+
+
+.admin-team-history-host span {
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+
+.admin-team-history-host strong {
+    color: #475569;
+    font-weight: 700;
+}
+
+
+.admin-team-history-dates {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 20px;
+}
+
+
+.admin-team-history-dates span {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 6px;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.admin-team-history-dates small {
+    color: #94a3b8;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   EMPTY HISTORY
+   ========================================================= */
+
+.admin-team-history-empty {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 18px;
+
+    background: #ffffff;
+
+    border: 1px dashed #cbd5e1;
+    border-radius: 13px;
+
+    box-sizing: border-box;
+}
+
+
+.admin-team-history-empty-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background: #f1f5f9;
+
+    font-size: 20px;
+}
+
+
+/* =========================================================
+   LARGE DESKTOP
+   ========================================================= */
+
+@media (min-width: 1400px) {
+
+    .admin-team-member {
+        grid-template-columns:
+            minmax(300px, 1fr)
+            minmax(400px, 1.4fr)
+            minmax(300px, 0.9fr);
+
+        gap: 28px;
+
+        padding: 30px;
+    }
+
+}
+
+
+/* =========================================================
+   DESKTOP / LAPTOP
+   ========================================================= */
+
+@media (min-width: 901px) and (max-width: 1200px) {
+
+    .admin-team-member {
+        grid-template-columns:
+            minmax(230px, 0.9fr)
+            minmax(280px, 1.2fr);
+
+        grid-template-areas:
+            "person actions"
+            "info info"
+            "history history";
+
+        gap: 22px;
+    }
+
+
+    .admin-team-member-actions {
+        align-items: flex-end;
+    }
+
+
+    .admin-team-action-top,
+    .admin-team-action-bottom {
+        justify-content: flex-end;
+    }
+
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .admin-team-member {
+        grid-template-columns: 1fr;
+
+        grid-template-areas:
+            "person"
+            "info"
+            "actions"
+            "history";
+
+        gap: 20px;
+
+        padding: 22px;
+    }
+
+
+    .admin-team-member-info {
+        grid-template-columns: 1fr 1fr;
+
+        gap: 18px;
+
+        padding-top: 4px;
+    }
+
+
+    .admin-team-member-actions {
+        width: 100%;
+    }
+
+
+    .admin-team-action-top,
+    .admin-team-action-bottom {
+        justify-content: flex-start;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .admin-team-member {
+        padding: 18px;
+
+        border-radius: 16px;
+
+        gap: 18px;
+    }
+
+
+    .admin-team-member-info {
+        grid-template-columns: 1fr;
+
+        gap: 16px;
+    }
+
+
+    .admin-team-member-person {
+        align-items: flex-start;
+    }
+
+
+    .admin-team-avatar {
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+
+        border-radius: 13px;
+
+        font-size: 18px;
+    }
+
+
+    .admin-team-member-person h3 {
+        font-size: 17px;
+    }
+
+
+    .admin-team-member-person p {
+        font-size: 13px;
+    }
+
+
+    .admin-team-action-top,
+    .admin-team-action-bottom {
+        width: 100%;
+
+        justify-content: flex-start;
+    }
+
+
+    .admin-team-action-bottom button {
+        flex: 1 1 auto;
+    }
+
+
+    .admin-team-history {
+        padding: 18px;
+        border-radius: 14px;
+    }
+
+
+    .admin-team-history-event-row {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 7px;
+    }
+
+
+    .admin-team-history-dates {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 7px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+    .admin-team-member {
+        padding: 15px;
+    }
+
+
+    .admin-team-member-person {
+        gap: 11px;
+    }
+
+
+    .admin-team-avatar {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+
+        font-size: 16px;
+    }
+
+
+    .admin-team-action-bottom {
+        flex-direction: column;
+    }
+
+
+    .admin-team-action-bottom button {
+        width: 100%;
+        flex: none;
+    }
+
+
+    .admin-team-history {
+        padding: 15px;
+    }
+
+
+    .admin-team-history-item {
+        gap: 11px;
+    }
+
+
+    .admin-team-history-timeline {
+        width: 22px;
+        min-width: 22px;
+    }
+
+
+    .admin-team-history-dot {
+        width: 22px;
+        height: 22px;
+        min-width: 22px;
+    }
+
+
+    .admin-team-history-line {
+        top: 22px;
+    }
+
+}
+/* =========================================================
+   ASSIGNMENT HISTORY — VIEW ALL
+   ========================================================= */
+
+.admin-team-history-more {
+    width: 100%;
+    margin-top: 4px;
+}
+
+/* =========================================================
+   VIEW ALL BUTTON
+   ========================================================= */
+
+.admin-team-history-more-button {
+    width: 100%;
+    min-height: 50px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    padding: 0 16px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #dbe3ea;
+    border-radius: 12px;
+
+    background: #ffffff;
+    color: #334155;
+
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.3;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    list-style: none;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease,
+        transform 0.18s ease;
+}
+
+/* Remove browser's default details arrow */
+
+.admin-team-history-more-button::-webkit-details-marker {
+    display: none;
+}
+
+.admin-team-history-more-button::marker {
+    display: none;
+    content: "";
+}
+
+/* =========================================================
+   HOVER
+   ========================================================= */
+
+.admin-team-history-more-button:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #111827;
+}
+
+/* =========================================================
+   ARROW
+   ========================================================= */
+
+.admin-team-history-more-arrow {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 28px;
+    height: 28px;
+
+    border-radius: 8px;
+
+    background: #f1f5f9;
+
+    font-size: 16px;
+    line-height: 1;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+/* =========================================================
+   OPEN STATE
+   ========================================================= */
+
+.admin-team-history-more[open]
+.admin-team-history-more-arrow {
+    transform: rotate(180deg);
+    background: #e2e8f0;
+}
+
+.admin-team-history-more[open]
+.admin-team-history-more-button {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+/* =========================================================
+   FULL HISTORY LIST
+   ========================================================= */
+
+.admin-team-history-full-list {
+    margin-top: 16px;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .admin-team-history-more-button {
+        min-height: 48px;
+
+        padding: 0 14px;
+
+        font-size: 14px;
+    }
+
+    .admin-team-history-more-arrow {
+        width: 27px;
+        height: 27px;
+
+        font-size: 15px;
+    }
+
+}
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+    .admin-team-history-more-button {
+        min-height: 46px;
+
+        padding: 0 12px;
+
+        font-size: 13px;
+    }
+
+    .admin-team-history-more-arrow {
+        width: 25px;
+        height: 25px;
+
+        font-size: 14px;
+    }
+
+}

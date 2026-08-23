@@ -3,7 +3,7 @@ import "../styles/Dashboard.css";
 import { useContext, useEffect, useState } from "react";
 import { EventContext } from "../context/EventContext";
 import { useAuth } from "../context/AuthContext";
-import HostSidebar from "../components/HostSidebar";
+
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -337,7 +337,7 @@ function Dashboard() {
   return (
     <div className="host-dashboard-layout">
 
-      <HostSidebar />
+
 
       <main className="host-dashboard-content">
 

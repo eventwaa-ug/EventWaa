@@ -1,0 +1,421 @@
+/* ============================================================
+   ATTENDANCE PASS PAGE
+============================================================ */
+
+.attendance-pass-page {
+    min-height: 100vh;
+
+    width: 100%;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    padding: 30px 20px;
+
+    box-sizing: border-box;
+
+    background: #f7f8fc;
+}
+
+
+/* ============================================================
+   PASS CARD
+============================================================ */
+
+.attendance-pass-card {
+    width: 100%;
+
+    max-width: 520px;
+
+    background: white;
+
+    border-radius: 24px;
+
+    padding: 35px;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.1);
+
+    border: 1px solid #eeeeee;
+}
+
+
+/* ============================================================
+   HEADER
+============================================================ */
+
+.attendance-pass-header {
+    text-align: center;
+
+    margin-bottom: 25px;
+}
+
+.attendance-pass-badge {
+    display: inline-block;
+
+    padding: 7px 14px;
+
+    border-radius: 30px;
+
+    background: #ecfdf5;
+
+    color: #15803d;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.8px;
+
+    margin-bottom: 12px;
+}
+
+.attendance-pass-header h1 {
+    margin: 0;
+
+    font-size: 30px;
+
+    color: #111827;
+}
+
+.attendance-pass-header h2 {
+    margin: 10px 0 0;
+
+    font-size: 20px;
+
+    color: #4b5563;
+
+    line-height: 1.4;
+}
+
+
+/* ============================================================
+   PASS ID
+============================================================ */
+
+.attendance-pass-id {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 14px 16px;
+
+    border-radius: 12px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e5e7eb;
+
+    margin-bottom: 25px;
+}
+
+.attendance-pass-id span {
+    color: #6b7280;
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+.attendance-pass-id strong {
+    color: #111827;
+
+    font-size: 14px;
+
+    word-break: break-all;
+
+    text-align: right;
+}
+
+
+/* ============================================================
+   QR SECTION
+============================================================ */
+
+.attendance-qr-section {
+    text-align: center;
+
+    margin: 25px 0 30px;
+}
+
+.attendance-qr-wrapper {
+    width: 230px;
+
+    height: 230px;
+
+    margin: 0 auto;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: white;
+
+    border-radius: 18px;
+
+    border: 1px solid #e5e7eb;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.06);
+}
+
+.attendance-qr-wrapper canvas {
+    max-width: 100%;
+
+    height: auto;
+}
+
+.attendance-qr-instruction {
+    margin: 14px 0 0;
+
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+
+/* ============================================================
+   ATTENDEE DETAILS
+============================================================ */
+
+.attendance-pass-details {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+
+    margin-bottom: 25px;
+}
+
+.attendance-detail {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 13px 15px;
+
+    border-bottom: 1px solid #eeeeee;
+}
+
+.attendance-detail span {
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+.attendance-detail strong {
+    color: #111827;
+
+    font-size: 15px;
+
+    text-align: right;
+
+    word-break: break-word;
+}
+
+
+/* ============================================================
+   STATUS
+============================================================ */
+
+.attendance-pass-status {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 16px;
+
+    border-radius: 14px;
+
+    background: #ecfdf5;
+
+    border: 1px solid #bbf7d0;
+
+    margin-top: 10px;
+}
+
+.status-icon {
+    width: 34px;
+
+    height: 34px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #16a34a;
+
+    color: white;
+
+    font-weight: 800;
+
+    font-size: 18px;
+}
+
+.attendance-pass-status strong {
+    display: block;
+
+    color: #15803d;
+
+    font-size: 15px;
+}
+
+.attendance-pass-status p {
+    margin: 4px 0 0;
+
+    color: #166534;
+
+    font-size: 13px;
+
+    line-height: 1.4;
+}
+
+
+/* ============================================================
+   FOOTER
+============================================================ */
+
+.attendance-pass-footer {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-top: 25px;
+
+    padding-top: 18px;
+
+    border-top: 1px solid #eeeeee;
+
+    color: #9ca3af;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 600px) {
+
+    .attendance-pass-page {
+        padding: 15px;
+
+        align-items: flex-start;
+    }
+
+    .attendance-pass-card {
+        margin-top: 15px;
+
+        padding: 24px 18px;
+
+        border-radius: 20px;
+    }
+
+    .attendance-pass-header h1 {
+        font-size: 26px;
+    }
+
+    .attendance-pass-header h2 {
+        font-size: 18px;
+    }
+
+    .attendance-qr-wrapper {
+        width: 215px;
+
+        height: 215px;
+    }
+
+    .attendance-pass-id {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 6px;
+    }
+
+    .attendance-pass-id strong {
+        text-align: left;
+    }
+
+    .attendance-detail {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 5px;
+    }
+
+    .attendance-detail strong {
+        text-align: left;
+    }
+
+    .attendance-pass-footer {
+        flex-direction: column;
+
+        text-align: center;
+
+        gap: 7px;
+    }
+}
+
+
+/* ============================================================
+   SMALL PHONES
+============================================================ */
+
+@media (max-width: 380px) {
+
+    .attendance-pass-card {
+        padding: 20px 14px;
+    }
+
+    .attendance-pass-header h1 {
+        font-size: 23px;
+    }
+
+    .attendance-pass-header h2 {
+        font-size: 16px;
+    }
+
+    .attendance-qr-wrapper {
+        width: 190px;
+
+        height: 190px;
+    }
+
+    .attendance-qr-wrapper canvas {
+        width: 170px !important;
+
+        height: 170px !important;
+    }
+
+}

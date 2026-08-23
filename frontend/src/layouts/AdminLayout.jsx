@@ -38,12 +38,26 @@ function AdminLayout(){
                         👥 Users
                     </Link>
 
+                    <Link
+                        to="/admin/team-members"
+                        onClick={() => setOpenMenu(false)}
+                    >
+                        👥 Team Members
+                    </Link>
+
 
                     <Link to="/admin/events"
                     onClick={()=> setOpenMenu(false)}
                     >
                         🎉 Events
                     </Link>
+
+                     <Link to="/admin/scan"
+                    onClick={() => setOpenMenu(false)}
+                    >
+                        📷 Scan Tickets
+                    </Link>
+
 
 
                     <Link to="/admin/host-applications"
@@ -66,6 +80,18 @@ function AdminLayout(){
                         <span>Refunds</span>
                     </Link>
 
+                    <Link to="/admin/wallet"
+                    onClick={()=> setOpenMenu(false)}
+                    >
+                    💰 Wallet
+                    </Link>
+                    
+                    <Link to="/admin/withdrawals"
+                    onClick={() => setOpenMenu(false)}
+                    >
+                    💰 Host Withdrawals
+                    </Link>
+
                     <Link to="/admin/reports"
                     onClick={() => setOpenMenu(false)}
                     >
@@ -73,18 +99,13 @@ function AdminLayout(){
                         <span>Reports</span>
                     </Link>
 
-
                     <Link to="/admin/settings"
                     onClick={()=> setOpenMenu(false)}
                     >
                         ⚙️ Settings
                     </Link>
 
-                    <Link to="/admin/wallet"
-                    onClick={()=> setOpenMenu(false)}
-                    >
-                        Wallet
-                    </Link>
+                    
 
 
                 </nav>

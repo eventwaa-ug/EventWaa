@@ -1,0 +1,751 @@
+/* ============================================================
+   TEAM INVITATION PAGE
+   ============================================================ */
+
+.team-invitation-page {
+    width: 100%;
+    min-height: 100vh;
+
+    padding: 40px 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(37, 99, 235, 0.08),
+            transparent 35%
+        ),
+        #f7f8fc;
+
+    box-sizing: border-box;
+}
+
+
+/* ============================================================
+   CARD
+   ============================================================ */
+
+.team-invitation-card {
+    width: 100%;
+    max-width: 560px;
+
+    padding: 42px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 26px;
+
+    box-shadow:
+        0 20px 60px rgba(15, 23, 42, 0.10);
+
+    box-sizing: border-box;
+
+    text-align: center;
+}
+
+
+/* ============================================================
+   BRAND
+   ============================================================ */
+
+.team-invitation-brand {
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    min-height: 58px;
+
+    margin-bottom: 24px;
+}
+
+.team-invitation-logo {
+    display: block;
+
+    max-width: 210px;
+    max-height: 64px;
+
+    width: auto;
+    height: auto;
+
+    object-fit: contain;
+}
+
+.team-invitation-brand-name {
+    color: #111827;
+
+    font-size: 28px;
+    font-weight: 900;
+
+    letter-spacing: -0.8px;
+}
+
+
+/* ============================================================
+   WELCOME ICON
+   ============================================================ */
+
+.team-invitation-welcome-icon {
+    width: 76px;
+    height: 76px;
+
+    margin: 0 auto 18px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #eff6ff;
+
+    font-size: 38px;
+
+    box-shadow:
+        0 8px 25px rgba(37, 99, 235, 0.10);
+}
+
+
+/* ============================================================
+   EYEBROW
+   ============================================================ */
+
+.team-invitation-eyebrow {
+    display: inline-block;
+
+    margin-bottom: 9px;
+
+    color: #2563eb;
+
+    font-size: 12px;
+
+    font-weight: 900;
+
+    letter-spacing: 1.8px;
+}
+
+
+/* ============================================================
+   HEADINGS
+   ============================================================ */
+
+.team-invitation-card h1 {
+    margin: 0;
+
+    color: #111827;
+
+    font-size: 34px;
+
+    line-height: 1.15;
+
+    font-weight: 850;
+
+    letter-spacing: -0.7px;
+}
+
+.team-invitation-intro {
+    max-width: 450px;
+
+    margin: 14px auto 0;
+
+    color: #6b7280;
+
+    font-size: 16px;
+
+    line-height: 1.65;
+}
+
+.team-invitation-intro strong {
+    color: #111827;
+}
+
+
+/* ============================================================
+   DETAILS
+   ============================================================ */
+
+.team-invitation-details {
+    margin-top: 28px;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+
+    text-align: left;
+}
+
+.team-invitation-details > div {
+    min-width: 0;
+
+    padding: 15px;
+
+    border-radius: 14px;
+
+    background: #f9fafb;
+
+    border: 1px solid #e5e7eb;
+}
+
+.team-invitation-details span {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #6b7280;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.8px;
+}
+
+.team-invitation-details strong {
+    display: block;
+
+    color: #111827;
+
+    font-size: 14px;
+
+    line-height: 1.4;
+
+    word-break: break-word;
+}
+
+
+/* ============================================================
+   FORM
+   ============================================================ */
+
+.team-invitation-form {
+    margin-top: 28px;
+
+    text-align: left;
+}
+
+.team-invitation-field {
+    margin-bottom: 18px;
+}
+
+.team-invitation-field label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #111827;
+
+    font-size: 15px;
+
+    font-weight: 700;
+}
+
+
+/* ============================================================
+   PASSWORD INPUT
+   ============================================================ */
+
+.team-invitation-password {
+    position: relative;
+
+    width: 100%;
+}
+
+.team-invitation-password input {
+    width: 100%;
+
+    height: 54px;
+
+    padding: 0 52px 0 16px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 12px;
+
+    background: #ffffff;
+
+    color: #111827;
+
+    font-size: 16px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.team-invitation-password input::placeholder {
+    color: #9ca3af;
+}
+
+.team-invitation-password input:focus {
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 4px rgba(37, 99, 235, 0.10);
+}
+
+.team-invitation-password input:disabled {
+    background: #f3f4f6;
+
+    cursor: not-allowed;
+}
+
+
+/* ============================================================
+   EYE BUTTON
+   ============================================================ */
+
+.team-invitation-eye {
+    position: absolute;
+
+    top: 2%;
+    right: 10px;
+
+    width: 60px;
+    height: 60px;
+
+    transform: translateY(-50%);
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+
+    background: transparent;
+
+    color: #6b7280;
+
+    cursor: pointer;
+
+    border-radius: 10px;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+.team-invitation-eye:hover {
+    background: #f3f4f6;
+
+    color: #2563eb;
+}
+
+.team-invitation-eye:disabled {
+    cursor: not-allowed;
+
+    opacity: 0.5;
+}
+
+
+/* ============================================================
+   MESSAGES
+   ============================================================ */
+
+.team-invitation-message {
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 10px;
+
+    padding: 14px;
+
+    margin: 16px 0;
+
+    border-radius: 12px;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+.team-invitation-message.error {
+    background: #fef2f2;
+
+    border: 1px solid #fecaca;
+
+    color: #b91c1c;
+}
+
+.team-invitation-message.success {
+    background: #f0fdf4;
+
+    border: 1px solid #bbf7d0;
+
+    color: #15803d;
+}
+
+
+/* ============================================================
+   SUBMIT BUTTON
+   ============================================================ */
+
+.team-invitation-submit {
+    width: 100%;
+
+    min-height: 54px;
+
+    margin-top: 8px;
+
+    padding: 14px 18px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 9px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-size: 16px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.team-invitation-submit:hover:not(:disabled) {
+    background: #1d4ed8;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 8px 20px rgba(37, 99, 235, 0.22);
+}
+
+.team-invitation-submit:disabled {
+    opacity: 0.7;
+
+    cursor: not-allowed;
+}
+
+
+/* ============================================================
+   BUTTON SPINNER
+   ============================================================ */
+
+.team-button-spinner {
+    width: 18px;
+    height: 18px;
+
+    border: 2px solid rgba(255, 255, 255, 0.35);
+
+    border-top-color: #ffffff;
+
+    border-radius: 50%;
+
+    animation:
+        teamInvitationSpin
+        0.7s linear infinite;
+}
+
+@keyframes teamInvitationSpin {
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.team-invitation-footer {
+    margin-top: 22px;
+
+    color: #9ca3af;
+
+    font-size: 13px;
+}
+
+
+/* ============================================================
+   LOADING
+   ============================================================ */
+
+.team-invitation-loading {
+    padding: 20px 0 5px;
+}
+
+.team-invitation-loading h2 {
+    margin: 20px 0 7px;
+
+    color: #111827;
+
+    font-size: 22px;
+}
+
+.team-invitation-loading p {
+    margin: 0;
+
+    color: #6b7280;
+
+    font-size: 15px;
+}
+
+.team-invitation-spinner {
+    width: 46px;
+    height: 46px;
+
+    margin: 0 auto;
+
+    border: 4px solid #dbeafe;
+
+    border-top-color: #2563eb;
+
+    border-radius: 50%;
+
+    animation:
+        teamInvitationSpin
+        0.8s linear infinite;
+}
+
+
+/* ============================================================
+   ERROR SCREEN
+   ============================================================ */
+
+.team-invitation-error-icon {
+    width: 76px;
+    height: 76px;
+
+    margin: 0 auto 18px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #fef2f2;
+
+    color: #dc2626;
+}
+
+.team-invitation-error {
+    margin: 15px auto 0;
+
+    max-width: 450px;
+
+    color: #b91c1c;
+
+    font-size: 15px;
+
+    line-height: 1.6;
+}
+
+.team-invitation-help {
+    margin-top: 22px;
+
+    padding: 16px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
+    border-radius: 14px;
+
+    background: #f9fafb;
+
+    border: 1px solid #e5e7eb;
+
+    text-align: left;
+}
+
+.team-invitation-help strong {
+    color: #111827;
+
+    font-size: 14px;
+}
+
+.team-invitation-help span {
+    color: #6b7280;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+/* ============================================================
+   ERROR SCREEN BUTTONS
+   ============================================================ */
+
+.team-invitation-primary-btn,
+.team-invitation-secondary-btn {
+    width: 100%;
+
+    min-height: 52px;
+
+    margin-top: 14px;
+
+    border-radius: 12px;
+
+    font-size: 15px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+.team-invitation-primary-btn {
+    border: none;
+
+    background: #2563eb;
+
+    color: white;
+}
+
+.team-invitation-primary-btn:hover {
+    background: #1d4ed8;
+}
+
+.team-invitation-secondary-btn {
+    border: 1px solid #d1d5db;
+
+    background: white;
+
+    color: #374151;
+}
+
+.team-invitation-secondary-btn:hover {
+    background: #f9fafb;
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 600px) {
+
+    .team-invitation-page {
+        min-height: 100dvh;
+
+        padding: 20px 14px;
+
+        align-items: flex-start;
+    }
+
+
+    .team-invitation-card {
+        margin-top: 10px;
+
+        padding: 28px 20px;
+
+        border-radius: 22px;
+    }
+
+
+    .team-invitation-logo {
+        max-width: 170px;
+
+        max-height: 56px;
+    }
+
+
+    .team-invitation-brand-name {
+        font-size: 25px;
+    }
+
+
+    .team-invitation-welcome-icon {
+        width: 68px;
+        height: 68px;
+
+        font-size: 34px;
+    }
+
+
+    .team-invitation-card h1 {
+        font-size: 29px;
+    }
+
+
+    .team-invitation-intro {
+        font-size: 15px;
+    }
+
+
+    .team-invitation-details {
+        grid-template-columns: 1fr;
+
+        gap: 10px;
+    }
+
+
+    .team-invitation-details > div {
+        padding: 14px;
+    }
+
+
+    .team-invitation-password input {
+        height: 56px;
+
+        font-size: 16px;
+    }
+
+
+    .team-invitation-submit {
+        min-height: 56px;
+
+        font-size: 16px;
+    }
+
+}
+
+
+/* ============================================================
+   VERY SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 380px) {
+
+    .team-invitation-page {
+        padding: 14px 10px;
+    }
+
+
+    .team-invitation-card {
+        padding: 24px 16px;
+
+        border-radius: 20px;
+    }
+
+
+    .team-invitation-card h1 {
+        font-size: 26px;
+    }
+
+}

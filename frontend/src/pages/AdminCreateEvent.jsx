@@ -92,6 +92,7 @@ data.append("organizerName", "EventWaa");
 data.append("hostName", "EventWaa");
 data.append("hostEmail", "admin@eventwaa.com");
 data.append("verifiedHost", true);
+data.append("adminEvent", "true");
 try {
   const response = await fetch("http://localhost:5000/events", {
     method: "POST",

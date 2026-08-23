@@ -1,0 +1,805 @@
+/* ============================================================
+   EVENTWAA TEAM TICKET LOOKUP
+   ============================================================ */
+.ticket-lookup-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 28px;
+  background: #f7f8fc;
+  box-sizing: border-box;
+  color: #172033;
+}
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+.ticket-lookup-topbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 34px;
+}
+.ticket-lookup-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: none;
+  background: transparent;
+  color: #465168;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 8px 0;
+  transition: 0.2s ease;
+}
+.ticket-lookup-back-btn:hover {
+  color: #111827;
+  transform: translateX(-2px);
+}
+.ticket-lookup-topbar-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+/* ============================================================
+   HEADER
+   ============================================================ */
+.ticket-lookup-header {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto 28px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.ticket-lookup-header-icon {
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111827;
+  color: white;
+  box-shadow:
+    0 8px 20px rgba(17, 24, 39, 0.15);
+}
+.ticket-lookup-header h1 {
+  margin: 0 0 5px;
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.ticket-lookup-header p {
+  margin: 0;
+  color: #667085;
+  font-size: 16px;
+  line-height: 1.5;
+}
+/* ============================================================
+   SEARCH CARD
+   ============================================================ */
+.ticket-lookup-search-card {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto 28px;
+  padding: 28px;
+  background: white;
+  border: 1px solid #e8ebf2;
+  border-radius: 20px;
+  box-shadow:
+    0 8px 30px rgba(16, 24, 40, 0.06);
+  box-sizing: border-box;
+}
+.ticket-lookup-search-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+.ticket-lookup-search-heading h2 {
+  margin: 0 0 5px;
+  font-size: 21px;
+  font-weight: 800;
+}
+.ticket-lookup-search-heading p {
+  margin: 0;
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.ticket-lookup-search-icon {
+  color: #667085;
+  flex-shrink: 0;
+}
+/* ============================================================
+   SEARCH FORM
+   ============================================================ */
+.ticket-lookup-form {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto
+    auto;
+  gap: 12px;
+  align-items: center;
+}
+.ticket-lookup-input-wrapper {
+  min-width: 0;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 16px;
+  border: 1.5px solid #d9deea;
+  border-radius: 12px;
+  background: #fff;
+  color: #667085;
+  box-sizing: border-box;
+  transition: 0.2s ease;
+}
+.ticket-lookup-input-wrapper:focus-within {
+  border-color: #111827;
+  box-shadow:
+    0 0 0 4px rgba(17, 24, 39, 0.07);
+}
+.ticket-lookup-input-wrapper input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #172033;
+  font-size: 16px;
+  font-weight: 600;
+}
+.ticket-lookup-input-wrapper input::placeholder {
+  color: #98a2b3;
+  font-weight: 500;
+}
+.ticket-lookup-search-btn {
+  height: 54px;
+  padding: 0 21px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: none;
+  border-radius: 12px;
+  background: #111827;
+  color: white;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.2s ease;
+}
+.ticket-lookup-search-btn:hover {
+  background: #000;
+  transform: translateY(-1px);
+}
+.ticket-lookup-search-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+.ticket-lookup-clear-btn {
+  height: 54px;
+  padding: 0 18px;
+  border: 1px solid #d9deea;
+  border-radius: 12px;
+  background: white;
+  color: #475467;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.ticket-lookup-clear-btn:hover {
+  background: #f8fafc;
+}
+/* ============================================================
+   ERROR
+   ============================================================ */
+.ticket-lookup-error {
+  margin-top: 16px;
+  padding: 13px 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 11px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #be123c;
+  font-size: 14px;
+  font-weight: 700;
+}
+/* ============================================================
+   RESULT
+   ============================================================ */
+.ticket-lookup-result {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+/* ============================================================
+   STATUS
+   ============================================================ */
+.ticket-lookup-status {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 22px 24px;
+  border-radius: 18px;
+  margin-bottom: 15px;
+  border: 1px solid;
+}
+.ticket-lookup-status.is-valid {
+  background: #ecfdf3;
+  border-color: #a7f3d0;
+  color: #047857;
+}
+.ticket-lookup-status.is-invalid {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #be123c;
+}
+.ticket-lookup-status-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+}
+.ticket-lookup-status span {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+.ticket-lookup-status h2 {
+  margin: 0;
+  font-size: 23px;
+  font-weight: 850;
+}
+/* ============================================================
+   ID CARD
+   ============================================================ */
+.ticket-lookup-id-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 22px;
+  background: white;
+  border: 1px solid #e8ebf2;
+  border-radius: 17px;
+  margin-bottom: 16px;
+  box-shadow:
+    0 5px 20px rgba(16, 24, 40, 0.04);
+}
+.ticket-lookup-id-card span {
+  display: block;
+  margin-bottom: 5px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 700;
+}
+.ticket-lookup-id-card strong {
+  display: block;
+  font-size: 19px;
+  letter-spacing: 0.02em;
+  word-break: break-all;
+}
+.ticket-lookup-id-badge {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #344054;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+/* ============================================================
+   INFORMATION GRID
+   ============================================================ */
+.ticket-lookup-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.ticket-lookup-info-card {
+  padding: 22px;
+  background: white;
+  border: 1px solid #e8ebf2;
+  border-radius: 17px;
+  box-shadow:
+    0 5px 20px rgba(16, 24, 40, 0.04);
+}
+.ticket-lookup-info-card-header {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 18px;
+}
+.ticket-lookup-info-card-header h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+}
+.ticket-lookup-card-icon {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #f2f4f7;
+  color: #344054;
+}
+.ticket-lookup-info-row {
+  padding: 12px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  border-top: 1px solid #eef0f4;
+}
+.ticket-lookup-info-row span {
+  color: #667085;
+  font-size: 13px;
+  font-weight: 600;
+}
+.ticket-lookup-info-row strong {
+  max-width: 65%;
+  text-align: right;
+  color: #172033;
+  font-size: 14px;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+.ticket-lookup-email {
+  color: #475467 !important;
+}
+/* ============================================================
+   ENTRY CARD
+   ============================================================ */
+.ticket-lookup-entry-card {
+  padding: 24px;
+  background: white;
+  border: 1px solid #e8ebf2;
+  border-radius: 18px;
+  margin-bottom: 16px;
+  box-shadow:
+    0 5px 20px rgba(16, 24, 40, 0.04);
+}
+.ticket-lookup-entry-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+  color: #475467;
+}
+.ticket-lookup-entry-header h3 {
+  margin: 0 0 5px;
+  color: #172033;
+  font-size: 18px;
+  font-weight: 800;
+}
+.ticket-lookup-entry-header p {
+  margin: 0;
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.ticket-lookup-entry-stats {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.ticket-lookup-entry-stat {
+  padding: 17px;
+  background: #f8f9fc;
+  border: 1px solid #edf0f5;
+  border-radius: 13px;
+}
+.ticket-lookup-entry-stat span {
+  display: block;
+  margin-bottom: 6px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 700;
+}
+.ticket-lookup-entry-stat strong {
+  font-size: 25px;
+  font-weight: 850;
+  color: #172033;
+}
+/* ============================================================
+   PROGRESS
+   ============================================================ */
+.ticket-lookup-progress {
+  margin-top: 21px;
+}
+.ticket-lookup-progress-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 8px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 700;
+}
+.ticket-lookup-progress-label strong {
+  color: #172033;
+}
+.ticket-lookup-progress-track {
+  width: 100%;
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e9edf3;
+}
+.ticket-lookup-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: #111827;
+  transition: width 0.3s ease;
+}
+/* ============================================================
+   WARNINGS
+   ============================================================ */
+.ticket-lookup-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  border: 1px solid;
+}
+.ticket-lookup-warning.refunded {
+  color: #b42318;
+  background: #fff4ed;
+  border-color: #fecdca;
+}
+.ticket-lookup-warning.limit {
+  color: #92400e;
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+.ticket-lookup-warning strong {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 14px;
+}
+.ticket-lookup-warning p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+/* ============================================================
+   LAST CHECK-IN
+   ============================================================ */
+.ticket-lookup-last-checkin {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  background: white;
+  border: 1px solid #e8ebf2;
+  border-radius: 16px;
+}
+.ticket-lookup-last-checkin span {
+  display: block;
+  margin-bottom: 3px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 700;
+}
+.ticket-lookup-last-checkin strong {
+  color: #172033;
+  font-size: 14px;
+}
+/* ============================================================
+   HISTORY
+   ============================================================ */
+.ticket-lookup-history-card {
+  padding: 23px;
+  background: white;
+  border: 1px solid #e8ebf2;
+  border-radius: 18px;
+  margin-bottom: 16px;
+  box-shadow:
+    0 5px 20px rgba(16, 24, 40, 0.04);
+}
+.ticket-lookup-history-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  color: #667085;
+  margin-bottom: 17px;
+}
+.ticket-lookup-history-header h3 {
+  margin: 0 0 4px;
+  color: #172033;
+  font-size: 18px;
+  font-weight: 800;
+}
+.ticket-lookup-history-header p {
+  margin: 0;
+  color: #667085;
+  font-size: 13px;
+}
+.ticket-lookup-history-list {
+  display: flex;
+  flex-direction: column;
+}
+.ticket-lookup-history-item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 13px 0;
+  border-top: 1px solid #eef0f4;
+}
+.ticket-lookup-history-number {
+  width: 35px;
+  height: 35px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f2f4f7;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 850;
+}
+.ticket-lookup-history-details {
+  flex: 1;
+  min-width: 0;
+}
+.ticket-lookup-history-details strong {
+  display: block;
+  margin-bottom: 3px;
+  color: #172033;
+  font-size: 14px;
+}
+.ticket-lookup-history-details span {
+  display: block;
+  color: #667085;
+  font-size: 12px;
+}
+.ticket-lookup-history-check {
+  color: #12b76a;
+  flex-shrink: 0;
+}
+.ticket-lookup-no-history {
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-top: 1px solid #eef0f4;
+  color: #667085;
+  font-size: 14px;
+  font-weight: 600;
+}
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+.ticket-lookup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-bottom: 30px;
+}
+.ticket-lookup-scan-btn,
+.ticket-lookup-new-btn {
+  min-height: 50px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-radius: 11px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.ticket-lookup-scan-btn {
+  border: none;
+  background: #111827;
+  color: white;
+}
+.ticket-lookup-scan-btn:hover {
+  background: #000;
+  transform: translateY(-1px);
+}
+.ticket-lookup-new-btn {
+  border: 1px solid #d9deea;
+  background: white;
+  color: #344054;
+}
+.ticket-lookup-new-btn:hover {
+  background: #f8fafc;
+}
+/* ============================================================
+   TABLET
+   ============================================================ */
+@media (max-width: 850px) {
+  .ticket-lookup-page {
+    padding: 22px;
+  }
+  .ticket-lookup-header h1 {
+    font-size: 28px;
+  }
+  .ticket-lookup-form {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ticket-lookup-input-wrapper {
+    grid-column: 1 / -1;
+  }
+  .ticket-lookup-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* ============================================================
+   MOBILE
+   ============================================================ */
+@media (max-width: 600px) {
+  .ticket-lookup-page {
+    padding: 16px;
+  }
+  .ticket-lookup-topbar {
+    margin-bottom: 25px;
+  }
+  .ticket-lookup-topbar-title {
+    font-size: 10px;
+  }
+  .ticket-lookup-back-btn {
+    font-size: 13px;
+  }
+  .ticket-lookup-header {
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .ticket-lookup-header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 13px;
+  }
+  .ticket-lookup-header h1 {
+    font-size: 24px;
+  }
+  .ticket-lookup-header p {
+    font-size: 13px;
+  }
+  .ticket-lookup-search-card {
+    padding: 19px;
+    border-radius: 16px;
+  }
+  .ticket-lookup-search-heading {
+    margin-bottom: 17px;
+  }
+  .ticket-lookup-search-heading h2 {
+    font-size: 18px;
+  }
+  .ticket-lookup-search-heading p {
+    font-size: 12px;
+  }
+  .ticket-lookup-form {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ticket-lookup-input-wrapper {
+    width: 100%;
+    height: 52px;
+  }
+  .ticket-lookup-search-btn {
+    width: 100%;
+    height: 52px;
+  }
+  .ticket-lookup-clear-btn {
+    width: 100%;
+    height: 48px;
+  }
+  .ticket-lookup-status {
+    padding: 17px;
+    border-radius: 15px;
+  }
+  .ticket-lookup-status-icon {
+    width: 42px;
+    height: 42px;
+  }
+  .ticket-lookup-status h2 {
+    font-size: 19px;
+  }
+  .ticket-lookup-id-card {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 17px;
+  }
+  .ticket-lookup-id-card strong {
+    font-size: 16px;
+  }
+  .ticket-lookup-info-card {
+    padding: 18px;
+  }
+  .ticket-lookup-entry-card {
+    padding: 18px;
+  }
+  .ticket-lookup-entry-stats {
+    grid-template-columns: 1fr;
+  }
+  .ticket-lookup-entry-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+  }
+  .ticket-lookup-entry-stat span {
+    margin-bottom: 0;
+  }
+  .ticket-lookup-entry-stat strong {
+    font-size: 22px;
+  }
+  .ticket-lookup-history-card {
+    padding: 18px;
+  }
+  .ticket-lookup-actions {
+    flex-direction: column;
+    padding-bottom: 20px;
+  }
+  .ticket-lookup-scan-btn,
+  .ticket-lookup-new-btn {
+    width: 100%;
+  }
+}
+/* ============================================================
+   VERY SMALL PHONES
+   ============================================================ */
+@media (max-width: 380px) {
+  .ticket-lookup-page {
+    padding: 12px;
+  }
+  .ticket-lookup-topbar-title {
+    display: none;
+  }
+  .ticket-lookup-header h1 {
+    font-size: 21px;
+  }
+  .ticket-lookup-header p {
+    font-size: 12px;
+  }
+  .ticket-lookup-info-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+  .ticket-lookup-info-row strong {
+    max-width: 100%;
+    text-align: left;
+  }
+}

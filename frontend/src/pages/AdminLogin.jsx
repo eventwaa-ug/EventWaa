@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ShieldCheck, LockKeyhole, ArrowLeft } from "lucide-react";
 import { usePlatformSettings } from "../context/PlatformSettingsContext.jsx";
 import "../styles/AdminLogin.css";
@@ -648,6 +648,13 @@ function AdminLogin() {
                                     </button>
 
                                 </div>
+
+                            </div>
+
+                            <div className="admin-forgot-password"> 
+                                <Link to="/admin/forgot-password">
+                                    Forgot admin password?
+                                </Link>
 
                             </div>
 

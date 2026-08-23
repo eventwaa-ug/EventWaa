@@ -2,54 +2,83 @@ import { Navigate, useLocation } from "react-router-dom";
 
 
 function AdminProtectedRoute({ children }) {
-
     const location = useLocation();
 
 
-    // =========================================================
-    // GET ADMIN AUTHENTICATION TOKEN
-    //
-    // Check localStorage first for:
-    // "Keep me signed in"
-    //
-    // Then check sessionStorage for:
-    // normal session-only login.
-    // =========================================================
+    /* =========================================================
+       READ ADMIN TOKEN
+    ========================================================= */
+
+    const localToken =
+        localStorage.getItem(
+            "eventwaa_admin_token"
+        );
+
+    const sessionToken =
+        sessionStorage.getItem(
+            "eventwaa_admin_token"
+        );
+
 
     const adminToken =
+        localToken || sessionToken;
+
+
+    /* =========================================================
+       READ ADMIN INFORMATION
+    ========================================================= */
+
+    const localAdmin =
         localStorage.getItem(
-            "eventwaa_admin_token"
-        ) ||
-        sessionStorage.getItem(
-            "eventwaa_admin_token"
+            "eventwaa_admin"
         );
 
+    const sessionAdmin =
+        sessionStorage.getItem(
+            "eventwaa_admin"
+        );
 
-    // =========================================================
-    // GET ADMIN INFORMATION
-    //
-    // Keep this synchronized with whichever storage
-    // contains the admin token.
-    // =========================================================
 
     const adminData =
-        localStorage.getItem(
-            "eventwaa_admin"
-        ) ||
-        sessionStorage.getItem(
-            "eventwaa_admin"
-        );
+        localAdmin || sessionAdmin;
 
 
-    // =========================================================
-    // NO TOKEN
-    //
-    // The person is not logged in as admin.
-    // Send them to the admin login page.
-    // =========================================================
+    /* =========================================================
+       DEBUG
+       
+       Remove these console logs later if you want.
+    ========================================================= */
+
+    console.log(
+        "ADMIN PROTECTED ROUTE"
+    );
+
+    console.log(
+        "Admin token exists:",
+        Boolean(adminToken)
+    );
+
+    console.log(
+        "Admin data exists:",
+        Boolean(adminData)
+    );
+
+
+    /* =========================================================
+       NO ADMIN TOKEN
+       
+       This is the most important check.
+
+       If there is NO admin token, the user MUST NOT
+       see AdminHome.
+    ========================================================= */
 
     if (!adminToken) {
 
+        console.log(
+            "NO ADMIN TOKEN → REDIRECTING TO ADMIN LOGIN"
+        );
+
         return (
             <Navigate
                 to="/admin/login"
@@ -63,12 +92,19 @@ function AdminProtectedRoute({ children }) {
     }
 
 
-    // =========================================================
-    // CHECK ADMIN DATA
-    // =========================================================
+    /* =========================================================
+       NO ADMIN DATA
+    ========================================================= */
 
     if (!adminData) {
 
+        console.log(
+            "ADMIN TOKEN EXISTS BUT ADMIN DATA IS MISSING"
+        );
+
+
+        // Clear invalid session
+
         localStorage.removeItem(
             "eventwaa_admin_token"
         );
@@ -99,66 +135,27 @@ function AdminProtectedRoute({ children }) {
     }
 
 
-    // =========================================================
-    // VALIDATE ADMIN DATA
-    // =========================================================
+    /* =========================================================
+       VALIDATE ADMIN DATA
+    ========================================================= */
+
+    let admin;
 
     try {
 
-        const admin = JSON.parse(
+        admin = JSON.parse(
             adminData
         );
-
-
-        if (
-            !admin ||
-            admin.role !== "admin"
-        ) {
-
-            // -----------------------------------------------
-            // Clear BOTH possible storage locations
-            // -----------------------------------------------
-
-            localStorage.removeItem(
-                "eventwaa_admin_token"
-            );
-
-            localStorage.removeItem(
-                "eventwaa_admin"
-            );
-
-            sessionStorage.removeItem(
-                "eventwaa_admin_token"
-            );
-
-            sessionStorage.removeItem(
-                "eventwaa_admin"
-            );
-
-
-            return (
-                <Navigate
-                    to="/admin/login"
-                    replace
-                    state={{
-                        from: location.pathname
-                    }}
-                />
-            );
-
-        }
 
     } catch (error) {
 
         console.error(
-            "ADMIN AUTH DATA ERROR:",
+            "INVALID ADMIN DATA:",
             error
         );
 
 
-        // -----------------------------------------------
-        // Clear BOTH storage locations
-        // -----------------------------------------------
+        // Clear corrupted authentication
 
         localStorage.removeItem(
             "eventwaa_admin_token"
@@ -185,17 +182,65 @@ function AdminProtectedRoute({ children }) {
                     from: location.pathname
                 }}
             />
-
         );
 
     }
 
 
-    // =========================================================
-    // ADMIN IS AUTHENTICATED
-    //
-    // Allow access to the admin dashboard.
-    // =========================================================
+    /* =========================================================
+       VALIDATE ADMIN ROLE
+    ========================================================= */
+
+    if (
+        !admin ||
+        admin.role !== "admin"
+    ) {
+
+        console.log(
+            "INVALID ADMIN ROLE → REDIRECTING"
+        );
+
+
+        // Clear invalid authentication
+
+        localStorage.removeItem(
+            "eventwaa_admin_token"
+        );
+
+        localStorage.removeItem(
+            "eventwaa_admin"
+        );
+
+        sessionStorage.removeItem(
+            "eventwaa_admin_token"
+        );
+
+        sessionStorage.removeItem(
+            "eventwaa_admin"
+        );
+
+
+        return (
+            <Navigate
+                to="/admin/login"
+                replace
+                state={{
+                    from: location.pathname
+                }}
+            />
+        );
+
+    }
+
+
+    /* =========================================================
+       ADMIN AUTHENTICATED
+    ========================================================= */
+
+    console.log(
+        "ADMIN AUTHENTICATED → ALLOWING ACCESS"
+    );
+
 
     return children;
 

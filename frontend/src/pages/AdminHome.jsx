@@ -134,12 +134,6 @@ useEffect(() => {
                     <h1>{stats.verifiedHosts}</h1>
                 </div>
 
-                <button
-                onClick={() => navigate("withdrawals")}
-                >
-                💰 Host Withdrawals
-                </button>
-
             </div>
 
         </div>

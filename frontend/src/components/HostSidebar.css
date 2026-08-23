@@ -46,24 +46,116 @@
     flex-shrink: 0;
 }
 
+/* ============================================================
+   HOST SIDEBAR LOGO / PLATFORM BRAND
+============================================================ */
+
 .host-sidebar-logo {
     display: flex;
     align-items: center;
-    gap: 10px;
+
+    gap: 9px;
+
+    width: 100%;
+    min-width: 0;
 
     cursor: pointer;
 }
 
-.host-logo-icon {
-    font-size: 27px;
+
+/* ============================================================
+   PLATFORM LOGO IMAGE
+============================================================ */
+
+.host-platform-logo {
+    display: block;
+
+    width: auto;
+    max-width: 155px;
+
+    height: 42px;
+
+    object-fit: contain;
+
+    object-position: left center;
+
+    flex-shrink: 0;
 }
+
+
+/* ============================================================
+   PLATFORM NAME FALLBACK
+============================================================ */
 
 .host-logo-text {
+    display: block;
+
+    max-width: 100%;
+
     font-size: 21px;
+
     font-weight: 800;
+
+    line-height: 1.2;
+
     color: #111827;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
 }
 
+
+/* ============================================================
+   LARGE DESKTOP
+============================================================ */
+
+@media (min-width: 1400px) {
+
+    .host-platform-logo {
+        max-width: 170px;
+
+        height: 44px;
+    }
+
+    .host-logo-text {
+        font-size: 22px;
+    }
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 768px) {
+
+    .host-platform-logo {
+        max-width: 165px;
+
+        height: 43px;
+    }
+}
+
+
+/* ============================================================
+   SMALL PHONES
+============================================================ */
+
+@media (max-width: 480px) {
+
+    .host-platform-logo {
+        max-width: 155px;
+
+        height: 41px;
+    }
+
+    .host-logo-text {
+        font-size: 20px;
+    }
+}
 
 /* ============================================================
    CLOSE BUTTON
@@ -446,3 +538,48 @@
         max-width: 90vw;
     }
 }
+
+/* ============================================================
+   LARGE DESKTOP
+============================================================ */
+
+@media (min-width: 1400px) {
+
+    .host-sidebar {
+        width: 270px;
+    }
+
+    .host-sidebar-header {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .host-profile {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .host-navigation {
+        padding-left: 11px;
+        padding-right: 11px;
+    }
+
+    .host-sidebar-bottom {
+        padding-left: 11px;
+        padding-right: 11px;
+    }
+}
+
+
+/* ============================================================
+   EXTRA LARGE DESKTOP
+============================================================ */
+
+@media (min-width: 1800px) {
+
+    .host-sidebar {
+        margin-left: calc((60% - 1100px) / 2 + 250px);
+        margin-right: calc((100% - 1100px) / 2);
+    }
+}
+

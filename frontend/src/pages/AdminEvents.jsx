@@ -38,20 +38,46 @@ function AdminEvents() {
 
       const data = await response.json();
 
-      /*
-       * Some APIs return the array directly.
-       * Others return { events: [...] }.
-       *
-       * We support both.
-       */
+      let loadedEvents = [];
 
       if (Array.isArray(data)) {
-        setEvents(data);
+        loadedEvents = data;
       } else if (Array.isArray(data.events)) {
-        setEvents(data.events);
-      } else {
-        setEvents([]);
+        loadedEvents = data.events;
       }
+
+      // ========================================================
+      // NEWEST EVENTS FIRST
+      //
+      // createdAt is preferred.
+      // If an older event does not have createdAt,
+      // its ID is used as a fallback.
+      // ========================================================
+
+      loadedEvents.sort((a, b) => {
+        const dateA = a?.createdAt
+          ? new Date(a.createdAt).getTime()
+          : 0;
+
+        const dateB = b?.createdAt
+          ? new Date(b.createdAt).getTime()
+          : 0;
+
+        if (
+          dateA &&
+          dateB &&
+          dateA !== dateB
+        ) {
+          return dateB - dateA;
+        }
+
+        return (
+          Number(b?.id || 0) -
+          Number(a?.id || 0)
+        );
+      });
+
+      setEvents(loadedEvents);
     } catch (error) {
       console.error(
         "Failed to load admin events:",
@@ -65,6 +91,125 @@ function AdminEvents() {
       setLoading(false);
     }
   }
+
+  // ============================================================
+  // CHECK WHETHER EVENT IS FREE
+  // ============================================================
+
+  const isFreeEvent = (event) => {
+    return (
+      String(
+        event?.eventType || ""
+      ).toLowerCase() === "free"
+    );
+  };
+
+  // ============================================================
+  // GET TICKET TYPES
+  // ============================================================
+
+  const getTickets = (event) => {
+    return Array.isArray(event?.tickets)
+      ? event.tickets
+      : [];
+  };
+
+  // ============================================================
+  // GET LOWEST TICKET PRICE
+  //
+  // Used for displaying:
+  // "From UGX 20,000"
+  //
+  // For multiple ticket types we show the cheapest one.
+  // ============================================================
+
+  const getLowestTicketPrice = (event) => {
+    const tickets = getTickets(event);
+
+    const prices = tickets
+      .map((ticket) =>
+        Number(
+          ticket?.price || 0
+        )
+      )
+      .filter(
+        (price) =>
+          !Number.isNaN(price) &&
+          price >= 0
+      );
+
+    if (prices.length === 0) {
+      return null;
+    }
+
+    return Math.min(...prices);
+  };
+
+  // ============================================================
+  // GET PRICE DISPLAY
+  // ============================================================
+
+  const getPriceDisplay = (event) => {
+    // ----------------------------------------------------------
+    // FREE EVENT
+    // ----------------------------------------------------------
+
+    if (isFreeEvent(event)) {
+      return "Free";
+    }
+
+    // ----------------------------------------------------------
+    // PAID EVENT
+    // ----------------------------------------------------------
+
+    const lowestPrice =
+      getLowestTicketPrice(event);
+
+    if (
+      lowestPrice !== null
+    ) {
+      if (getTickets(event).length > 1) {
+        return `From UGX ${lowestPrice.toLocaleString()}`;
+      }
+
+      return `UGX ${lowestPrice.toLocaleString()}`;
+    }
+
+    // ----------------------------------------------------------
+    // OLD EVENTS COMPATIBILITY
+    //
+    // If an older event still has event.price,
+    // display it rather than incorrectly calling it Free.
+    // ----------------------------------------------------------
+
+    const oldPrice =
+      event?.price;
+
+    if (
+      oldPrice !== undefined &&
+      oldPrice !== null &&
+      String(oldPrice).trim() !== "" &&
+      Number(oldPrice) >= 0
+    ) {
+      return `UGX ${Number(
+        oldPrice
+      ).toLocaleString()}`;
+    }
+
+    return "Paid";
+  };
+
+  // ============================================================
+  // GET EVENT TYPE
+  // ============================================================
+
+  const getEventTypeDisplay = (event) => {
+    if (isFreeEvent(event)) {
+      return "Free Event";
+    }
+
+    return "Paid Event";
+  };
 
   // ============================================================
   // IMAGE URL
@@ -81,18 +226,12 @@ function AdminEvents() {
       return null;
     }
 
-    const imagePath = String(poster).trim();
+    const imagePath =
+      String(poster).trim();
 
     if (!imagePath) {
       return null;
     }
-
-    /*
-     * Already a complete URL.
-     *
-     * Example:
-     * https://example.com/image.jpg
-     */
 
     if (
       imagePath.startsWith("http://") ||
@@ -101,25 +240,11 @@ function AdminEvents() {
       return imagePath;
     }
 
-    /*
-     * If Flask already returned:
-     *
-     * /uploads/events/image.jpg
-     *
-     * attach localhost:5000.
-     */
-
-    if (imagePath.startsWith("/")) {
+    if (
+      imagePath.startsWith("/")
+    ) {
       return `${API_BASE_URL}${imagePath}`;
     }
-
-    /*
-     * If backend stored:
-     *
-     * uploads/events/image.jpg
-     *
-     * add the missing slash.
-     */
 
     return `${API_BASE_URL}/${imagePath}`;
   };
@@ -129,12 +254,8 @@ function AdminEvents() {
   // ============================================================
 
   const handleImageError = (event) => {
-    /*
-     * Prevent the browser from repeatedly
-     * trying to load a broken image.
-     */
-
-    event.currentTarget.style.display = "none";
+    event.currentTarget.style.display =
+      "none";
 
     const fallback =
       event.currentTarget.parentElement?.querySelector(
@@ -147,7 +268,7 @@ function AdminEvents() {
   };
 
   // ============================================================
-  // FEATURE EVENT
+  // FEATURE / UNFEATURE
   // ============================================================
 
   async function toggleFeatured(id) {
@@ -159,9 +280,13 @@ function AdminEvents() {
         }
       );
 
-      if (!response.ok) {
+      const result =
+        await response.json();
+
+      if (!response.ok || !result.success) {
         throw new Error(
-          "Unable to update featured status."
+          result.message ||
+            "Unable to update featured status."
         );
       }
 
@@ -173,7 +298,8 @@ function AdminEvents() {
       );
 
       alert(
-        "Unable to update the featured status."
+        error.message ||
+          "Unable to update the featured status."
       );
     }
   }
@@ -183,11 +309,14 @@ function AdminEvents() {
   // ============================================================
 
   async function deleteEvent(id) {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this event?"
-    );
+    const confirmDelete =
+      window.confirm(
+        "Are you sure you want to delete this event?"
+      );
 
-    if (!confirmDelete) return;
+    if (!confirmDelete) {
+      return;
+    }
 
     try {
       const response = await fetch(
@@ -197,9 +326,16 @@ function AdminEvents() {
         }
       );
 
-      if (!response.ok) {
+      const result =
+        await response.json();
+
+      if (
+        !response.ok ||
+        !result.success
+      ) {
         throw new Error(
-          "Unable to delete event."
+          result.message ||
+            "Unable to delete event."
         );
       }
 
@@ -211,7 +347,8 @@ function AdminEvents() {
       );
 
       alert(
-        "Unable to delete this event."
+        error.message ||
+          "Unable to delete this event."
       );
     }
   }
@@ -227,20 +364,35 @@ function AdminEvents() {
     return events.filter((event) => {
       const matchesSearch =
         !searchValue ||
-        event.title
-          ?.toLowerCase()
+        String(
+          event?.title || ""
+        )
+          .toLowerCase()
           .includes(searchValue) ||
-        event.venue
-          ?.toLowerCase()
+        String(
+          event?.venue || ""
+        )
+          .toLowerCase()
           .includes(searchValue) ||
-        event.city
-          ?.toLowerCase()
+        String(
+          event?.city || ""
+        )
+          .toLowerCase()
           .includes(searchValue) ||
-        event.category
-          ?.toLowerCase()
+        String(
+          event?.category || ""
+        )
+          .toLowerCase()
           .includes(searchValue) ||
-        event.hostName
-          ?.toLowerCase()
+        String(
+          event?.hostName || ""
+        )
+          .toLowerCase()
+          .includes(searchValue) ||
+        String(
+          event?.organizerName || ""
+        )
+          .toLowerCase()
           .includes(searchValue);
 
       if (!matchesSearch) {
@@ -251,65 +403,41 @@ function AdminEvents() {
       // FEATURED
       // --------------------------------------------------------
 
-      if (filter === "featured") {
-        return event.featured === true;
+      if (
+        filter === "featured"
+      ) {
+        return (
+          event?.featured === true
+        );
       }
 
       // --------------------------------------------------------
       // FREE
       // --------------------------------------------------------
 
-      if (filter === "free") {
-        return (
-          event.eventType === "Free" ||
-          !event.price ||
-          event.price === 0 ||
-          event.price === "0" ||
-          event.price === "Free"
-        );
+      if (
+        filter === "free"
+      ) {
+        return isFreeEvent(event);
       }
 
       // --------------------------------------------------------
       // PAID
       // --------------------------------------------------------
 
-      if (filter === "paid") {
-        return !(
-          event.eventType === "Free" ||
-          !event.price ||
-          event.price === 0 ||
-          event.price === "0" ||
-          event.price === "Free"
-        );
+      if (
+        filter === "paid"
+      ) {
+        return !isFreeEvent(event);
       }
 
       return true;
     });
-  }, [events, search, filter]);
-
-  // ============================================================
-  // PRICE DISPLAY
-  // ============================================================
-
-  const getPriceDisplay = (event) => {
-    if (
-      event.eventType === "Free" ||
-      !event.price ||
-      event.price === 0 ||
-      event.price === "0" ||
-      event.price === "Free"
-    ) {
-      return "Free";
-    }
-
-    const price = Number(event.price);
-
-    if (Number.isNaN(price)) {
-      return event.price;
-    }
-
-    return `UGX ${price.toLocaleString()}`;
-  };
+  }, [
+    events,
+    search,
+    filter,
+  ]);
 
   // ============================================================
   // LOADING
@@ -319,14 +447,18 @@ function AdminEvents() {
     return (
       <div className="admin-events-page">
         <div className="admin-events-state">
+
           <div className="admin-loading-spinner"></div>
 
-          <h2>Loading events...</h2>
+          <h2>
+            Loading events...
+          </h2>
 
           <p>
-            Please wait while EventWaa loads
-            the events.
+            Please wait while EventWaa
+            loads the events.
           </p>
+
         </div>
       </div>
     );
@@ -340,6 +472,7 @@ function AdminEvents() {
     return (
       <div className="admin-events-page">
         <div className="admin-events-state error-state">
+
           <div className="state-icon">
             ⚠️
           </div>
@@ -348,7 +481,9 @@ function AdminEvents() {
             Unable to Load Events
           </h2>
 
-          <p>{error}</p>
+          <p>
+            {error}
+          </p>
 
           <button
             className="retry-events-btn"
@@ -356,6 +491,7 @@ function AdminEvents() {
           >
             Try Again
           </button>
+
         </div>
       </div>
     );
@@ -393,14 +529,15 @@ function AdminEvents() {
         <button
           className="create-event-btn"
           onClick={() =>
-            navigate("/admin/create-event")
+            navigate(
+              "/admin/create-event"
+            )
           }
         >
           + Create Event
         </button>
 
       </div>
-
 
       {/* ======================================================
           CONTROLS
@@ -419,22 +556,24 @@ function AdminEvents() {
             placeholder="Search events, venue, city, host..."
             value={search}
             onChange={(e) =>
-              setSearch(e.target.value)
+              setSearch(
+                e.target.value
+              )
             }
             className="event-search"
           />
 
         </div>
 
-
         <select
           value={filter}
           onChange={(e) =>
-            setFilter(e.target.value)
+            setFilter(
+              e.target.value
+            )
           }
           className="event-filter"
         >
-
           <option value="all">
             All Events
           </option>
@@ -450,11 +589,9 @@ function AdminEvents() {
           <option value="paid">
             Paid Events
           </option>
-
         </select>
 
       </div>
-
 
       {/* ======================================================
           RESULTS COUNT
@@ -475,7 +612,6 @@ function AdminEvents() {
         </span>
 
       </div>
-
 
       {/* ======================================================
           EMPTY STATE
@@ -515,246 +651,288 @@ function AdminEvents() {
 
       ) : (
 
-        /* ====================================================
-           EVENT GRID
-           ==================================================== */
-
         <div className="admin-events-grid">
 
-          {filteredEvents.map((event) => {
+          {filteredEvents.map(
+            (event) => {
 
-            const posterUrl =
-              getPosterUrl(event);
+              const posterUrl =
+                getPosterUrl(event);
 
-            return (
+              const eventType =
+                getEventTypeDisplay(
+                  event
+                );
 
-              <div
-                className="event-admin-card"
-                key={event.id}
-              >
+              const priceDisplay =
+                getPriceDisplay(
+                  event
+                );
 
-                {/* ==========================================
-                    POSTER
-                    ========================================== */}
+              const tickets =
+                getTickets(event);
 
-                <div className="admin-poster-wrapper">
+              return (
+                <div
+                  className="event-admin-card"
+                  key={event.id}
+                >
 
-                  {posterUrl ? (
+                  {/* ==========================================
+                      POSTER
+                      ========================================== */}
 
-                    <img
-                      src={posterUrl}
-                      alt={
-                        event.title ||
-                        "Event poster"
-                      }
-                      className="admin-event-poster"
-                      onError={
-                        handleImageError
-                      }
-                    />
+                  <div className="admin-poster-wrapper">
 
-                  ) : null}
+                    {posterUrl ? (
+                      <img
+                        src={posterUrl}
+                        alt={
+                          event.title ||
+                          "Event poster"
+                        }
+                        className="admin-event-poster"
+                        onError={
+                          handleImageError
+                        }
+                      />
+                    ) : null}
 
+                    <div
+                      className="poster-fallback"
+                      style={{
+                        display:
+                          posterUrl
+                            ? "none"
+                            : "flex",
+                      }}
+                    >
+                      <span>
+                        📅
+                      </span>
 
-                  {/* FALLBACK */}
+                      <strong>
+                        EventWaa
+                      </strong>
 
-                  <div
-                    className="poster-fallback"
-                    style={{
-                      display: posterUrl
-                        ? "none"
-                        : "flex",
-                    }}
-                  >
-                    <span>
-                      📅
+                      <small>
+                        No poster available
+                      </small>
+                    </div>
+
+                    {/* EVENT TYPE */}
+
+                    <span
+                      className={`event-type-overlay ${
+                        isFreeEvent(event)
+                          ? "free"
+                          : "paid"
+                      }`}
+                    >
+                      {eventType}
                     </span>
 
-                    <strong>
-                      EventWaa
-                    </strong>
+                    {/* FEATURED */}
 
-                    <small>
-                      No poster available
-                    </small>
+                    {event.featured && (
+                      <span className="featured-overlay-badge">
+                        ★ Featured
+                      </span>
+                    )}
+
                   </div>
 
+                  {/* ==========================================
+                      CONTENT
+                      ========================================== */}
 
-                  {/* FEATURED */}
+                  <div className="event-admin-content">
 
-                  {event.featured && (
-                    <span className="featured-overlay-badge">
-                      ★ Featured
-                    </span>
-                  )}
+                    <div className="event-title-row">
 
-                </div>
+                      <div>
 
+                        <h2>
+                          {event.title ||
+                            "Untitled Event"}
+                        </h2>
 
-                {/* ==========================================
-                    CONTENT
-                    ========================================== */}
+                        <span className="event-id">
+                          Event #{event.id}
+                        </span>
 
-                <div className="event-admin-content">
+                      </div>
 
-                  <div className="event-title-row">
+                    </div>
 
-                    <div>
+                    {/* ========================================
+                        EVENT INFO
+                        ======================================== */}
 
-                      <h2>
-                        {event.title ||
-                          "Untitled Event"}
-                      </h2>
+                    <div className="event-info-list">
 
-                      <span className="event-id">
-                        Event #{event.id}
-                      </span>
+                      <p>
+                        <strong>
+                          Host
+                        </strong>
+
+                        <span>
+                          {event.hostName ||
+                            event.organizerName ||
+                            "EventWaa"}
+                        </span>
+                      </p>
+
+                      <p>
+                        <strong>
+                          Venue
+                        </strong>
+
+                        <span>
+                          {event.venue ||
+                            "Not specified"}
+                        </span>
+                      </p>
+
+                      <p>
+                        <strong>
+                          City
+                        </strong>
+
+                        <span>
+                          {event.city ||
+                            "Not specified"}
+                        </span>
+                      </p>
+
+                      <p>
+                        <strong>
+                          Date
+                        </strong>
+
+                        <span>
+                          {event.date ||
+                            "Not specified"}
+                        </span>
+                      </p>
+
+                      <p>
+                        <strong>
+                          Category
+                        </strong>
+
+                        <span>
+                          {event.category ||
+                            "General"}
+                        </span>
+                      </p>
+
+                      <p>
+                        <strong>
+                          Type
+                        </strong>
+
+                        <span>
+                          {eventType}
+                        </span>
+                      </p>
+
+                      <p>
+                        <strong>
+                          Price
+                        </strong>
+
+                        <span>
+                          {priceDisplay}
+                        </span>
+                      </p>
+
+                      {/* ======================================
+                          TICKET TYPES
+                          ====================================== */}
+
+                      {!isFreeEvent(event) &&
+                        tickets.length > 0 && (
+                          <p>
+                            <strong>
+                              Tickets
+                            </strong>
+
+                            <span>
+                              {tickets.length}{" "}
+                              type
+                              {tickets.length !==
+                              1
+                                ? "s"
+                                : ""}
+                            </span>
+                          </p>
+                        )}
+
+                      <p>
+                        <strong>
+                          Tickets Sold
+                        </strong>
+
+                        <span>
+                          {Number(
+                            event.ticketsSold ||
+                              0
+                          ).toLocaleString()}
+                        </span>
+                      </p>
+
+                    </div>
+
+                    {/* ========================================
+                        ACTIONS
+                        ======================================== */}
+
+                    <div className="event-admin-actions">
+
+                      <button
+                        className="edit-event-btn"
+                        onClick={() =>
+                          navigate(
+                            `/admin/events/edit/${event.id}`
+                          )
+                        }
+                      >
+                        ✏️ Edit
+                      </button>
+
+                      <button
+                        className="feature-event-btn"
+                        onClick={() =>
+                          toggleFeatured(
+                            event.id
+                          )
+                        }
+                      >
+                        {event.featured
+                          ? "★ Featured"
+                          : "☆ Feature"}
+                      </button>
+
+                      <button
+                        className="delete-event-btn"
+                        onClick={() =>
+                          deleteEvent(
+                            event.id
+                          )
+                        }
+                      >
+                        🗑️ Delete
+                      </button>
 
                     </div>
 
                   </div>
 
-
-                  {/* EVENT INFO */}
-
-                  <div className="event-info-list">
-
-                    <p>
-                      <strong>
-                        Host
-                      </strong>
-
-                      <span>
-                        {event.hostName ||
-                          event.organizerName ||
-                          "EventWaa"}
-                      </span>
-                    </p>
-
-
-                    <p>
-                      <strong>
-                        Venue
-                      </strong>
-
-                      <span>
-                        {event.venue ||
-                          "Not specified"}
-                      </span>
-                    </p>
-
-
-                    <p>
-                      <strong>
-                        City
-                      </strong>
-
-                      <span>
-                        {event.city ||
-                          "Not specified"}
-                      </span>
-                    </p>
-
-
-                    <p>
-                      <strong>
-                        Date
-                      </strong>
-
-                      <span>
-                        {event.date ||
-                          "Not specified"}
-                      </span>
-                    </p>
-
-
-                    <p>
-                      <strong>
-                        Category
-                      </strong>
-
-                      <span>
-                        {event.category ||
-                          "General"}
-                      </span>
-                    </p>
-
-
-                    <p>
-                      <strong>
-                        Price
-                      </strong>
-
-                      <span>
-                        {getPriceDisplay(event)}
-                      </span>
-                    </p>
-
-
-                    <p>
-                      <strong>
-                        Tickets Sold
-                      </strong>
-
-                      <span>
-                        {Number(
-                          event.ticketsSold || 0
-                        ).toLocaleString()}
-                      </span>
-                    </p>
-
-                  </div>
-
-
-                  {/* ACTIONS */}
-
-                  <div className="event-admin-actions">
-
-                    <button
-                      className="edit-event-btn"
-                      onClick={() =>
-                        navigate(
-                          `/admin/events/edit/${event.id}`
-                        )
-                      }
-                    >
-                      ✏️ Edit
-                    </button>
-
-
-                    <button
-                      className="feature-event-btn"
-                      onClick={() =>
-                        toggleFeatured(
-                          event.id
-                        )
-                      }
-                    >
-                      {event.featured
-                        ? "★ Featured"
-                        : "☆ Feature"}
-                    </button>
-
-
-                    <button
-                      className="delete-event-btn"
-                      onClick={() =>
-                        deleteEvent(
-                          event.id
-                        )
-                      }
-                    >
-                      🗑️ Delete
-                    </button>
-
-                  </div>
-
                 </div>
-
-              </div>
-
-            );
-          })}
+              );
+            }
+          )}
 
         </div>
 

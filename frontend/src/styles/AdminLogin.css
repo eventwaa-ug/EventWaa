@@ -1159,6 +1159,58 @@
     white-space: nowrap;
 }
 
+/* ============================================================
+   FORGOT PASSWORD
+============================================================ */
+
+.admin-forgot-password {
+    width: 100%;
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    margin-top: -8px;
+
+    margin-bottom: 2px;
+}
+
+
+.admin-forgot-password a {
+    color: #2563eb;
+
+    font-size: 15px;
+
+    line-height: 1.4;
+
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition:
+        color 0.2s ease,
+        text-decoration 0.2s ease;
+}
+
+
+.admin-forgot-password a:hover {
+    color: #1d4ed8;
+
+    text-decoration: underline;
+}
+
+
+.admin-forgot-password a:focus-visible {
+    outline:
+        3px solid rgba(37, 99, 235, 0.18);
+
+    outline-offset: 4px;
+
+    border-radius: 5px;
+}
+
+
+
 
 /* ============================================================
    MOBILE
@@ -1446,146 +1498,234 @@
 
 
 /* ============================================================
+   ============================================================
    TABLET
-============================================================ */
+   ============================================================
+   ============================================================ */
 
-@media (max-width: 850px) {
-
-    .admin-login-page {
-        align-items: flex-start;
-
-        padding:
-            75px 20px 25px;
-    }
-
+@media (max-width: 950px) {
 
     .admin-login-container {
-        min-height: 0;
+        grid-template-columns: 0.9fr 1.1fr;
 
-        grid-template-columns: 1fr;
+        width: min(940px, calc(100% - 30px));
 
-        max-width: 560px;
-
-        border-radius: 24px;
+        margin-top: 75px;
     }
-
-
-    /* Hide large branding panel */
 
     .admin-brand-panel {
-        display: none;
+        padding: 55px 40px;
     }
-
-
-    /* Show mobile logo */
-
-    .admin-mobile-logo {
-        display: flex;
-    }
-
 
     .admin-login-panel {
-        width: 100%;
-
-        padding: 42px 38px;
+        padding: 45px 35px;
     }
 
+    .admin-brand-panel h1 {
+        font-size: 39px;
+    }
 
-    .admin-login-card {
-        max-width: 500px;
+    .admin-brand-description {
+        font-size: 15px;
     }
 
 }
 
 
 /* ============================================================
+   ============================================================
    MOBILE
-============================================================ */
+   ============================================================
+   ============================================================ */
 
-@media (max-width: 600px) {
+@media (max-width: 760px) {
 
     .admin-login-page {
-        min-height: 100svh;
-
-        padding:
-            72px 15px 20px;
-
-        align-items: flex-start;
+        min-height: 100vh;
     }
 
 
+    /* --------------------------------------------------------
+       BACK BUTTON
+       -------------------------------------------------------- */
+
     .admin-back-button {
-        top: 18px;
+        top: 15px;
         left: 15px;
 
-        padding: 10px 13px;
+        padding: 9px 12px;
 
         font-size: 13px;
     }
 
 
+    /* --------------------------------------------------------
+       LOGIN CONTAINER
+       -------------------------------------------------------- */
+
     .admin-login-container {
+        display: block;
+
         width: 100%;
 
-        max-width: none;
+        min-height: 100vh;
 
-        border-radius: 20px;
+        margin: 0;
 
-        box-shadow:
-            0 14px 40px rgba(19, 29, 52, 0.10);
+        border-radius: 0;
+
+        box-shadow: none;
+
+        background: #ffffff;
     }
 
+
+    /* --------------------------------------------------------
+       BRAND PANEL
+       -------------------------------------------------------- */
+
+    .admin-brand-panel {
+        min-height: 0;
+
+        padding: 85px 25px 35px;
+
+        text-align: center;
+
+        border-radius: 0 0 25px 25px;
+    }
+
+    .admin-brand-content {
+        max-width: 100%;
+
+        margin: 0 auto;
+    }
+
+    .admin-logo-wrapper {
+        margin-bottom: 24px;
+    }
+
+    .admin-platform-logo {
+        max-width: 150px;
+
+        margin: 0 auto;
+    }
+
+    .admin-text-logo {
+        font-size: 30px;
+    }
+
+    .admin-eyebrow {
+        margin-bottom: 10px;
+
+        font-size: 11px;
+    }
+
+    .admin-brand-panel h1 {
+        margin-bottom: 14px;
+
+        font-size: 30px;
+
+        letter-spacing: -0.8px;
+    }
+
+    .admin-brand-description {
+        max-width: 500px;
+
+        margin: 0 auto;
+
+        font-size: 14px;
+
+        line-height: 1.6;
+    }
+
+
+    /* --------------------------------------------------------
+       SECURITY FEATURES
+       -------------------------------------------------------- */
+
+    .admin-security-features {
+        display: none;
+    }
+
+
+    /* --------------------------------------------------------
+       BRAND FOOTER
+       -------------------------------------------------------- */
+
+    .admin-brand-footer {
+        display: none;
+    }
+
+
+    /* --------------------------------------------------------
+       LOGIN PANEL
+       -------------------------------------------------------- */
 
     .admin-login-panel {
-        padding: 32px 20px;
+        display: block;
+
+        padding: 35px 22px 40px;
     }
 
+    .admin-login-card {
+        max-width: none;
+    }
+
+
+    /* --------------------------------------------------------
+       MOBILE LOGO
+       -------------------------------------------------------- */
 
     .admin-mobile-logo {
-        margin-bottom: 18px;
-    }
+        display: flex;
 
+        justify-content: center;
+
+        margin-bottom: 24px;
+    }
 
     .admin-mobile-logo img {
-        max-width: 165px;
+        max-width: 130px;
+        max-height: 55px;
 
-        max-height: 60px;
+        object-fit: contain;
     }
-
 
     .admin-mobile-logo span {
-        font-size: 29px;
+        font-size: 27px;
+
+        font-weight: 900;
+
+        color: #101828;
     }
 
+
+    /* --------------------------------------------------------
+       LOGIN HEADER
+       -------------------------------------------------------- */
 
     .admin-login-header {
         margin-bottom: 27px;
-    }
 
+        text-align: center;
+    }
 
     .admin-login-icon {
-        width: 49px;
-        height: 49px;
+        width: 48px;
+        height: 48px;
 
-        margin-bottom: 15px;
-
-        border-radius: 14px;
+        margin: 0 auto 16px;
     }
-
 
     .admin-form-eyebrow {
-        font-size: 10px;
-
-        letter-spacing: 1.3px;
+        font-size: 11px;
     }
-
 
     .admin-login-header h2 {
-        font-size: 27px;
+        font-size: 30px;
 
-        line-height: 1.2;
+        letter-spacing: -0.7px;
     }
-
 
     .admin-login-header p {
         font-size: 15px;
@@ -1594,68 +1734,80 @@
     }
 
 
-    .admin-login-form {
-        gap: 19px;
-    }
+    /* --------------------------------------------------------
+       FORM
+       -------------------------------------------------------- */
 
+    .admin-login-form {
+        gap: 20px;
+    }
 
     .admin-input-group label {
-        font-size: 16px;
-    }
-
-
-    .admin-input-group input {
-        height: 55px;
-
-        font-size: 16px;
-
-        padding-left: 15px;
-    }
-
-
-    .admin-input-group input::placeholder {
         font-size: 15px;
     }
 
+    .admin-input-group input {
+        height: 56px;
 
-    .admin-password-wrapper input {
-        padding-right: 62px;
+        font-size: 16px;
     }
 
+
+    /* --------------------------------------------------------
+       PASSWORD EYE
+       -------------------------------------------------------- */
 
     .admin-password-toggle {
-        width: 49px;
-        height: 49px;
+        width: 44px;
+        height: 44px;
 
-        right: 3px;
+        right: 6px;
     }
 
 
-    .admin-password-toggle svg {
-        width: 23px;
-        height: 23px;
+    /* --------------------------------------------------------
+       REMEMBER
+       -------------------------------------------------------- */
+
+    .admin-remember-row {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 12px;
     }
 
+
+    /* --------------------------------------------------------
+       SECURITY NOTICE
+       -------------------------------------------------------- */
 
     .admin-security-notice {
-        padding: 14px;
+        padding: 13px;
     }
-
 
     .admin-security-notice p {
-        font-size: 12.5px;
+        font-size: 12px;
     }
 
+
+    /* --------------------------------------------------------
+       BUTTON
+       -------------------------------------------------------- */
 
     .admin-login-button {
         min-height: 56px;
 
-        font-size: 17px;
+        font-size: 16px;
     }
 
 
+    /* --------------------------------------------------------
+       FOOTER
+       -------------------------------------------------------- */
+
     .admin-login-footer {
-        margin-top: 20px;
+        margin-top: 24px;
     }
 
 }
@@ -1663,212 +1815,70 @@
 
 /* ============================================================
    SMALL PHONES
-============================================================ */
+   ============================================================ */
 
-@media (max-width: 400px) {
+@media (max-width: 420px) {
 
-    .admin-login-page {
-        padding:
-            68px 10px 15px;
+    .admin-brand-panel {
+        padding-left: 20px;
+        padding-right: 20px;
     }
-
-
-    .admin-back-button {
-        top: 16px;
-        left: 10px;
-
-        padding: 9px 11px;
-
-        font-size: 12px;
-    }
-
-
-    .admin-back-button svg {
-        width: 15px;
-        height: 15px;
-    }
-
-
-    .admin-login-container {
-        border-radius: 18px;
-    }
-
 
     .admin-login-panel {
-        padding: 28px 17px;
+        padding-left: 17px;
+        padding-right: 17px;
     }
 
-
-    .admin-mobile-logo img {
-        max-width: 150px;
-    }
-
-
-    .admin-mobile-logo span {
+    .admin-brand-panel h1 {
         font-size: 27px;
     }
 
-
     .admin-login-header h2 {
-        font-size: 24px;
+        font-size: 27px;
     }
-
-
-    .admin-login-header p {
-        font-size: 14px;
-    }
-
-
-    .admin-input-group label {
-        font-size: 15px;
-    }
-
 
     .admin-input-group input {
-        height: 53px;
-
-        font-size: 15px;
-    }
-
-
-    .admin-input-group input::placeholder {
-        font-size: 14px;
-    }
-
-
-    .admin-password-toggle {
-        width: 47px;
-        height: 47px;
-    }
-
-
-    .admin-password-toggle svg {
-        width: 22px;
-        height: 22px;
-    }
-
-
-    .admin-security-notice p {
-        font-size: 12px;
-    }
-
-
-    .admin-login-button {
-        min-height: 54px;
+        height: 54px;
 
         font-size: 16px;
     }
 
-
-    .admin-login-footer span {
-        font-size: 11px;
+    .admin-login-button {
+        min-height: 54px;
     }
 
 }
 
 
 /* ============================================================
-   VERY SMALL PHONES
-============================================================ */
+   ACCESSIBILITY
+   ============================================================ */
 
-@media (max-width: 350px) {
+.admin-login-page button:focus-visible,
+.admin-forgot-page button:focus-visible,
+.admin-otp-page button:focus-visible,
+.admin-reset-page button:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.25);
 
-    .admin-login-panel {
-        padding: 25px 14px;
-    }
-
-
-    .admin-login-header h2 {
-        font-size: 22px;
-    }
-
-
-    .admin-login-header p {
-        font-size: 13px;
-    }
-
-
-    .admin-login-form {
-        gap: 17px;
-    }
-
-
-    .admin-input-group input {
-        height: 51px;
-    }
-
-
-    .admin-security-notice {
-        padding: 12px;
-    }
-
-
-    .admin-security-notice p {
-        font-size: 11.5px;
-    }
-
-}
-
-
-/* ============================================================
-   LANDSCAPE PHONES
-============================================================ */
-
-@media (max-height: 620px) and (orientation: landscape) {
-
-    .admin-login-page {
-        min-height: 100vh;
-
-        align-items: flex-start;
-
-        padding-top: 70px;
-
-        padding-bottom: 20px;
-
-        overflow-y: auto;
-    }
-
-
-    .admin-login-container {
-        margin-bottom: 20px;
-    }
-
-
-    .admin-login-panel {
-        padding: 28px 35px;
-    }
-
-
-    .admin-login-header {
-        margin-bottom: 20px;
-    }
-
-
-    .admin-mobile-logo {
-        margin-bottom: 10px;
-    }
-
-
-    .admin-login-icon {
-        margin-bottom: 10px;
-    }
-
+    outline-offset: 2px;
 }
 
 
 /* ============================================================
    REDUCED MOTION
-============================================================ */
+   ============================================================ */
 
 @media (prefers-reduced-motion: reduce) {
 
-    .admin-login-container,
-    .admin-login-button,
-    .admin-password-toggle,
-    .admin-back-button {
-        animation: none;
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
 
-        transition: none;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+
+        transition-duration: 0.01ms !important;
     }
 
 }

@@ -1,0 +1,593 @@
+/* ============================================================
+   ADMIN SCANNER PAGE
+   ============================================================ */
+.admin-scanner-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 42px 30px;
+    box-sizing: border-box;
+    background: #f7f8fc;
+    color: #111827;
+}
+/* ============================================================
+   HEADER
+   ============================================================ */
+.admin-scanner-header {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto 30px;
+    text-align: center;
+}
+/* ============================================================
+   PLATFORM BRAND
+   ============================================================ */
+.admin-scanner-brand {
+    min-height: 58px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.admin-scanner-logo {
+    display: block;
+    max-width: 220px;
+    max-height: 64px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+.admin-scanner-platform-name {
+    margin: 0;
+    color: #111827;
+    font-size: 28px;
+    line-height: 1.2;
+    font-weight: 850;
+}
+/* ============================================================
+   EYEBROW
+   ============================================================ */
+.admin-scanner-eyebrow {
+    display: inline-block;
+    margin-bottom: 9px;
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 850;
+    letter-spacing: 1.5px;
+    color: #2563eb;
+}
+/* ============================================================
+   HEADER TITLE
+   ============================================================ */
+.admin-scanner-header h1 {
+    margin: 0;
+    color: #111827;
+    font-size: 38px;
+    line-height: 1.15;
+    font-weight: 850;
+}
+.admin-scanner-header p {
+    margin: 11px auto 0;
+    max-width: 620px;
+    color: #6b7280;
+    font-size: 18px;
+    line-height: 1.6;
+}
+/* ============================================================
+   STATS
+   ============================================================ */
+.admin-scanner-stats {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 18px;
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+.admin-scanner-stat {
+    min-width: 0;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow:
+        0 8px 25px rgba(15, 23, 42, 0.06);
+    box-sizing: border-box;
+}
+.admin-scanner-stat > span {
+    width: 54px;
+    height: 54px;
+    flex: 0 0 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: #f3f4f6;
+    font-size: 26px;
+}
+.admin-scanner-stat strong {
+    display: block;
+    font-size: 30px;
+    line-height: 1.1;
+    font-weight: 850;
+    color: #111827;
+}
+.admin-scanner-stat p {
+    margin: 5px 0 0;
+    color: #6b7280;
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 600;
+}
+/* ============================================================
+   STATS CONTROLS
+   ============================================================ */
+.admin-scanner-stats-controls {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 28px;
+    display: flex;
+    justify-content: flex-end;
+}
+.admin-scanner-clear-btn {
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid #dfe2e8;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #6b7280;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease;
+}
+.admin-scanner-clear-btn:hover {
+    background: #f9fafb;
+    color: #374151;
+    border-color: #cfd3dc;
+}
+/* ============================================================
+   SCANNER CONTAINER
+   ============================================================ */
+.admin-scanner-container {
+    width: 100%;
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 22px;
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        0 12px 35px rgba(15, 23, 42, 0.08);
+    box-sizing: border-box;
+}
+/* ============================================================
+   SCANNER INSTRUCTION
+   ============================================================ */
+.scanner-instruction {
+    text-align: center;
+    margin-bottom: 22px;
+}
+.scanner-instruction h2 {
+    margin: 0 0 8px;
+    font-size: 26px;
+    line-height: 1.25;
+    font-weight: 850;
+    color: #111827;
+}
+.scanner-instruction p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 16px;
+    line-height: 1.55;
+}
+/* ============================================================
+   QR CAMERA
+   ============================================================ */
+.admin-scanner-box {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #111827;
+    position: relative;
+}
+.admin-scanner-box video {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 280px;
+    display: block;
+    object-fit: cover;
+}
+/* ============================================================
+   CHECKING
+   ============================================================ */
+.scanner-checking {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 11px;
+    margin-top: 21px;
+    color: #2563eb;
+    font-size: 16px;
+    font-weight: 750;
+}
+.scanner-checking p {
+    margin: 0;
+}
+.checking-spinner {
+    width: 21px;
+    height: 21px;
+    flex: 0 0 21px;
+    border: 3px solid #dbeafe;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation:
+        adminScannerSpin
+        0.8s linear infinite;
+}
+@keyframes adminScannerSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+/* ============================================================
+   RESULT
+   ============================================================ */
+.admin-scan-result {
+    width: 100%;
+    max-width: 650px;
+    margin: 30px auto 0;
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 30px;
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        0 12px 35px rgba(15, 23, 42, 0.08);
+    box-sizing: border-box;
+}
+/* ============================================================
+   SCANNED CODE
+   ============================================================ */
+.scanned-code {
+    padding: 16px;
+    margin-bottom: 24px;
+    border-radius: 12px;
+    background: #f3f4f6;
+    text-align: center;
+}
+.scanned-code span {
+    display: block;
+    margin-bottom: 6px;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 650;
+}
+.scanned-code strong {
+    display: block;
+    color: #111827;
+    font-size: 16px;
+    line-height: 1.45;
+    word-break: break-all;
+}
+/* ============================================================
+   VALID RESULT
+   ============================================================ */
+.admin-valid-result {
+    text-align: center;
+    padding: 10px 0;
+}
+.admin-valid-result .result-icon {
+    width: 74px;
+    height: 74px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #dcfce7;
+    color: #16a34a;
+    font-size: 43px;
+    font-weight: 850;
+}
+.admin-valid-result h2 {
+    margin: 0;
+    color: #15803d;
+    font-size: 29px;
+    line-height: 1.2;
+    font-weight: 850;
+}
+.result-subtitle {
+    margin: 7px 0 0;
+    color: #6b7280;
+    font-size: 16px;
+    line-height: 1.5;
+}
+/* ============================================================
+   GUEST DETAILS
+   ============================================================ */
+.guest-details {
+    margin-top: 27px;
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    gap: 13px;
+    text-align: left;
+}
+.guest-details > div {
+    min-width: 0;
+    padding: 16px;
+    border-radius: 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    box-sizing: border-box;
+}
+.guest-details span {
+    display: block;
+    margin-bottom: 6px;
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 650;
+}
+.guest-details strong {
+    display: block;
+    color: #111827;
+    font-size: 16px;
+    line-height: 1.45;
+    word-break: break-word;
+}
+/* ============================================================
+   INVALID RESULT
+   ============================================================ */
+.admin-invalid-result {
+    text-align: center;
+    padding: 15px 0;
+}
+.admin-invalid-result .result-icon {
+    width: 74px;
+    height: 74px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #fee2e2;
+    color: #dc2626;
+    font-size: 43px;
+    font-weight: 850;
+}
+.admin-invalid-result h2 {
+    margin: 0;
+    color: #b91c1c;
+    font-size: 27px;
+    line-height: 1.2;
+    font-weight: 850;
+}
+.admin-invalid-result p {
+    margin: 11px auto 0;
+    max-width: 520px;
+    color: #4b5563;
+    font-size: 16px;
+    line-height: 1.65;
+}
+.limit-warning {
+    margin-top: 19px;
+    padding: 15px;
+    border-radius: 12px;
+    background: #fff7ed;
+    color: #c2410c;
+    font-size: 15px;
+    line-height: 1.55;
+    font-weight: 650;
+}
+/* ============================================================
+   SCAN NEXT
+   ============================================================ */
+.admin-scan-next-btn {
+    width: 100%;
+    margin-top: 26px;
+    min-height: 52px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 12px;
+    background: #2563eb;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 17px;
+    line-height: 1;
+    font-weight: 750;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+.admin-scan-next-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow:
+        0 8px 20px rgba(37, 99, 235, 0.18);
+}
+/* ============================================================
+   TABLET
+   ============================================================ */
+@media (max-width: 900px) {
+    .admin-scanner-page {
+        padding: 34px 22px;
+    }
+    .admin-scanner-header h1 {
+        font-size: 34px;
+    }
+    .admin-scanner-header p {
+        font-size: 17px;
+    }
+    .admin-scanner-container,
+    .admin-scan-result {
+        max-width: 620px;
+    }
+}
+/* ============================================================
+   MOBILE
+   ============================================================ */
+@media (max-width: 768px) {
+    .admin-scanner-page {
+        padding: 26px 16px;
+    }
+    .admin-scanner-brand {
+        margin-bottom: 15px;
+    }
+    .admin-scanner-logo {
+        max-width: 180px;
+        max-height: 55px;
+    }
+    .admin-scanner-platform-name {
+        font-size: 25px;
+    }
+    .admin-scanner-eyebrow {
+        font-size: 13px;
+        letter-spacing: 1.2px;
+    }
+    .admin-scanner-header h1 {
+        font-size: 30px;
+    }
+    .admin-scanner-header p {
+        font-size: 16px;
+    }
+    .admin-scanner-stats {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .admin-scanner-stat {
+        padding: 19px;
+    }
+    .admin-scanner-stat strong {
+        font-size: 28px;
+    }
+    .admin-scanner-stat p {
+        font-size: 15px;
+    }
+    .admin-scanner-stats-controls {
+        margin-bottom: 22px;
+    }
+    .admin-scanner-clear-btn {
+        width: 100%;
+        min-height: 42px;
+        font-size: 14px;
+    }
+    .admin-scanner-container {
+        padding: 19px;
+        border-radius: 18px;
+    }
+    .scanner-instruction {
+        margin-bottom: 18px;
+    }
+    .scanner-instruction h2 {
+        font-size: 23px;
+    }
+    .scanner-instruction p {
+        font-size: 15px;
+    }
+    .admin-scanner-box {
+        border-radius: 14px;
+    }
+    .admin-scanner-box video {
+        min-height: 240px;
+    }
+    .scanner-checking {
+        font-size: 15px;
+    }
+    .admin-scan-result {
+        padding: 20px;
+        border-radius: 18px;
+    }
+    .scanned-code {
+        padding: 14px;
+    }
+    .scanned-code span {
+        font-size: 13px;
+    }
+    .scanned-code strong {
+        font-size: 15px;
+    }
+    .guest-details {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    .guest-details > div {
+        padding: 15px;
+    }
+    .guest-details span {
+        font-size: 14px;
+    }
+    .guest-details strong {
+        font-size: 16px;
+    }
+    .admin-valid-result h2,
+    .admin-invalid-result h2 {
+        font-size: 23px;
+    }
+    .admin-valid-result .result-icon,
+    .admin-invalid-result .result-icon {
+        width: 68px;
+        height: 68px;
+        font-size: 38px;
+    }
+    .admin-invalid-result p {
+        font-size: 15px;
+    }
+    .admin-scan-next-btn {
+        min-height: 50px;
+        font-size: 16px;
+    }
+}
+/* ============================================================
+   SMALL PHONES
+   ============================================================ */
+@media (max-width: 420px) {
+    .admin-scanner-page {
+        padding: 20px 11px;
+    }
+    .admin-scanner-logo {
+        max-width: 155px;
+        max-height: 48px;
+    }
+    .admin-scanner-platform-name {
+        font-size: 23px;
+    }
+    .admin-scanner-header h1 {
+        font-size: 27px;
+    }
+    .admin-scanner-header p {
+        font-size: 15px;
+    }
+    .admin-scanner-container {
+        padding: 15px;
+        border-radius: 16px;
+    }
+    .admin-scanner-box {
+        border-radius: 12px;
+    }
+    .admin-scanner-box video {
+        min-height: 220px;
+    }
+    .admin-scan-result {
+        padding: 16px;
+        border-radius: 16px;
+    }
+    .admin-valid-result h2,
+    .admin-invalid-result h2 {
+        font-size: 21px;
+    }
+    .guest-details > div {
+        padding: 14px;
+    }
+}
