@@ -2,15 +2,38 @@ import { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { EventContext } from "../context/EventContext";
 import { useAuth } from "../context/AuthContext";
+import {
+  FiCalendar,
+  FiPlus,
+  FiUsers,
+  FiCheckCircle,
+  FiClock,
+  FiMapPin,
+  FiTag,
+  FiEdit3,
+  FiCopy,
+  FiTrash2,
+  FiSearch,
+  FiFilter,
+  FiCreditCard,
+  FiChevronRight,
+  FiEye,
+  FiGrid,
+} from "react-icons/fi";
 import "../styles/HostEvents.css";
 function HostEvents() {
   const navigate = useNavigate();
-  const { events, deleteEvent } = useContext(EventContext);
+  const { events, deleteEvent } =
+    useContext(EventContext);
   const { user } = useAuth();
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [search, setSearch] =
+    useState("");
+  const [filter, setFilter] =
+    useState("all");
   /*
-   * Only show events created by the logged-in host.
+   * ============================================================
+   * ONLY SHOW EVENTS CREATED BY LOGGED-IN HOST
+   * ============================================================
    */
   const myEvents = useMemo(() => {
     return (events || []).filter(
@@ -19,12 +42,13 @@ function HostEvents() {
     );
   }, [events, user]);
   /*
-   * Filter events by search and status.
+   * ============================================================
+   * FILTER EVENTS
+   * ============================================================
    */
   const filteredEvents = useMemo(() => {
-    const searchValue = search
-      .trim()
-      .toLowerCase();
+    const searchValue =
+      search.trim().toLowerCase();
     return myEvents.filter((event) => {
       const matchesSearch =
         !searchValue ||
@@ -64,16 +88,21 @@ function HostEvents() {
     });
   }, [myEvents, search, filter]);
   /*
-   * Sort upcoming events first.
+   * ============================================================
+   * SORT EVENTS
+   * ============================================================
    */
   const sortedEvents = useMemo(() => {
     return [...filteredEvents].sort(
       (a, b) =>
-        getEventDate(a) - getEventDate(b)
+        getEventDate(a) -
+        getEventDate(b)
     );
   }, [filteredEvents]);
   /*
-   * Find the next upcoming event.
+   * ============================================================
+   * NEXT UPCOMING EVENT
+   * ============================================================
    */
   const upcomingEvent = useMemo(() => {
     const upcoming = myEvents
@@ -88,13 +117,24 @@ function HostEvents() {
       );
     return upcoming[0] || null;
   }, [myEvents]);
+  /*
+   * ============================================================
+   * DELETE
+   * ============================================================
+   */
   const handleDelete = (event) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${event.title}"?`
-    );
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to delete "${event.title}"?`
+      );
     if (!confirmed) return;
     deleteEvent(event.id);
   };
+  /*
+   * ============================================================
+   * EVENT HELPERS
+   * ============================================================
+   */
   const getSoldTickets = (event) => {
     return Number(
       event.ticketsSold || 0
@@ -113,13 +153,6 @@ function HostEvents() {
     );
   };
   const getCheckedIn = (event) => {
-    /*
-     * The EventContext/event object may contain
-     * different attendance information depending
-     * on your backend.
-     *
-     * We safely use checkedIn when available.
-     */
     return Number(
       event.checkedIn || 0
     );
@@ -127,7 +160,9 @@ function HostEvents() {
   const getEventStatus = (event) => {
     const eventDate =
       getEventDate(event);
-    if (event.status === "cancelled") {
+    if (
+      event.status === "cancelled"
+    ) {
       return {
         label: "Cancelled",
         className: "status-cancelled",
@@ -144,14 +179,43 @@ function HostEvents() {
       className: "status-upcoming",
     };
   };
+  /*
+   * ============================================================
+   * IMAGE URL
+   * ============================================================
+   */
+  const BACKEND_URL =
+    "http://localhost:5000";
+  const getImageUrl = (event) => {
+    const image =
+      event?.eventPoster ||
+      event?.image;
+    if (!image) {
+      return "/default-event.jpg";
+    }
+    if (
+      image.startsWith("http://") ||
+      image.startsWith("https://")
+    ) {
+      return image;
+    }
+    return `${BACKEND_URL}${image}`;
+  };
+  /*
+   * ============================================================
+   * LOGIN CHECK
+   * ============================================================
+   */
   if (!user) {
     return (
       <div className="host-events-page">
         <div className="host-events-empty">
           <div className="host-events-empty-icon">
-            🔐
+            <FiCreditCard />
           </div>
-          <h2>Login Required</h2>
+          <h2>
+            Login Required
+          </h2>
           <p>
             Please log in to view your events.
           </p>
@@ -159,39 +223,20 @@ function HostEvents() {
       </div>
     );
   }
-
-  const BACKEND_URL = "http://localhost:5000";
-
-const getImageUrl = (event) => {
-    const image =
-        event?.eventPoster ||
-        event?.image;
-
-    if (!image) {
-        return "/default-event.jpg";
-    }
-
-    if (
-        image.startsWith("http://") ||
-        image.startsWith("https://")
-    ) {
-        return image;
-    }
-
-    return `${BACKEND_URL}${image}`;
-};
-
   return (
     <div className="host-events-page">
-      {/* ==================================================
+      {/* ======================================================
           HEADER
-      ================================================== */}
+      ====================================================== */}
       <div className="host-events-header">
         <div>
           <span className="host-events-eyebrow">
             HOST MANAGEMENT
           </span>
-          <h1>📅 My Events</h1>
+          <h1>
+            <FiCalendar />
+            My Events
+          </h1>
           <p>
             Manage all the events you have
             created on EventWaa.
@@ -203,26 +248,35 @@ const getImageUrl = (event) => {
             navigate("/create-event")
           }
         >
-          + Create Event
+          <FiPlus />
+          Create Event
         </button>
       </div>
-      {/* ==================================================
+      {/* ======================================================
           SUMMARY
-      ================================================== */}
+      ====================================================== */}
       <div className="host-events-summary">
         <div className="host-event-summary-card">
-          <span>📅</span>
+          <div className="summary-icon blue">
+            <FiCalendar />
+          </div>
           <div>
-            <small>Total Events</small>
+            <small>
+              Total Events
+            </small>
             <strong>
               {myEvents.length}
             </strong>
           </div>
         </div>
         <div className="host-event-summary-card">
-          <span>🚀</span>
+          <div className="summary-icon orange">
+            <FiClock />
+          </div>
           <div>
-            <small>Upcoming</small>
+            <small>
+              Upcoming
+            </small>
             <strong>
               {
                 myEvents.filter(
@@ -235,9 +289,13 @@ const getImageUrl = (event) => {
           </div>
         </div>
         <div className="host-event-summary-card">
-          <span>🎟️</span>
+          <div className="summary-icon purple">
+            <FiCreditCard />
+          </div>
           <div>
-            <small>Tickets Sold</small>
+            <small>
+              Tickets Sold
+            </small>
             <strong>
               {
                 myEvents.reduce(
@@ -251,9 +309,13 @@ const getImageUrl = (event) => {
           </div>
         </div>
         <div className="host-event-summary-card">
-          <span>💰</span>
+          <div className="summary-icon green">
+            <FiCheckCircle />
+          </div>
           <div>
-            <small>Total Revenue</small>
+            <small>
+              Total Revenue
+            </small>
             <strong>
               UGX{" "}
               {myEvents
@@ -270,9 +332,9 @@ const getImageUrl = (event) => {
           </div>
         </div>
       </div>
-      {/* ==================================================
-          CURRENT / NEXT EVENT
-      ================================================== */}
+      {/* ======================================================
+          NEXT UPCOMING EVENT
+      ====================================================== */}
       {upcomingEvent && (
         <section className="current-event-section">
           <div className="current-event-heading">
@@ -291,144 +353,141 @@ const getImageUrl = (event) => {
                 )
               }
             >
+              <FiUsers />
               View Attendees
+              <FiChevronRight />
             </button>
           </div>
           <div className="current-event-card">
-
-            {/* EVENT POSTER */}
+            {/* POSTER */}
             <div className="current-event-poster-wrapper">
-
-                <img
-                    src={getImageUrl(upcomingEvent)}
-                    alt={
-                        upcomingEvent.title ||
-                        "Event poster"
-                    }
-                    className="current-event-poster"
-                    onError={(e) => {
-                        e.currentTarget.src =
-                            "/default-event.jpg";
-                    }}
-                />
-
+              <img
+                src={getImageUrl(
+                  upcomingEvent
+                )}
+                alt={
+                  upcomingEvent.title ||
+                  "Event poster"
+                }
+                className="current-event-poster"
+                onError={(e) => {
+                  e.currentTarget.src =
+                    "/default-event.jpg";
+                }}
+              />
             </div>
-
-
-            {/* EXISTING EVENT INFO */}
-
+            {/* INFO */}
             <div className="current-event-info">
-
-                <h2>
-                    {upcomingEvent.title}
-                </h2>
-
-                <p>
-                    📍{" "}
-                    {upcomingEvent.venue},{" "}
-                    {upcomingEvent.city}
-                </p>
-
-                <p>
-                    📅{" "}
-                    {upcomingEvent.date}
-                </p>
-
-                <p>
-                    ⏰{" "}
-                    {upcomingEvent.startTime}
-                    {" - "}
-                    {upcomingEvent.endTime}
-                </p>
-
+              <span className="current-event-label">
+                UPCOMING
+              </span>
+              <h2>
+                {upcomingEvent.title}
+              </h2>
+              <p>
+                <FiMapPin />
+                {upcomingEvent.venue},{" "}
+                {upcomingEvent.city}
+              </p>
+              <p>
+                <FiCalendar />
+                {upcomingEvent.date}
+              </p>
+              <p>
+                <FiClock />
+                {upcomingEvent.startTime}
+                {" - "}
+                {upcomingEvent.endTime}
+              </p>
             </div>
-
-
+            {/* STATS */}
             <div className="current-event-stats">
-
-                <div>
-                    <strong>
-                        {getSoldTickets(
-                            upcomingEvent
-                        )}
-                    </strong>
-
-                    <span>
-                        Tickets Sold
-                    </span>
-                </div>
-
-                <div>
-                    <strong>
-                        {getRemaining(
-                            upcomingEvent
-                        )}
-                    </strong>
-
-                    <span>
-                        Remaining
-                    </span>
-                </div>
-
-                <div>
-                    <strong>
-                        UGX{" "}
-                        {Number(
-                            upcomingEvent.revenue || 0
-                        ).toLocaleString()}
-                    </strong>
-
-                    <span>
-                        Revenue
-                    </span>
-                </div>
-
+              <div>
+                <strong>
+                  {getSoldTickets(
+                    upcomingEvent
+                  )}
+                </strong>
+                <span>
+                  Tickets Sold
+                </span>
+              </div>
+              <div>
+                <strong>
+                  {getRemaining(
+                    upcomingEvent
+                  )}
+                </strong>
+                <span>
+                  Remaining
+                </span>
+              </div>
+              <div>
+                <strong>
+                  UGX{" "}
+                  {Number(
+                    upcomingEvent.revenue ||
+                    0
+                  ).toLocaleString()}
+                </strong>
+                <span>
+                  Revenue
+                </span>
+              </div>
             </div>
-
-        </div>
+          </div>
         </section>
       )}
-      {/* ==================================================
+      {/* ======================================================
           SEARCH + FILTER
-      ================================================== */}
+      ====================================================== */}
       <div className="host-events-toolbar">
-        <input
-          type="text"
-          placeholder="🔍 Search your events..."
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-        />
-        <select
-          value={filter}
-          onChange={(e) =>
-            setFilter(e.target.value)
-          }
-        >
-          <option value="all">
-            All Events
-          </option>
-          <option value="upcoming">
-            Upcoming
-          </option>
-          <option value="past">
-            Past
-          </option>
-          <option value="free">
-            Free Events
-          </option>
-          <option value="paid">
-            Paid Events
-          </option>
-        </select>
+        <div className="host-events-search">
+          <FiSearch />
+          <input
+            type="text"
+            placeholder="Search your events..."
+            value={search}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
+          />
+        </div>
+        <div className="host-events-filter">
+          <FiFilter />
+          <select
+            value={filter}
+            onChange={(e) =>
+              setFilter(e.target.value)
+            }
+          >
+            <option value="all">
+              All Events
+            </option>
+            <option value="upcoming">
+              Upcoming
+            </option>
+            <option value="past">
+              Past
+            </option>
+            <option value="free">
+              Free Events
+            </option>
+            <option value="paid">
+              Paid Events
+            </option>
+          </select>
+        </div>
       </div>
-      {/* ==================================================
-          EVENTS
-      ================================================== */}
+      {/* ======================================================
+          ALL EVENTS
+      ====================================================== */}
       <section className="all-host-events">
         <div className="all-host-events-heading">
           <div>
+            <span className="section-eyebrow">
+              EVENT LIBRARY
+            </span>
             <h2>
               All My Events
             </h2>
@@ -439,11 +498,15 @@ const getImageUrl = (event) => {
                 : ""}
             </p>
           </div>
+          <div className="event-count-badge">
+            <FiGrid />
+            {sortedEvents.length}
+          </div>
         </div>
         {sortedEvents.length === 0 ? (
           <div className="host-events-empty">
             <div className="host-events-empty-icon">
-              📅
+              <FiCalendar />
             </div>
             <h2>
               No Events Found
@@ -455,10 +518,13 @@ const getImageUrl = (event) => {
             {myEvents.length === 0 && (
               <button
                 onClick={() =>
-                  navigate("/create-event")
+                  navigate(
+                    "/create-event"
+                  )
                 }
               >
-                + Create Your First Event
+                <FiPlus />
+                Create Your First Event
               </button>
             )}
           </div>
@@ -491,22 +557,26 @@ const getImageUrl = (event) => {
                   className="host-event-card"
                   key={event.id}
                 >
-                  {/* EVENT MAIN INFO */}
+                  {/* =================================================
+                      EVENT MAIN INFO
+                  ================================================= */}
                   <div className="host-event-main">
-
+                    {/* POSTER */}
                     <div className="host-event-poster-wrapper">
-
-                        <img
-                            src={getImageUrl(event)}
-                            alt={event.title || "Event poster"}
-                            className="host-event-poster"
-                            onError={(e) => {
-                                e.currentTarget.src =
-                                    "/default-event.jpg";
-                            }}
-                        />
-
+                      <img
+                        src={getImageUrl(event)}
+                        alt={
+                          event.title ||
+                          "Event poster"
+                        }
+                        className="host-event-poster"
+                        onError={(e) => {
+                          e.currentTarget.src =
+                            "/default-event.jpg";
+                        }}
+                      />
                     </div>
+                    {/* TITLE */}
                     <div className="host-event-title-row">
                       <div>
                         <span
@@ -519,9 +589,10 @@ const getImageUrl = (event) => {
                         </h3>
                       </div>
                     </div>
+                    {/* META */}
                     <div className="host-event-meta">
                       <span>
-                        📍{" "}
+                        <FiMapPin />
                         {event.venue ||
                           "Venue not set"}
                         {event.city
@@ -529,12 +600,12 @@ const getImageUrl = (event) => {
                           : ""}
                       </span>
                       <span>
-                        📅{" "}
+                        <FiCalendar />
                         {event.date ||
                           "Date not set"}
                       </span>
                       <span>
-                        ⏰{" "}
+                        <FiClock />
                         {event.startTime ||
                           "--"}
                         {" - "}
@@ -542,25 +613,28 @@ const getImageUrl = (event) => {
                           "--"}
                       </span>
                       <span>
-                        🏷️{" "}
+                        <FiTag />
                         {event.category ||
                           "General"}
                       </span>
                     </div>
+                    {/* TYPE */}
                     <div className="host-event-type">
                       {event.eventType ===
                       "Free" ? (
                         <span className="free-badge">
-                          🎉 Free Event
+                          Free Event
                         </span>
                       ) : (
                         <span className="paid-badge">
-                          🎟️ Paid Event
+                          Paid Event
                         </span>
                       )}
                     </div>
                   </div>
-                  {/* PERFORMANCE */}
+                  {/* =================================================
+                      PERFORMANCE
+                  ================================================= */}
                   <div className="host-event-performance">
                     <div className="performance-item">
                       <span>
@@ -594,12 +668,14 @@ const getImageUrl = (event) => {
                         UGX{" "}
                         {Number(
                           event.revenue ||
-                            0
+                          0
                         ).toLocaleString()}
                       </strong>
                     </div>
                   </div>
-                  {/* PROGRESS */}
+                  {/* =================================================
+                      CAPACITY
+                  ================================================= */}
                   <div className="event-capacity">
                     <div className="capacity-header">
                       <span>
@@ -613,12 +689,15 @@ const getImageUrl = (event) => {
                       <div
                         className="capacity-fill"
                         style={{
-                          width: `${progress}%`,
+                          width:
+                            `${progress}%`,
                         }}
                       />
                     </div>
                   </div>
-                  {/* ACTIONS */}
+                  {/* =================================================
+                      ACTIONS
+                  ================================================= */}
                   <div className="host-event-actions">
                     <button
                       className="view-event-btn"
@@ -628,7 +707,8 @@ const getImageUrl = (event) => {
                         )
                       }
                     >
-                      👥 Attendees
+                      <FiUsers />
+                      Attendees
                     </button>
                     <button
                       className="scan-event-btn"
@@ -638,7 +718,8 @@ const getImageUrl = (event) => {
                         )
                       }
                     >
-                      🎟️ Scan
+                      <FiCheckCircle />
+                      Scan
                     </button>
                     <button
                       className="edit-event-btn"
@@ -653,7 +734,8 @@ const getImageUrl = (event) => {
                         )
                       }
                     >
-                      ✏️ Edit
+                      <FiEdit3 />
+                      Edit
                     </button>
                     <button
                       className="duplicate-event-btn"
@@ -669,7 +751,8 @@ const getImageUrl = (event) => {
                         )
                       }
                     >
-                      📋 Duplicate
+                      <FiCopy />
+                      Duplicate
                     </button>
                     <button
                       className="delete-event-btn"
@@ -677,7 +760,8 @@ const getImageUrl = (event) => {
                         handleDelete(event)
                       }
                     >
-                      🗑️ Delete
+                      <FiTrash2 />
+                      Delete
                     </button>
                   </div>
                 </article>
@@ -690,16 +774,21 @@ const getImageUrl = (event) => {
   );
 }
 /*
- * Convert the event date into a Date object.
- *
- * Handles the common YYYY-MM-DD format.
+ * ============================================================
+ * EVENT DATE HELPER
+ * ============================================================
  */
 function getEventDate(event) {
   if (!event?.date) {
     return new Date(0);
   }
-  const date = new Date(event.date);
-  if (Number.isNaN(date.getTime())) {
+  const date =
+    new Date(event.date);
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
     return new Date(0);
   }
   return date;

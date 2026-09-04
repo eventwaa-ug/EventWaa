@@ -1,326 +1,152 @@
+/* ============================================================
+   EVENT CARD
+   ============================================================ */
+
 .event-card {
+    background: #ffffff;
+    border-radius: 18px;
+    overflow: hidden;
 
+    border: 1px solid #e5e7eb;
 
-    background:white;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
 
-
-    border-radius:20px;
-
-
-    overflow:hidden;
-
-
-    border:1px solid #e5e7eb;
-
-
-    transition:.3s;
-
-
+    width: 100%;
+    min-width: 0;
 }
-
-
 
 .event-card:hover {
-
-
-    transform:translateY(-6px);
-
+    transform: translateY(-5px);
 
     box-shadow:
-    0 15px 30px rgba(0,0,0,.1);
-
-
+        0 12px 25px rgba(0, 0, 0, 0.09);
 }
 
 
-
-
+/* ============================================================
+   EVENT IMAGE / FULL POSTER
+   ============================================================ */
 
 .event-image-wrapper {
+    position: relative;
 
+    width: 100%;
 
-    position:relative;
+    background: #f8fafc;
 
+    overflow: hidden;
 
-    height:220px;
-
-
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-
-
-
 
 .event-image {
+    display: block;
 
+    width: 100%;
+    height: auto;
 
-    width:100%;
+    /*
+     * IMPORTANT:
+     * Complete poster remains visible.
+     * Nothing is cropped.
+     */
+    object-fit: contain;
 
-
-    height:100%;
-
-
-    object-fit:cover;
-
-
+    max-width: 100%;
 }
 
 
-
-
-
-
+/* ============================================================
+   EVENT TYPE BADGE
+   ============================================================ */
 
 .event-type {
+    position: absolute;
 
+    top: 13px;
+    left: 13px;
 
-    position:absolute;
+    padding: 6px 12px;
 
+    border-radius: 20px;
 
-    top:15px;
+    font-size: 0.78rem;
+    font-weight: 700;
 
-
-    left:15px;
-
-
-    padding:7px 14px;
-
-
-    border-radius:20px;
-
-
-    font-size:.8rem;
-
-
-    font-weight:700;
-
-
+    z-index: 5;
 }
-
-
 
 .event-type.free {
-
-
-    background:#dcfce7;
-
-
-    color:#166534;
-
-
+    background: #dcfce7;
+    color: #166534;
 }
-
-
 
 .event-type.paid {
-
-
-    background:#fee2e2;
-
-
-    color:#991b1b;
-
-
+    background: #fee2e2;
+    color: #991b1b;
 }
 
 
-
-
+/* ============================================================
+   VERIFIED HOST
+   ============================================================ */
 
 .verified-host {
+    position: absolute;
 
+    top: 13px;
+    right: 13px;
 
-    position:absolute;
+    background: #ffffff;
 
+    padding: 6px 10px;
 
-    top:15px;
+    border-radius: 20px;
 
+    font-size: 0.78rem;
+    font-weight: 600;
 
-    right:15px;
+    z-index: 5;
 
-
-    background:white;
-
-
-    padding:7px 12px;
-
-
-    border-radius:20px;
-
-
-    font-size:.8rem;
-
-
-    font-weight:600;
-
-
+    box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.08);
 }
 
 
-
-
-
-
-
-.event-card-content {
-
-
-    padding:20px;
-
-
-}
-
-
-
-
-.event-card-content h3 {
-
-
-    font-size:1.2rem;
-
-
-    color:#0f172a;
-
-
-    margin-bottom:12px;
-
-
-}
-
-
-
-
-
-.event-location,
-.event-date {
-
-
-    color:#64748b;
-
-
-    margin:8px 0;
-
-
-}
-
-
-
-
-
-.event-price {
-
-
-    font-weight:700;
-
-
-    color:#7c3aed;
-
-
-    margin:15px 0;
-
-
-}
-
-
-
-
-
-
-.view-details-btn {
-
-
-    display:block;
-
-
-    text-align:center;
-
-
-    background:#7c3aed;
-
-
-    color:white;
-
-
-    text-decoration:none;
-
-
-    padding:12px;
-
-
-    border-radius:12px;
-
-
-    font-weight:600;
-
-
-}
-
-
-
-
-
-
-
-@media(max-width:768px){
-
-
-
-.event-card {
-
-
-    border-radius:18px;
-
-
-}
-
-
-
-.event-image-wrapper {
-
-
-    height:200px;
-
-
-}
-
-
-
-.event-card-content {
-
-
-    padding:18px;
-
-
-}
-
-
-}
 /* ============================================================
    FAVORITE BUTTON
-============================================================ */
+   ============================================================ */
 
 .favorite-button {
     position: absolute;
-    right: 12px;
 
-    width: 42px;
-    height: 42px;
+    top: 13px;
+    right: 13px;
+
+    width: 38px;
+    height: 38px;
 
     border: none;
     border-radius: 50%;
 
-    background: rgb(149, 89, 197);
+    background: #d85c45;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    font-size: 23px;
+    font-size: 21px;
 
     cursor: pointer;
 
     z-index: 10;
 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.15);
 
     transition:
         transform 0.2s ease,
@@ -331,6 +157,258 @@
     transform: scale(1.08);
 }
 
+.favorite-button:active {
+    transform: scale(0.96);
+}
+
 .favorite-active {
-    background: white;
+    background: #ffffff;
+}
+
+
+/* ============================================================
+   EVENT CARD CONTENT
+   ============================================================ */
+
+.event-card-content {
+    padding: 17px;
+}
+
+.event-card-content h3 {
+    margin: 0 0 10px;
+
+    font-size: 1.08rem;
+    line-height: 1.35;
+
+    font-weight: 750;
+
+    color: #0f172a;
+}
+
+
+/* ============================================================
+   EVENT LOCATION / DATE
+   ============================================================ */
+
+.event-location,
+.event-date {
+    color: #64748b;
+
+    margin: 7px 0;
+
+    font-size: 0.88rem;
+    line-height: 1.45;
+}
+
+
+/* ============================================================
+   EVENT PRICE
+   ============================================================ */
+
+.event-price {
+    margin: 12px 0;
+
+    font-size: 0.95rem;
+    font-weight: 700;
+
+    color: #b34a36;
+}
+
+
+/* ============================================================
+   VIEW DETAILS
+   ============================================================ */
+
+.view-details-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    text-align: center;
+
+    background: #d85c45;
+    color: #ffffff;
+
+    text-decoration: none;
+
+    padding: 10px;
+
+    border-radius: 10px;
+
+    font-size: 0.9rem;
+    font-weight: 700;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.view-details-btn:hover {
+    background: #b34a36;
+
+    transform: translateY(-1px);
+}
+
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (max-width: 768px) {
+
+    .event-card {
+        border-radius: 16px;
+    }
+
+    .event-card-content {
+        padding: 15px;
+    }
+
+    .event-card-content h3 {
+        font-size: 1.03rem;
+    }
+
+    .event-location,
+    .event-date {
+        font-size: 0.86rem;
+    }
+
+    .event-price {
+        font-size: 0.92rem;
+    }
+
+    .view-details-btn {
+        padding: 10px;
+        font-size: 0.88rem;
+    }
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 480px) {
+
+    .event-card {
+        width: 94%;
+        margin: 0 auto;
+
+        border-radius: 15px;
+    }
+
+    /*
+     * Keep the COMPLETE poster.
+     * No fixed height is added.
+     */
+    .event-image-wrapper {
+        width: 100%;
+    }
+
+    .event-image {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+    }
+
+    .event-card-content {
+        padding: 14px;
+    }
+
+    .event-card-content h3 {
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+
+    .event-location,
+    .event-date {
+        font-size: 0.84rem;
+        margin: 6px 0;
+    }
+
+    .event-price {
+        margin: 11px 0;
+        font-size: 0.9rem;
+    }
+
+    .favorite-button {
+        width: 36px;
+        height: 36px;
+
+        top: 10px;
+        right: 10px;
+
+        font-size: 19px;
+    }
+
+    .event-type {
+        top: 10px;
+        left: 10px;
+
+        padding: 5px 9px;
+
+        font-size: 0.74rem;
+    }
+
+    .verified-host {
+        top: 10px;
+        right: 10px;
+
+        padding: 5px 8px;
+
+        font-size: 0.72rem;
+    }
+
+    .view-details-btn {
+        padding: 9px;
+
+        font-size: 0.86rem;
+
+        border-radius: 9px;
+    }
+}
+
+
+/* ============================================================
+   VERY SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 360px) {
+
+    .event-card {
+        width: 92%;
+    }
+
+    .event-card-content {
+        padding: 12px;
+    }
+
+    .event-card-content h3 {
+        font-size: 0.96rem;
+    }
+
+    .event-location,
+    .event-date {
+        font-size: 0.8rem;
+    }
+
+    .event-price {
+        font-size: 0.87rem;
+    }
+
+    .view-details-btn {
+        padding: 8px;
+
+        font-size: 0.82rem;
+    }
+
+    .favorite-button {
+        width: 34px;
+        height: 34px;
+    }
 }

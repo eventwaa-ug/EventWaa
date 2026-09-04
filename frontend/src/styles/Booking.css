@@ -63,7 +63,7 @@
 
   letter-spacing: 1px;
 
-  color: #2563eb;
+  color: #d85c45;
 
   background: #eff6ff;
 
@@ -239,7 +239,7 @@
 
 
 .quantity-controls button:hover {
-  background: #2563eb;
+  background: #d85c45;
 }
 
 
@@ -273,7 +273,7 @@
 
 
 .total-row strong {
-  color: #2563eb;
+  color: #d85c45;
 }
 
 
@@ -312,14 +312,14 @@
 
 
 .payment-options label:hover {
-  border-color: #2563eb;
+  border-color: #d85c45;
 
   background: #f8fbff;
 }
 
 
 .payment-options input {
-  accent-color: #2563eb;
+  accent-color: #d85c45;
 }
 
 
@@ -365,7 +365,7 @@
 
 
 .phone-section input:focus {
-  border-color: #2563eb;
+  border-color: #d85c45;
 
   box-shadow:
     0 0 0 3px rgba(37, 99, 235, 0.1);
@@ -387,7 +387,7 @@
 
   border-radius: 14px;
 
-  background: #2563eb;
+  background: #d85c45;
 
   color: white;
 
@@ -402,7 +402,7 @@
 
 
 .pay-btn:hover {
-  background: #1d4ed8;
+  background: #b34a36;
 
   transform: translateY(-1px);
 }

@@ -42,12 +42,7 @@
         ),
         #f6f7f9;
 
-    font-family:
-        Inter,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
+    font-family: var(--sans);
 
     color: #172033;
 }
@@ -1177,7 +1172,7 @@
 
 
 .admin-forgot-password a {
-    color: #2563eb;
+    color: #d85c45;
 
     font-size: 15px;
 
@@ -1194,7 +1189,7 @@
 
 
 .admin-forgot-password a:hover {
-    color: #1d4ed8;
+    color: #b34a36;
 
     text-decoration: underline;
 }

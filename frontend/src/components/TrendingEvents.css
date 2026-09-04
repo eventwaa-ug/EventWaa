@@ -26,7 +26,7 @@
     line-height: 1.7;
 }
 .section-tag {
-    color: #2563eb;
+    color: #d85c45;
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 2px;
@@ -52,7 +52,7 @@
 .see-all {
     background: none;
     border: none;
-    color: #2563eb;
+    color: #d85c45;
     cursor: pointer;
     font-size: 15px;
     font-weight: 600;

@@ -1,196 +1,588 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { QRCodeCanvas } from "qrcode.react";
-import { usePlatformSettings } from "../context/PlatformSettingsContext";
+import {
+  useParams,
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  QRCodeCanvas,
+} from "qrcode.react";
+
+import {
+  ArrowLeft,
+  Download,
+  CalendarDays,
+  MapPin,
+  Clock3,
+  Globe,
+  Ticket as TicketIcon,
+  CheckCircle,
+  XCircle,
+  Clock,
+} from "lucide-react";
+
+import {
+  usePlatformSettings,
+} from "../context/PlatformSettingsContext";
+
 import "../styles/TicketDetails.css";
 
-const API_URL = "http://localhost:5000";
 
 function TicketDetails() {
-  const { ticketId } = useParams();
-  const navigate = useNavigate();
 
-  const { settings } = usePlatformSettings();
+  const {
+    bookingId,
+  } = useParams();
 
-  const [ticket, setTicket] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const navigate =
+    useNavigate();
+
+  const {
+    settings,
+  } =
+    usePlatformSettings();
+
+
+  const [
+    booking,
+    setBooking,
+  ] =
+    useState(null);
+
+
+  const [
+    loading,
+    setLoading,
+  ] =
+    useState(true);
+
+
+  const [
+    error,
+    setError,
+  ] =
+    useState("");
+
 
   // ============================================================
-  // LOAD TICKET
+  // BACKEND
+  // ============================================================
+
+  const API_URL =
+    import.meta.env.VITE_API_URL ||
+    "http://localhost:5000";
+
+
+  // ============================================================
+  // LOAD BOOKING
   // ============================================================
 
   useEffect(() => {
-    const fetchTicket = async () => {
-      try {
-        setLoading(true);
-        setError("");
 
-        const response = await fetch(
-          `${API_URL}/bookings`
-        );
+    let isMounted =
+      true;
 
-        if (!response.ok) {
-          throw new Error(
-            "Unable to load ticket."
+
+    const fetchBooking =
+      async () => {
+
+        try {
+
+          setLoading(
+            true
           );
+
+          setError(
+            ""
+          );
+
+
+          if (
+            !bookingId
+          ) {
+            throw new Error(
+              "No booking ID was provided."
+            );
+          }
+
+
+          const requestedBookingId =
+            String(
+              bookingId
+            ).trim();
+
+
+          const response =
+            await fetch(
+              `${API_URL}/bookings`
+            );
+
+
+          if (
+            !response.ok
+          ) {
+            throw new Error(
+              `Unable to load booking. Server returned ${response.status}.`
+            );
+          }
+
+
+          const data =
+            await response.json();
+
+
+          const bookings =
+            Array.isArray(
+              data
+            )
+              ? data
+              : Array.isArray(
+                  data?.bookings
+                )
+              ? data.bookings
+              : [];
+
+
+          let foundBooking =
+            null;
+
+
+          for (
+            const item of
+            bookings
+          ) {
+
+            if (
+              !item ||
+              typeof item !==
+                "object"
+            ) {
+              continue;
+            }
+
+
+            const currentBookingId =
+              String(
+                item.id ||
+                item.bookingId ||
+                item._id ||
+                item.ticketId ||
+                ""
+              ).trim();
+
+
+            if (
+              currentBookingId ===
+              requestedBookingId
+            ) {
+
+              foundBooking =
+                item;
+
+              break;
+
+            }
+
+          }
+
+
+          if (
+            !foundBooking
+          ) {
+
+            if (
+              isMounted
+            ) {
+
+              setBooking(
+                null
+              );
+
+              setError(
+                "Booking not found."
+              );
+
+            }
+
+            return;
+
+          }
+
+
+          if (
+            isMounted
+          ) {
+
+            setBooking(
+              foundBooking
+            );
+
+          }
+
+
+          console.log(
+            "BOOKING DETAILS:",
+            foundBooking
+          );
+
+        } catch (
+          err
+        ) {
+
+          console.error(
+            "BOOKING DETAILS LOAD ERROR:",
+            err
+          );
+
+
+          if (
+            isMounted
+          ) {
+
+            setBooking(
+              null
+            );
+
+            setError(
+              err?.message ||
+              "Unable to load this booking."
+            );
+
+          }
+
+        } finally {
+
+          if (
+            isMounted
+          ) {
+
+            setLoading(
+              false
+            );
+
+          }
+
         }
 
-        const data = await response.json();
+      };
 
-        const foundTicket = data.find(
-          (booking) =>
-            String(booking.ticketId) ===
-            String(ticketId)
-        );
 
-        if (!foundTicket) {
-          setError("Ticket not found.");
-          setTicket(null);
-          return;
-        }
+    fetchBooking();
 
-        setTicket(foundTicket);
-      } catch (error) {
-        console.error(
-          "Ticket loading error:",
-          error
-        );
 
-        setError(
-          "Unable to load this ticket."
-        );
-      } finally {
-        setLoading(false);
-      }
+    return () => {
+
+      isMounted =
+        false;
+
     };
 
-    fetchTicket();
-  }, [ticketId]);
+  }, [
+    bookingId,
+    API_URL,
+  ]);
+
 
   // ============================================================
-  // PLATFORM LOGO URL
+  // PLATFORM LOGO
   // ============================================================
 
-  const getLogoUrl = () => {
-    const logo = settings?.platformLogo;
+  const getLogoUrl =
+    () => {
 
-    if (!logo) {
-      return "";
-    }
+      const logo =
+        settings?.platformLogo;
 
-    const imagePath = String(logo).trim();
 
-    if (!imagePath) {
-      return "";
-    }
+      if (
+        !logo
+      ) {
+        return "";
+      }
 
-    if (
-      imagePath.startsWith("http://") ||
-      imagePath.startsWith("https://")
-    ) {
-      return imagePath;
-    }
 
-    if (imagePath.startsWith("/")) {
-      return `${API_URL}${imagePath}`;
-    }
+      const imagePath =
+        String(
+          logo
+        ).trim();
 
-    return `${API_URL}/${imagePath}`;
-  };
 
-  const platformLogo = getLogoUrl();
+      if (
+        !imagePath
+      ) {
+        return "";
+      }
+
+
+      if (
+        imagePath.startsWith(
+          "http://"
+        ) ||
+        imagePath.startsWith(
+          "https://"
+        )
+      ) {
+
+        return imagePath;
+
+      }
+
+
+      if (
+        imagePath.startsWith(
+          "/"
+        )
+      ) {
+
+        return `${API_URL}${imagePath}`;
+
+      }
+
+
+      return `${API_URL}/${imagePath}`;
+
+    };
+
+
+  const platformLogo =
+    getLogoUrl();
+
 
   const platformName =
     settings?.platformName ||
     "EventWaa";
 
+
   // ============================================================
-  // DOWNLOAD TICKET
+  // DOWNLOAD
   // ============================================================
 
-  const downloadTicket = () => {
-    window.print();
-  };
+  const downloadTicket =
+    () => {
+
+      window.print();
+
+    };
+
 
   // ============================================================
   // LOADING
   // ============================================================
 
-  if (loading) {
+  if (
+    loading
+  ) {
+
     return (
+
       <div className="ticket-state">
-        <div className="ticket-loader"></div>
+
+        <div className="ticket-loader">
+        </div>
 
         <h2>
-          Loading your ticket...
+          Loading your tickets...
         </h2>
 
         <p>
-          Please wait while EventWaa
-          retrieves your ticket.
+          Please wait while EventWaa retrieves
+          your booking.
         </p>
+
       </div>
+
     );
+
   }
+
 
   // ============================================================
   // ERROR
   // ============================================================
 
-  if (error || !ticket) {
+  if (
+    error ||
+    !booking
+  ) {
+
     return (
+
       <div className="ticket-state">
+
         <div className="ticket-state-icon">
-          🎟️
+
+          <TicketIcon
+            size={42}
+            strokeWidth={2}
+          />
+
         </div>
 
+
         <h2>
-          Ticket not found
+          Booking not found
         </h2>
+
 
         <p>
           {error ||
-            "We couldn't find this ticket."}
+            "We couldn't find this booking."}
         </p>
+
 
         <button
           className="back-ticket-btn"
+          type="button"
           onClick={() =>
-            navigate("/profile")
+            navigate(
+              "/tickets"
+            )
           }
         >
-          Back to Profile
+          Back to My Tickets
         </button>
+
       </div>
+
     );
+
   }
 
-  // ============================================================
-  // REFUND STATUS
-  // ============================================================
-
-  const isRefunded =
-    ticket.refundStatus === "refunded";
-
-  const isPendingRefund =
-    ticket.refundStatus === "pending";
 
   // ============================================================
-  // QR VALUE
+  // BOOKING TICKETS
   // ============================================================
 
-  const qrValue =
-    String(ticket.ticketId);
+  let bookingTickets =
+    Array.isArray(
+      booking.tickets
+    )
+      ? booking.tickets
+      : [];
+
+
+  // Legacy support
+  if (
+    bookingTickets.length ===
+      0 &&
+    booking.ticketId
+  ) {
+
+    bookingTickets = [
+      {
+        ticketId:
+          booking.ticketId,
+
+        ticketType:
+          booking.ticketType ||
+          "Regular",
+
+        checkedIn:
+          booking.checkedIn ||
+          false,
+
+        refundStatus:
+          booking.refundStatus ||
+          "",
+      },
+    ];
+
+  }
+
+
+  // ============================================================
+  // BUYER
+  // ============================================================
+
+  const buyer =
+    booking.buyer &&
+    typeof booking.buyer ===
+      "object"
+      ? booking.buyer
+      : {};
+
+
+  // ============================================================
+  // EVENT DATE
+  // ============================================================
+
+  const eventDate =
+    booking.eventDate ||
+    booking.date ||
+    "";
+
+
+  // ============================================================
+  // EVENT PASSED
+  // ============================================================
+
+  let eventHasPassed =
+    false;
+
+
+  if (
+    eventDate
+  ) {
+
+    const parsedDate =
+      new Date(
+        eventDate
+      );
+
+
+    if (
+      !Number.isNaN(
+        parsedDate.getTime()
+      )
+    ) {
+
+      eventHasPassed =
+        parsedDate <
+        new Date();
+
+    }
+
+  }
+
+
+  // ============================================================
+  // QUANTITY
+  // ============================================================
+
+  const quantity =
+    Number(
+      booking.quantity ||
+      bookingTickets.length ||
+      1
+    );
+
+
+  // ============================================================
+  // TOTAL AMOUNT
+  // ============================================================
+
+  const totalAmount =
+    Number(
+      booking.customerTotal ??
+      booking.totalPrice ??
+      0
+    );
+
 
   // ============================================================
   // RENDER
   // ============================================================
 
   return (
+
     <div className="ticket-page">
 
       <div className="ticket-wrapper">
+
 
         {/* ======================================================
             TOP ACTIONS
@@ -200,35 +592,53 @@ function TicketDetails() {
 
           <button
             className="back-btn"
+            type="button"
             onClick={() =>
-              navigate(-1)
+              navigate(
+                -1
+              )
             }
           >
-            ← Back
+
+            <ArrowLeft
+              size={17}
+              strokeWidth={2.3}
+            />
+
+            Back
+
           </button>
+
 
           <button
             className="download-btn"
-            onClick={downloadTicket}
+            type="button"
+            onClick={
+              downloadTicket
+            }
           >
-            📥 Download Ticket
+
+            <Download
+              size={17}
+              strokeWidth={2.3}
+            />
+
+            Download Tickets
+
           </button>
 
         </div>
 
 
         {/* ======================================================
-            TICKET
+            BOOKING CARD
         ====================================================== */}
 
         <div
-          className={`ticket-card ${
-            isRefunded
-              ? "refunded-ticket"
-              : ""
-          }`}
+          className="ticket-card"
           id="eventwaa-ticket"
         >
+
 
           {/* ====================================================
               HEADER
@@ -244,9 +654,11 @@ function TicketDetails() {
                   src={platformLogo}
                   alt={platformName}
                   className="platform-logo"
-                  onError={(e) => {
-                    e.currentTarget.style.display =
+                  onError={(event) => {
+
+                    event.currentTarget.style.display =
                       "none";
+
                   }}
                 />
 
@@ -258,6 +670,7 @@ function TicketDetails() {
 
               )}
 
+
               <div className="platform-name">
                 {platformName}
               </div>
@@ -266,14 +679,14 @@ function TicketDetails() {
 
 
             <div className="ticket-label">
-              EVENT TICKET
+              BOOKING CONFIRMATION
             </div>
 
           </div>
 
 
           {/* ====================================================
-              EVENT POSTER
+              EVENT
           ==================================================== */}
 
           <div className="ticket-event">
@@ -284,23 +697,89 @@ function TicketDetails() {
                 YOUR EVENT
               </span>
 
+
               <h1>
-                {ticket.eventTitle ||
+                {booking.eventTitle ||
                   "EventWaa Event"}
               </h1>
 
+
               <div className="ticket-meta">
 
-                {ticket.eventVenue && (
+
+                {(
+                  booking.eventVenue ||
+                  booking.venue
+                ) && (
+
                   <span>
-                    📍 {ticket.eventVenue}
+
+                    <MapPin
+                      size={16}
+                      strokeWidth={2}
+                    />
+
+                    {booking.eventVenue ||
+                      booking.venue}
+
                   </span>
+
                 )}
 
-                {ticket.eventDate && (
+
+                {eventDate && (
+
                   <span>
-                    📅 {ticket.eventDate}
+
+                    <CalendarDays
+                      size={16}
+                      strokeWidth={2}
+                    />
+
+                    {eventDate}
+
                   </span>
+
+                )}
+
+
+                {(
+                  booking.eventTime ||
+                  booking.time
+                ) && (
+
+                  <span>
+
+                    <Clock3
+                      size={16}
+                      strokeWidth={2}
+                    />
+
+                    {booking.eventTime ||
+                      booking.time}
+
+                  </span>
+
+                )}
+
+
+                {(
+                  booking.eventCity ||
+                  booking.city
+                ) && (
+
+                  <span>
+
+                    <Globe
+                      size={16}
+                      strokeWidth={2}
+                    />
+
+                    {booking.eventCity ||
+                      booking.city}
+
+                  </span>
+
                 )}
 
               </div>
@@ -316,35 +795,39 @@ function TicketDetails() {
 
           <div className="ticket-perforation">
 
-            <span></span>
+            <span>
+            </span>
 
-            <div></div>
+            <div>
+            </div>
 
-            <span></span>
+            <span>
+            </span>
 
           </div>
 
 
           {/* ====================================================
-              TICKET BODY
+              BOOKING INFORMATION
           ==================================================== */}
 
           <div className="ticket-body">
 
-            {/* LEFT SIDE */}
-
             <div className="ticket-information">
 
+
               <div className="ticket-info-grid">
+
 
                 <div className="ticket-info-item">
 
                   <span>
-                    ATTENDEE
+                    BOOKED BY
                   </span>
 
                   <strong>
-                    {ticket.buyer?.name ||
+                    {buyer.name ||
+                      booking.name ||
                       "Guest"}
                   </strong>
 
@@ -358,7 +841,8 @@ function TicketDetails() {
                   </span>
 
                   <strong>
-                    {ticket.ticketType ||
+                    {bookingTickets[0]?.ticketType ||
+                      booking.ticketType ||
                       "Regular"}
                   </strong>
 
@@ -368,12 +852,11 @@ function TicketDetails() {
                 <div className="ticket-info-item">
 
                   <span>
-                    QUANTITY
+                    TICKETS
                   </span>
 
                   <strong>
-                    {ticket.quantity ||
-                      1}
+                    {quantity}
                   </strong>
 
                 </div>
@@ -387,18 +870,13 @@ function TicketDetails() {
 
                   <strong>
                     UGX{" "}
-                    {Number(
-                      ticket.totalPrice ||
-                        0
-                    ).toLocaleString()}
+                    {totalAmount.toLocaleString()}
                   </strong>
 
                 </div>
 
               </div>
 
-
-              {/* EMAIL */}
 
               <div className="ticket-email">
 
@@ -407,146 +885,268 @@ function TicketDetails() {
                 </span>
 
                 <strong>
-                  {ticket.buyer?.email ||
+                  {buyer.email ||
+                    booking.email ||
                     "Not available"}
                 </strong>
 
               </div>
 
 
-              {/* TICKET ID */}
+              <div className="ticket-status">
 
-              <div className="ticket-id-box">
+                <div className={
+                  eventHasPassed
+                    ? "status pending"
+                    : "status valid"
+                }>
 
-                <span>
-                  TICKET ID
-                </span>
+                  {eventHasPassed ? (
 
-                <strong>
-                  {ticket.ticketId}
-                </strong>
+                    <Clock
+                      size={25}
+                      strokeWidth={2.2}
+                    />
+
+                  ) : (
+
+                    <CheckCircle
+                      size={25}
+                      strokeWidth={2.2}
+                    />
+
+                  )}
+
+
+                  <div>
+
+                    <strong>
+
+                      {eventHasPassed
+                        ? "Event Passed"
+                        : "Booking Confirmed"}
+
+                    </strong>
+
+
+                    <p>
+
+                      {eventHasPassed
+                        ? "This event has already taken place."
+                        : `Your booking includes ${quantity} individual ticket${
+                            quantity !== 1
+                              ? "s"
+                              : ""
+                          }.`}
+
+                    </p>
+
+                  </div>
+
+                </div>
 
               </div>
 
+            </div>
 
-              {/* STATUS */}
+          </div>
 
-              <div className="ticket-status">
 
-                {isRefunded ? (
+          {/* ====================================================
+              INDIVIDUAL TICKETS
+          ==================================================== */}
 
-                  <div className="status refunded">
+          <div className="booking-tickets-section">
 
-                    <span>
-                      ❌
-                    </span>
 
-                    <div>
-                      <strong>
-                        Ticket Refunded
-                      </strong>
+            <div className="booking-tickets-heading">
 
-                      <p>
-                        This ticket is no longer
-                        valid for event entry.
-                      </p>
-                    </div>
+              <TicketIcon
+                size={22}
+              />
 
-                  </div>
+              <div>
 
-                ) : isPendingRefund ? (
+                <h2>
+                  Your Tickets
+                </h2>
 
-                  <div className="status pending">
-
-                    <span>
-                      ⏳
-                    </span>
-
-                    <div>
-                      <strong>
-                        Refund Pending
-                      </strong>
-
-                      <p>
-                        Your refund request is
-                        awaiting approval.
-                      </p>
-                    </div>
-
-                  </div>
-
-                ) : (
-
-                  <div className="status valid">
-
-                    <span>
-                      ✓
-                    </span>
-
-                    <div>
-                      <strong>
-                        Valid Ticket
-                      </strong>
-
-                      <p>
-                        Present this QR code at
-                        the event entrance.
-                      </p>
-                    </div>
-
-                  </div>
-
-                )}
+                <p>
+                  Each QR code represents one
+                  individual event entry.
+                </p>
 
               </div>
 
             </div>
 
 
-            {/* ==================================================
-                QR CODE
-                ================================================== */}
+            <div className="booking-tickets-grid">
 
-            <div className="ticket-qr-section">
 
-              {isRefunded ? (
+              {bookingTickets.map(
+                (
+                  individualTicket,
+                  index
+                ) => {
 
-                <div className="qr-disabled">
+                  const qrValue =
+                    String(
+                      individualTicket.ticketId ||
+                      ""
+                    ).trim();
 
-                  <span>
-                    ❌
-                  </span>
 
-                  <p>
-                    QR Code<br />
-                    Invalid
-                  </p>
+                  const isCheckedIn =
+                    individualTicket.checkedIn ===
+                    true;
 
-                </div>
 
-              ) : (
+                  const refundStatus =
+                    String(
+                      individualTicket.refundStatus ||
+                      booking.refundStatus ||
+                      ""
+                    )
+                      .trim()
+                      .toLowerCase();
 
-                <>
 
-                  <div className="qr-container">
+                  const isRefunded =
+                    refundStatus ===
+                    "refunded";
 
-                    <QRCodeCanvas
-                      value={qrValue}
-                      size={190}
-                      bgColor="#ffffff"
-                      fgColor="#111827"
-                      level="H"
-                      includeMargin={true}
-                    />
 
-                  </div>
+                  return (
 
-                  <p className="qr-caption">
-                    Scan at entrance
-                  </p>
+                    <div
+                      className={`individual-ticket ${
+                        isCheckedIn
+                          ? "individual-ticket-used"
+                          : ""
+                      } ${
+                        isRefunded
+                          ? "individual-ticket-refunded"
+                          : ""
+                      }`}
+                      key={
+                        qrValue ||
+                        index
+                      }
+                    >
 
-                </>
 
+                      <div className="individual-ticket-top">
+
+                        <strong>
+                          Ticket{" "}
+                          {index + 1}
+                        </strong>
+
+
+                        {isRefunded ? (
+
+                          <span className="status refunded">
+                            Refunded
+                          </span>
+
+                        ) : isCheckedIn ? (
+
+                          <span className="status used">
+                            Used
+                          </span>
+
+                        ) : eventHasPassed ? (
+
+                          <span className="status passed">
+                            Passed
+                          </span>
+
+                        ) : (
+
+                          <span className="status confirmed">
+                            Confirmed
+                          </span>
+
+                        )}
+
+                      </div>
+
+
+                      <div className="individual-ticket-type">
+
+                        {individualTicket.ticketType ||
+                          booking.ticketType ||
+                          "Regular"}
+
+                      </div>
+
+
+                      {isRefunded ? (
+
+                        <div className="qr-disabled">
+
+                          <XCircle
+                            size={42}
+                          />
+
+                          <p>
+                            Ticket Invalid
+                          </p>
+
+                        </div>
+
+                      ) : (
+
+                        <div className="individual-qr">
+
+                          <QRCodeCanvas
+                            value={
+                              qrValue
+                            }
+                            size={200}
+                            bgColor="#ffffff"
+                            fgColor="#111827"
+                            level="H"
+                            includeMargin={true}
+                          />
+
+                        </div>
+
+                      )}
+
+
+                      <div className="individual-ticket-id">
+
+                        <span>
+                          TICKET ID
+                        </span>
+
+                        <strong>
+                          {qrValue ||
+                            "N/A"}
+                        </strong>
+
+                      </div>
+
+
+                      <p className="individual-ticket-caption">
+
+                        {isRefunded
+                          ? "This ticket is no longer valid."
+                          : isCheckedIn
+                          ? "This ticket has already been used."
+                          : eventHasPassed
+                          ? "This event has already passed."
+                          : "Scan this QR code at the event entrance."}
+
+                      </p>
+
+                    </div>
+
+                  );
+
+                }
               )}
 
             </div>
@@ -561,6 +1161,7 @@ function TicketDetails() {
           <div className="ticket-footer">
 
             <div>
+
               <strong>
                 {platformName}
               </strong>
@@ -568,10 +1169,15 @@ function TicketDetails() {
               <span>
                 Discover. Book. Experience.
               </span>
+
             </div>
 
+
             <span>
-              Ticket #{ticket.ticketId}
+              {quantity} Ticket
+              {quantity !== 1
+                ? "s"
+                : ""}
             </span>
 
           </div>
@@ -579,21 +1185,28 @@ function TicketDetails() {
         </div>
 
 
-        {/* ======================================================
-            DOWNLOAD NOTE
-        ====================================================== */}
-
         <p className="ticket-download-note">
 
-          📄 Use <strong>Download Ticket</strong>{" "}
-          to save or print your EventWaa ticket.
+          Use{" "}
+
+          <strong>
+            Download Tickets
+          </strong>
+
+          {" "}
+
+          to save or print your EventWaa
+          booking confirmation.
 
         </p>
 
       </div>
 
     </div>
+
   );
+
 }
+
 
 export default TicketDetails;

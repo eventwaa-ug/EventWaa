@@ -1,4 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
+import {
+    FiCheck,
+    FiFolder,
+    FiInfo,
+    FiMail,
+    FiMapPin,
+    FiPlus,
+    FiRefreshCw,
+    FiSearch,
+    FiShield,
+    FiTag,
+    FiUserX,
+    FiUsers,
+    FiX
+} from "react-icons/fi";
 import "../styles/AdminTeamMembers.css";
 
 function AdminTeamMembers() {
@@ -1289,7 +1304,8 @@ function AdminTeamMembers() {
 
             return (
                 <span className="admin-team-invitation accepted">
-                    ✓ Accepted
+                    <FiCheck aria-hidden="true" />
+                    Accepted
                 </span>
             );
 
@@ -1317,7 +1333,6 @@ function AdminTeamMembers() {
                             "Disabled"
                     }
                 >
-
                     {invitingMemberId ===
                     member.id ? (
                         <>
@@ -1325,9 +1340,11 @@ function AdminTeamMembers() {
                             Sending...
                         </>
                     ) : (
-                        "Resend Invitation"
+                        <>
+                            <FiMail aria-hidden="true" />
+                            Send Invitation
+                        </>
                     )}
-
                 </button>
             );
 
@@ -1350,7 +1367,6 @@ function AdminTeamMembers() {
                         "Disabled"
                 }
             >
-
                 {invitingMemberId ===
                 member.id ? (
                     <>
@@ -1358,9 +1374,11 @@ function AdminTeamMembers() {
                         Sending...
                     </>
                 ) : (
-                    "✉ Send Invitation"
+                    <>
+                        <FiMail aria-hidden="true" />
+                        Send Invitation
+                    </>
                 )}
-
             </button>
         );
 
@@ -1554,7 +1572,7 @@ function AdminTeamMembers() {
                    ================================================= */}
                 <div className="admin-team-history-timeline">
                     <span className="admin-team-history-dot">
-                        ✓
+                        <FiCheck aria-hidden="true" />
                     </span>
                     {index < totalItems - 1 && (
                         <span className="admin-team-history-line"></span>
@@ -1628,7 +1646,7 @@ function AdminTeamMembers() {
                 </div>
                 <div className="admin-team-history-empty">
                     <div className="admin-team-history-empty-icon">
-                        🗂️
+                        <FiFolder aria-hidden="true" />
                     </div>
                     <div>
                         <strong>
@@ -1747,13 +1765,8 @@ function AdminTeamMembers() {
                     className="admin-add-member-btn"
                     onClick={openAddMember}
                 >
-
-                    <span>
-                        +
-                    </span>
-
+                    <FiPlus aria-hidden="true" />
                     Add Team Member
-
                 </button>
 
             </header>
@@ -1784,7 +1797,7 @@ function AdminTeamMembers() {
                             setError("")
                         }
                     >
-                        ×
+                        <FiX aria-hidden="true" />
                     </button>
 
                 </div>
@@ -1813,7 +1826,7 @@ function AdminTeamMembers() {
                             setSuccess("")
                         }
                     >
-                        ×
+                        <FiX aria-hidden="true" />
                     </button>
 
                 </div>
@@ -1829,9 +1842,13 @@ function AdminTeamMembers() {
 
                 <div className="admin-team-stat-card">
 
-                    <div className="admin-team-stat-icon">
-                        👥
-                    </div>
+                
+
+                <div className="admin-team-stat-icon">
+                    <FiUsers aria-hidden="true" />
+                </div>
+
+
 
                     <div>
 
@@ -1851,7 +1868,7 @@ function AdminTeamMembers() {
                 <div className="admin-team-stat-card">
 
                     <div className="admin-team-stat-icon">
-                        🟢
+                        <FiCheck aria-hidden="true" />
                     </div>
 
                     <div>
@@ -1872,7 +1889,7 @@ function AdminTeamMembers() {
                 <div className="admin-team-stat-card">
 
                     <div className="admin-team-stat-icon">
-                        🎟️
+                        <FiTag aria-hidden="true" />
                     </div>
 
                     <div>
@@ -1893,7 +1910,7 @@ function AdminTeamMembers() {
                 <div className="admin-team-stat-card">
 
                     <div className="admin-team-stat-icon">
-                        🚫
+                        <FiUserX aria-hidden="true" />
                     </div>
 
                     <div>
@@ -1940,7 +1957,8 @@ function AdminTeamMembers() {
                         className="admin-panel-add-btn"
                         onClick={openAddMember}
                     >
-                        + Add Member
+                        <FiPlus aria-hidden="true" />
+                        Add Member
                     </button>
 
                 </div>
@@ -1953,22 +1971,13 @@ function AdminTeamMembers() {
                 <div className="admin-team-filters">
 
                     <div className="admin-team-search">
-
-                        <span>
-                            🔍
-                        </span>
-
+                        <FiSearch aria-hidden="true" />
                         <input
                             type="text"
                             value={search}
-                            onChange={(e) =>
-                                setSearch(
-                                    e.target.value
-                                )
-                            }
+                            onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search members, hosts or events..."
                         />
-
                     </div>
 
 
@@ -2064,7 +2073,7 @@ function AdminTeamMembers() {
                     <div className="admin-team-empty">
 
                         <div className="admin-team-empty-icon">
-                            👥
+                            <FiUsers aria-hidden="true" />
                         </div>
 
                         <h3>
@@ -2345,7 +2354,7 @@ function AdminTeamMembers() {
                                 disabled={saving}
                                 aria-label="Close"
                             >
-                                ×
+                                <FiX aria-hidden="true" />
                             </button>
 
                         </div>
@@ -2514,13 +2523,8 @@ function AdminTeamMembers() {
 
 
                             <div className="admin-team-form-notice">
-
-                                <span>
-                                    🛡️
-                                </span>
-
+                                <FiShield aria-hidden="true" />
                                 <p>
-
                                     Team members are added as
 
                                     <strong>
@@ -2536,9 +2540,7 @@ function AdminTeamMembers() {
 
                                     to email the team member their
                                     account setup link.
-
                                 </p>
-
                             </div>
 
 
@@ -2666,7 +2668,7 @@ function AdminTeamMembers() {
                                 }
                                 aria-label="Close"
                             >
-                                ×
+                                <FiX aria-hidden="true" />
                             </button>
 
                         </div>
@@ -2933,13 +2935,8 @@ function AdminTeamMembers() {
                             ===================================== */}
 
                             <div className="admin-team-assignment-notice">
-
-                                <span>
-                                    🔄
-                                </span>
-
+                                <FiRefreshCw aria-hidden="true" />
                                 <div>
-
                                     <strong>
                                         Reassignment keeps the history
                                     </strong>
@@ -2955,7 +2952,6 @@ function AdminTeamMembers() {
                                     </p>
 
                                 </div>
-
                             </div>
 
 
@@ -2966,13 +2962,8 @@ function AdminTeamMembers() {
                             {assignmentMember.event && (
 
                                 <div className="admin-team-reassignment-help">
-
-                                    <span>
-                                        💡
-                                    </span>
-
+                                    <FiInfo aria-hidden="true" />
                                     <p>
-
                                         <strong>
                                             Events are not permanent
                                             assignments.
@@ -2986,7 +2977,6 @@ function AdminTeamMembers() {
                                         creating another team account.
 
                                     </p>
-
                                 </div>
 
                             )}

@@ -95,7 +95,7 @@
 }
 
 .withdrawal-filters button.active {
-    background: #2563eb;
+    background: #d85c45;
     color: white;
 }
 
@@ -184,7 +184,7 @@
     border-radius: 50%;
 
     background: #eff6ff;
-    color: #2563eb;
+    color: #d85c45;
 
     font-weight: 800;
     font-size: 18px;
@@ -250,7 +250,7 @@
 
 .status.processing {
     background: #dbeafe;
-    color: #1d4ed8;
+    color: #b34a36;
 }
 
 
@@ -328,7 +328,7 @@
     background: #eff6ff;
     border: 1px solid #dbeafe;
 
-    color: #1e40af;
+    color: #8f3829;
 }
 
 .processing-icon {
@@ -348,7 +348,7 @@
 
     line-height: 1.5;
 
-    color: #3b82f6;
+    color: #e07a62;
 }
 
 
@@ -404,7 +404,7 @@
 .approve-btn {
     border: none;
 
-    background: #2563eb;
+    background: #d85c45;
     color: white;
 
     padding: 12px 20px;
@@ -419,7 +419,7 @@
 }
 
 .approve-btn:hover {
-    background: #1d4ed8;
+    background: #b34a36;
 }
 
 .approve-btn:disabled {
@@ -435,7 +435,7 @@
 .check-status-btn {
     border: none;
 
-    background: #1d4ed8;
+    background: #b34a36;
     color: white;
 
     padding: 12px 20px;
@@ -450,7 +450,7 @@
 }
 
 .check-status-btn:hover {
-    background: #1e40af;
+    background: #8f3829;
 }
 
 .check-status-btn:disabled {

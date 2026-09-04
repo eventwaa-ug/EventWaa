@@ -1,393 +1,267 @@
 /* =========================================================
    FOOTER
 ========================================================= */
-
 .footer {
+  width: 100%;
+  box-sizing: border-box;
   background: #111827;
   color: #ffffff;
-  padding: 65px 24px 24px;
+  padding: 64px 24px 24px;
   margin-top: 60px;
 }
-
+/* =========================================================
+   CONTAINER
+========================================================= */
 .footer-container {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
-  gap: 45px;
-
+  grid-template-columns:
+    1.5fr
+    1fr
+    1fr
+    1fr
+    1fr;
+  gap: 42px;
   align-items: start;
 }
-
 /* =========================================================
    BRAND
 ========================================================= */
-
 .footer-brand {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 18px;
 }
-
+/* BRAND LINK */
+.footer-brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+  color: #ffffff;
+}
+/* LOGO */
 .footer-logo {
-  width: 130px;
-  height: auto;
+  display: block;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
+  flex-shrink: 0;
 }
-
-.footer-brand h3 {
-  font-size: 24px;
-  margin: 0;
+/* PLATFORM NAME */
+.footer-brand-name {
+  display: inline-block;
+  color: #ffffff;
+  font-size: 25px;
   font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.6px;
+  white-space: nowrap;
 }
-
+/* DESCRIPTION */
 .footer-brand p {
-  color: #d1d5db;
-  line-height: 1.7;
-  font-size: 15px;
-  max-width: 300px;
+  max-width: 310px;
   margin: 0;
+  color: #cbd5e1;
+  font-size: 14px;
+  line-height: 1.7;
 }
-
 /* =========================================================
    FOOTER LINKS
 ========================================================= */
-
 .footer-links {
   display: flex;
   flex-direction: column;
-  gap: 13px;
+  align-items: flex-start;
+  gap: 11px;
 }
-
 .footer-links h3 {
-  font-size: 17px;
-  font-weight: 700;
-  margin: 0 0 8px;
+  margin: 0 0 7px;
   color: #ffffff;
+  font-size: 15px;
+  font-weight: 750;
 }
-
 .footer-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
   color: #cbd5e1;
   text-decoration: none;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
-
   transition:
-    color 0.25s ease,
-    transform 0.25s ease;
+    color 0.2s ease,
+    transform 0.2s ease;
 }
-
 .footer-links a:hover {
   color: #22c55e;
   transform: translateX(3px);
 }
-
 /* =========================================================
-   CONTACT
+   EMAIL
 ========================================================= */
-
-.footer-contact {
-  display: flex;
-  flex-direction: column;
+.email-support-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 }
-
-.footer-contact h3 {
-  font-size: 17px;
-  margin: 0 0 18px;
-}
-
-.footer-contact p {
-  color: #cbd5e1;
-  margin: 0 0 12px;
-  font-size: 15px;
-  line-height: 1.6;
-}
-
 /* =========================================================
    FOOTER BOTTOM
 ========================================================= */
-
 .footer-bottom {
+  width: 100%;
   max-width: 1200px;
-  margin: 50px auto 0;
-
-  padding-top: 22px;
-
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-
+  margin: 48px auto 0;
+  padding-top: 21px;
+  border-top:
+    1px solid
+    rgba(255, 255, 255, 0.11);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-
+  justify-content: space-between;
   gap: 20px;
 }
-
 .footer-bottom p {
-  color: #9ca3af;
-  font-size: 14px;
   margin: 0;
+  color: #9ca3af;
+  font-size: 13px;
+  line-height: 1.5;
 }
-
 .footer-bottom-links {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 21px;
 }
-
 .footer-bottom-links a {
   color: #9ca3af;
   text-decoration: none;
-  font-size: 14px;
-  transition: color 0.25s ease;
+  font-size: 13px;
+  transition:
+    color 0.2s ease;
 }
-
 .footer-bottom-links a:hover {
   color: #22c55e;
 }
-
 /* =========================================================
    TABLET
 ========================================================= */
-
 @media (max-width: 1000px) {
-
   .footer-container {
-    grid-template-columns: 1.5fr 1fr 1fr;
-    gap: 40px;
+    grid-template-columns:
+      1.4fr
+      1fr
+      1fr;
+    gap: 38px;
   }
-
   .footer-brand {
     grid-column: 1 / -1;
   }
-
   .footer-brand p {
-    max-width: 500px;
+    max-width: 520px;
   }
-
 }
-
-
 /* =========================================================
    MOBILE
 ========================================================= */
-
 @media (max-width: 650px) {
-
   .footer {
     padding: 45px 20px 20px;
     margin-top: 45px;
   }
-
-  /*
-     IMPORTANT:
-
-     Instead of putting every section underneath
-     the previous one, we create a compact 2-column
-     layout for the footer sections.
-
-     The links inside each section remain vertical.
-  */
-
   .footer-container {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 38px 25px;
-
-    text-align: left;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap: 36px 25px;
   }
-
-  /* -----------------------------------------
-     BRAND
-  ----------------------------------------- */
-
+  /* BRAND */
   .footer-brand {
     grid-column: 1 / -1;
-
-    align-items: flex-start;
-    text-align: left;
-
-    padding-bottom: 5px;
+    gap: 15px;
   }
-
+  .footer-brand-link {
+    gap: 9px;
+  }
   .footer-logo {
-    width: 115px;
+    width: 36px;
+    height: 36px;
   }
-
-  .footer-brand h3 {
+  .footer-brand-name {
     font-size: 22px;
   }
-
   .footer-brand p {
-    font-size: 14px;
     max-width: 100%;
+    font-size: 13px;
     line-height: 1.7;
   }
-
-  /* -----------------------------------------
-     LINKS
-
-     Heading stays on top.
-     Links underneath stay vertical.
-  ----------------------------------------- */
-
+  /* LINKS */
   .footer-links {
-    align-items: flex-start;
-    text-align: left;
-
-    gap: 10px;
+    gap: 9px;
   }
-
   .footer-links h3 {
-    font-size: 16px;
-    margin-bottom: 7px;
+    margin-bottom: 6px;
+    font-size: 14px;
   }
-
   .footer-links a {
-    font-size: 14px;
-  }
-
-  /* -----------------------------------------
-     CONTACT
-  ----------------------------------------- */
-
-  .footer-contact {
-    grid-column: 1 / -1;
-
-    text-align: left;
-    align-items: flex-start;
-  }
-
-  .footer-contact h3 {
-    font-size: 16px;
-    margin-bottom: 14px;
-  }
-
-  .footer-contact p {
-    font-size: 14px;
-  }
-
-  /* -----------------------------------------
-     BOTTOM
-  ----------------------------------------- */
-
-  .footer-bottom {
-    margin-top: 38px;
-
-    flex-direction: column;
-
-    align-items: center;
-
-    text-align: center;
-
-    gap: 16px;
-  }
-
-  .footer-bottom p {
     font-size: 13px;
   }
-
+  /* BOTTOM */
+  .footer-bottom {
+    margin-top: 38px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 15px;
+  }
+  .footer-bottom p {
+    font-size: 12px;
+  }
   .footer-bottom-links {
     gap: 18px;
     flex-wrap: wrap;
     justify-content: center;
   }
-
   .footer-bottom-links a {
-    font-size: 13px;
+    font-size: 12px;
   }
-
 }
-
-
 /* =========================================================
    SMALL PHONES
 ========================================================= */
-
 @media (max-width: 380px) {
-
   .footer {
     padding-left: 16px;
     padding-right: 16px;
   }
-
   .footer-container {
-    gap: 32px 18px;
+    gap: 31px 18px;
   }
-
-  .footer-links h3 {
-    font-size: 15px;
+  .footer-logo {
+    width: 34px;
+    height: 34px;
   }
-
-  .footer-links a {
-    font-size: 13px;
+  .footer-brand-name {
+    font-size: 20px;
   }
-
   .footer-brand p {
+    font-size: 12px;
+  }
+  .footer-links h3 {
     font-size: 13px;
   }
-
+  .footer-links a {
+    font-size: 12px;
+  }
 }
-
-
 /* =========================================================
-   LOGO PREVIEW
-   (Keep this if used elsewhere in your app)
+   ACCESSIBILITY
 ========================================================= */
-
-.logo-preview {
-  margin-top: 16px;
-
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.preview-image {
-  height: 60px;
-  width: auto;
-
-  object-fit: contain;
-
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-
-  padding: 8px;
-
-  background: white;
-}
-
-.remove-logo {
-  background: #ef4444;
-  color: white;
-
-  border: none;
-
-  padding: 10px 14px;
-
-  border-radius: 8px;
-
-  cursor: pointer;
-
-  transition: background 0.2s ease;
-}
-
-.remove-logo:hover {
-  background: #dc2626;
-}
-
-.email-support-link {
-  color: #cbd5e1;
-  text-decoration: none;
-  font-size: 15px;
-  cursor: pointer;
-  transition: color 0.25s ease, transform 0.25s ease;
-}
-
-.email-support-link:hover {
-  color: #22c55e;
-  transform: translateX(3px);
-}
-
-.email-support-link:active {
-  color: #16a34a;
+.footer a:focus-visible {
+  outline: 2px solid #22c55e;
+  outline-offset: 3px;
+  border-radius: 4px;
 }

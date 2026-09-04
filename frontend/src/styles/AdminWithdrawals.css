@@ -28,7 +28,7 @@ transition:0.2s;
 }
 
 .withdrawal-filters button.active{
-background:#2563eb;
+background:#d85c45;
 color:white;
 }
 
@@ -94,7 +94,7 @@ margin-left:6px;
 }
 
 .approve-btn{
-background:#2563eb;
+background:#d85c45;
 color:white;
 border:none;
 padding:12px 20px;
@@ -105,7 +105,7 @@ transition:0.2s;
 }
 
 .approve-btn:hover{
-background:#1d4ed8;
+background:#b34a36;
 }
 
 @media (max-width:768px){

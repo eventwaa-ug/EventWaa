@@ -1,212 +1,429 @@
+/* ============================================================
+   VERIFIED HOSTS
+============================================================ */
+
 .verified-hosts {
   width: 100%;
-  padding: 80px 20px;
-  background: #fafafa;
+  padding: 76px 5%;
   box-sizing: border-box;
+
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #fafaf9 100%
+    );
 }
 
-.section-header {
+
+/* ============================================================
+   CONTAINER
+============================================================ */
+
+.verified-hosts-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+
+/* ============================================================
+   HEADER
+============================================================ */
+
+.verified-hosts-header {
   text-align: center;
-  margin-bottom: 45px;
+  margin-bottom: 38px;
 }
 
-.section-header h2 {
-  font-size: 2.2rem;
-  color: #1e293b;
+
+.verified-hosts-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
   margin-bottom: 12px;
+
+  padding: 7px 12px;
+
+  border-radius: 999px;
+
+  background: #f4f4f2;
+  border: 1px solid #e8e7e3;
+
+  color: #44413c;
+
+  font-size: 13px;
+  font-weight: 700;
 }
 
-.section-header p {
-  color: #64748b;
+
+.verified-hosts-header h2 {
+  margin: 0 0 10px;
+
+  color: #171717;
+
+  font-size: clamp(
+    1.8rem,
+    3vw,
+    2.35rem
+  );
+
+  line-height: 1.15;
+
+  letter-spacing: -0.7px;
+}
+
+
+.verified-hosts-header p {
+  max-width: 560px;
+
+  margin: 0 auto;
+
+  color: #686868;
+
   font-size: 1rem;
+
   line-height: 1.6;
 }
 
 
-/* HOST GRID */
+/* ============================================================
+   HOST GRID
+============================================================ */
 
 .hosts-grid {
-  max-width: 1200px;
-  margin: 0 auto;
-
   display: grid;
 
   grid-template-columns:
-    repeat(auto-fit, minmax(220px, 1fr));
+    repeat(4, minmax(0, 1fr));
 
-  gap: 25px;
+  gap: 18px;
 }
 
 
-/* HOST CARD */
+/* ============================================================
+   HOST CARD
+============================================================ */
 
 .host-card {
-  background: #ffffff;
+  min-width: 0;
 
-  padding: 30px 20px;
+  display: flex;
+  align-items: center;
 
-  border-radius: 18px;
+  gap: 13px;
 
-  text-align: center;
+  padding: 18px;
+
+  box-sizing: border-box;
+
+  background: rgba(255, 255, 255, 0.78);
+
+  border: 1px solid #e8e6e2;
+
+  border-radius: 16px;
 
   box-shadow:
-    0 8px 25px rgba(0, 0, 0, 0.07);
+    0 5px 18px rgba(0, 0, 0, 0.045);
 
   transition:
     transform 0.25s ease,
-    box-shadow 0.25s ease;
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
 }
+
+
+/* ============================================================
+   HOST CARD HOVER
+============================================================ */
 
 .host-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
+
+  background: #ffffff;
+
+  border-color: #ddd9d2;
 
   box-shadow:
-    0 14px 30px rgba(0, 0, 0, 0.1);
+    0 12px 28px rgba(0, 0, 0, 0.085);
 }
 
 
-/* HOST AVATAR */
+/* ============================================================
+   HOST AVATAR
+============================================================ */
 
 .host-avatar {
-  width: 80px;
-  height: 80px;
+  width: 52px;
+  height: 52px;
 
-  margin: 0 auto 18px;
-
-  border-radius: 50%;
+  flex: 0 0 52px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  background: #ede9fe;
+  border-radius: 50%;
 
-  color: #7c3aed;
+  background:
+    linear-gradient(
+      145deg,
+      #f2eee8,
+      #e8e2d9
+    );
 
-  font-size: 2rem;
+  border: 1px solid #ddd7ce;
 
-  font-weight: 700;
-
-  border: 3px solid #ddd6fe;
-}
-
-
-/* HOST NAME */
-
-.host-card h3 {
-  margin: 0 0 10px;
-
-  color: #1e293b;
+  color: #393632;
 
   font-size: 1.2rem;
+  font-weight: 800;
+
+  text-transform: uppercase;
 }
 
 
-/* VERIFIED BADGE */
+/* ============================================================
+   HOST INFO
+============================================================ */
+
+.host-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+
+.host-info h3 {
+  margin: 0;
+
+  color: #202020;
+
+  font-size: 0.98rem;
+
+  font-weight: 750;
+
+  line-height: 1.3;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+   VERIFIED BADGE
+============================================================ */
 
 .verified-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
 
-  color: #7c3aed;
+  gap: 5px;
 
-  font-size: 0.85rem;
+  width: fit-content;
 
-  font-weight: 600;
+  color: #65615b;
 
-  line-height: 1.4;
+  font-size: 12px;
+
+  font-weight: 650;
+
+  line-height: 1.3;
 }
 
 
-/* NO HOSTS */
+.verified-badge svg {
+  flex-shrink: 0;
+
+  color: #45413b;
+}
+
+
+/* ============================================================
+   NO HOSTS
+============================================================ */
 
 .no-hosts {
   grid-column: 1 / -1;
 
+  width: 100%;
+
+  box-sizing: border-box;
+
   text-align: center;
 
-  padding: 40px 20px;
+  padding: 48px 25px;
 
-  color: #64748b;
+  background: rgba(255, 255, 255, 0.75);
+
+  border: 1px dashed #d9d6d0;
+
+  border-radius: 18px;
 }
+
 
 .no-hosts-icon {
-  font-size: 2.5rem;
+  width: 54px;
+  height: 54px;
 
-  margin-bottom: 10px;
+  margin: 0 auto 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #f2f0ec;
+
+  color: #55514b;
 }
+
 
 .no-hosts h3 {
-  color: #1e293b;
+  margin: 0 0 8px;
 
-  margin-bottom: 8px;
+  color: #242424;
+
+  font-size: 1.15rem;
 }
+
 
 .no-hosts p {
-  margin: 0;
+  max-width: 440px;
+
+  margin: 0 auto;
+
+  color: #707070;
+
+  font-size: 0.92rem;
+
+  line-height: 1.6;
 }
 
 
-/* TABLET */
+/* ============================================================
+   TABLET
+============================================================ */
 
-@media (max-width: 768px) {
+@media (max-width: 1050px) {
 
   .verified-hosts {
-    padding: 60px 20px;
+    padding: 68px 4%;
   }
 
-  .section-header {
-    margin-bottom: 35px;
-  }
-
-  .section-header h2 {
-    font-size: 1.9rem;
-  }
 
   .hosts-grid {
     grid-template-columns:
       repeat(2, minmax(0, 1fr));
 
-    gap: 18px;
-  }
-
-  .host-card {
-    padding: 25px 15px;
+    gap: 16px;
   }
 
 }
 
 
-/* PHONE */
+/* ============================================================
+   MOBILE
+============================================================ */
 
-@media (max-width: 520px) {
+@media (max-width: 680px) {
 
   .verified-hosts {
-    padding: 50px 16px;
+    padding: 58px 18px;
   }
 
-  .section-header h2 {
-    font-size: 1.7rem;
+
+  .verified-hosts-header {
+    margin-bottom: 30px;
   }
 
-  .section-header p {
-    font-size: 0.9rem;
+
+  .verified-hosts-header h2 {
+    font-size: 1.8rem;
   }
+
+
+  .verified-hosts-header p {
+    font-size: 0.92rem;
+  }
+
 
   .hosts-grid {
     grid-template-columns: 1fr;
 
-    max-width: 360px;
+    gap: 13px;
   }
+
 
   .host-card {
-    padding: 28px 20px;
+    padding: 15px;
+
+    border-radius: 14px;
   }
 
-  .host-avatar {
-    width: 70px;
-    height: 70px;
 
-    font-size: 1.7rem;
+  .host-avatar {
+    width: 48px;
+    height: 48px;
+
+    flex-basis: 48px;
+
+    font-size: 1.1rem;
+  }
+
+}
+
+
+/* ============================================================
+   SMALL PHONES
+============================================================ */
+
+@media (max-width: 400px) {
+
+  .verified-hosts {
+    padding: 50px 15px;
+  }
+
+
+  .verified-hosts-header h2 {
+    font-size: 1.65rem;
+  }
+
+
+  .verified-hosts-label {
+    font-size: 12px;
+  }
+
+
+  .host-card {
+    padding: 14px;
+  }
+
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .host-card {
+    transition: none;
+  }
+
+  .host-card:hover {
+    transform: none;
   }
 
 }

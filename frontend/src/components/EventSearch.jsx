@@ -1,230 +1,333 @@
-import { useContext, useEffect, useState } from "react";
-import { EventContext } from "../context/EventContext";
-import { useNavigate } from "react-router-dom";
+import {
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  EventContext,
+} from "../context/EventContext";
+
+import {
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  Search,
+  MapPin,
+  ArrowRight,
+} from "lucide-react";
+
 import "./EventSearch.css";
 
 
-function EventSearch(){
+function EventSearch() {
 
-    const { events } = useContext(EventContext);
+  const { events } =
+    useContext(EventContext);
 
-    const navigate = useNavigate();
-
-
-    const [search,setSearch] = useState("");
-
-    const [suggestions,setSuggestions] = useState([]);
+  const navigate =
+    useNavigate();
 
 
-
-    useEffect(()=>{
-
-
-        if(!search.trim()){
-
-            setSuggestions([]);
-
-            return;
-
-        }
+  const [
+    search,
+    setSearch,
+  ] = useState("");
 
 
-
-        const value = search.toLowerCase();
-
-
-
-        const results = (events || [])
-
-        .filter(event=>{
+  const [
+    suggestions,
+    setSuggestions,
+  ] = useState([]);
 
 
-            const data = `
+  // ============================================================
+  // SEARCH SUGGESTIONS
+  // ============================================================
 
-            ${event.title || ""}
+  useEffect(() => {
 
-            ${event.city || ""}
-
-            ${event.location || ""}
-
-            ${event.venue || ""}
-
-            ${event.category || ""}
-
-            `.toLowerCase();
+    const value =
+      search.trim().toLowerCase();
 
 
+    if (!value) {
 
-            return data.includes(value);
+      setSuggestions([]);
 
+      return;
+
+    }
+
+
+    const results =
+      (events || [])
+        .filter((event) => {
+
+          const searchableText = [
+
+            event?.title,
+
+            event?.city,
+
+            event?.location,
+
+            event?.venue,
+
+            event?.category,
+
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+
+
+          return searchableText.includes(
+            value
+          );
 
         })
+        .slice(0, 5);
 
 
-        .slice(0,5);
+    setSuggestions(results);
 
+  }, [
+    search,
+    events,
+  ]);
 
 
-        setSuggestions(results);
+  // ============================================================
+  // SEARCH
+  // ============================================================
 
+  const performSearch = () => {
 
+    const value =
+      search.trim();
 
-    },[search,events]);
 
+    if (!value) {
+      return;
+    }
 
 
+    navigate(
+      `/events?search=${encodeURIComponent(
+        value
+      )}`
+    );
 
 
+    setSuggestions([]);
 
+  };
 
-    const handleEnter = (e)=>{
 
+  // ============================================================
+  // ENTER
+  // ============================================================
 
-        if(e.key === "Enter"){
+  const handleEnter = (event) => {
 
+    if (
+      event.key === "Enter"
+    ) {
 
-            if(search.trim()){
+      performSearch();
 
+    }
 
-                navigate(
-                    `/events?search=${search}`
-                );
+  };
 
 
-                setSuggestions([]);
+  // ============================================================
+  // OPEN EVENT
+  // ============================================================
 
+  const openEvent = (event) => {
 
-            }
+    navigate(
+      `/events/${event.id}`
+    );
 
 
-        }
+    setSearch("");
 
+    setSuggestions([]);
 
-    };
+  };
 
 
+  return (
 
+    <div className="event-search-wrapper">
 
 
+      {/* ======================================================
+          SEARCH BAR
+      ====================================================== */}
 
+      <div
+        className={`search-box ${
+          search.trim()
+            ? "has-search"
+            : ""
+        }`}
+      >
 
-    const openEvent = (event)=>{
+        {/* LEFT SEARCH ICON */}
 
+        <Search
+          className="search-main-icon"
+          size={21}
+          strokeWidth={2}
+          aria-hidden="true"
+        />
 
-        navigate(
-            `/events/${event.id}`
-        );
 
+        {/* INPUT */}
 
-        setSearch("");
+        <input
+          type="text"
+          value={search}
+          placeholder="Search events, cities, venues..."
+          onChange={(event) =>
+            setSearch(
+              event.target.value
+            )
+          }
+          onKeyDown={
+            handleEnter
+          }
+          aria-label="Search events"
+        />
 
-        setSuggestions([]);
 
+        {/* SEARCH BUTTON */}
 
-    };
+        <button
+          type="button"
+          className="search-submit"
+          onClick={
+            performSearch
+          }
+          aria-label="Search"
+        >
 
+          <Search
+            size={19}
+            strokeWidth={2.4}
+          />
 
+          <span>
+            Search
+          </span>
 
+        </button>
 
+      </div>
 
 
-return (
+      {/* ======================================================
+          SUGGESTIONS
+      ====================================================== */}
 
-<div className="event-search-wrapper">
+      {suggestions.length > 0 && (
 
+        <div className="search-results">
 
-<div className="search-box">
 
+          <div className="search-results-heading">
 
-<span>
-🔍
-</span>
+            <span>
+              Events
+            </span>
 
+          </div>
 
 
-<input
+          {suggestions.map(
+            (event) => (
 
-type="text"
+              <button
+                type="button"
+                className="search-item"
+                key={event.id}
+                onClick={() =>
+                  openEvent(event)
+                }
+              >
 
-placeholder="Search events, cities, venues..."
 
-value={search}
+                {/* EVENT SEARCH ICON */}
 
-onChange={(e)=>
-setSearch(e.target.value)
-}
+                <div className="search-item-icon">
 
-onKeyDown={handleEnter}
+                  <Search
+                    size={18}
+                    strokeWidth={2}
+                  />
 
-/>
+                </div>
 
 
+                {/* EVENT INFORMATION */}
 
-</div>
+                <div className="search-item-content">
 
+                  <strong>
+                    {event.title ||
+                      "Untitled Event"}
+                  </strong>
 
 
+                  {(event.city ||
+                    event.location ||
+                    event.venue) && (
 
+                    <span className="search-item-location">
 
-{
-suggestions.length > 0 && (
+                      <MapPin
+                        size={14}
+                        strokeWidth={2}
+                      />
 
-<div className="search-results">
+                      <span>
+                        {event.city ||
+                          event.location ||
+                          event.venue}
+                      </span>
 
+                    </span>
 
-{
-suggestions.map(event=>(
+                  )}
 
+                </div>
 
-<div
 
-key={event.id}
+                {/* ARROW */}
 
-className="search-item"
+                <ArrowRight
+                  className="search-item-arrow"
+                  size={17}
+                  strokeWidth={2}
+                />
 
-onClick={()=>
-openEvent(event)
-}
+              </button>
 
->
+            )
+          )}
 
+        </div>
 
-<h4>
+      )}
 
-{event.title}
+    </div>
 
-</h4>
-
-
-<p>
-
-📍 {event.city || event.location}
-
-</p>
-
-
-</div>
-
-
-))
-
-
-}
-
-
-</div>
-
-)
-
-}
-
-
-
-</div>
-
-
-);
-
+  );
 
 }
 

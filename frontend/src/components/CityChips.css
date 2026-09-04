@@ -1,235 +1,306 @@
-/* =========================================
-   CITY CHIPS SECTION
-========================================= */
-
+/* ============================================================
+   EVENTWAA — CITY CHIPS
+   Modern / Premium / Eventbrite-inspired
+============================================================ */
 .city-chips-section {
     width: 100%;
-    padding: 55px 8%;
-    background: #f8fafc;
+    padding: 58px 8%;
+    background: #f8f7f4;
     box-sizing: border-box;
 }
-
-
-/* =========================================
+/* ============================================================
    HEADER
-========================================= */
-
+============================================================ */
 .city-chips-header {
     text-align: center;
     margin-bottom: 30px;
 }
-
-
 .city-chips-header h2 {
     margin: 0 0 8px;
-
-    color: #0f172a;
-
-    font-size: 1.8rem;
-    font-weight: 700;
+    color: #171717;
+    font-size: 1.85rem;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.4px;
 }
-
-
 .city-chips-header p {
     margin: 0;
-
-    color: #64748b;
-
+    color: #737373;
     font-size: 0.95rem;
+    line-height: 1.5;
 }
-
-
-/* =========================================
-   CITY CONTAINER
-========================================= */
-
-.city-chips {
-    display: flex;
-
-    gap: 15px;
-
+/* ============================================================
+   CHIPS WRAPPER
+============================================================ */
+.city-chips-wrapper {
+    position: relative;
+    width: 100%;
     max-width: 1200px;
-
     margin: 0 auto;
-
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+/* ============================================================
+   CITY CHIPS
+============================================================ */
+.city-chips {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     overflow-x: auto;
-
     padding: 5px 2px 12px;
-
+    scroll-behavior: smooth;
     scroll-snap-type: x mandatory;
-
+    scrollbar-width: none;
     -ms-overflow-style: none;
 }
-
-
-/* Hide scrollbar */
-
 .city-chips::-webkit-scrollbar {
     display: none;
 }
-
-
-/* =========================================
-   CITY BUTTON
-========================================= */
-
+/* ============================================================
+   CITY CHIP
+============================================================ */
 .city-chip {
     flex: 0 0 auto;
-
-    display: flex;
-
+    display: inline-flex;
     align-items: center;
-
-    gap: 6px;
-
-    white-space: nowrap;
-
-    padding: 12px 22px;
-
+    justify-content: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 0 18px;
     border-radius: 999px;
-
     background: #ffffff;
-
-    border: 1px solid #e2e8f0;
-
-    color: #334155;
-
+    border: 1px solid #e3e0da;
+    color: #383838;
     cursor: pointer;
-
     font-family: inherit;
-
-    font-size: 0.95rem;
-
-    font-weight: 600;
-
+    font-size: 0.94rem;
+    font-weight: 650;
+    white-space: nowrap;
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.025);
     transition:
-        transform 0.25s ease,
-        background 0.25s ease,
-        color 0.25s ease,
-        border-color 0.25s ease,
-        box-shadow 0.25s ease;
-
+        background 0.22s ease,
+        color 0.22s ease,
+        border-color 0.22s ease,
+        transform 0.22s ease,
+        box-shadow 0.22s ease;
     scroll-snap-align: start;
 }
-
-
-/* =========================================
-   ICON
-========================================= */
-
-.city-icon {
-    font-size: 15px;
+/* ============================================================
+   CITY ICON
+============================================================ */
+.city-chip-icon {
+    flex-shrink: 0;
+    color: #f05a28;
+    transition:
+        color 0.22s ease,
+        transform 0.22s ease;
 }
-
-
-/* =========================================
+/* ============================================================
    HOVER
-========================================= */
-
+============================================================ */
 .city-chip:hover {
-    transform: translateY(-3px);
-
-    background: #2563eb;
-
-    color: #ffffff;
-
-    border-color: #2563eb;
-
+    transform: translateY(-2px);
+    background: #fff7f3;
+    border-color: #f4a58a;
+    color: #171717;
     box-shadow:
-        0 7px 18px rgba(37, 99, 235, 0.18);
+        0 7px 18px rgba(240, 90, 40, 0.10);
 }
-
-
-/* =========================================
+.city-chip:hover .city-chip-icon {
+    color: #e64d1d;
+    transform: scale(1.08);
+}
+/* ============================================================
    ACTIVE CITY
-========================================= */
-
+============================================================ */
 .city-chip.active {
-    background: #2563eb;
-
+    background: #f05a28;
+    border-color: #f05a28;
     color: #ffffff;
-
-    border-color: #2563eb;
-
     box-shadow:
-        0 7px 18px rgba(37, 99, 235, 0.18);
+        0 7px 18px rgba(240, 90, 40, 0.18);
 }
-
-
-/* =========================================
+.city-chip.active .city-chip-icon {
+    color: #ffffff;
+}
+/* ============================================================
    ACTIVE HOVER
-========================================= */
-
+============================================================ */
 .city-chip.active:hover {
-    background: #1d4ed8;
-
-    border-color: #1d4ed8;
+    background: #df4f20;
+    border-color: #df4f20;
+    box-shadow:
+        0 9px 22px rgba(240, 90, 40, 0.22);
 }
-
-
-/* =========================================
-   MOBILE
-========================================= */
-
-@media (max-width: 768px) {
-
+/* ============================================================
+   MORE BUTTON
+============================================================ */
+.city-more-button {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 44px;
+    padding: 0 17px;
+    border-radius: 999px;
+    background: #171717;
+    border: 1px solid #171717;
+    color: #ffffff;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.91rem;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow:
+        0 5px 15px rgba(0, 0, 0, 0.12);
+    transition:
+        background 0.22s ease,
+        border-color 0.22s ease,
+        transform 0.22s ease,
+        box-shadow 0.22s ease;
+}
+.city-more-button:hover {
+    background: #f05a28;
+    border-color: #f05a28;
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 20px rgba(240, 90, 40, 0.20);
+}
+.city-more-button svg {
+    transition:
+        transform 0.22s ease;
+}
+.city-more-button:hover svg {
+    transform: translateX(3px);
+}
+/* ============================================================
+   TABLET
+============================================================ */
+@media (max-width: 900px) {
     .city-chips-section {
-        padding: 40px 20px;
+        padding: 50px 5%;
     }
-
-
     .city-chips-header {
-        text-align: left;
-
-        margin-bottom: 22px;
+        margin-bottom: 25px;
     }
-
-
     .city-chips-header h2 {
-        font-size: 1.5rem;
+        font-size: 1.7rem;
     }
-
-
-    .city-chips-header p {
-        line-height: 1.5;
-    }
-
-
     .city-chips {
         gap: 10px;
-
-        padding-bottom: 10px;
     }
-
-
     .city-chip {
-        padding: 10px 17px;
-
+        min-height: 42px;
+        padding: 0 16px;
+        font-size: 0.9rem;
+    }
+    .city-more-button {
+        min-height: 42px;
+        padding: 0 15px;
         font-size: 0.88rem;
     }
-
 }
-
-
-/* =========================================
-   SMALL PHONES
-========================================= */
-
-@media (max-width: 400px) {
-
+/* ============================================================
+   MOBILE
+============================================================ */
+@media (max-width: 600px) {
     .city-chips-section {
-        padding-left: 16px;
-        padding-right: 16px;
+        padding: 42px 16px;
     }
-
-
+    /* HEADER */
+    .city-chips-header {
+        text-align: left;
+        margin-bottom: 20px;
+    }
     .city-chips-header h2 {
-        font-size: 1.4rem;
+        font-size: 1.45rem;
+        letter-spacing: -0.25px;
     }
-
-
+    .city-chips-header p {
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+    /* WRAPPER */
+    .city-chips-wrapper {
+        gap: 8px;
+    }
+    /* CHIPS */
+    .city-chips {
+        gap: 8px;
+        padding:
+            3px
+            2px
+            10px;
+    }
     .city-chip {
-        padding: 9px 15px;
+        min-height: 40px;
+        padding: 0 14px;
+        gap: 6px;
+        font-size: 0.84rem;
     }
-
+    .city-chip-icon {
+        width: 15px;
+        height: 15px;
+    }
+    /* ========================================================
+       MORE
+       IMPORTANT:
+       The More button remains visible on mobile.
+    ======================================================== */
+    .city-more-button {
+        min-height: 40px;
+        padding: 0 13px;
+        gap: 3px;
+        font-size: 0.82rem;
+        box-shadow:
+            0 4px 12px rgba(0, 0, 0, 0.11);
+    }
+    .city-more-button svg {
+        width: 15px;
+        height: 15px;
+    }
+}
+/* ============================================================
+   SMALL PHONES
+============================================================ */
+@media (max-width: 380px) {
+    .city-chips-section {
+        padding: 38px 14px;
+    }
+    .city-chips-header h2 {
+        font-size: 1.35rem;
+    }
+    .city-chips-header p {
+        font-size: 0.84rem;
+    }
+    .city-chips-wrapper {
+        gap: 6px;
+    }
+    .city-chips {
+        gap: 7px;
+    }
+    .city-chip {
+        min-height: 38px;
+        padding: 0 12px;
+        font-size: 0.8rem;
+    }
+    .city-more-button {
+        min-height: 38px;
+        padding: 0 11px;
+        font-size: 0.78rem;
+    }
+}
+/* ============================================================
+   ACCESSIBILITY
+============================================================ */
+.city-chip:focus-visible,
+.city-more-button:focus-visible {
+    outline: 2px solid #f05a28;
+    outline-offset: 3px;
 }

@@ -4,6 +4,27 @@ import { useContext, useEffect, useState } from "react";
 import { EventContext } from "../context/EventContext";
 import { useAuth } from "../context/AuthContext";
 
+import {
+  CalendarDays,
+  Ticket,
+  CheckCircle2,
+  Users,
+  Wallet,
+  MessageCircle,
+  Plus,
+  MapPin,
+  Clock3,
+  Tag,
+  Gift,
+  BadgeCheck,
+  Hourglass,
+  Pencil,
+  Copy,
+  ScanLine,
+  Trash2,
+  ArrowRight,
+  Inbox,
+} from "lucide-react";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -44,8 +65,6 @@ function Dashboard() {
 
   /* =========================================================
      EVENT IMAGE
-     
-     THIS IS THE SAME LOGIC USED BY EventCard.jsx
   ========================================================= */
 
   const getImageUrl = () => {
@@ -61,7 +80,6 @@ function Dashboard() {
       return "/default-event.jpg";
     }
 
-    // Already a full URL
     if (
       image.startsWith("http://") ||
       image.startsWith("https://")
@@ -69,7 +87,6 @@ function Dashboard() {
       return image;
     }
 
-    // Relative path from backend
     return `${BACKEND_URL}${image}`;
   };
 
@@ -337,8 +354,6 @@ function Dashboard() {
   return (
     <div className="host-dashboard-layout">
 
-
-
       <main className="host-dashboard-content">
 
         {/* ===================================================
@@ -350,15 +365,11 @@ function Dashboard() {
           <div className="dashboard-welcome">
 
             <div className="welcome-heading">
-
-              <span>
-                Welcome back,
-              </span>
+              <span>Welcome back,</span>
 
               <strong>
-                {user?.name || "Organizer"} 👋
+                {user?.name || "Organizer"}
               </strong>
-
             </div>
 
             <p>
@@ -368,7 +379,6 @@ function Dashboard() {
 
           </div>
 
-
           <div className="dashboard-header-actions">
 
             <button
@@ -377,9 +387,12 @@ function Dashboard() {
                 navigate("/create-event")
               }
             >
-              + Create Event
-            </button>
+              <Plus size={19} strokeWidth={2.5} />
 
+              <span>
+                Create Event
+              </span>
+            </button>
 
             <button
               className="inbox-btn"
@@ -387,7 +400,11 @@ function Dashboard() {
                 navigate("/host-messages")
               }
             >
-              💬 Inbox
+              <MessageCircle size={19} />
+
+              <span>
+                Inbox
+              </span>
 
               {unreadCount > 0 && (
                 <span className="inbox-badge">
@@ -410,109 +427,70 @@ function Dashboard() {
 
           <div className="stats-grid">
 
-            <div className="stat-card">
-
+            <div className="stat-card events-stat">
               <div className="stat-icon">
-                📅
+                <CalendarDays />
               </div>
 
               <div className="stat-content">
-
-                <h2>
-                  {totalEvents}
-                </h2>
-
-                <p>
-                  Total Events
-                </p>
-
+                <h2>{totalEvents}</h2>
+                <p>Total Events</p>
               </div>
-
             </div>
 
 
-            <div className="stat-card">
-
+            <div className="stat-card tickets-stat">
               <div className="stat-icon">
-                🎟️
+                <Ticket />
               </div>
 
               <div className="stat-content">
-
-                <h2>
-                  {totalTicketsSold}
-                </h2>
-
-                <p>
-                  Tickets Sold
-                </p>
-
+                <h2>{totalTicketsSold}</h2>
+                <p>Tickets Sold</p>
               </div>
-
             </div>
 
 
-            <div className="stat-card">
-
+            <div className="stat-card checked-stat">
               <div className="stat-icon">
-                ✅
+                <CheckCircle2 />
               </div>
 
               <div className="stat-content">
-
-                <h2>
-                  {checkedInCount}
-                </h2>
-
-                <p>
-                  Checked In
-                </p>
-
+                <h2>{checkedInCount}</h2>
+                <p>Checked In</p>
               </div>
-
             </div>
 
 
-            <div className="stat-card">
-
+            <div className="stat-card capacity-stat">
               <div className="stat-icon">
-                👥
+                <Users />
               </div>
 
               <div className="stat-content">
-
                 <h2>
                   {totalCapacity.toLocaleString()}
                 </h2>
 
-                <p>
-                  Total Capacity
-                </p>
-
+                <p>Total Capacity</p>
               </div>
-
             </div>
 
 
             <div className="stat-card revenue-stat">
-
               <div className="stat-icon">
-                💰
+                <Wallet />
               </div>
 
               <div className="stat-content">
-
                 <h2>
                   UGX{" "}
                   {totalRevenue.toLocaleString()}
                 </h2>
 
-                <p>
-                  Revenue
-                </p>
-
+                <p>Revenue</p>
               </div>
-
             </div>
 
           </div>
@@ -529,17 +507,12 @@ function Dashboard() {
           <div className="section-title">
 
             <div>
-
-              <h2>
-                Current Event
-              </h2>
+              <h2>Current Event</h2>
 
               <p>
                 Your most recently created event.
               </p>
-
             </div>
-
 
             <button
               className="view-all-events-btn"
@@ -547,7 +520,8 @@ function Dashboard() {
                 navigate("/host-events")
               }
             >
-              View All Events →
+              <span>View All Events</span>
+              <ArrowRight size={17} />
             </button>
 
           </div>
@@ -562,7 +536,7 @@ function Dashboard() {
             <div className="empty-events">
 
               <div className="empty-events-icon">
-                📅
+                <CalendarDays />
               </div>
 
               <h3>
@@ -580,23 +554,18 @@ function Dashboard() {
                   navigate("/create-event")
                 }
               >
-                + Create Event
+                <Plus size={19} />
+                <span>Create Event</span>
               </button>
 
             </div>
 
           ) : (
 
-            /* =================================================
-               EVENT CARD
-            ================================================= */
-
             <article className="dashboard-event-card">
 
               {/* =============================================
                   EVENT POSTER
-
-                  THIS MATCHES EventCard.jsx
               ============================================= */}
 
               <div className="event-poster-wrapper">
@@ -614,8 +583,6 @@ function Dashboard() {
                   }}
                 />
 
-                {/* EVENT TYPE */}
-
                 <span
                   className={`event-type ${
                     currentEvent.eventType === "Free"
@@ -628,15 +595,11 @@ function Dashboard() {
                     : "PAID"}
                 </span>
 
-
-                {/* VERIFIED HOST */}
-
                 {currentEvent.verifiedHost && (
-
                   <span className="verified-host">
-                    ✅ Verified
+                    <BadgeCheck size={15} />
+                    Verified
                   </span>
-
                 )}
 
               </div>
@@ -673,14 +636,12 @@ function Dashboard() {
                 </div>
 
 
-                {/* ===========================================
-                    EVENT DETAILS
-                =========================================== */}
+                {/* EVENT DETAILS */}
 
                 <div className="event-details">
 
                   <p>
-                    <span>📍</span>
+                    <MapPin />
 
                     <span>
                       {currentEvent.venue
@@ -691,28 +652,23 @@ function Dashboard() {
                         currentEvent.location ||
                         "Location not specified"}
                     </span>
-
                   </p>
 
 
                   <p>
-
-                    <span>📅</span>
+                    <CalendarDays />
 
                     <span>
                       {currentEvent.date ||
                         "Date not specified"}
                     </span>
-
                   </p>
 
 
                   <p>
-
-                    <span>⏰</span>
+                    <Clock3 />
 
                     <span>
-
                       {currentEvent.startTime ||
                         currentEvent.time ||
                         "Time not specified"}
@@ -720,86 +676,67 @@ function Dashboard() {
                       {currentEvent.endTime
                         ? ` - ${currentEvent.endTime}`
                         : ""}
-
                     </span>
-
                   </p>
 
 
                   <p>
-
-                    <span>🏷️</span>
+                    <Tag />
 
                     <span>
                       {currentEvent.category ||
                         "Uncategorized"}
                     </span>
-
                   </p>
 
 
                   <p>
+                    {currentEvent.eventType ===
+                    "Free" ? (
+                      <Gift />
+                    ) : (
+                      <Wallet />
+                    )}
 
                     <span>
-                      {currentEvent.eventType ===
-                      "Free"
-                        ? "🎉"
-                        : "💰"}
-                    </span>
-
-                    <span>
-
                       {currentEvent.eventType ===
                       "Free"
                         ? "Free Event"
                         : `Starting Price: UGX ${startingPrice.toLocaleString()}`}
-
                     </span>
-
                   </p>
 
 
                   <p>
-
-                    <span>👥</span>
+                    <Users />
 
                     <span>
-
                       Capacity:{" "}
-
                       {Number(
                         currentEvent.capacity || 0
                       ).toLocaleString()}
-
                     </span>
-
                   </p>
 
                 </div>
 
 
-                {/* ===========================================
-                    PERFORMANCE
-                =========================================== */}
+                {/* PERFORMANCE */}
 
                 <div className="event-performance">
 
                   <div className="performance-card sold-card">
 
                     <div className="performance-icon">
-                      🎟️
+                      <Ticket />
                     </div>
 
                     <div>
-
-                      <span>
-                        Tickets Sold
-                      </span>
+                      <span>Tickets Sold</span>
 
                       <strong>
                         {soldTickets}
                       </strong>
-
                     </div>
 
                   </div>
@@ -808,19 +745,15 @@ function Dashboard() {
                   <div className="performance-card checked-card">
 
                     <div className="performance-icon">
-                      ✅
+                      <CheckCircle2 />
                     </div>
 
                     <div>
-
-                      <span>
-                        Checked In
-                      </span>
+                      <span>Checked In</span>
 
                       <strong>
                         {checkedIn}
                       </strong>
-
                     </div>
 
                   </div>
@@ -829,19 +762,15 @@ function Dashboard() {
                   <div className="performance-card remaining-card">
 
                     <div className="performance-icon">
-                      ⏳
+                      <Hourglass />
                     </div>
 
                     <div>
-
-                      <span>
-                        Remaining
-                      </span>
+                      <span>Remaining</span>
 
                       <strong>
                         {currentEventRemaining}
                       </strong>
-
                     </div>
 
                   </div>
@@ -849,9 +778,7 @@ function Dashboard() {
                 </div>
 
 
-                {/* ===========================================
-                    TICKET TYPES
-                =========================================== */}
+                {/* TICKET TYPES */}
 
                 {ticketStats.length > 0 && (
 
@@ -860,15 +787,14 @@ function Dashboard() {
                     <div className="ticket-breakdown-header">
 
                       <div>
-
                         <h4>
-                          🎟️ Ticket Types
+                          <Ticket size={19} />
+                          Ticket Types
                         </h4>
 
                         <p>
                           Ticket sales breakdown
                         </p>
-
                       </div>
 
                     </div>
@@ -900,28 +826,20 @@ function Dashboard() {
                             <div className="ticket-type-numbers">
 
                               <div>
-
-                                <span>
-                                  Sold
-                                </span>
+                                <span>Sold</span>
 
                                 <strong>
                                   {ticket.sold}
                                 </strong>
-
                               </div>
 
 
                               <div>
-
-                                <span>
-                                  Remaining
-                                </span>
+                                <span>Remaining</span>
 
                                 <strong>
                                   {ticket.remaining}
                                 </strong>
-
                               </div>
 
                             </div>
@@ -959,7 +877,8 @@ function Dashboard() {
                     )
                   }
                 >
-                  ✏️ Edit
+                  <Pencil size={17} />
+                  <span>Edit</span>
                 </button>
 
 
@@ -977,7 +896,8 @@ function Dashboard() {
                     )
                   }
                 >
-                  📋 Duplicate
+                  <Copy size={17} />
+                  <span>Duplicate</span>
                 </button>
 
 
@@ -989,7 +909,8 @@ function Dashboard() {
                     )
                   }
                 >
-                  🎟️ Scan Tickets
+                  <ScanLine size={17} />
+                  <span>Scan Tickets</span>
                 </button>
 
 
@@ -1001,7 +922,8 @@ function Dashboard() {
                     )
                   }
                 >
-                  👥 View Attendees
+                  <Users size={17} />
+                  <span>View Attendees</span>
                 </button>
 
 
@@ -1013,7 +935,8 @@ function Dashboard() {
                     )
                   }
                 >
-                  🗑️ Delete
+                  <Trash2 size={17} />
+                  <span>Delete</span>
                 </button>
 
               </div>

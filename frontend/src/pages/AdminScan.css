@@ -64,6 +64,30 @@
   font-size: 30px;
 }
 
+.admin-scan-header-icon,
+.admin-scan-state-icon,
+.admin-scan-info span,
+.admin-scan-attendance span,
+.select-event-scan-btn,
+.admin-scan-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-scan-header-icon svg {
+  font-size: 42px;
+}
+
+.admin-scan-info svg,
+.admin-scan-attendance svg {
+  flex-shrink: 0;
+}
+
+.clear-search-btn svg {
+  font-size: 18px;
+}
+
 
 /* ============================================================
    SEARCH + FILTER
@@ -127,6 +151,11 @@
   font-size: 20px;
   line-height: 1;
 }
+
+
+/* ============================================================
+   FILTER
+   ============================================================ */
 
 .admin-scan-filter {
   width: 220px;
@@ -418,8 +447,19 @@
 }
 
 .admin-scan-state-icon {
-  margin-bottom: 15px;
-  font-size: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-scan-state-icon svg {
+  width: 38px;
+  height: 38px;
+  stroke-width: 1.8;
+}
+
+.admin-scan-error .admin-scan-state-icon svg {
+  color: #b45309;
 }
 
 .admin-scan-state h2 {

@@ -1,394 +1,1069 @@
+/* ============================================================
+   HOST PROFILE
+============================================================ */
+
 .host-profile {
-
-    max-width: 1100px;
-    margin: 40px auto;
-    padding: 30px;
-    background: #f7f7f7;
-    font-family: Arial, sans-serif;
-
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 40px 24px 70px;
+    background: #f7f8fc;
+    font-family: var(--sans);
+    box-sizing: border-box;
 }
 
 
-/* =========================
-   HOST COVER SECTION
-========================= */
+/* ============================================================
+   HOST COVER / HEADER
+============================================================ */
 
 .host-cover {
-
-    background: white;
-    padding: 40px 20px;
-    border-radius: 25px;
+    width: 100%;
+    background: #ffffff;
+    padding: 45px 30px 35px;
+    border-radius: 26px;
     text-align: center;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+    box-sizing: border-box;
+}
 
+
+/* ============================================================
+   AVATAR
+============================================================ */
+
+.host-avatar-wrapper {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #f0f2f5;
+    flex-shrink: 0;
 }
 
 
 .host-avatar {
-
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+    display: block;
     object-fit: cover;
-    margin-bottom: 20px;
-
 }
 
 
+/* ============================================================
+   HOST NAME
+============================================================ */
 
 .host-name-row {
-
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
-
 }
-
 
 
 .host-name-row h1 {
-
-    font-size: 34px;
     margin: 0;
-
+    font-size: 34px;
+    line-height: 1.2;
+    font-weight: 700;
+    color: #1f2937;
+    word-break: break-word;
 }
 
 
-
-/* VERIFIED BADGE */
-
 .verified-badge {
-
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 5px;
 
     background: #e8f7ee;
     color: #16803c;
 
-    padding: 7px 15px;
-
-    border-radius: 25px;
+    padding: 7px 14px;
+    border-radius: 30px;
 
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 700;
 
+    white-space: nowrap;
 }
-
 
 
 .host-cover h3 {
-
-    margin-top: 15px;
+    margin: 14px 0 0;
     font-size: 20px;
-
+    line-height: 1.4;
+    color: #333;
+    font-weight: 600;
+    word-break: break-word;
 }
 
 
-
-.host-cover p {
-
+.host-cover > p {
+    margin: 8px 0 0;
     color: #666;
-    margin-top: 8px;
-
+    font-size: 15px;
+    line-height: 1.5;
+    word-break: break-word;
 }
 
 
-
-/* =========================
+/* ============================================================
    ACTION BUTTONS
-========================= */
-
+============================================================ */
 
 .host-actions {
-
-    display:flex;
-    justify-content:center;
-    gap:15px;
-    margin-top:25px;
-
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 26px;
+    flex-wrap: wrap;
 }
-
 
 
 .host-actions button {
+    min-height: 46px;
+    padding: 12px 24px;
 
-    padding:12px 25px;
+    border: none;
+    border-radius: 25px;
 
-    border:none;
+    background: #0077cc;
+    color: #ffffff;
 
-    border-radius:25px;
+    font-size: 15px;
+    font-weight: 600;
 
-    cursor:pointer;
+    cursor: pointer;
 
-    background:#0077cc;
-
-    color:white;
-
-    font-size:15px;
-
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease,
+        box-shadow 0.2s ease;
 }
-
 
 
 .host-actions button:hover {
-
-    opacity:0.85;
-
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(0, 119, 204, 0.18);
 }
 
 
+.host-actions button:active {
+    transform: translateY(0);
+}
 
 
-/* =========================
-   ABOUT SECTION
-========================= */
-
+/* ============================================================
+   ABOUT
+============================================================ */
 
 .host-about {
-
-    background:white;
-
-    margin-top:25px;
-
-    padding:30px;
-
-    border-radius:20px;
-
+    width: 100%;
+    margin-top: 25px;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 22px;
+    box-sizing: border-box;
 }
-
 
 
 .host-about h2 {
-
-    margin-bottom:10px;
-
+    margin: 0 0 12px;
+    font-size: 25px;
+    color: #1f2937;
 }
-
 
 
 .host-about p {
-
-    color:#666;
-
-    line-height:1.6;
-
+    margin: 0;
+    color: #666;
+    font-size: 16px;
+    line-height: 1.7;
+    word-break: break-word;
 }
 
 
-
-/* =========================
-   STATISTICS
-========================= */
-
+/* ============================================================
+   HOST STATISTICS
+============================================================ */
 
 .host-stats {
-
-    display:grid;
-
-    grid-template-columns:repeat(3,1fr);
-
-    gap:20px;
-
-    margin:30px 0;
-
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin: 25px 0 35px;
 }
 
 
-
-.host-stats div {
-
-    background:white;
-
-    padding:25px;
-
-    border-radius:20px;
-
-    text-align:center;
-
-    box-shadow:0 5px 15px rgba(0,0,0,0.05);
-
+.host-stats > div {
+    min-width: 0;
+    background: #ffffff;
+    padding: 28px 20px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
 }
-
 
 
 .host-stats h3 {
-
-    font-size:32px;
-
-    margin:0 0 10px;
-
+    margin: 0 0 8px;
+    color: #1f2937;
+    font-size: 32px;
+    line-height: 1.2;
+    font-weight: 700;
 }
-
 
 
 .host-stats p {
-
-    color:#666;
-
+    margin: 0;
+    color: #666;
+    font-size: 15px;
+    line-height: 1.4;
 }
 
 
-
-/* =========================
-   EVENTS SECTION
-========================= */
-
+/* ============================================================
+   HOST EVENTS SECTION
+============================================================ */
 
 .host-events {
-
-    margin-top:40px;
-
+    width: 100%;
+    margin-top: 35px;
 }
 
 
-
-.host-events h2 {
-
-    font-size:28px;
-
-    margin-bottom:25px;
-
+.host-events-header {
+    width: 100%;
+    margin-bottom: 22px;
 }
 
 
+.host-events-header h2 {
+    margin: 0 0 6px;
+    color: #1f2937;
+    font-size: 28px;
+    line-height: 1.25;
+}
 
-/* EVENT CARD */
 
+.host-events-header p {
+    margin: 0;
+    color: #777;
+    font-size: 15px;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+
+/* ============================================================
+   EVENT LIST
+============================================================ */
+
+.host-event-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+
+/* ============================================================
+   PUBLIC EVENT CARD
+============================================================ */
 
 .public-event-card {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 24px;
 
-    display:flex;
+    background: #ffffff;
 
-    align-items:center;
+    padding: 20px;
 
-    gap:25px;
+    border-radius: 20px;
 
-    background:white;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.07);
 
-    padding:20px;
+    box-sizing: border-box;
 
-    border-radius:20px;
-
-    margin-bottom:20px;
-
-    box-shadow:0 5px 15px rgba(0,0,0,0.08);
-
+    overflow: hidden;
 }
 
 
+/* ============================================================
+   EVENT IMAGE
+============================================================ */
 
 .public-event-card img {
+    width: 230px;
+    height: 155px;
 
-    width:220px;
+    flex: 0 0 230px;
 
-    height:150px;
+    object-fit: cover;
 
-    object-fit:cover;
+    border-radius: 16px;
 
-    border-radius:15px;
+    display: block;
+
+    background: #f0f2f5;
+}
+
+
+/* ============================================================
+   EVENT CONTENT
+============================================================ */
+
+.public-event-content {
+    flex: 1;
+    min-width: 0;
+}
+
+
+.public-event-content h3 {
+    margin: 0 0 12px;
+
+    color: #1f2937;
+
+    font-size: 22px;
+    line-height: 1.3;
+
+    font-weight: 700;
+
+    word-break: break-word;
+}
+
+
+.public-event-content p {
+    margin: 7px 0;
+
+    color: #666;
+
+    font-size: 15px;
+    line-height: 1.5;
+
+    word-break: break-word;
+}
+
+
+.public-event-content .event-price {
+    color: #0077cc;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+
+.public-event-content .event-free {
+    color: #16803c;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+
+/* ============================================================
+   VIEW EVENT BUTTON
+============================================================ */
+
+.public-event-content button {
+    margin-top: 12px;
+
+    min-height: 44px;
+
+    padding: 11px 22px;
+
+    border: none;
+    border-radius: 24px;
+
+    background: #0077cc;
+    color: #ffffff;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        opacity 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.public-event-content button:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(0, 119, 204, 0.18);
+}
+
+
+.public-event-content button:active {
+    transform: translateY(0);
+}
+
+
+/* ============================================================
+   NO EVENTS
+============================================================ */
+
+.no-host-events {
+    width: 100%;
+    background: #ffffff;
+
+    padding: 55px 25px;
+
+    border-radius: 22px;
+
+    text-align: center;
+
+    box-sizing: border-box;
+
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.05);
+}
+
+
+.no-host-events > div {
+    font-size: 42px;
+    margin-bottom: 12px;
+}
+
+
+.no-host-events h3 {
+    margin: 0 0 8px;
+
+    color: #1f2937;
+
+    font-size: 21px;
+}
+
+
+.no-host-events p {
+    margin: 0;
+
+    color: #777;
+
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+
+/* ============================================================
+   LOADING SCREEN
+============================================================ */
+
+.host-profile-loading {
+    width: 100%;
+    min-height: 60vh;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px 20px;
+
+    text-align: center;
+
+    box-sizing: border-box;
+}
+
+
+.host-loading-spinner {
+    width: 45px;
+    height: 45px;
+
+    border: 4px solid #e5e7eb;
+    border-top-color: #0077cc;
+
+    border-radius: 50%;
+
+    animation: hostSpinner 0.8s linear infinite;
+
+    margin-bottom: 20px;
+}
+
+
+.host-profile-loading h2 {
+    margin: 0 0 8px;
+
+    color: #1f2937;
+
+    font-size: 22px;
+}
+
+
+.host-profile-loading p {
+    margin: 0;
+
+    color: #777;
+
+    font-size: 15px;
+}
+
+
+@keyframes hostSpinner {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 
 }
 
 
+/* ============================================================
+   HOST NOT FOUND
+============================================================ */
 
-.public-event-card h3 {
+.host-profile-not-found {
+    width: 100%;
+    min-height: 65vh;
 
-    font-size:22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    margin-bottom:12px;
+    padding: 40px 20px;
+
+    background: #f7f8fc;
+
+    box-sizing: border-box;
+}
+
+
+.host-not-found-card {
+    width: 100%;
+    max-width: 500px;
+
+    padding: 45px 30px;
+
+    background: #ffffff;
+
+    border-radius: 24px;
+
+    text-align: center;
+
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+
+    box-sizing: border-box;
+}
+
+
+.host-not-found-icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+}
+
+
+.host-not-found-card h2 {
+    margin: 0 0 10px;
+
+    color: #1f2937;
+
+    font-size: 26px;
+}
+
+
+.host-not-found-card p {
+    margin: 0 0 22px;
+
+    color: #777;
+
+    line-height: 1.6;
+}
+
+
+.host-not-found-card button {
+    min-height: 45px;
+
+    padding: 11px 24px;
+
+    border: none;
+    border-radius: 24px;
+
+    background: #0077cc;
+    color: #ffffff;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   TABLET
+============================================================ */
+
+@media (max-width: 900px) {
+
+    .host-profile {
+        max-width: 100%;
+        padding: 30px 20px 60px;
+    }
+
+
+    .host-cover {
+        padding: 38px 25px 32px;
+    }
+
+
+    .host-avatar-wrapper {
+        width: 135px;
+        height: 135px;
+    }
+
+
+    .host-name-row h1 {
+        font-size: 30px;
+    }
+
+
+    .public-event-card {
+        gap: 18px;
+    }
+
+
+    .public-event-card img {
+        width: 200px;
+        height: 140px;
+        flex-basis: 200px;
+    }
+
+
+    .public-event-content h3 {
+        font-size: 20px;
+    }
 
 }
 
 
+/* ============================================================
+   MOBILE
+============================================================ */
 
-.public-event-card p {
+@media (max-width: 700px) {
 
-    color:#666;
+    .host-profile {
+        width: 100%;
+        margin: 0;
+        padding: 18px 12px 45px;
+    }
 
-    margin:8px 0;
+
+    /* ---------------------------------------------
+       HOST HEADER
+    --------------------------------------------- */
+
+    .host-cover {
+        padding: 30px 16px 25px;
+        border-radius: 20px;
+    }
+
+
+    .host-avatar-wrapper {
+        width: 115px;
+        height: 115px;
+        margin-bottom: 16px;
+    }
+
+
+    .host-name-row {
+        gap: 8px;
+    }
+
+
+    .host-name-row h1 {
+        width: 100%;
+        font-size: 26px;
+        line-height: 1.25;
+    }
+
+
+    .verified-badge {
+        font-size: 12px;
+        padding: 6px 11px;
+    }
+
+
+    .host-cover h3 {
+        margin-top: 11px;
+        font-size: 17px;
+    }
+
+
+    .host-cover > p {
+        font-size: 14px;
+    }
+
+
+    /* ---------------------------------------------
+       ACTIONS
+    --------------------------------------------- */
+
+    .host-actions {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+
+        gap: 10px;
+
+        margin-top: 21px;
+    }
+
+
+    .host-actions button {
+        flex: 1 1 145px;
+
+        min-width: 0;
+
+        min-height: 44px;
+
+        padding: 10px 14px;
+
+        font-size: 14px;
+    }
+
+
+    /* ---------------------------------------------
+       ABOUT
+    --------------------------------------------- */
+
+    .host-about {
+        margin-top: 16px;
+        padding: 22px 18px;
+        border-radius: 18px;
+    }
+
+
+    .host-about h2 {
+        font-size: 22px;
+    }
+
+
+    .host-about p {
+        font-size: 15px;
+        line-height: 1.65;
+    }
+
+
+    /* ---------------------------------------------
+       STATS
+    --------------------------------------------- */
+
+    .host-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+
+        gap: 9px;
+
+        margin: 16px 0 25px;
+    }
+
+
+    .host-stats > div {
+        padding: 18px 7px;
+
+        border-radius: 16px;
+    }
+
+
+    .host-stats h3 {
+        font-size: 23px;
+        margin-bottom: 6px;
+    }
+
+
+    .host-stats p {
+        font-size: 11px;
+        line-height: 1.3;
+    }
+
+
+    /* ---------------------------------------------
+       EVENTS HEADER
+    --------------------------------------------- */
+
+    .host-events {
+        margin-top: 25px;
+    }
+
+
+    .host-events-header {
+        margin-bottom: 15px;
+    }
+
+
+    .host-events-header h2 {
+        font-size: 23px;
+        margin-bottom: 5px;
+    }
+
+
+    .host-events-header p {
+        font-size: 13px;
+    }
+
+
+    /* ---------------------------------------------
+       EVENT LIST
+    --------------------------------------------- */
+
+    .host-event-list {
+        gap: 14px;
+    }
+
+
+    /* ---------------------------------------------
+       EVENT CARD
+       
+       IMPORTANT:
+       Keep the image and content SIDE BY SIDE
+       on mobile instead of stacking vertically.
+    --------------------------------------------- */
+
+    .public-event-card {
+        width: 100%;
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        gap: 12px;
+
+        padding: 12px;
+
+        border-radius: 17px;
+    }
+
+
+    .public-event-card img {
+        width: 115px;
+        height: 105px;
+
+        flex: 0 0 115px;
+
+        border-radius: 12px;
+    }
+
+
+    .public-event-content {
+        min-width: 0;
+        flex: 1;
+    }
+
+
+    .public-event-content h3 {
+        margin-bottom: 7px;
+
+        font-size: 16px;
+        line-height: 1.25;
+
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+
+        overflow: hidden;
+    }
+
+
+    .public-event-content p {
+        margin: 4px 0;
+
+        font-size: 12px;
+        line-height: 1.35;
+    }
+
+
+    .public-event-content .event-price,
+    .public-event-content .event-free {
+        font-size: 13px;
+    }
+
+
+    .public-event-content button {
+        min-height: 36px;
+
+        margin-top: 7px;
+
+        padding: 8px 13px;
+
+        border-radius: 20px;
+
+        font-size: 12px;
+    }
+
+
+    /* ---------------------------------------------
+       NO EVENTS
+    --------------------------------------------- */
+
+    .no-host-events {
+        padding: 40px 18px;
+        border-radius: 18px;
+    }
+
+
+    .no-host-events > div {
+        font-size: 36px;
+    }
+
+
+    .no-host-events h3 {
+        font-size: 19px;
+    }
+
+
+    .no-host-events p {
+        font-size: 14px;
+    }
+
+
+    /* ---------------------------------------------
+       LOADING
+    --------------------------------------------- */
+
+    .host-profile-loading {
+        min-height: 70vh;
+        padding: 30px 15px;
+    }
+
+
+    .host-profile-loading h2 {
+        font-size: 19px;
+    }
+
+
+    .host-profile-loading p {
+        font-size: 14px;
+    }
+
+
+    /* ---------------------------------------------
+       NOT FOUND
+    --------------------------------------------- */
+
+    .host-profile-not-found {
+        min-height: 70vh;
+        padding: 25px 15px;
+    }
+
+
+    .host-not-found-card {
+        padding: 35px 20px;
+        border-radius: 20px;
+    }
+
+
+    .host-not-found-card h2 {
+        font-size: 23px;
+    }
 
 }
 
 
+/* ============================================================
+   SMALL PHONES
+============================================================ */
 
-.public-event-card button {
+@media (max-width: 400px) {
 
-    margin-top:12px;
-
-    padding:12px 25px;
-
-    border:none;
-
-    border-radius:25px;
-
-    background:#0077cc;
-
-    color:white;
-
-    cursor:pointer;
-
-}
-
-
-
-.public-event-card button:hover {
-
-    opacity:0.85;
-
-}
-
-
-
-/* =========================
-   MOBILE RESPONSIVE
-========================= */
-
-
-@media(max-width:700px){
-
-
-    .host-profile{
-
-        padding:15px;
-
+    .host-profile {
+        padding-left: 9px;
+        padding-right: 9px;
     }
 
 
-    .host-name-row h1{
-
-        font-size:26px;
-
+    .host-cover {
+        padding-left: 12px;
+        padding-right: 12px;
     }
 
 
-    .host-stats{
-
-        grid-template-columns:1fr;
-
+    .host-avatar-wrapper {
+        width: 105px;
+        height: 105px;
     }
 
 
-
-    .public-event-card{
-
-        flex-direction:column;
-
-        align-items:flex-start;
-
+    .host-name-row h1 {
+        font-size: 24px;
     }
 
 
-
-    .public-event-card img{
-
-        width:100%;
-
-        height:200px;
-
+    .host-actions {
+        gap: 8px;
     }
 
+
+    .host-actions button {
+        flex-basis: 135px;
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: 13px;
+    }
+
+
+    .host-stats {
+        gap: 6px;
+    }
+
+
+    .host-stats > div {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+
+
+    .host-stats h3 {
+        font-size: 21px;
+    }
+
+
+    .host-stats p {
+        font-size: 10px;
+    }
+
+
+    .public-event-card {
+        gap: 10px;
+        padding: 10px;
+    }
+
+
+    .public-event-card img {
+        width: 100px;
+        height: 95px;
+        flex-basis: 100px;
+    }
+
+
+    .public-event-content h3 {
+        font-size: 15px;
+    }
+
+
+    .public-event-content p {
+        font-size: 11px;
+    }
+
+
+    .public-event-content button {
+        padding: 7px 11px;
+        font-size: 11px;
+    }
 
 }

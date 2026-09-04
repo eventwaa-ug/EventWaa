@@ -1,16 +1,15 @@
 import { useContext } from "react";
 import { EventContext } from "../context/EventContext";
+import { BadgeCheck, Users } from "lucide-react";
 import "./VerifiedHosts.css";
 
 function VerifiedHosts() {
-
   const { events } = useContext(EventContext);
 
   // Store unique verified hosts
   const hostsMap = new Map();
 
   (events || []).forEach((event) => {
-
     // Only verified hosts with a valid host ID
     if (!event.verifiedHost || !event.hostId) {
       return;
@@ -18,99 +17,120 @@ function VerifiedHosts() {
 
     // Prevent the same host from appearing multiple times
     if (!hostsMap.has(event.hostId)) {
-
       hostsMap.set(event.hostId, {
         hostId: event.hostId,
-        name: event.hostName || "EventWaa Host"
+        name: event.hostName || "EventWaa Host",
       });
-
     }
-
   });
 
   const hosts = Array.from(hostsMap.values());
 
-
   return (
-
     <section className="verified-hosts">
+      <div className="verified-hosts-container">
 
-      <div className="section-header">
+        {/* =====================================================
+            SECTION HEADER
+        ===================================================== */}
 
-        <h2>
-          ⭐ Verified Hosts
-        </h2>
+        <div className="verified-hosts-header">
 
-        <p>
-          Trusted organizers creating amazing experiences
-        </p>
+          <span className="verified-hosts-label">
+            <BadgeCheck
+              size={16}
+              strokeWidth={2.2}
+            />
 
-      </div>
+            Verified organizers
+          </span>
+
+          <h2>
+            Trusted hosts
+          </h2>
+
+          <p>
+            Discover events from organizers verified by EventWaa.
+          </p>
+
+        </div>
 
 
-      <div className="hosts-grid">
+        {/* =====================================================
+            HOSTS
+        ===================================================== */}
 
-        {hosts.length === 0 ? (
+        <div className="hosts-grid">
 
-          <div className="no-hosts">
+          {hosts.length === 0 ? (
 
-            <div className="no-hosts-icon">
-              ⭐
+            <div className="no-hosts">
+
+              <div className="no-hosts-icon">
+                <Users
+                  size={28}
+                  strokeWidth={1.8}
+                />
+              </div>
+
+              <h3>
+                No verified hosts yet
+              </h3>
+
+              <p>
+                Verified organizers will appear here as they join
+                EventWaa.
+              </p>
+
             </div>
 
-            <h3>
-              No verified hosts yet
-            </h3>
+          ) : (
 
-            <p>
-              Verified organizers will appear here.
-            </p>
+            hosts.map((host) => (
 
-          </div>
+              <div
+                className="host-card"
+                key={host.hostId}
+              >
 
-        ) : (
+                {/* HOST AVATAR */}
 
-          hosts.map((host) => (
+                <div className="host-avatar">
+                  {host.name.charAt(0).toUpperCase()}
+                </div>
 
-            <div
-              className="host-card"
-              key={host.hostId}
-            >
 
-              {/* HOST AVATAR */}
+                {/* HOST INFORMATION */}
 
-              <div className="host-avatar">
+                <div className="host-info">
 
-                {host.name
-                  ? host.name.charAt(0).toUpperCase()
-                  : "⭐"}
+                  <h3>
+                    {host.name}
+                  </h3>
+
+                  <span className="verified-badge">
+
+                    <BadgeCheck
+                      size={17}
+                      strokeWidth={2.2}
+                    />
+
+                    Verified organizer
+
+                  </span>
+
+                </div>
 
               </div>
 
+            ))
 
-              {/* HOST NAME */}
+          )}
 
-              <h3>
-                {host.name}
-              </h3>
-
-
-              {/* VERIFIED BADGE */}
-
-              <span className="verified-badge">
-                ✓ Verified Event Organizer
-              </span>
-
-            </div>
-
-          ))
-
-        )}
+        </div>
 
       </div>
-
     </section>
-
   );
 }
 

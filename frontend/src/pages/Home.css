@@ -86,7 +86,7 @@
 }
 .secondary-btn:hover {
     color: white;
-    background: #8B5CF6;
+    background: #d85c45;
     transform: translateY(-3px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }

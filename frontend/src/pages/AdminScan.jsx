@@ -343,7 +343,7 @@ function AdminScan() {
         </div>
 
         <div className="admin-scan-header-icon">
-          📷
+          <FiCamera aria-hidden="true" />
         </div>
 
       </div>
@@ -356,38 +356,31 @@ function AdminScan() {
       <div className="admin-scan-controls">
 
         <div className="admin-scan-search">
-
-          <span>
-            🔍
-          </span>
+          <FiSearch aria-hidden="true" />
 
           <input
             type="text"
             placeholder="Search events, venue, city, host..."
             value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
+            onChange={(e) => setSearch(e.target.value)}
           />
 
           {search && (
             <button
               type="button"
               className="clear-search-btn"
+              aria-label="Clear search"
               onClick={() => setSearch("")}
             >
-              ×
+              <FiX aria-hidden="true" />
             </button>
           )}
-
         </div>
 
 
         <select
           value={filter}
-          onChange={(e) =>
-            setFilter(e.target.value)
-          }
+          onChange={(e) => setFilter(e.target.value)}
           className="admin-scan-filter"
         >
 
@@ -556,15 +549,13 @@ function AdminScan() {
                         : "flex"
                     }}
                   >
-                    <span>📅</span>
+                    <span>
+                      <FiCalendar aria-hidden="true" />
+                    </span>
 
-                    <strong>
-                      EventWaa
-                    </strong>
+                    <strong>EventWaa</strong>
 
-                    <small>
-                      No poster available
-                    </small>
+                    <small>No poster available</small>
                   </div>
 
 
@@ -723,7 +714,8 @@ function AdminScan() {
                       )
                     }
                   >
-                    📷 Scan This Event
+                    <FiCamera aria-hidden="true" />
+                    Scan This Event
                   </button>
 
                 </div>

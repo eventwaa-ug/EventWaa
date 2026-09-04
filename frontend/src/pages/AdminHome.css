@@ -1,114 +1,1090 @@
-admin-home{
+/* ============================================================
+   EVENTWAA ADMIN HOME
+   PREMIUM ADMIN DASHBOARD
+   ============================================================ */
 
-    width:100%;
+:root {
+    --admin-bg: #f6f7f9;
+    --admin-white: #ffffff;
+    --admin-text: #171717;
+    --admin-text-soft: #404040;
+    --admin-muted: #737373;
+    --admin-border: #e5e5e5;
 
+    --admin-accent: #d85c45;
+    --admin-blue-soft: #eff6ff;
+
+    --admin-green: #16a34a;
+    --admin-green-soft: #f0fdf4;
+
+    --admin-orange: #ea580c;
+    --admin-orange-soft: #fff7ed;
+
+    --admin-accent: #d85c45;
+    --admin-accent-soft: #fff0eb;
+
+    --admin-shadow:
+        0 4px 18px rgba(0, 0, 0, 0.045);
+
+    --admin-shadow-hover:
+        0 16px 35px rgba(0, 0, 0, 0.09);
+
+    --admin-radius: 18px;
 }
 
-.admin-home h1{
-
-    margin-bottom:30px;
-
-}
-
-.dashboard-cards{
-
-    display:grid;
-
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-
-    gap:25px;
-
-}
-
-.dashboard-card{
-
-    background:white;
-
-    padding:30px;
-
-    border-radius:15px;
-
-    text-align:center;
-
-    box-shadow:0 5px 20px rgba(0,0,0,.08);
-
-}
-
-.dashboard-card h2{
-
-    margin-bottom:15px;
-
-    color:#666;
-
-}
-
-.dashboard-card h1{
-
-    font-size:45px;
-
-}
-
-.admin-notification {
-
-    background: white;
-    padding: 20px;
-    margin: 25px 0;
-    border-radius: 15px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-
+* {
+    box-sizing: border-box;
 }
 
 
-.admin-notification h2 {
+/* ============================================================
+   MAIN PAGE
+   ============================================================ */
 
-    margin-bottom: 15px;
+.admin-home {
+    width: 100%;
+    min-height: 100vh;
 
+    padding: 44px 42px 70px;
+
+    background: var(--admin-bg);
+
+    color: var(--admin-text);
 }
 
 
-.admin-notification-item {
+/* ============================================================
+   CENTERED DESKTOP CONTENT
+   ============================================================ */
 
-    background: #f5f5f5;
-    padding: 12px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-
+.admin-home > * {
+    width: 100%;
+    max-width: 1320px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 
-.admin-notification-item p {
+/* ============================================================
+   HEADER
+   ============================================================ */
 
+.admin-home-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 50px;
+
+    margin-bottom: 54px;
+}
+
+
+/* ============================================================
+   EYEBROW
+   ============================================================ */
+
+.admin-eyebrow {
+    margin: 0 0 12px;
+
+    font-size: 13px;
+    line-height: 1.3;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+
+    color: var(--admin-blue);
+}
+
+
+/* ============================================================
+   MAIN TITLE
+   ============================================================ */
+
+.admin-home-header h1 {
     margin: 0;
 
-}
-.notification-list{
+    font-size: clamp(38px, 3vw, 52px);
+    line-height: 1.08;
 
-    margin-top:20px;
+    font-weight: 800;
 
-}
+    letter-spacing: -1.8px;
 
-
-.notification-item{
-
-    background:white;
-    padding:15px;
-    border-radius:12px;
-    margin-bottom:10px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
+    color: #171717;
 }
 
 
-.notification-item button{
+/* ============================================================
+   SUBTITLE
+   ============================================================ */
 
-    background:#2563eb;
-    color:white;
-    border:none;
-    padding:8px 15px;
-    border-radius:8px;
-    cursor:pointer;
+.admin-subtitle {
+    margin: 14px 0 0;
 
+    max-width: 720px;
+
+    font-size: 18px;
+    line-height: 1.6;
+
+    color: var(--admin-muted);
 }
 
+
+/* ============================================================
+   NOTIFICATION BUTTON
+   ============================================================ */
+
+.admin-notification-button {
+    flex-shrink: 0;
+
+    min-height: 54px;
+
+    padding: 0 20px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    border: 1px solid var(--admin-border);
+    border-radius: 14px;
+
+    background: var(--admin-white);
+
+    color: #262626;
+
+    font-size: 15px;
+    font-weight: 750;
+
+    cursor: pointer;
+
+    box-shadow: var(--admin-shadow);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.admin-notification-button:hover {
+    transform: translateY(-2px);
+
+    border-color: #d4d4d4;
+
+    background: #fafafa;
+
+    box-shadow:
+        0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+.admin-notification-button:active {
+    transform: translateY(0);
+}
+
+
+/* ============================================================
+   NOTIFICATION BADGE
+   ============================================================ */
+
+.notification-badge {
+    min-width: 24px;
+    height: 24px;
+
+    padding: 0 7px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 999px;
+
+    background: #ef4444;
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+/* ============================================================
+   SECTION HEADINGS
+   ============================================================ */
+
+.admin-section-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 35px;
+
+    margin-bottom: 24px;
+}
+
+
+/* ============================================================
+   SECTION TITLE
+   ============================================================ */
+
+.admin-section-heading h2 {
+    margin: 0;
+
+    font-size: 27px;
+    line-height: 1.2;
+
+    font-weight: 800;
+
+    letter-spacing: -0.7px;
+
+    color: #171717;
+}
+
+
+/* ============================================================
+   SECTION DESCRIPTION
+   ============================================================ */
+
+.admin-section-heading p {
+    margin: 8px 0 0;
+
+    font-size: 16px;
+    line-height: 1.5;
+
+    color: var(--admin-muted);
+}
+
+
+/* ============================================================
+   REFRESH BUTTON
+   ============================================================ */
+
+.refresh-dashboard {
+    flex-shrink: 0;
+
+    min-height: 44px;
+
+    padding: 0 16px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+
+    background: #ffffff;
+
+    color: #404040;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.refresh-dashboard:hover {
+    transform: translateY(-1px);
+
+    border-color: #d4d4d4;
+
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.07);
+}
+
+.refresh-dashboard:active {
+    transform: translateY(0);
+}
+
+
+/* ============================================================
+   PLATFORM STAT CARDS
+   DESKTOP = 3 PER ROW
+   ============================================================ */
+
+.dashboard-cards {
+    width: 100%;
+    max-width: 1280px;
+
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    margin: 0 auto 58px;
+    align-items: stretch;
+}
+
+
+/* ============================================================
+   DASHBOARD CARD
+   ============================================================ */
+
+.dashboard-card {
+    position: relative;
+
+    min-width: 0;
+
+    min-height: 260px;
+
+    padding: 28px 30px;
+
+    display: flex;
+    flex-direction: column;
+
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius);
+
+    background: var(--admin-white);
+
+    box-shadow: var(--admin-shadow);
+
+    overflow: hidden;
+
+    transition:
+        transform 0.22s ease,
+        box-shadow 0.22s ease,
+        border-color 0.22s ease;
+}
+
+
+/* ============================================================
+   SUBTLE CARD TOP LINE
+   ============================================================ */
+
+.dashboard-card::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 3px;
+
+    background: #d4d4d4;
+
+    opacity: 0;
+
+    transition:
+        opacity 0.22s ease;
+}
+
+
+/* ============================================================
+   CARD HOVER
+   ============================================================ */
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+
+    border-color: #d9d9d9;
+
+    box-shadow: var(--admin-shadow-hover);
+}
+
+.dashboard-card:hover::before {
+    opacity: 1;
+}
+
+
+/* ============================================================
+   CARD TOP
+   ============================================================ */
+
+.dashboard-card-top {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+
+/* ============================================================
+   CARD ICON
+   ============================================================ */
+
+.dashboard-card-icon {
+    width: 56px;
+    height: 56px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 15px;
+
+    transition:
+        transform 0.22s ease;
+}
+
+.dashboard-card:hover .dashboard-card-icon {
+    transform: scale(1.04);
+}
+
+
+/* ============================================================
+   ICON COLORS
+   ============================================================ */
+
+.users-icon {
+    background: var(--admin-blue-soft);
+    color: var(--admin-blue);
+}
+
+.events-icon {
+    background: var(--admin-accent-soft);
+    color: var(--admin-accent);
+}
+
+.pending-icon {
+    background: var(--admin-orange-soft);
+    color: var(--admin-orange);
+}
+
+.verified-icon {
+    background: var(--admin-green-soft);
+    color: var(--admin-green);
+}
+
+.tickets-icon {
+    background: #f5f3ff;
+    color: #6d4acb;
+}
+
+
+/* ============================================================
+   CARD LABEL
+   ============================================================ */
+
+.dashboard-card-label {
+    margin-left: auto;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.1px;
+
+    text-transform: uppercase;
+
+    color: #8a8a8a;
+
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   LARGE STAT NUMBER
+   ============================================================ */
+
+.dashboard-card h3 {
+    margin: 0;
+
+    font-size: clamp(30px, 2.6vw, 46px);
+
+    line-height: 1.04;
+
+    font-weight: 800;
+
+    letter-spacing: -1.6px;
+
+    color: #171717;
+
+    overflow-wrap: anywhere;
+
+    word-break: break-word;
+}
+
+.dashboard-card p {
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #737373;
+}
+
+
+/* ============================================================
+   ADMINISTRATION SECTION
+   ============================================================ */
+
+.tools-heading {
+    margin-top: 0;
+
+    margin-bottom: 24px;
+}
+
+
+/* ============================================================
+   ADMIN TOOLS
+   ============================================================ */
+
+.admin-tools {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 22px;
+
+    padding-bottom: 25px;
+}
+
+
+/* ============================================================
+   ADMIN TOOL CARD
+   ============================================================ */
+
+.admin-tool-card {
+    width: 100%;
+    min-height: 145px;
+
+    padding: 26px 28px;
+
+    display: grid;
+
+    grid-template-columns:
+        auto minmax(0, 1fr) auto;
+
+    align-items: center;
+
+    gap: 22px;
+
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius);
+
+    background: #ffffff;
+
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.035);
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.22s ease,
+        box-shadow 0.22s ease,
+        border-color 0.22s ease,
+        background 0.22s ease;
+}
+
+
+/* ============================================================
+   TOOL CARD HOVER
+   ============================================================ */
+
+.admin-tool-card:hover {
+    transform: translateY(-4px);
+
+    border-color: #d4d4d4;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 16px 32px rgba(0, 0, 0, 0.08);
+}
+
+
+/* ============================================================
+   TOOL ICON
+   ============================================================ */
+
+.admin-tool-icon {
+    width: 58px;
+    height: 58px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 16px;
+
+    background: #f5f5f5;
+
+    color: #404040;
+
+    transition:
+        background 0.22s ease,
+        color 0.22s ease,
+        transform 0.22s ease;
+}
+
+
+/* ============================================================
+   TOOL ICON HOVER
+   ============================================================ */
+
+.admin-tool-card:hover .admin-tool-icon {
+    background: #eeeeee;
+
+    color: #171717;
+
+    transform: scale(1.04);
+}
+
+
+/* ============================================================
+   TOOL CONTENT
+   ============================================================ */
+
+.admin-tool-content {
+    min-width: 0;
+}
+
+.admin-tool-content h3 {
+    margin: 0;
+
+    font-size: 19px;
+
+    line-height: 1.3;
+
+    font-weight: 800;
+
+    color: #202020;
+}
+
+.admin-tool-content p {
+    margin: 8px 0 0;
+
+    font-size: 15px;
+
+    line-height: 1.55;
+
+    color: #737373;
+}
+
+
+/* ============================================================
+   TOOL ARROW
+   ============================================================ */
+
+.admin-tool-arrow {
+    flex-shrink: 0;
+
+    color: #a3a3a3;
+
+    transition:
+        transform 0.22s ease,
+        color 0.22s ease;
+}
+
+.admin-tool-card:hover .admin-tool-arrow {
+    transform: translateX(5px);
+
+    color: #404040;
+}
+
+
+/* ============================================================
+   LARGE DESKTOP
+   32" + responsiveness
+   ============================================================ */
+
+@media (min-width: 1600px) {
+    .admin-home > * {
+        max-width: 1460px;
+    }
+
+    .dashboard-cards {
+        max-width: 1460px;
+        gap: 28px;
+    }
+
+    .dashboard-card {
+        min-height: 310px;
+        padding: 28px 26px 22px;
+    }
+
+    .dashboard-card-top {
+        margin-bottom: 18px;
+    }
+
+    .dashboard-card h3 {
+        font-size: clamp(28px, 1.7vw, 42px);
+        letter-spacing: -1px;
+    }
+
+    .dashboard-card p {
+        font-size: 15px;
+    }
+}
+
+@media (min-width: 2000px) {
+    .dashboard-cards {
+        max-width: 1560px;
+        gap: 30px;
+    }
+
+    .dashboard-card {
+        min-height: 330px;
+        padding: 30px 28px 24px;
+    }
+
+    .dashboard-card h3 {
+        font-size: clamp(30px, 1.5vw, 46px);
+    }
+}
+
+/* ============================================================
+   MEDIUM DESKTOP
+   1101px - 1399px
+   ============================================================ */
+
+@media (min-width: 1101px) and (max-width: 1399px) {
+    .dashboard-cards {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .dashboard-card {
+        min-height: 250px;
+        padding: 24px 20px 18px;
+    }
+
+    .dashboard-card h3 {
+        font-size: clamp(25px, 2.3vw, 34px);
+        letter-spacing: -0.8px;
+    }
+}
+
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (max-width: 1100px) {
+
+    .admin-home {
+        padding: 32px 26px 55px;
+    }
+
+    .admin-home-header {
+        margin-bottom: 44px;
+    }
+
+    .admin-home-header h1 {
+        font-size: 42px;
+    }
+
+    .admin-subtitle {
+        font-size: 17px;
+    }
+
+    /*
+     * Keep 3 cards for as long as there is enough room.
+     */
+
+    .dashboard-cards {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+
+        gap: 16px;
+    }
+
+    .dashboard-card {
+        min-height: 225px;
+        padding: 20px 22px 18px;
+    }
+
+    .dashboard-card h3 {
+        font-size: clamp(24px, 2.8vw, 36px);
+        letter-spacing: -1px;
+    }
+
+    .dashboard-card p {
+        font-size: 14px;
+    }
+
+    .admin-tools {
+        gap: 16px;
+    }
+
+    .admin-tool-card {
+        padding: 22px;
+    }
+}
+
+
+/* ============================================================
+   SMALL TABLET
+   ============================================================ */
+
+@media (max-width: 850px) {
+
+    .admin-home {
+        padding: 28px 22px 50px;
+    }
+
+    .admin-home-header {
+        flex-direction: column;
+
+        gap: 24px;
+    }
+
+    .admin-notification-button {
+        width: fit-content;
+    }
+
+    .dashboard-cards {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 18px;
+    }
+
+    .dashboard-card {
+        min-height: 210px;
+    }
+
+    .dashboard-card h3 {
+        font-size: clamp(30px, 4vw, 38px);
+        letter-spacing: -1.3px;
+    }
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 600px) {
+
+    .admin-home {
+        padding: 24px 16px 42px;
+    }
+
+
+    /* HEADER */
+
+    .admin-home-header {
+        margin-bottom: 38px;
+        gap: 20px;
+    }
+
+    .admin-eyebrow {
+        font-size: 11px;
+    }
+
+    .admin-home-header h1 {
+        font-size: 34px;
+        letter-spacing: -1.2px;
+    }
+
+    .admin-subtitle {
+        margin-top: 11px;
+        font-size: 15px;
+    }
+
+    .admin-notification-button {
+        width: 100%;
+    }
+
+
+    /* SECTION */
+
+    .admin-section-heading {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 15px;
+
+        margin-bottom: 20px;
+    }
+
+    .admin-section-heading h2 {
+        font-size: 24px;
+    }
+
+    .admin-section-heading p {
+        font-size: 15px;
+    }
+
+    .refresh-dashboard {
+        width: 100%;
+    }
+
+
+    /* STAT CARDS */
+
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+
+        gap: 14px;
+
+        margin-bottom: 42px;
+    }
+
+    .dashboard-card {
+        min-height: 200px;
+        padding: 20px 18px 18px;
+    }
+
+    .dashboard-card-top {
+        margin-bottom: 16px;
+    }
+
+    .dashboard-card-icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    .dashboard-card h3 {
+        font-size: clamp(26px, 7vw, 38px);
+        letter-spacing: -1px;
+    }
+
+    .dashboard-card p {
+        font-size: 14px;
+    }
+
+
+    /* TOOLS */
+
+    .admin-tools {
+        grid-template-columns: 1fr;
+
+        gap: 14px;
+    }
+
+    .admin-tool-card {
+        min-height: 200px;
+
+        padding: 20px;
+
+        grid-template-columns:
+            auto minmax(0, 1fr);
+
+        gap: 16px;
+
+        position: relative;
+    }
+
+    .admin-tool-icon {
+        width: 52px;
+        height: 52px;
+    }
+
+    .admin-tool-content {
+        padding-right: 28px;
+    }
+
+    .admin-tool-content h3 {
+        font-size: 18px;
+    }
+
+    .admin-tool-content p {
+        font-size: 14px;
+    }
+
+    .admin-tool-arrow {
+        position: absolute;
+
+        top: 20px;
+        right: 18px;
+    }
+}
+
+
+/* ============================================================
+   SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 380px) {
+
+    .admin-home {
+        padding: 20px 13px 36px;
+    }
+
+    .admin-home-header h1 {
+        font-size: 30px;
+    }
+
+    .admin-section-heading h2 {
+        font-size: 22px;
+    }
+
+    .dashboard-card {
+        padding: 20px;
+    }
+
+    .dashboard-card h3 {
+        font-size: clamp(28px, 8vw, 38px);
+    }
+}
+
+
+/* ============================================================
+   TOUCH DEVICES
+   ============================================================ */
+
+@media (hover: none) {
+
+    .dashboard-card:hover,
+    .admin-tool-card:hover,
+    .admin-notification-button:hover,
+    .refresh-dashboard:hover {
+        transform: none;
+
+        box-shadow:
+            var(--admin-shadow);
+    }
+
+    .dashboard-card:hover::before {
+        opacity: 0;
+    }
+
+    .dashboard-card:hover .dashboard-card-icon,
+    .admin-tool-card:hover .admin-tool-icon,
+    .admin-tool-card:hover .admin-tool-arrow {
+        transform: none;
+    }
+}
+
+
+/* ============================================================
+   ACCESSIBILITY
+   ============================================================ */
+
+button:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.25);
+    outline-offset: 3px;
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .dashboard-card,
+    .dashboard-card::before,
+    .dashboard-card-icon,
+    .admin-tool-card,
+    .admin-tool-icon,
+    .admin-tool-arrow,
+    .admin-notification-button,
+    .refresh-dashboard {
+        transition: none;
+    }
+}

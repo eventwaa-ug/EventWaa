@@ -121,7 +121,7 @@
 
     margin-bottom: 9px;
 
-    color: #2563eb;
+    color: #d85c45;
 
     font-size: 12px;
 
@@ -290,7 +290,7 @@
 }
 
 .team-invitation-password input:focus {
-    border-color: #2563eb;
+    border-color: #d85c45;
 
     box-shadow:
         0 0 0 4px rgba(37, 99, 235, 0.10);
@@ -341,7 +341,7 @@
 .team-invitation-eye:hover {
     background: #f3f4f6;
 
-    color: #2563eb;
+    color: #d85c45;
 }
 
 .team-invitation-eye:disabled {
@@ -414,7 +414,7 @@
 
     border-radius: 12px;
 
-    background: #2563eb;
+    background: #d85c45;
 
     color: #ffffff;
 
@@ -431,7 +431,7 @@
 }
 
 .team-invitation-submit:hover:not(:disabled) {
-    background: #1d4ed8;
+    background: #b34a36;
 
     transform: translateY(-1px);
 
@@ -519,7 +519,7 @@
 
     border: 4px solid #dbeafe;
 
-    border-top-color: #2563eb;
+    border-top-color: #d85c45;
 
     border-radius: 50%;
 
@@ -622,13 +622,13 @@
 .team-invitation-primary-btn {
     border: none;
 
-    background: #2563eb;
+    background: #d85c45;
 
     color: white;
 }
 
 .team-invitation-primary-btn:hover {
-    background: #1d4ed8;
+    background: #b34a36;
 }
 
 .team-invitation-secondary-btn {

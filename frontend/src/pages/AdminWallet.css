@@ -46,7 +46,7 @@
 
 .wallet-card h1{
     font-size:32px;
-    color:#2563eb;
+    color:#d85c45;
     margin:0;
 }
 
@@ -86,7 +86,7 @@
 
 .withdraw-section input:focus,
 .withdraw-section select:focus{
-    border-color:#2563eb;
+    border-color:#d85c45;
     box-shadow:0 0 0 3px rgba(37,99,235,.15);
 }
 

@@ -1,302 +1,666 @@
+/* ============================================================
+   FEATURED EVENTS
+   ============================================================ */
+
 .featured-events {
-  padding: 80px 8%;
-  background: #ffffff;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 72px 7% 78px;
+
+    background: #ffffff;
+
 }
 
 
-/* ============================= */
-/* HEADER */
-/* ============================= */
+/* ============================================================
+   SECTION HEADER ROW
+   ============================================================ */
 
 .section-header-row {
-  max-width: 1200px;
-  margin: 0 auto 45px;
 
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+    width: 100%;
 
-  gap: 30px;
-}
+    max-width: 1200px;
 
-.section-header {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.badge {
-  display: inline-flex;
-  width: fit-content;
-
-  background: #eef3ff;
-  color: #4f46e5;
-
-  padding: 8px 18px;
-
-  border-radius: 999px;
-
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.section-header h2 {
-  font-size: 2.2rem;
-  margin: 0;
-  color: #0f172a;
-}
-
-.section-header p {
-  color: #64748b;
-  margin: 0;
-  font-size: 1rem;
-  line-height: 1.6;
-}
-
-
-/* ============================= */
-/* SEE ALL */
-/* ============================= */
-
-.see-all-link {
-  color: #2563eb;
-
-  text-decoration: none;
-
-  font-weight: 600;
-
-  white-space: nowrap;
-
-  transition: 0.3s ease;
-}
-
-.see-all-link:hover {
-  color: #1d4ed8;
-  transform: translateX(4px);
-}
-
-
-/* ============================= */
-/* EVENTS GRID */
-/* ============================= */
-
-.featured-grid {
-  max-width: 1200px;
-  margin: auto;
-
-  display: grid;
-
-  grid-template-columns: repeat(3, 1fr);
-
-  gap: 28px;
-}
-
-
-/* ============================= */
-/* NO FEATURED EVENTS */
-/* ============================= */
-
-.no-featured-events {
-  grid-column: 1 / -1;
-
-  text-align: center;
-
-  padding: 60px 30px;
-
-  background: #f8fafc;
-
-  border: 1px dashed #cbd5e1;
-
-  border-radius: 20px;
-}
-
-.no-featured-icon {
-  font-size: 45px;
-  margin-bottom: 15px;
-}
-
-.no-featured-events h3 {
-  margin: 0 0 10px;
-
-  color: #1e293b;
-
-  font-size: 1.3rem;
-}
-
-.no-featured-events p {
-  color: #64748b;
-
-  margin: 0 auto 25px;
-
-  max-width: 500px;
-
-  line-height: 1.6;
-}
-
-.browse-events-btn {
-  display: inline-block;
-
-  background: #2563eb;
-
-  color: white;
-
-  padding: 12px 22px;
-
-  border-radius: 10px;
-
-  text-decoration: none;
-
-  font-weight: 600;
-
-  transition: 0.3s ease;
-}
-
-.browse-events-btn:hover {
-  background: #1d4ed8;
-
-  transform: translateY(-2px);
-}
-
-
-/* ============================= */
-/* TABLET */
-/* ============================= */
-
-@media (max-width: 992px) {
-
-  .featured-events {
-    padding: 70px 5%;
-  }
-
-  .featured-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-}
-
-
-/* ============================= */
-/* MOBILE */
-/* ============================= */
-
-@media (max-width: 768px) {
-
-  .featured-events {
-    padding: 60px 20px;
-  }
-
-
-  .section-header-row {
-    align-items: flex-start;
-
-    flex-direction: column;
-
-    gap: 20px;
-
-    margin-bottom: 30px;
-  }
-
-
-  .section-header {
-    text-align: left;
-
-    align-items: flex-start;
-  }
-
-
-  .badge {
-    margin: 0;
-  }
-
-
-  .section-header h2 {
-    font-size: 1.8rem;
-  }
-
-
-  .section-header p {
-    font-size: 0.95rem;
-  }
-
-
-  .see-all-link {
-    font-size: 15px;
-  }
-
-
-  .featured-grid {
+    margin: 0 auto 38px;
 
     display: flex;
 
-    overflow-x: auto;
+    align-items: flex-end;
 
-    gap: 18px;
+    justify-content: space-between;
 
-    padding-bottom: 12px;
-
-    scroll-snap-type: x mandatory;
-
-    margin: 0 -20px;
-
-    padding-left: 20px;
-    padding-right: 20px;
-
-  }
-
-
-  .featured-grid::-webkit-scrollbar {
-    display: none;
-  }
-
-
-  .featured-grid > * {
-
-    flex: 0 0 85%;
-
-    scroll-snap-align: start;
-
-  }
-
-
-  .no-featured-events {
-
-    min-width: 85%;
-
-    padding: 45px 20px;
-
-  }
+    gap: 30px;
 
 }
 
 
-/* ============================= */
-/* SMALL PHONES */
-/* ============================= */
+/* ============================================================
+   SECTION HEADER
+   ============================================================ */
+
+.section-header {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 9px;
+
+}
+
+
+/* ============================================================
+   FEATURED BADGE
+   ============================================================ */
+
+.featured-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    width: fit-content;
+
+    padding: 7px 12px;
+
+    border-radius: 999px;
+
+    background: #fff8df;
+
+    color: #9a6700;
+
+    border: 1px solid #f4e5ad;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    line-height: 1;
+
+}
+
+
+/* ============================================================
+   HEADING
+   ============================================================ */
+
+.section-header h2 {
+
+    margin: 0;
+
+    color: #1f2937;
+
+    font-size: 2.15rem;
+
+    line-height: 1.18;
+
+    font-weight: 750;
+
+    letter-spacing: -0.6px;
+
+}
+
+
+.section-header p {
+
+    margin: 0;
+
+    max-width: 600px;
+
+    color: #5f6368;
+
+    font-size: 1rem;
+
+    line-height: 1.6;
+
+    font-weight: 400;
+
+}
+
+
+/* ============================================================
+   SEE ALL
+   ============================================================ */
+
+.see-all-link {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    flex-shrink: 0;
+
+    color: #252525;
+
+    text-decoration: none;
+
+    font-size: 15px;
+
+    font-weight: 650;
+
+    padding: 9px 2px;
+
+    border-bottom: 1px solid transparent;
+
+    transition:
+        color 0.25s ease,
+        gap 0.25s ease,
+        border-color 0.25s ease;
+
+}
+
+
+.see-all-link:hover {
+
+    color: #9a6700;
+
+    gap: 11px;
+
+    border-color: #e8d58e;
+
+}
+
+
+/* ============================================================
+   EVENTS GRID
+   ============================================================ */
+
+.featured-grid {
+
+    width: 100%;
+
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 24px;
+
+}
+
+
+/* ============================================================
+   EVENT WRAPPER
+   ============================================================ */
+
+.featured-event-item {
+
+    min-width: 0;
+
+    border-radius: 18px;
+
+    transition:
+        transform 0.3s ease;
+
+}
+
+
+.featured-event-item:hover {
+
+    transform: translateY(-4px);
+
+}
+
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+
+.no-featured-events {
+
+    grid-column: 1 / -1;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    text-align: center;
+
+    padding: 54px 28px;
+
+    border: 1px solid #e8e8e8;
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #fafafa 100%
+        );
+
+    box-shadow:
+        0 8px 28px rgba(0, 0, 0, 0.055);
+
+}
+
+
+/* ============================================================
+   EMPTY ICON
+   ============================================================ */
+
+.no-featured-icon {
+
+    width: 62px;
+
+    height: 62px;
+
+    margin: 0 auto 17px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #f7f3e7;
+
+    color: #8b6f28;
+
+}
+
+
+/* ============================================================
+   EMPTY TITLE
+   ============================================================ */
+
+.no-featured-events h3 {
+
+    margin: 0 0 9px;
+
+    color: #252525;
+
+    font-size: 1.25rem;
+
+    line-height: 1.35;
+
+    font-weight: 700;
+
+}
+
+
+/* ============================================================
+   EMPTY TEXT
+   ============================================================ */
+
+.no-featured-events p {
+
+    max-width: 500px;
+
+    margin: 0 auto 23px;
+
+    color: #626262;
+
+    font-size: 0.96rem;
+
+    line-height: 1.6;
+
+}
+
+
+/* ============================================================
+   BROWSE BUTTON
+   ============================================================ */
+
+.browse-events-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    min-height: 44px;
+
+    padding: 0 18px;
+
+    box-sizing: border-box;
+
+    border-radius: 10px;
+
+    background: #222222;
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    transition:
+        background 0.25s ease,
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+
+}
+
+
+.browse-events-btn:hover {
+
+    background: #000000;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.16);
+
+}
+
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (max-width: 1024px) {
+
+    .featured-events {
+
+        padding: 65px 5% 70px;
+
+    }
+
+
+    .featured-grid {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 21px;
+
+    }
+
+
+    .section-header-row {
+
+        margin-bottom: 32px;
+
+    }
+
+
+    .section-header h2 {
+
+        font-size: 2rem;
+
+    }
+
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 768px) {
+
+    .featured-events {
+
+        padding: 55px 20px 60px;
+
+    }
+
+
+    .section-header-row {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 17px;
+
+        margin-bottom: 28px;
+
+    }
+
+
+    .section-header {
+
+        width: 100%;
+
+    }
+
+
+    .section-header h2 {
+
+        font-size: 1.8rem;
+
+        letter-spacing: -0.4px;
+
+    }
+
+
+    .section-header p {
+
+        font-size: 0.95rem;
+
+        line-height: 1.55;
+
+    }
+
+
+    .see-all-link {
+
+        font-size: 14px;
+
+    }
+
+
+    /* --------------------------------------------------------
+       MOBILE EVENT SCROLLER
+       -------------------------------------------------------- */
+
+    .featured-grid {
+
+        display: flex;
+
+        width: auto;
+
+        margin-left: -20px;
+
+        margin-right: -20px;
+
+        padding-left: 20px;
+
+        padding-right: 20px;
+
+        gap: 16px;
+
+        overflow-x: auto;
+
+        overflow-y: hidden;
+
+        scroll-snap-type: x mandatory;
+
+    }
+
+
+    .featured-grid::-webkit-scrollbar {
+
+        height: 0;
+
+    }
+
+
+    .featured-event-item {
+
+        flex: 0 0 82%;
+
+        max-width: 360px;
+
+        scroll-snap-align: start;
+
+    }
+
+
+    .featured-event-item:hover {
+
+        transform: none;
+
+    }
+
+
+    .no-featured-events {
+
+        flex: 0 0 82%;
+
+        padding: 42px 20px;
+
+        scroll-snap-align: start;
+
+    }
+
+}
+
+
+/* ============================================================
+   SMALL PHONES
+   ============================================================ */
 
 @media (max-width: 480px) {
 
-  .featured-events {
-    padding: 50px 16px;
-  }
+    .featured-events {
+
+        padding: 48px 16px 55px;
+
+    }
 
 
-  .section-header h2 {
-    font-size: 1.6rem;
-  }
+    .section-header-row {
+
+        gap: 15px;
+
+        margin-bottom: 25px;
+
+    }
 
 
-  .featured-grid {
+    .featured-badge {
 
-    margin: 0 -16px;
+        font-size: 12px;
 
-    padding-left: 16px;
-    padding-right: 16px;
+        padding: 7px 11px;
 
-  }
+    }
 
 
-  .featured-grid > * {
-    flex: 0 0 90%;
-  }
+    .section-header h2 {
+
+        font-size: 1.6rem;
+
+    }
+
+
+    .section-header p {
+
+        font-size: 0.92rem;
+
+    }
+
+
+    .featured-grid {
+
+        margin-left: -16px;
+
+        margin-right: -16px;
+
+        padding-left: 16px;
+
+        padding-right: 16px;
+
+        gap: 14px;
+
+    }
+
+
+    .featured-event-item {
+
+        flex: 0 0 88%;
+
+    }
+
+
+    .no-featured-events {
+
+        flex-basis: 88%;
+
+        padding: 38px 18px;
+
+    }
+
+
+    .no-featured-events h3 {
+
+        font-size: 1.15rem;
+
+    }
+
+
+    .no-featured-events p {
+
+        font-size: 0.9rem;
+
+    }
+
+}
+
+
+/* ============================================================
+   VERY SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 360px) {
+
+    .featured-events {
+
+        padding-left: 14px;
+
+        padding-right: 14px;
+
+    }
+
+
+    .featured-grid {
+
+        margin-left: -14px;
+
+        margin-right: -14px;
+
+        padding-left: 14px;
+
+        padding-right: 14px;
+
+    }
+
+
+    .section-header h2 {
+
+        font-size: 1.5rem;
+
+    }
+
+
+    .featured-event-item {
+
+        flex-basis: 91%;
+
+    }
 
 }

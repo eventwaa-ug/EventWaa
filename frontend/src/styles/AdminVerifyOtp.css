@@ -68,7 +68,7 @@
 
 .admin-otp-back:hover {
     background: #ffffff;
-    color: #1d4ed8;
+    color: #b34a36;
 
     transform: translateX(-2px);
 
@@ -133,7 +133,7 @@
             #dbeafe
         );
 
-    color: #2563eb;
+    color: #d85c45;
 
     box-shadow:
         inset 0 0 0 1px rgba(37, 99, 235, 0.08);
@@ -155,7 +155,7 @@
 
     margin-bottom: 10px;
 
-    color: #2563eb;
+    color: #d85c45;
 
     font-size: 13px;
     font-weight: 800;
@@ -317,7 +317,7 @@
 }
 
 .admin-otp-inputs input:focus {
-    border-color: #2563eb;
+    border-color: #d85c45;
 
     background: #f8fbff;
 
@@ -358,8 +358,8 @@
     background:
         linear-gradient(
             135deg,
-            #2563eb,
-            #1d4ed8
+            #d85c45,
+            #b34a36
         );
 
     color: #ffffff;
@@ -454,7 +454,7 @@
 .admin-otp-footer svg {
     flex-shrink: 0;
 
-    color: #2563eb;
+    color: #d85c45;
 }
 
 
@@ -497,7 +497,7 @@
 
     border-radius: 12px;
 
-    background: #2563eb;
+    background: #d85c45;
 
     color: #ffffff;
 
@@ -512,7 +512,7 @@
 }
 
 .admin-otp-card > button:hover {
-    background: #1d4ed8;
+    background: #b34a36;
 
     transform: translateY(-1px);
 }

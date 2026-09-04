@@ -2654,3 +2654,295 @@
     }
 
 }
+
+/* =========================================================
+   MODERN HOME-PAGE COLOUR OVERRIDES
+   ========================================================= */
+
+.admin-team-page {
+    --team-accent: #168a5b;
+    --team-accent-dark: #0f6f49;
+    --team-accent-soft: #e8f6ef;
+    --team-surface-soft: #f4f8f6;
+    --team-border-hover: #9ed3b9;
+    --team-text: #17211c;
+}
+
+/* Purple buttons */
+.admin-add-member-btn,
+.admin-empty-add-btn,
+.admin-team-submit-btn,
+.admin-team-invite-btn {
+    background: var(--team-accent);
+    box-shadow: 0 8px 22px rgba(22, 138, 91, 0.16);
+}
+
+.admin-add-member-btn:hover,
+.admin-empty-add-btn:hover,
+.admin-team-submit-btn:hover,
+.admin-team-invite-btn:hover {
+    background: var(--team-accent-dark);
+    box-shadow: 0 12px 28px rgba(22, 138, 91, 0.24);
+    transform: translateY(-2px);
+}
+
+/* Secondary buttons */
+.admin-panel-add-btn {
+    background: var(--team-accent-soft);
+    color: var(--team-accent-dark);
+}
+
+.admin-panel-add-btn:hover {
+    background: #d8f0e3;
+    color: var(--team-accent-dark);
+    transform: translateY(-2px);
+}
+
+/* Cards */
+.admin-team-stat-card,
+.admin-team-member {
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.admin-team-stat-card:hover,
+.admin-team-member:hover {
+    border-color: var(--team-border-hover);
+    box-shadow: 0 14px 32px rgba(23, 33, 28, 0.09);
+    transform: translateY(-3px);
+}
+
+/* Icons and avatar */
+.admin-team-stat-icon,
+.admin-team-empty-icon {
+    background: var(--team-accent-soft);
+    color: var(--team-accent);
+}
+
+.admin-team-avatar {
+    background: var(--team-accent-soft);
+    color: var(--team-accent-dark);
+}
+
+/* Inputs and selects */
+.admin-team-search:focus-within,
+.admin-team-filters select:focus,
+.admin-team-form-group input:focus,
+.admin-team-form-group select:focus {
+    border-color: var(--team-accent);
+    box-shadow: 0 0 0 3px rgba(22, 138, 91, 0.12);
+}
+
+/* Assignment button */
+.admin-team-action-bottom .admin-team-assign-action {
+    background: var(--team-accent);
+    border-color: var(--team-accent);
+}
+
+.admin-team-action-bottom .admin-team-assign-action:hover {
+    background: var(--team-accent-dark);
+    border-color: var(--team-accent-dark);
+    transform: translateY(-1px);
+}
+
+/* Neutral action buttons */
+.admin-team-action-bottom button:hover,
+.admin-team-invite-btn:hover,
+.admin-team-modal-close:hover,
+.admin-team-cancel-btn:hover,
+.admin-team-history-more-button:hover {
+    background: var(--team-surface-soft);
+    border-color: var(--team-border-hover);
+    color: var(--team-text);
+    transform: translateY(-1px);
+}
+
+/* Invitation states */
+.admin-team-invite-btn.pending,
+.admin-team-invitation.pending {
+    background: #fff8e6;
+    border-color: #f0d38a;
+    color: #8a6412;
+}
+
+/* Notices */
+.admin-team-form-notice {
+    background: var(--team-accent-soft);
+    border-color: #bfe4cd;
+}
+
+.admin-team-form-notice strong {
+    color: var(--team-accent-dark);
+}
+
+/* Loading */
+.admin-team-spinner {
+    border-color: #d8eee1;
+    border-top-color: var(--team-accent);
+}
+
+/* React Icons */
+.admin-team-page svg {
+    width: 1em;
+    height: 1em;
+    flex: 0 0 auto;
+    stroke-width: 2;
+}
+
+/* ============================================================
+   RESPONSIVE TYPOGRAPHY
+============================================================ */
+
+.admin-team-page {
+    font-size: 16px;
+}
+
+.admin-team-header h1 {
+    font-size: clamp(1.8rem, 3vw, 3rem);
+    line-height: 1.1;
+}
+
+.admin-team-header p,
+.admin-team-panel-header p {
+    font-size: clamp(0.85rem, 1.2vw, 1rem);
+}
+
+.admin-team-stat-card strong {
+    font-size: clamp(1.5rem, 2.4vw, 2.35rem);
+    line-height: 1;
+}
+
+.admin-team-stat-card span {
+    font-size: clamp(0.72rem, 1vw, 0.9rem);
+}
+
+.admin-team-panel-header h2 {
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+}
+
+.admin-team-member-person h3 {
+    font-size: clamp(1rem, 1.35vw, 1.2rem);
+}
+
+.admin-team-member-person p,
+.admin-team-member-info strong,
+.admin-team-current-assignment strong {
+    font-size: clamp(0.8rem, 1vw, 0.95rem);
+}
+
+.admin-team-action-bottom button,
+.admin-team-invite-btn,
+.admin-team-assign-action {
+    font-size: clamp(0.72rem, 0.9vw, 0.86rem);
+}
+
+/* Prevent long names and events from breaking the layout */
+.admin-team-member-person,
+.admin-team-member-info,
+.admin-team-current-assignment,
+.admin-team-history-content {
+    min-width: 0;
+}
+
+.admin-team-member-person h3,
+.admin-team-member-person p,
+.admin-team-current-assignment strong,
+.admin-team-history-content strong {
+    overflow-wrap: anywhere;
+}
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 700px) {
+    .admin-team-page {
+        font-size: 15px;
+    }
+
+    .admin-team-header h1 {
+        font-size: clamp(1.65rem, 8vw, 2.2rem);
+    }
+
+    .admin-team-header p,
+    .admin-team-panel-header p {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+
+    .admin-team-stat-card strong {
+        font-size: clamp(1.35rem, 7vw, 1.9rem);
+    }
+
+    .admin-team-stat-card span {
+        font-size: 0.7rem;
+    }
+
+    .admin-team-panel-header h2 {
+        font-size: 1.3rem;
+    }
+
+    .admin-team-member-person h3 {
+        font-size: 1rem;
+    }
+
+    .admin-team-action-bottom button,
+    .admin-team-invite-btn,
+    .admin-team-assign-action {
+        font-size: 0.75rem;
+    }
+
+    .admin-team-filters input,
+    .admin-team-filters select {
+        font-size: 0.85rem;
+    }
+}
+
+/* ============================================================
+   SMALL PHONES
+============================================================ */
+
+@media (max-width: 420px) {
+    .admin-team-page {
+        font-size: 14px;
+    }
+
+    .admin-team-header h1 {
+        font-size: 1.55rem;
+    }
+
+    .admin-team-stat-card strong {
+        font-size: 1.3rem;
+    }
+
+    .admin-team-stat-card span {
+        font-size: 0.65rem;
+    }
+
+    .admin-team-action-bottom button,
+    .admin-team-invite-btn,
+    .admin-team-assign-action {
+        font-size: 0.7rem;
+        padding-inline: 0.55rem;
+    }
+}
+
+/* ============================================================
+   LARGE DESKTOP
+============================================================ */
+
+@media (min-width: 1440px) {
+    .admin-team-header h1 {
+        font-size: 3.1rem;
+    }
+
+    .admin-team-stat-card strong {
+        font-size: 2.35rem;
+    }
+
+    .admin-team-panel-header h2 {
+        font-size: 1.85rem;
+    }
+}

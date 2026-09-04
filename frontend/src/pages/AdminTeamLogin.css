@@ -104,7 +104,7 @@
 
     background: #f3f0ff;
 
-    color: #6c3df4;
+    color: #d85c45;
 
     font-size: 12px;
 
@@ -249,7 +249,7 @@
 
 .admin-team-login-field input:focus {
 
-    border-color: #6c3df4;
+    border-color: #d85c45;
 
     box-shadow:
         0 0 0 4px
@@ -319,7 +319,7 @@
 
     background: #f3f4f6;
 
-    color: #6c3df4;
+    color: #d85c45;
 }
 
 
@@ -380,7 +380,7 @@
 
     border-radius: 12px;
 
-    background: #6c3df4;
+    background: #d85c45;
 
     color: #ffffff;
 

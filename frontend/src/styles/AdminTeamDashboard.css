@@ -1,15 +1,18 @@
 /* ============================================================
-   TEAM PORTAL
+   EVENTWAA TEAM PORTAL
+   MODERN NEUTRAL / GREEN SYSTEM
    ============================================================ */
 
 .team-portal-page {
     width: 100%;
     min-height: 100vh;
 
-    background: #f6f8fc;
-    color: #172033;
+    background: #f7f8f6;
+    color: #17201b;
 
     box-sizing: border-box;
+
+        font-family: var(--sans);
 }
 
 
@@ -25,9 +28,9 @@
 
     box-sizing: border-box;
 
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.96);
 
-    border-bottom: 1px solid #e7eaf0;
+    border-bottom: 1px solid #e5e8e5;
 
     display: flex;
     align-items: center;
@@ -38,6 +41,8 @@
     position: sticky;
     top: 0;
     z-index: 100;
+
+  
 }
 
 
@@ -49,20 +54,18 @@
     display: flex;
     align-items: center;
 
-    gap: 10px;
+    gap: 11px;
 
     min-width: 0;
 }
 
 
-/* PLATFORM LOGO HOLDER */
-
 .team-portal-brand-logo {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
 
-    min-width: 34px;
-    max-width: 34px;
+    min-width: 36px;
+    max-width: 36px;
 
     display: flex;
     align-items: center;
@@ -70,15 +73,15 @@
 
     overflow: hidden;
 
-    border-radius: 7px;
+    border-radius: 9px;
 
     flex-shrink: 0;
 
-    background: #f1f4f9;
+    background: #f0f2ef;
+
+    border: 1px solid #e2e6e2;
 }
 
-
-/* ACTUAL PLATFORM LOGO */
 
 .team-portal-platform-logo {
     width: 100%;
@@ -94,30 +97,24 @@
 }
 
 
-/* FALLBACK */
-
 .team-portal-brand-logo span {
-    width: 34px;
-    height: 34px;
+    width: 100%;
+    height: 100%;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    border-radius: 7px;
-
-    background: #2563eb;
+    background: #17201b;
 
     color: #ffffff;
 
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
 
-    line-height: 1;
+    letter-spacing: -0.2px;
 }
 
-
-/* BRAND TEXT */
 
 .team-portal-brand-text {
     display: flex;
@@ -135,6 +132,8 @@
 
     font-weight: 800;
 
+    color: #17201b;
+
     white-space: nowrap;
 }
 
@@ -142,16 +141,16 @@
 .team-portal-brand-text span {
     display: block;
 
-    margin-top: 3px;
+    margin-top: 4px;
 
     font-size: 8px;
     line-height: 1;
 
-    font-weight: 700;
+    font-weight: 800;
 
-    letter-spacing: 1.2px;
+    letter-spacing: 1.3px;
 
-    color: #7b8498;
+    color: #879087;
 
     white-space: nowrap;
 }
@@ -165,7 +164,7 @@
     display: flex;
     align-items: center;
 
-    gap: 20px;
+    gap: 18px;
 }
 
 
@@ -174,6 +173,8 @@
     align-items: center;
 
     gap: 10px;
+
+    min-width: 0;
 }
 
 
@@ -187,14 +188,16 @@
     align-items: center;
     justify-content: center;
 
-    background: #e8f0ff;
+    background: #e9eee9;
 
-    color: #2563eb;
+    color: #26352b;
 
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 800;
 
     flex-shrink: 0;
+
+    border: 1px solid #dde4dd;
 }
 
 
@@ -211,9 +214,9 @@
 
     line-height: 1.2;
 
-    font-weight: 700;
+    font-weight: 750;
 
-    color: #172033;
+    color: #17201b;
 
     white-space: nowrap;
 }
@@ -226,44 +229,57 @@
 
     line-height: 1.2;
 
-    color: #7b8498;
+    color: #7a847c;
 
     white-space: nowrap;
 }
 
 
-/* LOGOUT */
+/* ============================================================
+   LOGOUT
+   ============================================================ */
 
 .team-portal-logout {
-    border: 1px solid #e0e4eb;
+    border: 1px solid #dfe4df;
 
     background: #ffffff;
 
-    color: #3b4354;
+    color: #3f4942;
 
-    padding: 9px 15px;
+    min-height: 39px;
 
-    border-radius: 9px;
+    padding: 0 14px;
 
-    font-size: 13px;
+    border-radius: 10px;
 
-    font-weight: 700;
+    font-size: 12px;
+
+    font-weight: 750;
 
     cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
 
     transition:
         background 0.2s ease,
         border-color 0.2s ease,
-        color 0.2s ease;
+        color 0.2s ease,
+        transform 0.2s ease;
 }
 
 
 .team-portal-logout:hover {
-    background: #f5f7fa;
+    background: #f5f7f5;
 
-    border-color: #cbd1dc;
+    border-color: #cbd3cc;
 
-    color: #172033;
+    color: #17201b;
+
+    transform: translateY(-1px);
 }
 
 
@@ -271,6 +287,8 @@
     opacity: 0.6;
 
     cursor: not-allowed;
+
+    transform: none;
 }
 
 
@@ -285,7 +303,7 @@
 
     margin: 0 auto;
 
-    padding: 36px 28px 60px;
+    padding: 38px 28px 64px;
 
     box-sizing: border-box;
 }
@@ -313,19 +331,24 @@
 
 
 .team-portal-spinner {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
 
-    border: 4px solid #e5eaf2;
+    border: 3px solid #e1e6e1;
 
-    border-top-color: #2563eb;
+    border-top-color: #26352b;
 
     border-radius: 50%;
 
     animation:
-        teamPortalSpin 0.8s linear infinite;
+        teamPortalSpin 0.75s linear infinite;
 
     margin-bottom: 18px;
+}
+
+
+.team-portal-spinner > div {
+    display: none;
 }
 
 
@@ -340,13 +363,15 @@
     margin: 0 0 8px;
 
     font-size: 22px;
+
+    color: #17201b;
 }
 
 
 .team-portal-loading p {
     margin: 0;
 
-    color: #737d90;
+    color: #737d75;
 
     font-size: 14px;
 }
@@ -363,60 +388,101 @@
 
     margin-bottom: 24px;
 
-    padding: 16px 18px;
+    padding: 15px 17px;
 
-    border-radius: 12px;
+    border-radius: 13px;
 
-    background: #fff2f2;
+    background: #fff7f6;
 
-    border: 1px solid #ffd5d5;
+    border: 1px solid #f1d9d6;
 
-    display: flex;
+    display: grid;
+
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+
     align-items: center;
-    justify-content: space-between;
 
-    gap: 20px;
+    gap: 12px;
 }
 
 
-.team-portal-error > div {
+.team-error-icon {
+    width: 36px;
+    height: 36px;
+
+    border-radius: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #f9e8e5;
+
+    color: #b33a2d;
+}
+
+
+.team-portal-error > div:nth-child(2) {
     display: flex;
     flex-direction: column;
 
     gap: 4px;
+
+    min-width: 0;
 }
 
 
 .team-portal-error strong {
-    color: #b42318;
+    color: #8f2d24;
 
-    font-size: 14px;
+    font-size: 13px;
 }
 
 
 .team-portal-error span {
-    color: #7f1d1d;
+    color: #79443f;
 
-    font-size: 13px;
+    font-size: 12px;
+
+    overflow-wrap: anywhere;
 }
 
 
 .team-portal-error button {
     border: none;
 
-    background: #b42318;
+    background: #29342d;
 
     color: #ffffff;
 
-    border-radius: 8px;
+    border-radius: 9px;
 
-    padding: 9px 14px;
+    min-height: 36px;
 
-    font-size: 12px;
+    padding: 0 13px;
 
-    font-weight: 700;
+    font-size: 11px;
+
+    font-weight: 750;
 
     cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.team-portal-error button:hover {
+    background: #17201b;
+
+    transform: translateY(-1px);
 }
 
 
@@ -433,14 +499,14 @@
 
     gap: 30px;
 
-    margin-bottom: 28px;
+    margin-bottom: 30px;
 }
 
 
 .team-portal-eyebrow {
     display: block;
 
-    margin-bottom: 8px;
+    margin-bottom: 9px;
 
     font-size: 10px;
 
@@ -448,22 +514,22 @@
 
     letter-spacing: 1.6px;
 
-    font-weight: 800;
+    font-weight: 850;
 
-    color: #2563eb;
+    color: #647069;
 }
 
 
 .team-portal-welcome h1 {
     margin: 0;
 
-    font-size: 32px;
+    font-size: 34px;
 
     line-height: 1.15;
 
-    letter-spacing: -0.7px;
+    letter-spacing: -0.9px;
 
-    color: #151c2d;
+    color: #121a15;
 }
 
 
@@ -476,45 +542,57 @@
 
     line-height: 1.6;
 
-    color: #687386;
+    color: #69736c;
 }
 
 
 .team-portal-role-badge {
     flex-shrink: 0;
 
-    padding: 13px 18px;
+    min-width: 150px;
+
+    padding: 13px 17px;
 
     border-radius: 12px;
 
     background: #ffffff;
 
-    border: 1px solid #e4e8ef;
+    border: 1px solid #e1e6e1;
 
     display: flex;
     flex-direction: column;
 
-    gap: 4px;
+    gap: 5px;
 
     text-align: right;
+
+    box-shadow:
+        0 4px 14px rgba(28, 40, 31, 0.035);
 }
 
 
-.team-portal-role-badge span {
+.team-portal-role-badge > span {
     font-size: 9px;
 
     letter-spacing: 1.2px;
 
     font-weight: 800;
 
-    color: #8a93a4;
+    color: #8a948c;
 }
 
 
 .team-portal-role-badge strong {
-    font-size: 14px;
+    display: inline-flex;
 
-    color: #2563eb;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 6px;
+
+    font-size: 13px;
+
+    color: #26352b;
 }
 
 
@@ -532,14 +610,14 @@
 
     gap: 16px;
 
-    margin-bottom: 32px;
+    margin-bottom: 34px;
 }
 
 
 .team-action-card {
     width: 100%;
 
-    border: 1px solid #e2e7ef;
+    border: 1px solid #e0e5e0;
 
     background: #ffffff;
 
@@ -558,10 +636,14 @@
 
     cursor: pointer;
 
+    box-shadow:
+        0 2px 7px rgba(28, 40, 31, 0.025);
+
     transition:
         transform 0.2s ease,
         box-shadow 0.2s ease,
-        border-color 0.2s ease;
+        border-color 0.2s ease,
+        background 0.2s ease;
 }
 
 
@@ -569,9 +651,11 @@
     transform: translateY(-2px);
 
     box-shadow:
-        0 10px 25px rgba(23, 32, 51, 0.08);
+        0 12px 28px rgba(28, 40, 31, 0.075);
 
-    border-color: #cbd5e5;
+    border-color: #ccd4cd;
+
+    background: #fdfefd;
 }
 
 
@@ -594,9 +678,9 @@
     align-items: center;
     justify-content: center;
 
-    font-size: 22px;
+    background: #edf2ed;
 
-    background: #edf4ff;
+    color: #314238;
 }
 
 
@@ -605,7 +689,9 @@
 
     font-size: 16px;
 
-    color: #182033;
+    color: #18211c;
+
+    font-weight: 750;
 }
 
 
@@ -618,14 +704,30 @@
 
     line-height: 1.45;
 
-    color: #7a8496;
+    color: #78827b;
 }
 
 
 .team-action-card b {
-    font-size: 22px;
+    width: 32px;
+    height: 32px;
 
-    color: #8a94a7;
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #7d877f;
+
+    background: #f5f7f5;
+}
+
+
+.team-action-card:hover b {
+    color: #26352b;
+
+    background: #eaf0ea;
 }
 
 
@@ -636,7 +738,7 @@
 .team-portal-section {
     width: 100%;
 
-    margin-top: 32px;
+    margin-top: 34px;
 }
 
 
@@ -667,9 +769,9 @@
 
     letter-spacing: 1.4px;
 
-    font-weight: 800;
+    font-weight: 850;
 
-    color: #8a94a7;
+    color: #8a948c;
 }
 
 
@@ -680,9 +782,9 @@
 
     line-height: 1.2;
 
-    letter-spacing: -0.3px;
+    letter-spacing: -0.35px;
 
-    color: #182033;
+    color: #18211c;
 }
 
 
@@ -693,9 +795,13 @@
 
     line-height: 1.5;
 
-    color: #7a8496;
+    color: #78827b;
 }
 
+
+/* ============================================================
+   BADGES
+   ============================================================ */
 
 .team-assigned-badge,
 .team-event-count {
@@ -705,13 +811,24 @@
 
     border-radius: 20px;
 
-    background: #eef5ff;
+    background: #eef2ee;
 
-    color: #2563eb;
+    color: #39483e;
 
     font-size: 11px;
 
     font-weight: 800;
+
+    border: 1px solid #dce3dc;
+}
+
+
+.team-assigned-badge {
+    background: #eaf1eb;
+
+    color: #34523d;
+
+    border-color: #d5e2d7;
 }
 
 
@@ -730,7 +847,7 @@
 
     background: #ffffff;
 
-    border: 1px solid #e2e7ef;
+    border: 1px solid #dfe5df;
 
     border-radius: 18px;
 
@@ -738,9 +855,13 @@
 
     cursor: pointer;
 
+    box-shadow:
+        0 3px 12px rgba(28, 40, 31, 0.035);
+
     transition:
         transform 0.2s ease,
-        box-shadow 0.2s ease;
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
 }
 
 
@@ -748,7 +869,9 @@
     transform: translateY(-2px);
 
     box-shadow:
-        0 12px 30px rgba(23, 32, 51, 0.08);
+        0 14px 34px rgba(28, 40, 31, 0.08);
+
+    border-color: #ccd5cd;
 }
 
 
@@ -763,7 +886,7 @@
 
     min-height: 360px;
 
-    background: #eef1f6;
+    background: #eef1ee;
 
     display: flex;
     align-items: center;
@@ -772,14 +895,6 @@
     overflow: hidden;
 }
 
-
-/*
- * FULL POSTER
- *
- * We intentionally use contain instead of cover.
- *
- * This means the ENTIRE poster remains visible.
- */
 
 .team-assigned-event-poster .team-full-poster {
     width: 100%;
@@ -791,7 +906,7 @@
 
     object-position: center;
 
-    background: #eef1f6;
+    background: #eef1ee;
 }
 
 
@@ -805,13 +920,13 @@
 
     border-radius: 7px;
 
-    background: rgba(20, 28, 45, 0.85);
+    background: rgba(27, 35, 30, 0.88);
 
     color: #ffffff;
 
     font-size: 9px;
 
-    font-weight: 800;
+    font-weight: 850;
 
     letter-spacing: 1px;
 }
@@ -829,21 +944,16 @@
     align-items: center;
     justify-content: center;
 
-    gap: 8px;
+    gap: 10px;
 
-    color: #8993a5;
-}
-
-
-.team-poster-placeholder span {
-    font-size: 45px;
+    color: #8b958d;
 }
 
 
 .team-poster-placeholder small {
     font-size: 11px;
 
-    font-weight: 700;
+    font-weight: 750;
 
     letter-spacing: 1px;
 }
@@ -866,7 +976,11 @@
 
 
 .team-event-status {
-    display: inline-block;
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
 
     margin-bottom: 10px;
 
@@ -874,7 +988,7 @@
 
     font-weight: 800;
 
-    color: #159447;
+    color: #3c6748;
 }
 
 
@@ -887,7 +1001,7 @@
 
     letter-spacing: -0.5px;
 
-    color: #182033;
+    color: #18211c;
 
     overflow-wrap: anywhere;
 }
@@ -898,16 +1012,29 @@
 
     flex-wrap: wrap;
 
-    gap: 9px 16px;
+    gap: 10px 17px;
 
     margin-top: 18px;
 }
 
 
 .team-event-meta span {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
     font-size: 12px;
 
-    color: #6d778a;
+    color: #68736b;
+}
+
+
+.team-event-meta svg {
+    flex-shrink: 0;
+
+    color: #7b867d;
 }
 
 
@@ -916,48 +1043,73 @@
 
     font-size: 13px;
 
-    color: #747e91;
+    color: #747e76;
 }
 
 
 .team-event-host strong {
-    color: #2d3546;
+    color: #303b33;
 }
 
 
-.team-assigned-event-body button {
+/* ============================================================
+   SCAN EVENT BUTTON
+   ============================================================ */
+
+.team-assigned-event-body > button {
     align-self: flex-start;
+
+    min-height: 46px;
 
     margin-top: 22px;
 
+    padding: 0 17px;
+
     border: none;
 
-    border-radius: 9px;
+    border-radius: 10px;
 
-    background: #2563eb;
+    background: #26352b;
 
     color: #ffffff;
 
-    padding: 11px 17px;
-
-    font-size: 12px;
+    font-size: 13px;
 
     font-weight: 800;
 
     cursor: pointer;
 
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
     transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
         background 0.2s ease;
 }
 
 
-.team-assigned-event-body button:hover {
-    background: #1d4ed8;
+.team-assigned-event-body > button:hover {
+    background: #17201b;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 7px 18px rgba(23, 32, 27, 0.18);
+}
+
+
+.team-assigned-event-body > button:active {
+    transform: translateY(0);
 }
 
 
 /* ============================================================
-   NO ASSIGNMENT
+   EMPTY STATES
    ============================================================ */
 
 .team-no-assignment,
@@ -967,25 +1119,35 @@
 
     box-sizing: border-box;
 
-    padding: 40px 25px;
+    padding: 42px 25px;
 
     background: #ffffff;
 
-    border: 1px solid #e4e8ef;
+    border: 1px solid #e2e7e2;
 
     border-radius: 16px;
 
     text-align: center;
 
-    color: #737d90;
+    color: #737d75;
 }
 
 
-.team-no-assignment > div,
-.team-no-activity > div {
-    font-size: 30px;
+.team-empty-icon {
+    width: 48px;
+    height: 48px;
 
-    margin-bottom: 8px;
+    margin: 0 auto 12px;
+
+    border-radius: 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #eef2ee;
+
+    color: #536158;
 }
 
 
@@ -995,7 +1157,7 @@
 
     font-size: 16px;
 
-    color: #333c4e;
+    color: #333d35;
 }
 
 
@@ -1008,6 +1170,27 @@
     font-size: 13px;
 
     line-height: 1.5;
+
+    color: #7a847c;
+}
+
+
+.team-no-events {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 9px;
+
+    min-height: 110px;
+
+    font-size: 13px;
+}
+
+
+.team-no-events svg {
+    color: #879189;
 }
 
 
@@ -1038,7 +1221,7 @@
 
     background: #ffffff;
 
-    border: 1px solid #e3e8ef;
+    border: 1px solid #e1e6e1;
 
     border-radius: 14px;
 
@@ -1047,6 +1230,21 @@
     align-items: flex-start;
 
     gap: 13px;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.team-summary-card:hover {
+    transform: translateY(-2px);
+
+    border-color: #d1d9d2;
+
+    box-shadow:
+        0 9px 22px rgba(28, 40, 31, 0.055);
 }
 
 
@@ -1056,15 +1254,15 @@
 
     flex-shrink: 0;
 
-    border-radius: 10px;
+    border-radius: 11px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    background: #f0f5ff;
+    background: #edf2ed;
 
-    font-size: 18px;
+    color: #536158;
 }
 
 
@@ -1078,11 +1276,11 @@
 
     font-size: 8px;
 
-    font-weight: 800;
+    font-weight: 850;
 
     letter-spacing: 1px;
 
-    color: #8a94a7;
+    color: #8a948c;
 }
 
 
@@ -1093,7 +1291,7 @@
 
     font-size: 21px;
 
-    color: #1b2436;
+    color: #1b251e;
 }
 
 
@@ -1104,7 +1302,7 @@
 
     line-height: 1.45;
 
-    color: #7a8496;
+    color: #7a847c;
 }
 
 
@@ -1129,13 +1327,16 @@
 
     background: #ffffff;
 
-    border: 1px solid #e2e7ef;
+    border: 1px solid #e0e5e0;
 
     border-radius: 16px;
 
     overflow: hidden;
 
     cursor: pointer;
+
+    box-shadow:
+        0 2px 8px rgba(28, 40, 31, 0.025);
 
     transition:
         transform 0.2s ease,
@@ -1148,14 +1349,14 @@
     transform: translateY(-3px);
 
     box-shadow:
-        0 12px 28px rgba(23, 32, 51, 0.09);
+        0 14px 30px rgba(28, 40, 31, 0.085);
 
-    border-color: #d3dae5;
+    border-color: #d0d8d1;
 }
 
 
 .team-event-card.assigned {
-    border-color: #9fc0ff;
+    border-color: #aebcae;
 }
 
 
@@ -1170,7 +1371,7 @@
 
     height: 310px;
 
-    background: #eef1f6;
+    background: #eef1ee;
 
     display: flex;
     align-items: center;
@@ -1179,12 +1380,6 @@
     overflow: hidden;
 }
 
-
-/*
- * SHOW THE FULL POSTER.
- *
- * Do NOT use cover here because cover crops posters.
- */
 
 .team-event-card-poster .team-full-poster {
     width: 100%;
@@ -1196,7 +1391,7 @@
 
     object-position: center;
 
-    background: #eef1f6;
+    background: #eef1ee;
 }
 
 
@@ -1210,13 +1405,13 @@
 
     border-radius: 6px;
 
-    background: rgba(20, 28, 45, 0.86);
+    background: rgba(27, 35, 30, 0.88);
 
     color: #ffffff;
 
     font-size: 8px;
 
-    font-weight: 800;
+    font-weight: 850;
 
     letter-spacing: 0.8px;
 }
@@ -1230,9 +1425,7 @@
     align-items: center;
     justify-content: center;
 
-    font-size: 42px;
-
-    color: #9aa3b2;
+    color: #8e9890;
 }
 
 
@@ -1252,7 +1445,7 @@
 
     line-height: 1.35;
 
-    color: #1b2436;
+    color: #1b251e;
 
     overflow-wrap: anywhere;
 }
@@ -1261,39 +1454,63 @@
 .team-event-card-body p {
     margin: 9px 0 0;
 
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
     font-size: 12px;
 
-    color: #727c8f;
+    color: #727d75;
 
     overflow-wrap: anywhere;
 }
 
 
-.team-event-card-body small {
-    display: block;
+.team-event-card-body p svg {
+    flex-shrink: 0;
+}
 
-    margin-top: 7px;
+
+.team-event-card-body small {
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-top: 8px;
 
     font-size: 11px;
 
-    color: #8993a5;
+    color: #89938b;
 }
 
+
+.team-event-card-body small svg {
+    flex-shrink: 0;
+}
+
+
+/* VIEW EVENT */
 
 .team-event-card-body button {
     width: 100%;
 
-    margin-top: 14px;
+    margin-top: 15px;
 
-    padding: 10px 12px;
+    min-height: 40px;
 
-    border: 1px solid #dbe1ea;
+    padding: 0 12px;
 
-    border-radius: 8px;
+    border: 1px solid #dce2dc;
+
+    border-radius: 9px;
 
     background: #ffffff;
 
-    color: #2563eb;
+    color: #39463e;
 
     font-size: 12px;
 
@@ -1301,16 +1518,26 @@
 
     cursor: pointer;
 
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
     transition:
         background 0.2s ease,
-        border-color 0.2s ease;
+        border-color 0.2s ease,
+        color 0.2s ease;
 }
 
 
 .team-event-card-body button:hover {
-    background: #f2f6ff;
+    background: #f1f4f1;
 
-    border-color: #b9cdf5;
+    border-color: #cbd4cc;
+
+    color: #1d2a21;
 }
 
 
@@ -1323,7 +1550,7 @@
 
     background: #ffffff;
 
-    border: 1px solid #e2e7ef;
+    border: 1px solid #e0e5e0;
 
     border-radius: 16px;
 
@@ -1343,7 +1570,15 @@
 
     padding: 16px 18px;
 
-    border-bottom: 1px solid #edf0f4;
+    border-bottom: 1px solid #edf0ed;
+
+    transition:
+        background 0.2s ease;
+}
+
+
+.team-activity-row:hover {
+    background: #fafbfa;
 }
 
 
@@ -1362,9 +1597,9 @@
     align-items: center;
     justify-content: center;
 
-    background: #eaf8ef;
+    background: #eaf1eb;
 
-    color: #159447;
+    color: #41604a;
 
     font-weight: 800;
 }
@@ -1383,14 +1618,14 @@
 .team-activity-content strong {
     font-size: 13px;
 
-    color: #283246;
+    color: #28332c;
 }
 
 
 .team-activity-content span {
     font-size: 12px;
 
-    color: #687386;
+    color: #68736b;
 
     overflow-wrap: anywhere;
 }
@@ -1399,14 +1634,14 @@
 .team-activity-content small {
     font-size: 10px;
 
-    color: #929baa;
+    color: #929b94;
 }
 
 
 .team-activity-row time {
     font-size: 11px;
 
-    color: #929baa;
+    color: #929b94;
 
     white-space: nowrap;
 }
@@ -1423,7 +1658,7 @@
 
     box-sizing: border-box;
 
-    border-top: 1px solid #e5e8ee;
+    border-top: 1px solid #e3e7e3;
 
     background: #ffffff;
 
@@ -1433,16 +1668,16 @@
 
     gap: 20px;
 
-    color: #858e9f;
+    color: #858f87;
 
     font-size: 11px;
 }
 
 
 .team-portal-footer span:first-child {
-    font-weight: 700;
+    font-weight: 750;
 
-    color: #697386;
+    color: #68736b;
 }
 
 
@@ -1501,7 +1736,7 @@
 @media (max-width: 700px) {
 
     .team-portal-header {
-        min-height: 0px;
+        min-height: 0;
 
         padding: 14px 16px;
 
@@ -1560,7 +1795,7 @@
 
 
     .team-portal-welcome h1 {
-        font-size: 26px;
+        font-size: 27px;
     }
 
 
@@ -1575,6 +1810,11 @@
         box-sizing: border-box;
 
         text-align: left;
+    }
+
+
+    .team-portal-role-badge strong {
+        justify-content: flex-start;
     }
 
 
@@ -1594,8 +1834,6 @@
     .team-action-icon {
         width: 44px;
         height: 44px;
-
-        font-size: 20px;
     }
 
 
@@ -1617,10 +1855,6 @@
         grid-template-columns: 1fr;
     }
 
-
-    /*
-     * On mobile we still show the complete poster.
-     */
 
     .team-assigned-event-poster {
         min-height: 360px;
@@ -1662,10 +1896,6 @@
     }
 
 
-    /*
-     * Full poster on mobile.
-     */
-
     .team-event-card-poster {
         height: auto;
 
@@ -1703,6 +1933,19 @@
         gap: 7px;
     }
 
+
+    .team-portal-error {
+        grid-template-columns:
+            36px minmax(0, 1fr);
+    }
+
+
+    .team-portal-error button {
+        grid-column: 2;
+
+        justify-self: flex-start;
+    }
+
 }
 
 
@@ -1713,23 +1956,13 @@
 @media (max-width: 420px) {
 
     .team-portal-brand-logo {
-        width: 30px;
-        height: 30px;
+        width: 31px;
+        height: 31px;
 
-        min-width: 30px;
-        max-width: 30px;
+        min-width: 31px;
+        max-width: 31px;
 
-        border-radius: 6px;
-    }
-
-
-    .team-portal-brand-logo span {
-        width: 30px;
-        height: 30px;
-
-        border-radius: 6px;
-
-        font-size: 11px;
+        border-radius: 7px;
     }
 
 
@@ -1746,7 +1979,9 @@
 
 
     .team-portal-logout {
-        padding: 8px 11px;
+        min-height: 36px;
+
+        padding: 0 10px;
 
         font-size: 11px;
     }
@@ -1774,48 +2009,13 @@
         min-height: 330px;
     }
 
-}
-/* ============================================================
-   SCAN EVENT BUTTON
-   ============================================================ */
-
-.team-assigned-event-body > button {
-    min-height: 46px;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 10px;
-    background: #2563eb;
-    color: #ffffff;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        background 0.2s ease;
-}
-
-.team-assigned-event-body > button:hover {
-    background: #1d4ed8;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.22);
-}
-
-.team-assigned-event-body > button:active {
-    transform: translateY(0);
-}
-
-
-/* ============================================================
-   MOBILE
-   ============================================================ */
-
-@media (max-width: 600px) {
 
     .team-assigned-event-body > button {
         width: 100%;
+
         min-height: 48px;
-        font-size: 16px;
+
+        font-size: 14px;
     }
 
 }

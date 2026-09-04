@@ -1,702 +1,893 @@
 /* ============================================================
    EVENTWAA — MY TICKETS
-============================================================ */
-
-.tickets-page {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 45px 22px 80px;
-  min-height: 70vh;
-}
-
-
+   Tickets.css
+   Modern Eventbrite + Airbnb inspired design
+   ============================================================ */
 /* ============================================================
-   HEADER
+   ROOT PAGE
 ============================================================ */
-
-.tickets-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 25px;
-
-  margin-bottom: 40px;
-  padding: 32px;
-
-  background: linear-gradient(
-    135deg,
-    #111827,
-    #1f2937
-  );
-
-  border-radius: 24px;
-
-  color: white;
-
-  box-shadow:
-    0 15px 35px rgba(0, 0, 0, 0.12);
+.tickets-page {
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 55px 30px 80px;
+  background: #f7f7f5;
+  color: #222222;
+  font-family: inherit;
 }
-
+/* ============================================================
+   MAIN HEADER
+============================================================ */
+.tickets-header {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto 45px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+}
+.tickets-header > div:first-child {
+  min-width: 0;
+}
 .tickets-eyebrow {
   display: block;
-
-  margin-bottom: 7px;
-
-  font-size: 12px;
-  font-weight: 800;
-
-  letter-spacing: 2px;
-
-  opacity: 0.7;
+  margin-bottom: 10px;
+  color: #ff5a5f;
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 900;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
 }
-
 .tickets-header h1 {
   margin: 0;
-
-  font-size: 36px;
-  line-height: 1.15;
+  color: #222222;
+  font-size: 42px;
+  line-height: 1.12;
+  font-weight: 900;
+  letter-spacing: -1.2px;
 }
-
 .tickets-header p {
-  margin: 10px 0 0;
-
-  color: rgba(255, 255, 255, 0.7);
-
-  font-size: 15px;
+  margin: 12px 0 0;
+  color: #6b6b6b;
+  font-size: 17px;
+  line-height: 1.5;
+  font-weight: 500;
 }
-
+/* ============================================================
+   BOOKING COUNT
+============================================================ */
 .tickets-count {
   min-width: 105px;
-
-  padding: 18px;
-
-  border-radius: 18px;
-
-  background: rgba(255, 255, 255, 0.1);
-
-  text-align: center;
+  padding: 17px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e5e3;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.04);
 }
-
 .tickets-count span {
-  display: block;
-
-  font-size: 30px;
-  font-weight: 800;
+  color: #222222;
+  font-size: 25px;
+  line-height: 1.1;
+  font-weight: 900;
 }
-
 .tickets-count small {
+  margin-top: 5px;
+  color: #717171;
   font-size: 12px;
-
-  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.3;
+  font-weight: 800;
+  letter-spacing: 0.5px;
 }
-
-
 /* ============================================================
-   SECTION
+   SECTIONS
 ============================================================ */
-
 .tickets-section {
-  margin-bottom: 50px;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto 55px;
 }
-
+.free-section {
+  margin-top: 15px;
+}
+/* ============================================================
+   SECTION HEADING
+============================================================ */
 .section-heading {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
 }
-
 .section-heading h2 {
   margin: 0;
-
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #222222;
   font-size: 24px;
-
-  color: #111827;
+  line-height: 1.3;
+  font-weight: 900;
+  letter-spacing: -0.4px;
 }
-
+.section-heading h2 svg {
+  flex-shrink: 0;
+  color: #ff5a5f;
+}
 .section-heading p {
-  margin: 6px 0 0;
-
-  color: #6b7280;
-
-  font-size: 14px;
+  margin: 7px 0 0;
+  color: #717171;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 500;
 }
-
-
 /* ============================================================
-   GRID
+   TICKET GRID
 ============================================================ */
-
 .tickets-grid {
+  width: 100%;
   display: grid;
-
   grid-template-columns:
-    repeat(
-      auto-fit,
-      minmax(300px, 1fr)
-    );
-
-  gap: 22px;
+    repeat(2, minmax(0, 1fr));
+  gap: 24px;
 }
-
-
 /* ============================================================
    TICKET CARD
 ============================================================ */
-
-.ticket-card {
+.tickets-page .ticket-card {
   position: relative;
-
-  overflow: hidden;
-
-  background: white;
-
-  border: 1px solid #e5e7eb;
-
+  min-width: 0;
+  padding: 26px;
+  box-sizing: border-box;
+  border: 1px solid #e5e5e3;
   border-radius: 20px;
-
-  padding: 22px;
-
+  background: #ffffff;
   box-shadow:
-    0 8px 25px rgba(0, 0, 0, 0.06);
-
+    0 3px 12px rgba(0, 0, 0, 0.035);
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
 }
-
-.ticket-card:hover {
-  transform: translateY(-3px);
-
-  box-shadow:
-    0 14px 32px rgba(0, 0, 0, 0.1);
-}
-
-
 /* ============================================================
-   TOP
+   CARD HOVER
 ============================================================ */
-
-.ticket-card-top {
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  gap: 15px;
-
-  margin-bottom: 20px;
+.tickets-page .ticket-card.current-ticket:hover {
+  transform: translateY(-5px);
+  border-color: #d9d9d6;
+  box-shadow:
+    0 14px 35px rgba(0, 0, 0, 0.09);
 }
-
-.ticket-event-icon {
-  width: 48px;
-  height: 48px;
-
+.tickets-page .ticket-card.past-ticket:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.065);
+}
+/* ============================================================
+   CARD TOP
+============================================================ */
+.ticket-card-top {
+  width: 100%;
+  margin-bottom: 22px;
   display: flex;
-
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+/* ============================================================
+   EVENT ICON
+============================================================ */
+.ticket-event-icon {
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 14px;
-
-  background: #eff6ff;
-
-  font-size: 23px;
+  background: #fff1f1;
+  color: #ff5a5f;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
 }
-
-
+.ticket-card:hover .ticket-event-icon {
+  transform: scale(1.04);
+  background: #ffe7e8;
+}
 /* ============================================================
-   STATUS
+   STATUS BASE
 ============================================================ */
-
-.status {
+.tickets-page .status {
+  min-height: 32px;
+  padding: 7px 11px;
+  box-sizing: border-box;
   display: inline-flex;
-
   align-items: center;
-
-  padding: 6px 10px;
-
+  justify-content: center;
+  gap: 6px;
   border-radius: 999px;
-
-  font-size: 11px;
-
-  font-weight: 800;
-
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 900;
   white-space: nowrap;
 }
-
-.status.confirmed {
-  background: #ecfdf5;
-  color: #047857;
-}
-
-.status.pending {
-  background: #fffbeb;
-  color: #b45309;
-}
-
-.status.refunded {
-  background: #fef2f2;
-  color: #b91c1c;
-}
-
-
 /* ============================================================
-   EVENT
+   CONFIRMED
 ============================================================ */
-
-.ticket-event h2 {
-  margin: 0 0 10px;
-
-  font-size: 21px;
-
-  color: #111827;
-
+.tickets-page .status.confirmed {
+  border: 1px solid #c9ead7;
+  background: #eefaf3;
+  color: #207a47;
+}
+/* ============================================================
+   USED
+============================================================ */
+.tickets-page .status.used {
+  border: 1px solid #c9dff5;
+  background: #eef6ff;
+  color: #25639b;
+}
+/* ============================================================
+   PASSED
+============================================================ */
+.tickets-page .status.passed {
+  border: 1px solid #e1e1df;
+  background: #f4f4f2;
+  color: #666666;
+}
+/* ============================================================
+   REFUNDED
+============================================================ */
+.tickets-page .status.refunded {
+  border: 1px solid #f3caca;
+  background: #fff0f0;
+  color: #b4232d;
+}
+/* ============================================================
+   EVENT AREA
+============================================================ */
+.tickets-page .ticket-event {
+  width: 100%;
+  margin-bottom: 24px;
+}
+.tickets-page .ticket-event h2 {
+  margin: 0;
+  color: #222222;
+  font-size: 22px;
   line-height: 1.3;
+  font-weight: 900;
+  letter-spacing: -0.35px;
+  overflow-wrap: anywhere;
 }
-
+/* ============================================================
+   LOCATION / DATE
+============================================================ */
 .ticket-location {
+  margin-top: 13px;
   display: flex;
-
   flex-direction: column;
-
-  gap: 5px;
-
-  color: #6b7280;
-
-  font-size: 13px;
+  gap: 8px;
 }
-
-
+.ticket-location span {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #5f5f5f;
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+.ticket-location svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #777777;
+}
 /* ============================================================
    DETAILS
 ============================================================ */
-
-.ticket-details {
+.tickets-page .ticket-details {
+  width: 100%;
   display: grid;
-
   grid-template-columns:
     repeat(2, minmax(0, 1fr));
-
-  gap: 1px;
-
-  margin-top: 22px;
-
-  overflow: hidden;
-
-  border: 1px solid #e5e7eb;
-
-  border-radius: 14px;
-
-  background: #e5e7eb;
+  gap: 12px;
+  margin-bottom: 20px;
 }
-
-.ticket-detail {
+/* ============================================================
+   INDIVIDUAL DETAIL
+============================================================ */
+.tickets-page .ticket-detail {
   min-width: 0;
-
-  padding: 13px;
-
-  background: #f9fafb;
+  padding: 15px;
+  box-sizing: border-box;
+  border: 1px solid #ededeb;
+  border-radius: 13px;
+  background: #fafaf9;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
-
-.ticket-detail span {
+/* ============================================================
+   DETAIL HOVER
+============================================================ */
+.tickets-page .ticket-detail:hover {
+  transform: translateY(-2px);
+  border-color: #ddddda;
+  background: #ffffff;
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.055);
+}
+/* ============================================================
+   DETAIL LABEL
+============================================================ */
+.tickets-page .ticket-detail span {
   display: block;
-
-  margin-bottom: 5px;
-
-  color: #6b7280;
-
+  margin-bottom: 7px;
+  color: #777777;
   font-size: 11px;
-
-  font-weight: 600;
-
+  line-height: 1.3;
+  font-weight: 900;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
-
-  letter-spacing: 0.4px;
 }
-
-.ticket-detail strong {
+/* ============================================================
+   DETAIL VALUE
+============================================================ */
+.tickets-page .ticket-detail strong {
   display: block;
-
-  color: #111827;
-
-  font-size: 14px;
-
+  color: #252525;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 850;
   overflow-wrap: anywhere;
 }
-
-.ticket-id {
-  font-size: 11px !important;
-
-  word-break: break-all;
+/* ============================================================
+   REFUND / PASSED BANNERS
+============================================================ */
+.tickets-page .refund-banner {
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  font-weight: 650;
 }
-
-
+/* ============================================================
+   PASSED BANNER
+============================================================ */
+.tickets-page .passed-banner {
+  border: 1px solid #dededb;
+  background: #f5f5f3;
+  color: #5f5f5d;
+}
+/* ============================================================
+   REFUNDED BANNER
+============================================================ */
+.tickets-page .refunded-banner {
+  border: 1px solid #f1cccc;
+  background: #fff1f1;
+  color: #a52a32;
+}
+/* ============================================================
+   PENDING REFUND
+============================================================ */
+.tickets-page .pending-banner {
+  border: 1px solid #f0dfb7;
+  background: #fff9e9;
+  color: #85651c;
+}
 /* ============================================================
    ACTIONS
 ============================================================ */
-
-.ticket-actions {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 10px;
-
-  margin-top: 20px;
-}
-
-.view-ticket-btn,
-.refund-btn,
-.review-ticket-btn {
+.tickets-page .ticket-actions {
   width: 100%;
-
-  min-height: 46px;
-
   display: flex;
-
   align-items: center;
-
-  justify-content: center;
-
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 3px;
+}
+/* ============================================================
+   ALL ACTION BUTTONS
+============================================================ */
+.tickets-page .ticket-actions a,
+.tickets-page .ticket-actions button {
+  min-height: 44px;
+  padding: 0 15px;
   box-sizing: border-box;
-
-  padding: 12px 16px;
-
-  border: none;
-
-  border-radius: 12px;
-
-  font-size: 14px;
-
-  font-weight: 700;
-
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 850;
   text-decoration: none;
-
   cursor: pointer;
-
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    background 0.2s ease;
+    transform 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    color 0.18s ease;
 }
-
-.view-ticket-btn {
-  background: #2563eb;
-
-  color: white;
-
+/* ============================================================
+   VIEW TICKET
+============================================================ */
+.tickets-page .view-ticket-btn {
+  border: 1px solid #222222;
+  background: #222222;
+  color: #ffffff;
   box-shadow:
-    0 5px 14px rgba(37, 99, 235, 0.2);
+    0 4px 10px rgba(0, 0, 0, 0.08);
 }
-
-.view-ticket-btn:hover {
-  background: #1d4ed8;
-
-  transform: translateY(-1px);
+.tickets-page .view-ticket-btn:hover {
+  background: #000000;
+  border-color: #000000;
+  transform: translateY(-2px);
+  box-shadow:
+    0 7px 16px rgba(0, 0, 0, 0.14);
 }
-
-.refund-btn {
-  background: #fee2e2;
-
-  color: #b91c1c;
-}
-
-.refund-btn:hover {
-  background: #fecaca;
-}
-
-.refund-btn.pending {
-  background: #fef3c7;
-
-  color: #92400e;
-
+.tickets-page .view-ticket-btn.disabled {
+  border-color: #ddddda;
+  background: #f1f1ef;
+  color: #888888;
+  box-shadow: none;
   cursor: not-allowed;
 }
-
-.review-ticket-btn {
-  background: #f59e0b;
-
-  color: white;
+.tickets-page .view-ticket-btn.disabled:hover {
+  transform: none;
+  background: #f1f1ef;
 }
-
-.review-ticket-btn:hover {
-  background: #d97706;
-
-  transform: translateY(-1px);
+/* ============================================================
+   REVIEW
+============================================================ */
+.tickets-page .review-ticket-btn {
+  border: 1px solid #e1c85a;
+  background: #fffdf0;
+  color: #765f00;
 }
-
-.view-ticket-btn.disabled {
-  background: #d1d5db;
-
-  color: #6b7280;
-
+.tickets-page .review-ticket-btn:hover {
+  border-color: #d5ba43;
+  background: #fff9d9;
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 15px rgba(150, 120, 0, 0.10);
+}
+/* ============================================================
+   REFUND
+============================================================ */
+.tickets-page .refund-btn {
+  border: 1px solid #ff5a5f;
+  background: #ffffff;
+  color: #d83d43;
+}
+.tickets-page .refund-btn:hover {
+  border-color: #ff5a5f;
+  background: #fff3f3;
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 15px rgba(255, 90, 95, 0.12);
+}
+/* ============================================================
+   REFUND PENDING
+============================================================ */
+.tickets-page .refund-btn.pending {
+  border-color: #eadfbf;
+  background: #faf7eb;
+  color: #90752a;
   cursor: not-allowed;
-
-  pointer-events: none;
-
   box-shadow: none;
 }
-
-
+.tickets-page .refund-btn.pending:hover {
+  transform: none;
+  background: #faf7eb;
+}
 /* ============================================================
-   REFUND BANNER
+   DELETE
 ============================================================ */
-
-.refund-banner {
-  margin-top: 16px;
-
-  padding: 12px;
-
-  border-radius: 12px;
-
-  font-size: 13px;
-
-  font-weight: 700;
-
-  text-align: center;
+.tickets-page .delete-past-ticket-btn {
+  border: 1px solid #e3c9c9;
+  background: #ffffff;
+  color: #a33232;
 }
-
-.refunded-banner {
-  background: #fef2f2;
-
-  color: #b91c1c;
+.tickets-page .delete-past-ticket-btn:hover {
+  border-color: #d8aaaa;
+  background: #fff4f4;
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 15px rgba(160, 45, 45, 0.10);
 }
-
-.pending-banner {
-  background: #fffbeb;
-
-  color: #92400e;
+.tickets-page .delete-past-ticket-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
-
-
 /* ============================================================
-   REFUNDED CARD
+   FREE TICKET CARD
 ============================================================ */
-
-.refunded-ticket {
-  opacity: 0.82;
-
-  border-color: #fecaca;
-
-  background: #fffafa;
+.tickets-page .free-ticket-card .ticket-event-icon {
+  background: #fff4e8;
+  color: #e87518;
 }
-
-
+.tickets-page .free-ticket-card:hover .ticket-event-icon {
+  background: #ffead4;
+}
 /* ============================================================
-   EMPTY STATE
+   PAST TICKET
 ============================================================ */
-
-.tickets-empty-section,
-.tickets-empty {
-  padding: 55px 25px;
-
-  border: 1px dashed #d1d5db;
-
-  border-radius: 20px;
-
-  background: #f9fafb;
-
-  text-align: center;
+.tickets-page .past-ticket {
+  background: #fcfcfb;
 }
-
-.tickets-empty-section.small-empty {
-  padding: 40px 25px;
+.tickets-page .past-ticket .ticket-event h2 {
+  color: #3c3c3c;
 }
-
-.empty-icon {
-  width: 65px;
-  height: 65px;
-
+/* ============================================================
+   EMPTY STATES
+============================================================ */
+.tickets-empty,
+.tickets-loading,
+.tickets-empty-section {
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
-
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  margin: 0 auto 16px;
-
-  border-radius: 50%;
-
-  background: #eff6ff;
-
-  font-size: 28px;
+  text-align: center;
 }
-
-.tickets-empty-section h3,
-.tickets-empty h2 {
-  margin: 0 0 8px;
-
-  color: #111827;
+/* ============================================================
+   FULL EMPTY / LOGIN
+============================================================ */
+.tickets-empty {
+  max-width: 560px;
+  min-height: 55vh;
+  margin: 0 auto;
 }
-
-.tickets-empty-section p,
-.tickets-empty p {
-  margin: 0 0 20px;
-
-  color: #6b7280;
-
-  font-size: 14px;
+.tickets-empty-section {
+  min-height: 330px;
+  padding: 45px 25px;
+  border: 1px solid #e5e5e3;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.035);
 }
-
-.tickets-empty-section button,
-.tickets-empty button {
+/* ============================================================
+   SMALL EMPTY
+============================================================ */
+.small-empty {
+  min-height: 270px;
+}
+/* ============================================================
+   EMPTY ICON
+============================================================ */
+.empty-icon {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: #fff1f1;
+  color: #ff5a5f;
+  margin-bottom: 18px;
+}
+/* ============================================================
+   EMPTY HEADINGS
+============================================================ */
+.tickets-empty h2,
+.tickets-loading h2,
+.tickets-empty-section h3 {
+  margin: 0;
+  color: #222222;
+  font-size: 23px;
+  line-height: 1.3;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+}
+.tickets-empty-section h3 {
+  font-size: 20px;
+}
+/* ============================================================
+   EMPTY PARAGRAPHS
+============================================================ */
+.tickets-empty p,
+.tickets-loading p,
+.tickets-empty-section p {
+  max-width: 480px;
+  margin: 9px 0 0;
+  color: #717171;
+  font-size: 15px;
+  line-height: 1.6;
+  font-weight: 500;
+}
+/* ============================================================
+   EMPTY BUTTON
+============================================================ */
+.tickets-empty button,
+.tickets-empty-section button {
+  min-height: 46px;
+  margin-top: 22px;
+  padding: 0 21px;
   border: none;
-
-  padding: 12px 22px;
-
   border-radius: 10px;
-
-  background: #2563eb;
-
-  color: white;
-
-  font-weight: 700;
-
+  background: #222222;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 850;
   cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
 }
-
-.tickets-empty-section button:hover,
-.tickets-empty button:hover {
-  background: #1d4ed8;
+.tickets-empty button:hover,
+.tickets-empty-section button:hover {
+  background: #000000;
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.14);
 }
-
-
 /* ============================================================
    LOADING
 ============================================================ */
-
 .tickets-loading {
-  min-height: 400px;
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  justify-content: center;
-
-  text-align: center;
+  min-height: 65vh;
 }
-
-.tickets-loading h2 {
-  margin: 20px 0 8px;
-
-  color: #111827;
-}
-
-.tickets-loading p {
-  margin: 0;
-
-  color: #6b7280;
-}
-
 .tickets-spinner {
-  width: 45px;
-  height: 45px;
-
-  border: 4px solid #e5e7eb;
-
-  border-top-color: #2563eb;
-
+  width: 42px;
+  height: 42px;
+  margin-bottom: 20px;
+  border: 4px solid #e8e8e5;
+  border-top-color: #ff5a5f;
   border-radius: 50%;
-
-  animation: tickets-spin 0.8s linear infinite;
+  animation:
+    tickets-spin 0.8s linear infinite;
 }
-
 @keyframes tickets-spin {
   to {
     transform: rotate(360deg);
   }
 }
-
-
 /* ============================================================
-   FREE TICKET
+   TABLET
 ============================================================ */
-
-.free-ticket-card {
-  border-color: #d1fae5;
-}
-
-.free-section {
-  margin-top: 10px;
-}
-
-
-/* ============================================================
-   MOBILE
-============================================================ */
-
-@media (max-width: 700px) {
-
+@media (max-width: 900px) {
   .tickets-page {
-    padding: 25px 15px 60px;
+    padding: 45px 22px 65px;
   }
-
   .tickets-header {
-    padding: 25px 20px;
-
-    border-radius: 20px;
-
-    align-items: flex-start;
+    margin-bottom: 35px;
   }
-
   .tickets-header h1 {
-    font-size: 29px;
+    font-size: 36px;
   }
-
-  .tickets-count {
-    min-width: 75px;
-
-    padding: 12px;
-  }
-
-  .tickets-count span {
-    font-size: 24px;
-  }
-
   .tickets-grid {
     grid-template-columns: 1fr;
   }
-
+  .tickets-section {
+    margin-bottom: 45px;
+  }
 }
-
-
-@media (max-width: 480px) {
-
+/* ============================================================
+   MOBILE
+============================================================ */
+@media (max-width: 600px) {
+  .tickets-page {
+    padding: 28px 14px 50px;
+  }
   .tickets-header {
-    flex-direction: column;
+    margin-bottom: 32px;
+    align-items: flex-start;
+    gap: 20px;
   }
-
+  .tickets-header h1 {
+    font-size: 32px;
+    letter-spacing: -0.8px;
+  }
+  .tickets-header p {
+    margin-top: 8px;
+    font-size: 15px;
+  }
+  .tickets-eyebrow {
+    font-size: 11px;
+    letter-spacing: 1.4px;
+  }
   .tickets-count {
-    width: 100%;
-
-    box-sizing: border-box;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 8px;
+    min-width: 78px;
+    padding: 13px 12px;
+    border-radius: 13px;
   }
-
   .tickets-count span {
-    display: inline;
+    font-size: 21px;
   }
-
-  .ticket-card {
-    padding: 18px;
-
+  .tickets-count small {
+    font-size: 10px;
+  }
+  .section-heading {
+    margin-bottom: 18px;
+  }
+  .section-heading h2 {
+    font-size: 21px;
+  }
+  .section-heading p {
+    font-size: 14px;
+  }
+  .tickets-grid {
+    gap: 17px;
+  }
+  .tickets-page .ticket-card {
+    padding: 21px 18px;
     border-radius: 17px;
   }
-
-  .ticket-details {
+  .ticket-card-top {
+    margin-bottom: 18px;
+  }
+  .ticket-event-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+  }
+  .tickets-page .status {
+    min-height: 30px;
+    padding: 6px 9px;
+    font-size: 11px;
+  }
+  .tickets-page .ticket-event {
+    margin-bottom: 20px;
+  }
+  .tickets-page .ticket-event h2 {
+    font-size: 20px;
+  }
+  .ticket-location {
+    margin-top: 11px;
+    gap: 7px;
+  }
+  .ticket-location span {
+    font-size: 13px;
+  }
+  .tickets-page .ticket-details {
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .tickets-page .ticket-detail {
+    padding: 13px 12px;
+    border-radius: 11px;
+  }
+  .tickets-page .ticket-detail span {
+    margin-bottom: 6px;
+    font-size: 10px;
+  }
+  .tickets-page .ticket-detail strong {
+    font-size: 15px;
+  }
+  .tickets-page .refund-banner {
+    padding: 12px 13px;
+    font-size: 12px;
+  }
+  .tickets-page .ticket-actions {
+    display: grid;
+    grid-template-columns:
+      1fr 1fr;
+    gap: 9px;
+  }
+  .tickets-page .ticket-actions a,
+  .tickets-page .ticket-actions button {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 9px;
+    font-size: 12px;
+  }
+  .tickets-empty-section {
+    min-height: 290px;
+    padding: 35px 20px;
+  }
+  .small-empty {
+    min-height: 240px;
+  }
+}
+/* ============================================================
+   SMALL PHONES
+============================================================ */
+@media (max-width: 420px) {
+  .tickets-page {
+    padding: 22px 10px 40px;
+  }
+  .tickets-header {
+    gap: 12px;
+  }
+  .tickets-header h1 {
+    font-size: 28px;
+  }
+  .tickets-header p {
+    font-size: 14px;
+  }
+  .tickets-count {
+    min-width: 67px;
+    padding: 11px 8px;
+  }
+  .tickets-count span {
+    font-size: 19px;
+  }
+  .tickets-count small {
+    font-size: 9px;
+  }
+  .section-heading h2 {
+    font-size: 19px;
+  }
+  .section-heading p {
+    font-size: 13px;
+  }
+  .tickets-page .ticket-card {
+    padding: 18px 15px;
+    border-radius: 15px;
+  }
+  .tickets-page .ticket-event h2 {
+    font-size: 18px;
+  }
+  .tickets-page .ticket-details {
     grid-template-columns: 1fr;
   }
-
-  .ticket-detail {
-    padding: 12px;
+  .tickets-page .ticket-detail strong {
+    font-size: 15px;
   }
-
+  .tickets-page .ticket-actions {
+    grid-template-columns: 1fr;
+  }
+  .tickets-page .ticket-actions a,
+  .tickets-page .ticket-actions button {
+    min-height: 45px;
+    font-size: 13px;
+  }
+  .empty-icon {
+    width: 64px;
+    height: 64px;
+  }
+  .tickets-empty h2,
+  .tickets-loading h2 {
+    font-size: 21px;
+  }
+}
+/* ============================================================
+   ACCESSIBILITY
+============================================================ */
+.tickets-page button:focus-visible,
+.tickets-page a:focus-visible {
+  outline: 3px solid rgba(255, 90, 95, 0.28);
+  outline-offset: 3px;
+}
+/* ============================================================
+   REDUCED MOTION
+============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .tickets-page .ticket-card,
+  .tickets-page .ticket-detail,
+  .tickets-page .ticket-actions a,
+  .tickets-page .ticket-actions button,
+  .tickets-empty button,
+  .tickets-empty-section button,
+  .ticket-event-icon {
+    transition: none;
+  }
+  .tickets-spinner {
+    animation: none;
+  }
 }

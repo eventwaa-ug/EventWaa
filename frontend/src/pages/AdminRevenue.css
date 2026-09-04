@@ -1,197 +1,897 @@
-.admin-revenue{
+/* ============================================================
+   ADMIN REVENUE
+============================================================ */
 
-    padding:30px;
-
-    background:#f8fafc;
-
-    min-height:100vh;
-
+.admin-revenue {
+    width: 100%;
+    min-height: 100vh;
+    padding: 40px;
+    background: #f7f8fc;
+    box-sizing: border-box;
 }
 
 
+/* ============================================================
+   HEADER
+============================================================ */
 
-.admin-revenue h1{
+.admin-revenue-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    margin-bottom: 38px;
+}
 
-    font-size:32px;
+.admin-revenue-title-area {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
 
-    margin-bottom:35px;
+.admin-revenue-title-icon {
+    width: 58px;
+    height: 58px;
+    flex-shrink: 0;
 
-    color:#111827;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
+    border-radius: 16px;
+
+    background: #eef2ff;
+    color: #197c78;
+}
+
+.admin-revenue-eyebrow {
+    margin: 0 0 6px;
+
+    color: #d85c45;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: 1px;
+}
+
+.admin-revenue-header h1 {
+    margin: 0;
+
+    color: #111827;
+
+    font-size: 32px;
+    font-weight: 800;
+
+    line-height: 1.15;
+}
+
+.admin-revenue-subtitle {
+    margin: 7px 0 0;
+
+    color: #6b7280;
+
+    font-size: 15px;
 }
 
 
-/* Top cards */
+/* ============================================================
+   REFRESH
+============================================================ */
 
-.revenue-cards{
+.admin-revenue-refresh {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 
-    display:grid;
+    min-height: 44px;
+    padding: 0 17px;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 11px;
+
+    background: #ffffff;
+    color: #374151;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.admin-revenue-refresh:hover {
+    border-color: #c7d2fe;
+    background: #f8faff;
+    color: #197c78;
+}
+
+.admin-revenue-refresh:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+
+/* ============================================================
+   ERROR
+============================================================ */
+
+.admin-revenue-error {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    margin-bottom: 25px;
+    padding: 14px 17px;
+
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+
+    background: #fef2f2;
+    color: #b91c1c;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* ============================================================
+   SECTION HEADING
+============================================================ */
+
+.admin-revenue-section-heading {
+    margin-bottom: 18px;
+}
+
+.admin-revenue-section-heading h2 {
+    margin: 0;
+
+    color: #111827;
+
+    font-size: 21px;
+    font-weight: 800;
+}
+
+.admin-revenue-section-heading p {
+    margin: 5px 0 0;
+
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+
+/* ============================================================
+   REVENUE CARDS
+============================================================ */
+
+.revenue-cards {
+    display: grid;
 
     grid-template-columns:
-    repeat(auto-fit,minmax(230px,1fr));
+        repeat(3, minmax(0, 1fr));
 
-    gap:25px;
+    gap: 22px;
 
-    margin-bottom:40px;
-
+    margin-bottom: 35px;
 }
 
 
+/* ============================================================
+   REVENUE CARD
+============================================================ */
 
-.revenue-card{
+.revenue-card {
+    min-width: 0;
 
-    background:white;
+    padding: 27px;
 
-    padding:30px;
+    background: #ffffff;
 
-    border-radius:20px;
+    border: 1px solid #eef0f4;
+    border-radius: 18px;
 
     box-shadow:
-    0 10px 25px rgba(0,0,0,0.08);
+        0 5px 20px rgba(15, 23, 42, 0.05);
 
-    transition:.3s;
-
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
-
-
-.revenue-card:hover{
-
-    transform:translateY(-5px);
-
-}
-
-
-
-.revenue-card h3{
-
-    color:#6b7280;
-
-    font-size:16px;
-
-    margin-bottom:15px;
-
-}
-
-
-
-.revenue-card h1{
-
-    font-size:36px;
-
-    color:#2563eb;
-
-    margin:0;
-
-}
-
-
-
-/* Event revenue section */
-
-.event-revenue{
-
-    background:white;
-
-    padding:30px;
-
-    border-radius:20px;
+.revenue-card:hover {
+    transform: translateY(-3px);
 
     box-shadow:
-    0 10px 25px rgba(0,0,0,0.08);
+        0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+
+/* ============================================================
+   CARD TOP
+============================================================ */
+
+.revenue-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 24px;
+}
+
+.revenue-card-top span {
+    color: #6b7280;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: 0.8px;
+}
+
+
+/* ============================================================
+   CARD ICON
+============================================================ */
+
+.revenue-card-icon {
+    width: 46px;
+    height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 13px;
+
+    background: #f1f5ff;
+    color: #197c78;
+}
+
+
+/* ============================================================
+   CARD VALUE
+============================================================ */
+
+.revenue-card-value {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+
+    min-width: 0;
+}
+
+.revenue-card-value small {
+    flex-shrink: 0;
+
+    color: #6b7280;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: 0.5px;
+}
+
+.revenue-card-value strong {
+    min-width: 0;
+
+    color: #111827;
+
+    font-size: clamp(24px, 2.5vw, 36px);
+    font-weight: 850;
+
+    line-height: 1;
+
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.revenue-card > p {
+    margin: 13px 0 0;
+
+    color: #9ca3af;
+
+    font-size: 13px;
+}
+
+
+/* ============================================================
+   PRIMARY REVENUE CARD
+============================================================ */
+
+.revenue-card-primary {
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #f8f9ff
+        );
+
+    border-color: #e0e7ff;
+}
+
+.revenue-card-primary .revenue-card-icon {
+    background: #eef2ff;
+    color: #197c78;
+}
+
+.revenue-card-primary .revenue-card-value strong {
+    color: #4338ca;
+}
+
+
+/* ============================================================
+   EVENT REVENUE
+============================================================ */
+
+.event-revenue {
+    width: 100%;
+
+    background: #ffffff;
+
+    border: 1px solid #eef0f4;
+    border-radius: 18px;
+
+    box-shadow:
+        0 5px 20px rgba(15, 23, 42, 0.05);
+
+    overflow: hidden;
+}
+
+
+/* ============================================================
+   EVENT REVENUE HEADER
+============================================================ */
+
+.event-revenue-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 25px 28px;
+
+    border-bottom: 1px solid #eef0f4;
+}
+
+.event-revenue-heading-row {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.event-revenue-heading-row h2 {
+    margin: 0;
+
+    color: #111827;
+
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.event-revenue-header p {
+    margin: 6px 0 0 33px;
+
+    color: #9ca3af;
+
+    font-size: 13px;
+}
+
+.event-revenue-icon {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: #f1f5ff;
+    color: #197c78;
+}
+
+.event-revenue-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    padding: 8px 12px;
+
+    border-radius: 9px;
+
+    background: #f8fafc;
+    color: #64748b;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+
+/* ============================================================
+   REVENUE TABLE
+============================================================ */
+
+.revenue-table-wrapper {
+    width: 100%;
+}
+
+
+/* ============================================================
+   TABLE HEADER
+============================================================ */
+
+.revenue-table-header {
+    display: grid;
+
+    grid-template-columns:
+        minmax(220px, 2fr)
+        minmax(130px, 1fr)
+        minmax(180px, 1fr);
+
+    gap: 25px;
+
+    padding: 13px 28px;
+
+    background: #fafbfc;
+
+    border-bottom: 1px solid #eef0f4;
+
+    color: #9ca3af;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 0.7px;
+}
+
+
+/* ============================================================
+   REVENUE ROW
+============================================================ */
+
+.revenue-row {
+    display: grid;
+
+    grid-template-columns:
+        minmax(220px, 2fr)
+        minmax(130px, 1fr)
+        minmax(180px, 1fr);
+
+    align-items: center;
+
+    gap: 25px;
+
+    padding: 20px 28px;
+
+    border-bottom: 1px solid #f1f3f5;
+
+    transition: background 0.2s ease;
+}
+
+.revenue-row:hover {
+    background: #fafbff;
+}
+
+.revenue-row:last-child {
+    border-bottom: none;
+}
+
+
+/* ============================================================
+   EVENT NAME
+============================================================ */
+
+.revenue-event-name {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    min-width: 0;
+}
+
+.revenue-event-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #f8fafc;
+    color: #64748b;
+}
+
+.revenue-event-name div:last-child {
+    min-width: 0;
+}
+
+.revenue-event-name h3 {
+    margin: 0;
+
+    color: #1f2937;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    line-height: 1.35;
+
+    overflow-wrap: anywhere;
+}
+
+.revenue-event-name span {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #9ca3af;
+
+    font-size: 11px;
+}
+
+
+/* ============================================================
+   TICKET COUNT
+============================================================ */
+
+.revenue-ticket-count {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: #64748b;
+}
+
+.revenue-ticket-count strong {
+    color: #374151;
+
+    font-size: 14px;
+}
+
+
+/* ============================================================
+   EVENT AMOUNT
+============================================================ */
+
+.revenue-event-amount {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+
+    gap: 6px;
+
+    min-width: 0;
+}
+
+.revenue-event-amount span {
+    color: #9ca3af;
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.revenue-event-amount strong {
+    color: #111827;
+
+    font-size: 16px;
+    font-weight: 800;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* ============================================================
+   LOADING
+============================================================ */
+
+.admin-revenue-loading {
+    min-height: 180px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 12px;
+
+    color: #64748b;
+}
+
+.admin-revenue-loading p {
+    margin: 0;
+
+    font-size: 14px;
+}
+
+
+/* ============================================================
+   EMPTY
+============================================================ */
+
+.admin-revenue-empty {
+    min-height: 230px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 30px;
+
+    text-align: center;
+}
+
+.admin-revenue-empty-icon {
+    width: 55px;
+    height: 55px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 15px;
+
+    border-radius: 15px;
+
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.admin-revenue-empty h3 {
+    margin: 0;
+
+    color: #374151;
+
+    font-size: 17px;
+}
+
+.admin-revenue-empty p {
+    max-width: 400px;
+
+    margin: 7px 0 0;
+
+    color: #9ca3af;
+
+    font-size: 13px;
+}
+
+
+/* ============================================================
+   SPINNER
+============================================================ */
+
+.admin-revenue-spin {
+    animation: adminRevenueSpin 0.9s linear infinite;
+}
+
+@keyframes adminRevenueSpin {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 
 }
 
 
+/* ============================================================
+   LARGE DESKTOP
+============================================================ */
 
-.event-revenue h2{
+@media (min-width: 1400px) {
 
-    margin-bottom:25px;
+    .admin-revenue {
+        padding: 45px 50px;
+    }
 
-    color:#111827;
+    .revenue-card {
+        padding: 32px;
+        min-height: 190px;
+    }
 
-}
-
-
-
-.revenue-row{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    padding:18px;
-
-    border-bottom:1px solid #e5e7eb;
-
-    gap:20px;
+    .revenue-card-value strong {
+        font-size: clamp(28px, 2.2vw, 34px);
+    }
 
 }
 
 
+/* ============================================================
+   TABLET
+============================================================ */
 
-.revenue-row:last-child{
+@media (max-width: 1000px) {
 
-    border-bottom:none;
+    .admin-revenue {
+        padding: 30px;
+    }
+
+    .revenue-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .revenue-table-header,
+    .revenue-row {
+        grid-template-columns:
+            minmax(180px, 2fr)
+            minmax(120px, 1fr)
+            minmax(150px, 1fr);
+
+        gap: 18px;
+    }
 
 }
 
 
+/* ============================================================
+   MOBILE
+============================================================ */
 
-.revenue-row h3{
+@media (max-width: 700px) {
 
-    margin:0;
-
-    color:#111827;
-
-}
-
-
-
-.revenue-row p{
-
-    margin:0;
-
-    color:#6b7280;
-
-}
-
-
-
-
-@media(max-width:700px){
-
-
-    .admin-revenue{
-
-        padding:20px;
-
+    .admin-revenue {
+        padding: 22px 18px;
     }
 
 
-    .admin-revenue h1{
+    .admin-revenue-header {
+        align-items: flex-start;
+        flex-direction: column;
 
-        font-size:26px;
-
+        margin-bottom: 30px;
     }
 
 
-    .revenue-row{
-
-        flex-direction:column;
-
-        align-items:flex-start;
-
+    .admin-revenue-title-area {
+        align-items: flex-start;
     }
 
 
-    .revenue-card h1{
-
-        font-size:30px;
-
+    .admin-revenue-title-icon {
+        width: 50px;
+        height: 50px;
     }
 
+
+    .admin-revenue-header h1 {
+        font-size: 27px;
+    }
+
+
+    .admin-revenue-subtitle {
+        font-size: 14px;
+    }
+
+
+    .admin-revenue-refresh {
+        width: 100%;
+    }
+
+
+    /* CARDS */
+
+    .revenue-cards {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+
+    .revenue-card {
+        padding: 23px;
+        min-height: 155px;
+    }
+
+
+    .revenue-card-value strong {
+        font-size: clamp(22px, 5vw, 28px);
+    }
+
+
+    /* EVENT SECTION */
+
+    .event-revenue-header {
+        align-items: flex-start;
+        flex-direction: column;
+
+        gap: 15px;
+
+        padding: 21px;
+    }
+
+
+    .event-revenue-header p {
+        margin-left: 0;
+    }
+
+
+    .event-revenue-count {
+        align-self: flex-start;
+    }
+
+
+    /* HIDE TABLE HEADER */
+
+    .revenue-table-header {
+        display: none;
+    }
+
+
+    /* ROWS */
+
+    .revenue-row {
+        display: flex;
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 13px;
+
+        padding: 20px 21px;
+    }
+
+
+    .revenue-ticket-count {
+        padding-top: 2px;
+    }
+
+
+    .revenue-event-amount {
+        justify-content: flex-start;
+
+        padding-top: 5px;
+    }
+
+}
+
+
+/* ============================================================
+   SMALL PHONES
+============================================================ */
+
+@media (max-width: 420px) {
+
+    .admin-revenue {
+        padding: 18px 14px;
+    }
+
+
+    .admin-revenue-header h1 {
+        font-size: 24px;
+    }
+
+
+    .admin-revenue-title-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 13px;
+    }
+
+
+    .revenue-card {
+        padding: 20px;
+    }
+
+
+    .revenue-card-value strong {
+        font-size: clamp(18px, 5.5vw, 24px);
+    }
+
+
+    .event-revenue-header {
+        padding: 18px;
+    }
+
+
+    .revenue-row {
+        padding: 18px;
+    }
 
 }

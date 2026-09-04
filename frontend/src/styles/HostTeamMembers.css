@@ -1,20 +1,15 @@
 /* ============================================================
    HOST TEAM MEMBERS
-   EventWaa
+   EventWaa - Complete Stylesheet
    ============================================================ */
 
 .host-team-page {
     width: 100%;
     min-height: 100vh;
-
     background: #f7f8fc;
-
     padding: 40px;
-
     box-sizing: border-box;
-
     color: #172033;
-
     font-family:
         Inter,
         -apple-system,
@@ -23,55 +18,226 @@
         Roboto,
         Arial,
         sans-serif;
-}
 
+    /* ============================================================
+       MODERN GREEN THEME VARIABLES
+       ============================================================ */
+    --host-green: #168a5b;
+    --host-green-dark: #0f6f49;
+    --host-green-soft: #e8f6ef;
+    --host-green-border: #bfe4cd;
+    --host-text: #17211c;
+    --host-muted: #667085;
+    --host-surface: #f7faf8;
+    --host-error: #d32f2f;
+    --host-error-soft: #fff0f0;
+    --host-error-border: #f2b8b8;
+
+    background: var(--host-surface);
+    color: var(--host-text);
+}
 
 /* ============================================================
-   HEADER
+   RESPONSIVE TYPOGRAPHY
    ============================================================ */
 
-.host-team-header {
-    max-width: 1200px;
-
-    margin: 0 auto 30px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: flex-end;
-
-    gap: 30px;
+.host-team-header h1 {
+    font-size: clamp(1.85rem, 3vw, 3rem);
 }
+
+.host-team-header p,
+.host-team-info p,
+.host-team-section-heading p {
+    font-size: clamp(0.875rem, 1.2vw, 1.05rem);
+}
+
+.host-team-info h3 {
+    font-size: clamp(1rem, 1.5vw, 1.2rem);
+}
+
+.host-team-stat strong {
+    font-size: clamp(1.5rem, 2.5vw, 2.35rem);
+}
+
+.host-team-stat small {
+    font-size: clamp(0.75rem, 1vw, 0.95rem);
+}
+
+.host-team-section-heading h2 {
+    font-size: clamp(1.35rem, 2vw, 1.8rem);
+}
+
+.host-team-member-details h3 {
+    font-size: clamp(1rem, 1.4vw, 1.25rem);
+}
+
+.host-team-member-details > p,
+.host-team-member-meta span,
+.host-team-status,
+.host-team-status-button,
+.host-team-remove-button,
+.host-team-manage-events-button {
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+}
+
+.host-team-page button,
+.host-team-page input,
+.host-team-page select {
+    font-family: inherit;
+}
+
+/* ============================================================
+   GLOBAL GREEN ACCENT STYLES
+   ============================================================ */
+
+.host-team-back,
+.host-team-avatar,
+.host-team-manage-summary strong {
+    color: var(--host-green);
+}
+
+.host-team-add-button,
+.host-team-empty button,
+.host-team-form-actions button[type="submit"],
+.host-team-event-option.selected .host-team-custom-checkbox {
+    background: var(--host-green);
+    border-color: var(--host-green);
+}
+
+.host-team-info,
+.host-team-permission-box {
+    background: var(--host-green-soft);
+    border-color: var(--host-green-border);
+}
+
+.host-team-info-icon,
+.host-team-stat > span,
+.host-team-empty-icon,
+.host-team-avatar {
+    background: var(--host-green-soft);
+}
+
+.host-team-spinner {
+    border-top-color: var(--host-green);
+}
+
+/* ============================================================
+   MODERN TRANSITION & HOVER STATES (GLOBAL)
+   ============================================================ */
+
+.host-team-add-button,
+.host-team-empty button,
+.host-team-form-actions button[type="submit"],
+.host-team-manage-events-button,
+.host-team-status-button,
+.host-team-remove-button,
+.host-team-event-option,
+.host-team-member-card,
+.host-team-modal-header button {
+    transition:
+        transform 0.2s ease,
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        color 0.2s ease;
+}
+
+.host-team-add-button:hover,
+.host-team-empty button:hover,
+.host-team-form-actions button[type="submit"]:hover {
+    background: var(--host-green-dark);
+    border-color: var(--host-green-dark);
+    box-shadow: 0 12px 26px rgba(22, 138, 91, 0.22);
+    transform: translateY(-2px);
+}
+
+.host-team-member-card:hover,
+.host-team-stat:hover {
+    border-color: var(--host-green-border);
+    box-shadow: 0 14px 32px rgba(23, 33, 28, 0.09);
+    transform: translateY(-3px);
+}
+
+.host-team-back:hover {
+    color: var(--host-green-dark);
+}
+
+.host-team-status-button:hover,
+.host-team-modal-header button:hover {
+    background: var(--host-green-soft);
+    border-color: var(--host-green-border);
+    color: var(--host-green-dark);
+    transform: translateY(-1px);
+}
+
+.host-team-remove-button:hover {
+    background: var(--host-error-soft);
+    border-color: var(--host-error-border);
+    transform: translateY(-1px);
+}
+
+.host-team-manage-events-button:hover {
+    background: #d8f0e3;
+    border-color: #9ed3b9;
+    transform: translateY(-2px);
+}
+
+.host-team-event-option:hover,
+.host-team-event-option.selected {
+    background: var(--host-green-soft);
+    border-color: var(--host-green-border);
+}
+
+.host-team-form-group input:focus,
+.host-team-form-group select:focus {
+    border-color: var(--host-green);
+    box-shadow: 0 0 0 3px rgba(22, 138, 91, 0.13);
+}
+
+/* ============================================================
+   CONTAINER & WRAPPER
+   ============================================================ */
+
+.host-team-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.host-team-header-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.host-team-header-content {
+    flex: 1;
+    min-width: 250px;
+}
+
+/* ============================================================
+   HEADER SECTION
+   ============================================================ */
 
 .host-team-header h1 {
     margin: 12px 0 8px;
-
     font-size: 38px;
-
     line-height: 1.15;
-
     font-weight: 800;
-
     letter-spacing: -0.7px;
-
-    color: #111827;
+    color: var(--host-text);
 }
 
 .host-team-header p {
     margin: 0;
-
     max-width: 650px;
-
     font-size: 17px;
-
     line-height: 1.6;
-
-    color: #5b6475;
-
+    color: var(--host-muted);
     font-weight: 500;
 }
-
 
 /* ============================================================
    BACK BUTTON
@@ -79,510 +245,327 @@
 
 .host-team-back {
     border: none;
-
     background: transparent;
-
     padding: 0;
-
     font-size: 16px;
-
     font-weight: 700;
-
-    color: #4f46e5;
-
     cursor: pointer;
-
     transition: 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.host-team-back:hover {
-    transform: translateX(-3px);
+.host-team-back svg {
+    width: 20px;
+    height: 20px;
 }
-
 
 /* ============================================================
-   ADD BUTTON
+   ADD BUTTON (Primary Action)
    ============================================================ */
 
 .host-team-add-button {
     border: none;
-
-    background: #4f46e5;
-
     color: white;
-
     padding: 15px 22px;
-
     border-radius: 12px;
-
     font-size: 16px;
-
     font-weight: 750;
-
     cursor: pointer;
-
     white-space: nowrap;
-
-    box-shadow:
-        0 8px 20px rgba(79, 70, 229, 0.18);
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
+    box-shadow: 0 8px 20px rgba(22, 138, 91, 0.18);
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.host-team-add-button:hover {
-    transform: translateY(-2px);
-
-    box-shadow:
-        0 12px 26px rgba(79, 70, 229, 0.24);
+.host-team-add-button svg {
+    width: 20px;
+    height: 20px;
 }
 
+.host-team-add-button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(22, 138, 91, 0.12);
+}
 
 /* ============================================================
-   INFORMATION CARD
+   INFO SECTION
    ============================================================ */
 
 .host-team-info {
-    max-width: 1200px;
-
-    margin: 0 auto 30px;
-
     display: flex;
-
-    align-items: flex-start;
-
-    gap: 18px;
-
-    padding: 24px;
-
-    background: #eef2ff;
-
-    border: 1px solid #dfe4ff;
-
-    border-radius: 16px;
-
-    box-sizing: border-box;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px solid;
+    margin-bottom: 32px;
 }
 
 .host-team-info-icon {
-    width: 48px;
-
-    height: 48px;
-
-    min-width: 48px;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
-    background: white;
-
-    border-radius: 12px;
-
-    font-size: 25px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    flex-shrink: 0;
 }
 
-.host-team-info h3 {
-    margin: 0 0 7px;
-
-    font-size: 19px;
-
-    font-weight: 800;
-
-    color: #20264a;
+.host-team-info-icon svg {
+    width: 20px;
+    height: 20px;
+    color: var(--host-green);
 }
 
-.host-team-info p {
+.host-team-info-content h3 {
+    margin: 0 0 4px;
+    font-weight: 700;
+    color: var(--host-text);
+}
+
+.host-team-info-content p {
     margin: 0;
-
-    font-size: 16px;
-
-    line-height: 1.6;
-
-    color: #515b73;
-
-    font-weight: 500;
+    color: var(--host-muted);
 }
-
 
 /* ============================================================
-   STATISTICS
+   STATS SECTION
    ============================================================ */
 
 .host-team-stats {
-    max-width: 1200px;
-
-    margin: 0 auto 35px;
-
     display: grid;
-
-    grid-template-columns:
-        repeat(3, minmax(0, 1fr));
-
-    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
 }
 
 .host-team-stat {
-    min-height: 105px;
-
-    padding: 22px;
-
     background: white;
-
-    border: 1px solid #e7e9ef;
-
-    border-radius: 16px;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 17px;
-
-    box-sizing: border-box;
-
-    box-shadow:
-        0 4px 16px rgba(20, 30, 60, 0.04);
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 24px;
+    text-align: center;
+    transition: 0.3s ease;
 }
 
 .host-team-stat > span {
-    width: 48px;
-
-    height: 48px;
-
-    min-width: 48px;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    margin: 0 auto 12px;
+}
 
-    border-radius: 12px;
-
-    background: #f3f4ff;
-
-    font-size: 24px;
+.host-team-stat > span svg {
+    width: 26px;
+    height: 26px;
+    color: var(--host-green);
 }
 
 .host-team-stat strong {
     display: block;
-
-    font-size: 28px;
-
-    line-height: 1.1;
-
-    font-weight: 800;
-
-    color: #111827;
+    margin-bottom: 8px;
+    color: var(--host-text);
 }
 
 .host-team-stat small {
+    color: var(--host-muted);
     display: block;
-
-    margin-top: 6px;
-
-    font-size: 15px;
-
-    line-height: 1.3;
-
-    font-weight: 650;
-
-    color: #667085;
 }
-
 
 /* ============================================================
-   MEMBERS SECTION
+   PERMISSION BOX
    ============================================================ */
 
-.host-team-members-section {
-    max-width: 1200px;
-
-    margin: 0 auto;
+.host-team-permission-box {
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid;
+    margin-bottom: 24px;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
+.host-team-permission-box strong {
+    display: block;
+    color: var(--host-green-dark);
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.host-team-permission-box ul {
+    margin: 8px 0 0;
+    padding-left: 20px;
+}
+
+.host-team-permission-box li {
+    margin-bottom: 6px;
+    color: var(--host-text);
+}
+
+/* ============================================================
+   SECTION HEADING
+   ============================================================ */
+
 .host-team-section-heading {
-    margin-bottom: 18px;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
+    margin-bottom: 24px;
 }
 
 .host-team-section-heading h2 {
-    margin: 0 0 5px;
-
-    font-size: 27px;
-
-    line-height: 1.2;
-
+    margin: 0 0 8px;
     font-weight: 800;
-
-    color: #111827;
+    letter-spacing: -0.5px;
+    color: var(--host-text);
 }
 
 .host-team-section-heading p {
     margin: 0;
-
-    font-size: 16px;
-
-    line-height: 1.5;
-
-    color: #667085;
-
-    font-weight: 500;
+    color: var(--host-muted);
 }
-
 
 /* ============================================================
-   EMPTY STATE
+   MEMBERS LIST
    ============================================================ */
 
-.host-team-empty {
-    padding: 55px 30px;
-
-    background: white;
-
-    border: 1px solid #e7e9ef;
-
-    border-radius: 18px;
-
-    text-align: center;
-
-    box-shadow:
-        0 4px 18px rgba(20, 30, 60, 0.04);
+.host-team-members-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
 }
-
-.host-team-empty-icon {
-    width: 70px;
-
-    height: 70px;
-
-    margin: 0 auto 18px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    border-radius: 18px;
-
-    background: #f3f4ff;
-
-    font-size: 34px;
-}
-
-.host-team-empty h3 {
-    margin: 0 0 9px;
-
-    font-size: 23px;
-
-    font-weight: 800;
-
-    color: #111827;
-}
-
-.host-team-empty p {
-    max-width: 520px;
-
-    margin: 0 auto 24px;
-
-    font-size: 16px;
-
-    line-height: 1.6;
-
-    color: #667085;
-
-    font-weight: 500;
-}
-
-.host-team-empty button {
-    border: none;
-
-    background: #4f46e5;
-
-    color: white;
-
-    padding: 14px 21px;
-
-    border-radius: 11px;
-
-    font-size: 16px;
-
-    font-weight: 750;
-
-    cursor: pointer;
-}
-
-
-/* ============================================================
-   TEAM LIST
-   ============================================================ */
-
-.host-team-list {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 16px;
-}
-
-
-/* ============================================================
-   MEMBER CARD
-   ============================================================ */
 
 .host-team-member-card {
-    width: 100%;
-
-    padding: 22px;
-
     background: white;
-
     border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 20px;
+    transition: 0.3s ease;
+}
 
-    border-radius: 17px;
-
+.host-team-member-card-header {
     display: flex;
-
-    align-items: center;
-
+    align-items: flex-start;
     justify-content: space-between;
-
-    gap: 25px;
-
-    box-sizing: border-box;
-
-    box-shadow:
-        0 4px 18px rgba(20, 30, 60, 0.04);
-
-    transition:
-        box-shadow 0.2s ease,
-        transform 0.2s ease;
+    margin-bottom: 16px;
+    gap: 12px;
 }
 
-.host-team-member-card:hover {
-    transform: translateY(-1px);
-
-    box-shadow:
-        0 8px 24px rgba(20, 30, 60, 0.07);
-}
-
-
-/* ============================================================
-   MEMBER MAIN
-   ============================================================ */
-
-.host-team-member-main {
+.host-team-member-avatar-section {
     display: flex;
-
     align-items: center;
-
-    gap: 17px;
-
-    min-width: 0;
+    gap: 12px;
+    flex: 1;
 }
 
 .host-team-avatar {
-    width: 56px;
-
-    height: 56px;
-
-    min-width: 56px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-
-    background: #eef2ff;
-
-    color: #4f46e5;
-
-    font-size: 22px;
-
-    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--host-green-dark);
 }
 
 .host-team-member-details {
-    min-width: 0;
+    flex: 1;
 }
 
 .host-team-member-details h3 {
-    margin: 0 0 5px;
-
-    font-size: 20px;
-
-    line-height: 1.3;
-
-    font-weight: 800;
-
-    color: #111827;
-
-    word-break: break-word;
+    margin: 0 0 4px;
+    font-weight: 700;
+    color: var(--host-text);
 }
 
 .host-team-member-details > p {
-    margin: 0 0 10px;
-
-    font-size: 16px;
-
-    line-height: 1.4;
-
-    color: #596273;
-
-    font-weight: 500;
-
-    word-break: break-word;
+    margin: 0;
+    color: var(--host-muted);
+    word-break: break-all;
 }
-
-
-/* ============================================================
-   MEMBER META
-   ============================================================ */
 
 .host-team-member-meta {
     display: flex;
-
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
     flex-wrap: wrap;
-
-    gap: 10px;
 }
 
 .host-team-member-meta span {
-    display: inline-flex;
-
+    display: flex;
     align-items: center;
-
-    gap: 5px;
-
-    padding: 6px 10px;
-
-    background: #f8f9fc;
-
-    border: 1px solid #e9ebf0;
-
-    border-radius: 8px;
-
-    font-size: 14px;
-
-    line-height: 1.3;
-
-    font-weight: 650;
-
-    color: #4b5563;
+    gap: 4px;
+    padding: 4px 8px;
+    background: #f3f4f6;
+    border-radius: 6px;
+    color: var(--host-muted);
 }
 
+.host-team-member-meta svg {
+    width: 14px;
+    height: 14px;
+}
+
+.host-team-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.host-team-status.active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.host-team-status.inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.host-team-status svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* ============================================================
+   ASSIGNED EVENTS
+   ============================================================ */
+
+.host-team-assigned-events {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 0;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+    margin: 12px 0;
+}
+
+.host-team-assigned-events span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--host-text);
+}
+
+.host-team-assigned-events svg {
+    width: 16px;
+    height: 16px;
+    color: var(--host-green);
+    flex-shrink: 0;
+}
 
 /* ============================================================
    MEMBER ACTIONS
@@ -590,148 +573,162 @@
 
 .host-team-member-actions {
     display: flex;
-
-    align-items: center;
-
-    justify-content: flex-end;
-
-    flex-wrap: wrap;
-
-    gap: 9px;
-
-    flex-shrink: 0;
+    gap: 10px;
+    margin-top: 16px;
 }
 
-
-/* ============================================================
-   STATUS
-   ============================================================ */
-
-.host-team-status {
-    display: inline-flex;
-
-    align-items: center;
-
-    padding: 8px 11px;
-
-    border-radius: 8px;
-
-    font-size: 14px;
-
-    font-weight: 750;
-
-    white-space: nowrap;
-}
-
-.host-team-status.active {
-    background: #ecfdf3;
-
-    color: #087443;
-}
-
-.host-team-status.disabled {
-    background: #fef2f2;
-
-    color: #b42318;
-}
-
-
-/* ============================================================
-   ACTION BUTTONS
-   ============================================================ */
-
+.host-team-manage-events-button,
 .host-team-status-button,
 .host-team-remove-button {
+    flex: 1;
     padding: 10px 14px;
-
     border-radius: 9px;
-
+    border: 1px solid;
     font-size: 14px;
-
     font-weight: 750;
-
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 40px;
+}
 
-    transition: 0.2s ease;
+.host-team-manage-events-button {
+    border-color: var(--host-green-border);
+    background: var(--host-green-soft);
+    color: var(--host-green-dark);
 }
 
 .host-team-status-button {
+    border-color: #e5e7eb;
     background: white;
-
-    border: 1px solid #d7dbe4;
-
-    color: #344054;
-}
-
-.host-team-status-button:hover {
-    background: #f8f9fc;
+    color: var(--host-text);
 }
 
 .host-team-remove-button {
-    background: #fff5f5;
-
-    border: 1px solid #ffd6d6;
-
-    color: #c62828;
+    border-color: var(--host-error-border);
+    background: var(--host-error-soft);
+    color: var(--host-error);
 }
 
-.host-team-remove-button:hover {
-    background: #feecec;
+.host-team-manage-events-button svg,
+.host-team-status-button svg,
+.host-team-remove-button svg {
+    width: 16px;
+    height: 16px;
 }
-
 
 /* ============================================================
-   MODAL OVERLAY
+   EMPTY STATE
+   ============================================================ */
+
+.host-team-empty {
+    text-align: center;
+    padding: 60px 40px;
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+}
+
+.host-team-empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    margin: 0 auto 24px;
+}
+
+.host-team-empty-icon svg {
+    width: 40px;
+    height: 40px;
+    color: var(--host-green);
+}
+
+.host-team-empty h3 {
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--host-text);
+}
+
+.host-team-empty p {
+    margin: 0 0 24px;
+    color: var(--host-muted);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.host-team-empty button {
+    border: none;
+    color: white;
+    padding: 14px 21px;
+    border-radius: 11px;
+    font-size: 16px;
+    font-weight: 750;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.host-team-empty button svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ============================================================
+   MODAL OVERLAY & BACKDROP
    ============================================================ */
 
 .host-team-modal-overlay {
     position: fixed;
-
-    inset: 0;
-
-    z-index: 9999;
-
-    padding: 25px;
-
-    background: rgba(15, 23, 42, 0.58);
-
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
-    box-sizing: border-box;
-
-    overflow-y: auto;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
 }
 
-
-/* ============================================================
-   MODAL
-   ============================================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
 
 .host-team-modal {
-    width: 100%;
-
-    max-width: 570px;
-
-    max-height: calc(100vh - 50px);
-
-    overflow-y: auto;
-
     background: white;
-
-    border-radius: 20px;
-
-    padding: 28px;
-
-    box-sizing: border-box;
-
-    box-shadow:
-        0 25px 70px rgba(0, 0, 0, 0.22);
+    border-radius: 16px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
 }
 
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
 
 /* ============================================================
    MODAL HEADER
@@ -739,191 +736,188 @@
 
 .host-team-modal-header {
     display: flex;
-
-    align-items: flex-start;
-
+    align-items: center;
     justify-content: space-between;
-
-    gap: 20px;
-
-    margin-bottom: 25px;
+    padding: 24px;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .host-team-modal-header h2 {
-    margin: 0 0 7px;
-
-    font-size: 26px;
-
-    line-height: 1.2;
-
-    font-weight: 800;
-
-    color: #111827;
-}
-
-.host-team-modal-header p {
     margin: 0;
-
-    font-size: 15px;
-
-    line-height: 1.5;
-
-    color: #667085;
-
-    font-weight: 500;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--host-text);
 }
 
 .host-team-modal-header button {
-    width: 38px;
-
-    height: 38px;
-
-    flex-shrink: 0;
-
     border: none;
-
-    background: #f3f4f6;
-
-    border-radius: 9px;
-
-    font-size: 25px;
-
-    line-height: 1;
-
-    color: #344054;
-
+    background: transparent;
+    padding: 8px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    color: var(--host-muted);
 }
 
+.host-team-modal-header button svg {
+    width: 24px;
+    height: 24px;
+}
 
 /* ============================================================
-   FORM
+   MODAL CONTENT
    ============================================================ */
 
-.host-team-form {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 18px;
+.host-team-modal-content {
+    padding: 24px;
 }
 
-.host-team-form-group {
+.host-team-modal-footer {
     display: flex;
+    gap: 12px;
+    padding: 24px;
+    border-top: 1px solid #e5e7eb;
+    background: #fafbfc;
+}
 
-    flex-direction: column;
+.host-team-modal-footer button {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 16px;
+}
 
-    gap: 8px;
+.host-team-modal-footer button.cancel {
+    background: white;
+    border-color: #e5e7eb;
+    color: var(--host-text);
+}
+
+.host-team-modal-footer button.submit {
+    background: var(--host-green);
+    border-color: var(--host-green);
+    color: white;
+}
+
+/* ============================================================
+   FORM GROUP
+   ============================================================ */
+
+.host-team-form-group {
+    margin-bottom: 20px;
 }
 
 .host-team-form-group label {
-    font-size: 16px;
-
-    line-height: 1.3;
-
-    font-weight: 750;
-
-    color: #1f2937;
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: var(--host-text);
+    font-size: 14px;
 }
 
 .host-team-form-group input,
 .host-team-form-group select {
     width: 100%;
-
-    min-height: 50px;
-
     padding: 12px 14px;
-
-    border: 1px solid #d5d9e2;
-
+    border: 1px solid #d1d5db;
     border-radius: 10px;
-
+    font-size: 15px;
     background: white;
-
-    color: #111827;
-
-    font-family: inherit;
-
-    font-size: 16px;
-
-    font-weight: 500;
-
-    outline: none;
-
+    color: var(--host-text);
     box-sizing: border-box;
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
+    transition: 0.2s ease;
 }
 
-.host-team-form-group input::placeholder {
-    color: #98a2b3;
-
-    font-weight: 450;
+.host-team-form-group input::placeholder,
+.host-team-form-group select {
+    color: var(--host-muted);
 }
 
-.host-team-form-group input:focus,
-.host-team-form-group select:focus {
-    border-color: #4f46e5;
-
-    box-shadow:
-        0 0 0 3px rgba(79, 70, 229, 0.12);
+.host-team-form-group input:disabled,
+.host-team-form-group select:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
 }
-
 
 /* ============================================================
-   PERMISSION BOX
+   EVENT OPTIONS
    ============================================================ */
 
-.host-team-permission-box {
+.host-team-events-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.host-team-event-option {
     display: flex;
-
-    align-items: flex-start;
-
-    gap: 13px;
-
-    padding: 17px;
-
-    background: #f5f7ff;
-
-    border: 1px solid #e0e5ff;
-
-    border-radius: 12px;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: 0.2s ease;
 }
 
-.host-team-permission-box > div:first-child {
-    font-size: 24px;
-
-    line-height: 1;
+.host-team-event-option input {
+    display: none;
 }
 
-.host-team-permission-box strong {
+.host-team-custom-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    flex-shrink: 0;
+    transition: 0.2s ease;
+}
+
+.host-team-custom-checkbox svg {
+    width: 16px;
+    height: 16px;
+}
+
+.host-team-event-option-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.host-team-event-option-content strong {
     display: block;
-
-    margin-bottom: 5px;
-
-    font-size: 16px;
-
-    line-height: 1.3;
-
-    font-weight: 800;
-
-    color: #252b4a;
+    font-weight: 700;
+    color: var(--host-text);
+    font-size: 15px;
 }
 
-.host-team-permission-box p {
-    margin: 0;
-
-    font-size: 14px;
-
-    line-height: 1.5;
-
-    color: #626b80;
-
-    font-weight: 500;
+.host-team-event-option-content small {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--host-muted);
+    font-size: 13px;
 }
 
+.host-team-event-option-content small svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
 
 /* ============================================================
    FORM ACTIONS
@@ -931,397 +925,356 @@
 
 .host-team-form-actions {
     display: flex;
-
-    justify-content: flex-end;
-
-    gap: 10px;
-
-    margin-top: 5px;
+    gap: 12px;
+    margin-top: 24px;
 }
 
 .host-team-form-actions button {
-    min-height: 48px;
-
-    padding: 11px 18px;
-
+    flex: 1;
+    padding: 14px 16px;
     border-radius: 10px;
-
-    font-size: 15px;
-
+    font-size: 16px;
     font-weight: 750;
-
     cursor: pointer;
+    border: 1px solid;
+}
+
+.host-team-form-actions button[type="submit"] {
+    color: white;
 }
 
 .host-team-form-actions button[type="button"] {
     background: white;
-
-    border: 1px solid #d5d9e2;
-
-    color: #344054;
+    border-color: #e5e7eb;
+    color: var(--host-text);
 }
 
-.host-team-form-actions button[type="submit"] {
-    background: #4f46e5;
-
-    border: 1px solid #4f46e5;
-
-    color: white;
+.host-team-form-actions button[type="button"]:hover {
+    background: #f3f4f6;
 }
-
 
 /* ============================================================
-   TABLET
+   LOADING STATES
+   ============================================================ */
+
+.host-team-spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid #e5e7eb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.host-team-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+    min-height: 400px;
+}
+
+.host-team-loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.host-team-loading-content p {
+    color: var(--host-muted);
+    font-size: 16px;
+}
+
+/* ============================================================
+   ERROR & SUCCESS MESSAGES
+   ============================================================ */
+
+.host-team-error-message,
+.host-team-success-message {
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.host-team-error-message {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+.host-team-success-message {
+    background: #d1fae5;
+    border: 1px solid #a7f3d0;
+    color: #065f46;
+}
+
+.host-team-error-message svg,
+.host-team-success-message svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.host-team-error-message strong,
+.host-team-success-message strong {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* ============================================================
+   MANAGE SUMMARY
+   ============================================================ */
+
+.host-team-manage-summary {
+    background: var(--host-green-soft);
+    border: 1px solid var(--host-green-border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.host-team-manage-summary p {
+    margin: 0;
+    color: var(--host-text);
+    font-size: 14px;
+}
+
+.host-team-manage-summary strong {
+    font-size: 22px;
+    font-weight: 800;
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN - TABLET (900px)
    ============================================================ */
 
 @media (max-width: 900px) {
-
     .host-team-page {
-        padding: 30px 24px;
+        padding: 28px;
     }
 
-    .host-team-header {
-        align-items: flex-start;
-
+    .host-team-header-wrapper {
         flex-direction: column;
+        align-items: flex-start;
     }
 
     .host-team-add-button {
         width: 100%;
-    }
-
-    .host-team-stats {
-        grid-template-columns:
-            repeat(3, minmax(0, 1fr));
-    }
-
-    .host-team-member-card {
-        align-items: flex-start;
-
-        flex-direction: column;
-    }
-
-    .host-team-member-actions {
-        width: 100%;
-
-        justify-content: flex-start;
-    }
-
-}
-
-
-/* ============================================================
-   MOBILE
-   ============================================================ */
-
-@media (max-width: 650px) {
-
-    .host-team-page {
-        padding: 22px 15px 35px;
-    }
-
-
-    /* HEADER */
-
-    .host-team-header {
-        margin-bottom: 22px;
-
-        gap: 20px;
-    }
-
-    .host-team-header h1 {
-        font-size: 32px;
-
-        letter-spacing: -0.5px;
-    }
-
-    .host-team-header p {
-        font-size: 16px;
-
-        line-height: 1.55;
-    }
-
-    .host-team-back {
-        font-size: 16px;
-    }
-
-    .host-team-add-button {
-        width: 100%;
-
-        min-height: 50px;
-
-        font-size: 16px;
-    }
-
-
-    /* INFO */
-
-    .host-team-info {
-        padding: 19px;
-
-        gap: 13px;
-
-        margin-bottom: 22px;
-    }
-
-    .host-team-info-icon {
-        width: 43px;
-
-        height: 43px;
-
-        min-width: 43px;
-
-        font-size: 22px;
-    }
-
-    .host-team-info h3 {
-        font-size: 17px;
-    }
-
-    .host-team-info p {
-        font-size: 15px;
-
-        line-height: 1.55;
-    }
-
-
-    /* STATS */
-
-    .host-team-stats {
-        grid-template-columns: 1fr;
-
-        gap: 12px;
-
-        margin-bottom: 28px;
-    }
-
-    .host-team-stat {
-        min-height: 85px;
-
-        padding: 17px;
-    }
-
-    .host-team-stat strong {
-        font-size: 25px;
-    }
-
-    .host-team-stat small {
-        font-size: 14px;
-    }
-
-
-    /* SECTION */
-
-    .host-team-section-heading {
-        margin-bottom: 15px;
-    }
-
-    .host-team-section-heading h2 {
-        font-size: 24px;
-    }
-
-    .host-team-section-heading p {
-        font-size: 15px;
-    }
-
-
-    /* MEMBER CARD */
-
-    .host-team-member-card {
-        padding: 18px;
-
-        gap: 18px;
-
-        border-radius: 15px;
-    }
-
-    .host-team-member-main {
-        width: 100%;
-
-        align-items: flex-start;
-
-        gap: 13px;
-    }
-
-    .host-team-avatar {
-        width: 48px;
-
-        height: 48px;
-
-        min-width: 48px;
-
-        font-size: 19px;
-    }
-
-    .host-team-member-details h3 {
-        font-size: 18px;
-    }
-
-    .host-team-member-details > p {
-        font-size: 15px;
-
-        margin-bottom: 9px;
-    }
-
-    .host-team-member-meta {
-        gap: 7px;
-    }
-
-    .host-team-member-meta span {
-        font-size: 13px;
-
-        padding: 5px 8px;
-    }
-
-
-    /* ACTIONS */
-
-    .host-team-member-actions {
-        display: grid;
-
-        grid-template-columns:
-            1fr 1fr;
-
-        width: 100%;
-
-        gap: 8px;
-    }
-
-    .host-team-status {
-        grid-column: 1 / -1;
-
         justify-content: center;
-
-        width: 100%;
-
-        box-sizing: border-box;
-
-        font-size: 14px;
     }
 
-    .host-team-status-button,
-    .host-team-remove-button {
-        width: 100%;
-
-        min-height: 45px;
-
-        font-size: 14px;
-    }
-
-
-    /* EMPTY */
-
-    .host-team-empty {
-        padding: 42px 20px;
-    }
-
-    .host-team-empty h3 {
-        font-size: 21px;
-    }
-
-    .host-team-empty p {
-        font-size: 15px;
-    }
-
-
-    /* MODAL */
-
-    .host-team-modal-overlay {
-        padding: 12px;
-    }
-
-    .host-team-modal {
-        max-height: calc(100vh - 24px);
-
-        padding: 22px;
-
-        border-radius: 17px;
-    }
-
-    .host-team-modal-header h2 {
-        font-size: 23px;
-    }
-
-    .host-team-modal-header p {
-        font-size: 14px;
-    }
-
-    .host-team-form {
+    .host-team-members-list {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 16px;
     }
 
-    .host-team-form-group label {
+    .host-team-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .host-team-modal {
+        max-width: 90%;
+    }
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN - MOBILE (650px)
+   ============================================================ */
+
+@media (max-width: 650px) {
+    .host-team-page {
+        padding: 20px;
+    }
+
+    .host-team-header h1 {
+        font-size: 28px;
+        margin: 8px 0 4px;
+    }
+
+    .host-team-header p {
         font-size: 15px;
     }
 
-    .host-team-form-group input,
-    .host-team-form-group select {
-        min-height: 50px;
-
-        font-size: 16px;
+    .host-team-members-list {
+        grid-template-columns: 1fr;
     }
 
-    .host-team-permission-box {
-        padding: 15px;
+    .host-team-stats {
+        grid-template-columns: 1fr;
     }
 
-    .host-team-permission-box strong {
-        font-size: 15px;
+    .host-team-member-card-header {
+        flex-direction: column;
     }
 
-    .host-team-permission-box p {
-        font-size: 13px;
+    .host-team-member-actions {
+        flex-direction: column;
+    }
+
+    .host-team-manage-events-button,
+    .host-team-status-button,
+    .host-team-remove-button {
+        width: 100%;
+    }
+
+    .host-team-modal {
+        max-width: 95%;
+        border-radius: 14px;
+    }
+
+    .host-team-modal-header,
+    .host-team-modal-content,
+    .host-team-modal-footer {
+        padding: 16px;
     }
 
     .host-team-form-actions {
-        flex-direction: column-reverse;
+        flex-direction: column;
     }
 
     .host-team-form-actions button {
         width: 100%;
-
-        min-height: 50px;
-
-        font-size: 16px;
     }
-
 }
 
-
 /* ============================================================
-   VERY SMALL PHONES
+   RESPONSIVE DESIGN - SMALL MOBILE (380px)
    ============================================================ */
 
 @media (max-width: 380px) {
-
     .host-team-page {
-        padding-left: 12px;
-
-        padding-right: 12px;
+        padding: 16px;
     }
 
     .host-team-header h1 {
-        font-size: 29px;
+        font-size: 24px;
     }
 
     .host-team-header p {
-        font-size: 15px;
-    }
-
-    .host-team-member-card {
-        padding: 15px;
-    }
-
-    .host-team-member-details h3 {
-        font-size: 17px;
-    }
-
-    .host-team-member-details > p {
         font-size: 14px;
     }
 
-    .host-team-modal {
-        padding: 18px;
+    .host-team-info {
+        flex-direction: column;
+        text-align: center;
     }
 
+    .host-team-member-card {
+        padding: 16px;
+    }
+
+    .host-team-member-avatar-section {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .host-team-member-meta {
+        justify-content: center;
+    }
+
+    .host-team-add-button {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+
+    .host-team-empty {
+        padding: 40px 20px;
+    }
+
+    .host-team-modal-header h2 {
+        font-size: 18px;
+    }
+
+    .host-team-form-group label {
+        font-size: 13px;
+    }
+
+    .host-team-form-group input,
+    .host-team-form-group select {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+
+@media print {
+    .host-team-add-button,
+    .host-team-back,
+    .host-team-member-actions {
+        display: none;
+    }
+
+    .host-team-page {
+        background: white;
+        padding: 0;
+    }
+
+    .host-team-member-card {
+        page-break-inside: avoid;
+    }
+}
+
+/* ============================================================
+   ACCESSIBILITY
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .host-team-page {
+        background: #1a1a1a;
+        color: #e5e5e5;
+        --host-text: #e5e5e5;
+        --host-muted: #9ca3af;
+        --host-surface: #1a1a1a;
+    }
+
+    .host-team-member-card,
+    .host-team-empty,
+    .host-team-modal {
+        background: #2a2a2a;
+        border-color: #404040;
+    }
+
+    .host-team-form-group input,
+    .host-team-form-group select,
+    .host-team-event-option {
+        background: #2a2a2a;
+        border-color: #404040;
+        color: #e5e5e5;
+    }
 }

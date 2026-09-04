@@ -52,7 +52,7 @@
 
     font-weight:600;
 
-    color:#2563eb;
+    color:#d85c45;
 
 }
 
@@ -124,7 +124,7 @@
 
 .circle.active{
 
-    background:#2563eb;
+    background:#d85c45;
 
     color:white;
 
@@ -252,7 +252,7 @@ textarea:focus{
 
     outline:none;
 
-    border-color:#2563eb;
+    border-color:#d85c45;
 
 }
 
@@ -304,7 +304,7 @@ button{
 
     border-radius:14px;
 
-    background:#2563eb;
+    background:#d85c45;
 
     color:white;
 
@@ -320,7 +320,7 @@ button{
 
 button:hover{
 
-    background:#1d4ed8;
+    background:#b34a36;
 
 }
 

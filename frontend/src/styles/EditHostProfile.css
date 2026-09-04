@@ -94,7 +94,7 @@ opacity:0.85;
   min-width: 150px;
   height: 44px;
   padding: 0 18px;
-  background: #2563eb;
+  background: #d85c45;
   color: white;
   border-radius: 10px;
   font-size: 14px;
@@ -104,7 +104,7 @@ opacity:0.85;
 }
 
 .upload-photo-btn:hover {
-  background: #1d4ed8;
+  background: #b34a36;
 }
 
 .upload-photo-btn input {

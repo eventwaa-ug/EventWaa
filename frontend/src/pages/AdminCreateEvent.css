@@ -100,7 +100,7 @@
 .form-grid input:focus,
 .create-event-form textarea:focus,
 .form-row select:focus {
-    border-color: #2563eb;
+    border-color: #d85c45;
 
     outline: none;
 
@@ -175,7 +175,7 @@
 }
 
 .ticket-header button {
-    background: #2563eb;
+    background: #d85c45;
 
     color: #ffffff;
 
@@ -197,7 +197,7 @@
 }
 
 .ticket-header button:hover {
-    background: #1d4ed8;
+    background: #b34a36;
 
     transform: translateY(-1px);
 }
@@ -253,7 +253,7 @@
 }
 
 .ticket-row input:focus {
-    border-color: #2563eb;
+    border-color: #d85c45;
 
     box-shadow:
         0 0 0 3px rgba(37, 99, 235, 0.10);
@@ -374,13 +374,13 @@
 }
 
 .form-actions button:last-child {
-    background: #2563eb;
+    background: #d85c45;
 
     color: #ffffff;
 }
 
 .form-actions button:last-child:hover {
-    background: #1d4ed8;
+    background: #b34a36;
 }
 
 /* ============================================================
@@ -541,7 +541,7 @@
 
 .selected-poster-name {
   margin-top: 10px;
-  color: #2563eb;
+    color: #d85c45;
   font-size: 14px;
 }
 
@@ -582,7 +582,7 @@
 
 .event-type-badge.paid {
   background: #dbeafe;
-  color: #1d4ed8;
+    color: #b34a36;
 }
 
 

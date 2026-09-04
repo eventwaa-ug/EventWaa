@@ -1,585 +1,851 @@
 /* ============================================================
-   HOST SIDEBAR
+   EVENTWAA HOST SIDEBAR
+   Professional • Responsive • Clean
 ============================================================ */
-
+* {
+    box-sizing: border-box;
+}
+/* ============================================================
+   SIDEBAR
+============================================================ */
 .host-sidebar {
     position: fixed;
     top: 0;
     left: 0;
-
     width: 250px;
     height: 100vh;
-
-    background: #ffffff;
-    border-right: 1px solid #e5e7eb;
-
     display: flex;
     flex-direction: column;
-
+    background: #ffffff;
+    border-right: 1px solid #e6eaf0;
+    box-shadow:
+        4px 0 24px rgba(15, 23, 42, 0.045);
     z-index: 2000;
-
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.04);
-
-    box-sizing: border-box;
-
-    /* Desktop sidebar */
     transform: translateX(0);
-
-    transition: transform 0.3s ease;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+    overflow: hidden;
 }
-
-
 /* ============================================================
-   HEADER
+   SIDEBAR HEADER
 ============================================================ */
-
 .host-sidebar-header {
-    height: 75px;
+    width: 100%;
+    min-height: 76px;
     padding: 0 20px;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
-    border-bottom: 1px solid #f0f0f0;
-
+    border-bottom: 1px solid #eef1f5;
     flex-shrink: 0;
 }
-
 /* ============================================================
-   HOST SIDEBAR LOGO / PLATFORM BRAND
+   LOGO
 ============================================================ */
-
 .host-sidebar-logo {
+    min-width: 0;
+    width: 100%;
     display: flex;
     align-items: center;
-
-    gap: 9px;
-
-    width: 100%;
-    min-width: 0;
-
     cursor: pointer;
+    outline: none;
 }
-
-
+.host-sidebar-logo:focus-visible {
+    border-radius: 8px;
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.14);
+}
 /* ============================================================
    PLATFORM LOGO IMAGE
 ============================================================ */
-
 .host-platform-logo {
     display: block;
-
     width: auto;
     max-width: 155px;
-
     height: 42px;
-
     object-fit: contain;
-
     object-position: left center;
-
     flex-shrink: 0;
 }
-
-
 /* ============================================================
    PLATFORM NAME FALLBACK
 ============================================================ */
-
 .host-logo-text {
     display: block;
-
     max-width: 100%;
-
-    font-size: 21px;
-
-    font-weight: 800;
-
-    line-height: 1.2;
-
     color: #111827;
-
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
     white-space: nowrap;
-
     overflow: hidden;
-
     text-overflow: ellipsis;
 }
-
-
-/* ============================================================
-   LARGE DESKTOP
-============================================================ */
-
-@media (min-width: 1400px) {
-
-    .host-platform-logo {
-        max-width: 170px;
-
-        height: 44px;
-    }
-
-    .host-logo-text {
-        font-size: 22px;
-    }
-}
-
-
-/* ============================================================
-   MOBILE
-============================================================ */
-
-@media (max-width: 768px) {
-
-    .host-platform-logo {
-        max-width: 165px;
-
-        height: 43px;
-    }
-}
-
-
-/* ============================================================
-   SMALL PHONES
-============================================================ */
-
-@media (max-width: 480px) {
-
-    .host-platform-logo {
-        max-width: 155px;
-
-        height: 41px;
-    }
-
-    .host-logo-text {
-        font-size: 20px;
-    }
-}
-
 /* ============================================================
    CLOSE BUTTON
 ============================================================ */
-
 .host-sidebar-close {
     display: none;
-
-    border: none;
-    background: transparent;
-
-    font-size: 30px;
-
-    cursor: pointer;
-
-    color: #374151;
-
+    width: 40px;
+    height: 40px;
     padding: 0;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #4b5563;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
 }
-
-
+.host-sidebar-close:hover {
+    background: #f3f4f6;
+    color: #111827;
+    transform: rotate(3deg);
+}
 /* ============================================================
-   HOST ACCOUNT
+   HOST PROFILE
 ============================================================ */
-
 .host-profile {
+    width: 100%;
+    padding: 19px 18px;
     display: flex;
     align-items: center;
-
     gap: 12px;
-
-    padding: 20px;
-
-    border-bottom: 1px solid #f0f0f0;
-
+    border-bottom: 1px solid #eef1f5;
     flex-shrink: 0;
-
     min-width: 0;
 }
-
+/* ============================================================
+   AVATAR
+============================================================ */
 .host-avatar {
-    width: 43px;
-    height: 43px;
-
-    border-radius: 50%;
-
-    background: #2563eb;
-    color: white;
-
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    font-size: 18px;
-    font-weight: 700;
-
+    border-radius: 50%;
+    background:
+        linear-gradient(
+            135deg,
+            #2563eb,
+            #4f46e5
+        );
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1;
     flex-shrink: 0;
+    box-shadow:
+        0 5px 14px rgba(37, 99, 235, 0.2);
 }
-
+/* ============================================================
+   PROFILE INFORMATION
+============================================================ */
 .host-profile-info {
+    min-width: 0;
+    flex: 1;
     display: flex;
     flex-direction: column;
-
-    min-width: 0;
-
-    flex: 1;
 }
-
 .host-profile-info strong {
+    display: block;
+    max-width: 100%;
     color: #111827;
-
     font-size: 14px;
-
+    font-weight: 750;
+    line-height: 1.35;
     white-space: nowrap;
-
     overflow: hidden;
-
     text-overflow: ellipsis;
 }
-
 .host-profile-info span {
-    color: #6b7280;
-
-    font-size: 12px;
-
+    display: block;
     margin-top: 3px;
+    color: #7b8494;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
 }
-
-
 /* ============================================================
    NAVIGATION
 ============================================================ */
-
 .host-navigation {
     flex: 1;
-
-    padding: 20px 12px;
-
+    min-height: 0;
+    padding: 21px 11px;
     overflow-y: auto;
+    overflow-x: hidden;
 }
-
+/* ============================================================
+   NAVIGATION SCROLLBAR
+============================================================ */
+.host-navigation::-webkit-scrollbar {
+    width: 5px;
+}
+.host-navigation::-webkit-scrollbar-track {
+    background: transparent;
+}
+.host-navigation::-webkit-scrollbar-thumb {
+    background: #d9dee7;
+    border-radius: 10px;
+}
+/* ============================================================
+   MENU TITLE
+============================================================ */
 .host-menu-title {
-    margin: 0 10px 10px;
-
+    margin: 0 11px 10px;
+    color: #9aa3b2;
     font-size: 11px;
-
-    font-weight: 700;
-
-    letter-spacing: 1px;
-
-    color: #9ca3af;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    line-height: 1.3;
 }
-
+/* ============================================================
+   NAVIGATION ITEM
+============================================================ */
 .host-nav-item {
+    position: relative;
     width: 100%;
-
+    min-height: 47px;
+    margin: 0 0 5px;
+    padding: 11px 13px;
     display: flex;
     align-items: center;
-
     gap: 13px;
-
-    padding: 12px 14px;
-
-    margin-bottom: 5px;
-
-    border: none;
-
-    border-radius: 10px;
-
+    border: 1px solid transparent;
+    border-radius: 11px;
     background: transparent;
-
-    color: #374151;
-
+    color: #4b5563;
+    font-family: inherit;
     font-size: 14px;
-
-    font-weight: 600;
-
+    font-weight: 650;
+    line-height: 1.3;
     text-align: left;
-
     cursor: pointer;
-
     transition:
         background 0.2s ease,
-        color 0.2s ease;
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
-
-.host-nav-item:hover {
-    background: #f3f4f6;
-    color: #2563eb;
-}
-
-.host-nav-item.active {
-    background: #eff6ff;
-    color: #2563eb;
-}
-
+/* ============================================================
+   ICON
+============================================================ */
 .host-nav-icon {
     width: 25px;
-
-    font-size: 19px;
-
+    min-width: 25px;
+    height: 25px;
     display: flex;
     align-items: center;
     justify-content: center;
-
+    color: #6b7280;
     flex-shrink: 0;
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
 }
-
-
 /* ============================================================
-   BOTTOM
+   LABEL
 ============================================================ */
-
+.host-nav-label {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* ============================================================
+   HOVER
+============================================================ */
+.host-nav-item:hover {
+    background: #f5f8ff;
+    border-color: #e5edff;
+    color: #2563eb;
+    transform: translateX(2px);
+}
+.host-nav-item:hover .host-nav-icon {
+    color: #2563eb;
+    transform: scale(1.06);
+}
+/* ============================================================
+   ACTIVE ITEM
+============================================================ */
+.host-nav-item.active {
+    background:
+        linear-gradient(
+            90deg,
+            #eff6ff,
+            #f5f8ff
+        );
+    border-color: #dbeafe;
+    color: #1d4ed8;
+    box-shadow:
+        0 4px 12px rgba(37, 99, 235, 0.06);
+}
+.host-nav-item.active::before {
+    content: "";
+    position: absolute;
+    left: -11px;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 0 4px 4px 0;
+    background: #2563eb;
+}
+.host-nav-item.active .host-nav-icon {
+    color: #2563eb;
+}
+/* ============================================================
+   BOTTOM SECTION
+============================================================ */
 .host-sidebar-bottom {
-    padding: 12px;
-
-    border-top: 1px solid #f0f0f0;
-
+    width: 100%;
+    padding: 12px 11px;
+    border-top: 1px solid #eef1f5;
     flex-shrink: 0;
 }
-
+/* ============================================================
+   LOGOUT
+============================================================ */
 .logout-item {
     color: #dc2626;
 }
-
-.logout-item:hover {
-    background: #fef2f2;
+.logout-item .host-nav-icon {
     color: #dc2626;
 }
-
-
+.logout-item:hover {
+    background: #fff5f5;
+    border-color: #fee2e2;
+    color: #dc2626;
+    transform: translateX(2px);
+}
+.logout-item:hover .host-nav-icon {
+    color: #dc2626;
+    transform: translateX(1px);
+}
 /* ============================================================
-   MOBILE HAMBURGER
+   MOBILE MENU BUTTON
 ============================================================ */
-
 .host-menu-button {
     display: none;
-
     position: fixed;
-
-    top: 18px;
+    top: 17px;
     left: 15px;
-
-    width: 44px;
-    height: 44px;
-
-    border: 1px solid #e5e7eb;
-
-    border-radius: 10px;
-
-    background: #ffffff;
-
-    cursor: pointer;
-
-    z-index: 2100;
-
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
-
+    width: 45px;
+    height: 45px;
     padding: 0;
-
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-
-    gap: 5px;
+    border: 1px solid #e1e6ee;
+    border-radius: 11px;
+    background: #ffffff;
+    color: #1f2937;
+    cursor: pointer;
+    z-index: 2100;
+    box-shadow:
+        0 5px 18px rgba(15, 23, 42, 0.12);
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
-
-.host-menu-button span {
-    width: 21px;
-    height: 2px;
-
-    background: #111827;
-
-    border-radius: 2px;
+.host-menu-button:hover {
+    background: #f5f8ff;
+    border-color: #cbdcff;
+    color: #2563eb;
+    transform: translateY(-1px);
+    box-shadow:
+        0 7px 20px rgba(37, 99, 235, 0.15);
 }
-
-
+.host-menu-button:active {
+    transform: scale(0.96);
+}
 /* ============================================================
    OVERLAY
 ============================================================ */
-
 .host-sidebar-overlay {
     position: fixed;
-
     inset: 0;
-
-    background: rgba(0, 0, 0, 0.45);
-
+    background: rgba(15, 23, 42, 0.48);
     z-index: 1999;
+    animation: hostOverlayFade 0.2s ease;
 }
-
-
+@keyframes hostOverlayFade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
 /* ============================================================
-   MOBILE SIDEBAR
+   LARGE DESKTOP
+   1400px+
 ============================================================ */
-
+@media (min-width: 1400px) {
+    .host-sidebar {
+        width: 270px;
+    }
+    .host-sidebar-header {
+        min-height: 80px;
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+    .host-platform-logo {
+        max-width: 170px;
+        height: 44px;
+    }
+    .host-logo-text {
+        font-size: 23px;
+    }
+    .host-profile {
+        padding: 21px 20px;
+    }
+    .host-avatar {
+        width: 46px;
+        height: 46px;
+        font-size: 18px;
+    }
+    .host-profile-info strong {
+        font-size: 15px;
+    }
+    .host-profile-info span {
+        font-size: 12px;
+    }
+    .host-navigation {
+        padding: 23px 12px;
+    }
+    .host-nav-item {
+        min-height: 49px;
+        padding: 12px 14px;
+        font-size: 15px;
+    }
+    .host-nav-icon {
+        width: 26px;
+        min-width: 26px;
+    }
+    .host-sidebar-bottom {
+        padding: 13px 12px;
+    }
+}
+/* ============================================================
+   EXTRA LARGE DESKTOP
+   1800px+
+============================================================ */
+@media (min-width: 1800px) {
+    .host-sidebar {
+        width: 285px;
+    }
+    .host-sidebar-header {
+        min-height: 84px;
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+    .host-platform-logo {
+        max-width: 185px;
+        height: 47px;
+    }
+    .host-logo-text {
+        font-size: 24px;
+    }
+    .host-profile {
+        padding: 22px 21px;
+    }
+    .host-avatar {
+        width: 48px;
+        height: 48px;
+    }
+    .host-navigation {
+        padding: 25px 13px;
+    }
+    .host-nav-item {
+        min-height: 51px;
+        padding: 13px 15px;
+        font-size: 15px;
+        gap: 14px;
+    }
+    .host-nav-icon {
+        width: 27px;
+        min-width: 27px;
+    }
+    .host-sidebar-bottom {
+        padding: 14px 13px;
+    }
+}
+/* ============================================================
+   DESKTOP / LAPTOP
+   1000px - 1399px
+============================================================ */
+@media (min-width: 1000px) and (max-width: 1399px) {
+    .host-sidebar {
+        width: 250px;
+    }
+    .host-sidebar-header {
+        padding-left: 19px;
+        padding-right: 19px;
+    }
+    .host-navigation {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .host-nav-item {
+        font-size: 14px;
+    }
+}
+/* ============================================================
+   TABLET
+   769px - 999px
+============================================================ */
+@media (min-width: 769px) and (max-width: 999px) {
+    .host-sidebar {
+        width: 235px;
+    }
+    .host-sidebar-header {
+        min-height: 72px;
+        padding-left: 17px;
+        padding-right: 17px;
+    }
+    .host-platform-logo {
+        max-width: 145px;
+        height: 39px;
+    }
+    .host-logo-text {
+        font-size: 20px;
+    }
+    .host-profile {
+        padding: 17px 15px;
+    }
+    .host-avatar {
+        width: 42px;
+        height: 42px;
+        font-size: 16px;
+    }
+    .host-navigation {
+        padding: 18px 9px;
+    }
+    .host-nav-item {
+        min-height: 45px;
+        padding: 10px 11px;
+        gap: 11px;
+        font-size: 13px;
+    }
+    .host-nav-icon {
+        width: 24px;
+        min-width: 24px;
+    }
+    .host-sidebar-bottom {
+        padding: 10px 9px;
+    }
+}
+/* ============================================================
+   MOBILE
+   768px AND BELOW
+============================================================ */
 @media (max-width: 768px) {
-
     /* --------------------------------------------------------
-       HAMBURGER IS VISIBLE
+       HAMBURGER
     -------------------------------------------------------- */
-
     .host-menu-button {
         display: flex;
     }
-
-
     /* --------------------------------------------------------
-       SIDEBAR IS COMPLETELY HIDDEN
-       UNTIL .host-sidebar-open IS PRESENT
+       SIDEBAR
     -------------------------------------------------------- */
-
     .host-sidebar {
-        width: 280px;
-
-        max-width: 85vw;
-
-        /*
-           THIS IS THE IMPORTANT PART.
-           Sidebar starts completely outside the screen.
-        */
-
+        width: 285px;
+        max-width: 86vw;
         transform: translateX(-110%);
-
-        transition: transform 0.3s ease;
-
         box-shadow: none;
-
-        /*
-           Keep it above the dashboard.
-        */
-
-        z-index: 2000;
     }
-
-
     /* --------------------------------------------------------
-       ONLY OPEN SIDEBAR COMES INTO VIEW
+       OPEN SIDEBAR
     -------------------------------------------------------- */
-
     .host-sidebar.host-sidebar-open {
         transform: translateX(0);
-
         box-shadow:
-            8px 0 30px rgba(0, 0, 0, 0.15);
+            10px 0 35px rgba(15, 23, 42, 0.18);
     }
-
-
     /* --------------------------------------------------------
-       CLOSE BUTTON ONLY EXISTS ON MOBILE
+       HEADER
     -------------------------------------------------------- */
-
-    .host-sidebar-close {
-        display: block;
+    .host-sidebar-header {
+        min-height: 76px;
+        padding-left: 18px;
+        padding-right: 12px;
     }
-
-
+    .host-platform-logo {
+        max-width: 165px;
+        height: 43px;
+    }
+    .host-logo-text {
+        font-size: 22px;
+    }
+    /* --------------------------------------------------------
+       CLOSE
+    -------------------------------------------------------- */
+    .host-sidebar-close {
+        display: flex;
+    }
     /* --------------------------------------------------------
        PROFILE
     -------------------------------------------------------- */
-
     .host-profile {
         padding: 18px;
     }
-
-
+    .host-avatar {
+        width: 45px;
+        height: 45px;
+        font-size: 17px;
+    }
+    .host-profile-info strong {
+        font-size: 14px;
+    }
+    .host-profile-info span {
+        font-size: 12px;
+    }
     /* --------------------------------------------------------
        NAVIGATION
     -------------------------------------------------------- */
-
     .host-navigation {
-        padding-top: 15px;
+        padding: 18px 11px;
+    }
+    .host-menu-title {
+        margin-bottom: 11px;
+    }
+    .host-nav-item {
+        min-height: 49px;
+        padding: 11px 13px;
+        font-size: 14px;
+        gap: 13px;
+    }
+    .host-nav-icon {
+        width: 25px;
+        min-width: 25px;
+    }
+    /* --------------------------------------------------------
+       BOTTOM
+    -------------------------------------------------------- */
+    .host-sidebar-bottom {
+        padding: 12px 11px;
     }
 }
-
-
 /* ============================================================
    SMALL PHONES
+   480px AND BELOW
 ============================================================ */
-
 @media (max-width: 480px) {
-
     .host-menu-button {
-        top: 16px;
+        top: 15px;
         left: 12px;
-
-        width: 43px;
-        height: 43px;
+        width: 44px;
+        height: 44px;
+        border-radius: 11px;
     }
-
-
     .host-sidebar {
         width: 290px;
-
         max-width: 88vw;
-
-        /*
-           Still completely hidden initially.
-        */
-
         transform: translateX(-110%);
     }
-
-
     .host-sidebar.host-sidebar-open {
         transform: translateX(0);
     }
+    /* --------------------------------------------------------
+       HEADER
+    -------------------------------------------------------- */
+    .host-sidebar-header {
+        min-height: 72px;
+        padding-left: 16px;
+        padding-right: 10px;
+    }
+    .host-platform-logo {
+        max-width: 155px;
+        height: 41px;
+    }
+    .host-logo-text {
+        font-size: 20px;
+    }
+    /* --------------------------------------------------------
+       PROFILE
+    -------------------------------------------------------- */
+    .host-profile {
+        padding: 17px 16px;
+        gap: 11px;
+    }
+    .host-avatar {
+        width: 43px;
+        height: 43px;
+        font-size: 16px;
+    }
+    /* --------------------------------------------------------
+       NAVIGATION
+    -------------------------------------------------------- */
+    .host-navigation {
+        padding: 16px 10px;
+    }
+    .host-menu-title {
+        margin-left: 10px;
+        margin-right: 10px;
+        font-size: 10px;
+    }
+    .host-nav-item {
+        min-height: 48px;
+        padding: 11px 12px;
+        font-size: 14px;
+        gap: 12px;
+    }
+    .host-nav-icon {
+        width: 24px;
+        min-width: 24px;
+    }
+    .host-nav-icon svg {
+        width: 19px;
+        height: 19px;
+    }
+    /* --------------------------------------------------------
+       BOTTOM
+    -------------------------------------------------------- */
+    .host-sidebar-bottom {
+        padding: 10px;
+    }
 }
-
-
 /* ============================================================
    VERY SMALL PHONES
+   360px AND BELOW
 ============================================================ */
-
 @media (max-width: 360px) {
-
+    .host-menu-button {
+        top: 13px;
+        left: 10px;
+        width: 42px;
+        height: 42px;
+    }
     .host-sidebar {
-        width: 280px;
-
+        width: 278px;
         max-width: 90vw;
+    }
+    /* --------------------------------------------------------
+       HEADER
+    -------------------------------------------------------- */
+    .host-sidebar-header {
+        min-height: 69px;
+        padding-left: 14px;
+        padding-right: 8px;
+    }
+    .host-platform-logo {
+        max-width: 145px;
+        height: 39px;
+    }
+    .host-logo-text {
+        font-size: 19px;
+    }
+    /* --------------------------------------------------------
+       PROFILE
+    -------------------------------------------------------- */
+    .host-profile {
+        padding: 15px 14px;
+    }
+    .host-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 15px;
+    }
+    .host-profile-info strong {
+        font-size: 13px;
+    }
+    .host-profile-info span {
+        font-size: 11px;
+    }
+    /* --------------------------------------------------------
+       NAVIGATION
+    -------------------------------------------------------- */
+    .host-navigation {
+        padding: 14px 8px;
+    }
+    .host-nav-item {
+        min-height: 46px;
+        padding: 10px;
+        font-size: 13px;
+        gap: 10px;
+    }
+    .host-nav-icon {
+        width: 23px;
+        min-width: 23px;
+    }
+    .host-nav-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+    /* --------------------------------------------------------
+       BOTTOM
+    -------------------------------------------------------- */
+    .host-sidebar-bottom {
+        padding: 8px;
     }
 }
 
-/* ============================================================
-   LARGE DESKTOP
-============================================================ */
+/* Make the dashboard sit close to the fixed sidebar */
+.host-dashboard-shell {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    background: #f3f5f8;
+}
 
+.host-dashboard-main {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    padding-left: 250px;
+    background: transparent;
+}
+
+/* Desktop */
 @media (min-width: 1400px) {
-
     .host-sidebar {
         width: 270px;
     }
 
-    .host-sidebar-header {
-        padding-left: 20px;
-        padding-right: 20px;
-    }
-
-    .host-profile {
-        padding-left: 18px;
-        padding-right: 18px;
-    }
-
-    .host-navigation {
-        padding-left: 11px;
-        padding-right: 11px;
-    }
-
-    .host-sidebar-bottom {
-        padding-left: 11px;
-        padding-right: 11px;
+    .host-dashboard-main {
+        padding-left: 270px;
     }
 }
 
-
-/* ============================================================
-   EXTRA LARGE DESKTOP
-============================================================ */
-
+/* Larger desktop */
 @media (min-width: 1800px) {
-
     .host-sidebar {
-        margin-left: calc((60% - 1100px) / 2 + 250px);
-        margin-right: calc((100% - 1100px) / 2);
+        width: 500px;
+    }
+
+    .host-dashboard-main {
+        padding-left: 280px;
     }
 }
 
+/* Tablet */
+@media (min-width: 769px) and (max-width: 999px) {
+    .host-sidebar {
+        width: 235px;
+    }
+
+    .host-dashboard-main {
+        margin-left: 400px;
+        width: calc(100% - 235px);
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .host-dashboard-main {
+        margin-left: 0;
+        width: 100%;
+    }
+}

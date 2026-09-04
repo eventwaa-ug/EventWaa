@@ -1,369 +1,410 @@
+/* ============================================================
+   EVENTWAA — HERO
+   Modern event-platform design
+   Clear real background image
+   No blur
+   Mobile responsive
+============================================================ */
+/* ============================================================
+   HERO
+============================================================ */
 .hero {
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    text-align:center;
-
-
-    background:linear-gradient(
-        135deg,
-        #7C3AED,
-        #DB2777,
-        #F97316
-    );
-
-
-    color:white;
-
-
-    padding:80px 8% 60px;
-
-
-    overflow:hidden;
-
+    position: relative;
+    width: 100%;
+    min-height: 570px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 90px 7% 80px;
+    overflow: hidden;
+    background: #202124;
+    color: #ffffff;
+    text-align: center;
+    isolation: isolate;
 }
-
-
-
-
-
-
+/* ============================================================
+   REAL BACKGROUND IMAGE
+============================================================ */
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    background-image:
+        url("/images/hero.jpg");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+/* ============================================================
+   IMAGE OVERLAY
+   Keeps the photograph clear while making text readable
+============================================================ */
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0.68) 0%,
+            rgba(0, 0, 0, 0.42) 45%,
+            rgba(0, 0, 0, 0.58) 100%
+        );
+}
+/* ============================================================
+   CONTENT
+============================================================ */
 .hero-content {
-
-    max-width:850px;
-
-    margin:auto;
-
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
-
-
-
-
-
-
-.hero h1 {
-
-    color:white;
-
-    font-size:3.5rem;
-
-    font-weight:800;
-
-    line-height:1.15;
-
-    margin-bottom:20px;
-
-    letter-spacing:-1px;
-
-}
-
-
-
-
-
-.hero h1 span {
-
-    display:inline-block;
-
-    margin-left:10px;
-
-    color:#FDE047;
-
-}
-
-
-
-
-
-
-.hero p {
-
-    color:rgba(255,255,255,0.9);
-
-
-    font-size:1.15rem;
-
-
-    line-height:1.6;
-
-
-    max-width:650px;
-
-
-    margin:0 auto 35px;
-
-}
-
-
-
-
-
-
-.hero-button {
-
-    display:flex;
-
-    justify-content:center;
-
-    gap:18px;
-
-    flex-wrap:wrap;
-
-}
-
-
-
-
-
-
-.primary-btn {
-
-
-    background:white;
-
-
-    color:#7C3AED;
-
-
-    padding:15px 32px;
-
-
-    border:none;
-
-
-    border-radius:14px;
-
-
-    font-weight:700;
-
-
-    cursor:pointer;
-
-
-    transition:.3s;
-
-}
-
-
-
-
-.primary-btn:hover {
-
-
-    transform:translateY(-4px);
-
+/* ============================================================
+   KICKER
+============================================================ */
+.hero-kicker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    margin-bottom: 20px;
+    padding: 8px 14px;
+    border: 1px solid
+        rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    background:
+        rgba(239, 139, 143, 0.2);
+    color: #faf5f5;
+    font-size: 32px;
+    line-height: 2.2;
+    font-weight: 900;
+    letter-spacing: 2.15px;
     box-shadow:
-    0 10px 20px rgba(0,0,0,.2);
-
+        0 5px 18px
+        rgba(0, 0, 0, 0.12);
 }
-
-
-
-
-
-
-.secondary-btn {
-
-
-    display:flex;
-
-
-    align-items:center;
-
-
-    gap:10px;
-
-
-    background:transparent;
-
-
-    color:white;
-
-
-    padding:15px 32px;
-
-
-    border:2px solid white;
-
-
-    border-radius:14px;
-
-
-    font-weight:700;
-
-
-    cursor:pointer;
-
-
-    transition:.3s;
-
+/* ============================================================
+   KICKER DOT
+============================================================ */
+.hero-kicker-dot {
+    width: 7px;
+    height: 7px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #c64646;
 }
-
-
-
-
-.secondary-btn span:last-child {
-
-
-    font-size:1.4rem;
-
-}
-
-
-
-
-
-.secondary-btn:hover {
-
-
-    background:white;
-
-    color:#DB2777;
-
-    transform:translateY(-4px);
-
-}
-
-
-
-
-
-
-
-
-
-/* TABLET */
-
-
-@media(max-width:900px){
-
-
-.hero {
-
-
-    padding:70px 5% 50px;
-
-}
-
-
-
-
+/* ============================================================
+   TITLE
+============================================================ */
 .hero h1 {
-
-
-    font-size:2.8rem;
-
+    margin: 0 0 22px;
+    color: #d06969;
+    font-size:
+        clamp(
+            3rem,
+            5.5vw,
+            4.7rem
+        );
+    line-height: 1.04;
+    font-weight: 800;
+    letter-spacing: -2.8px;
+    text-shadow:
+        0 4px 20px
+        rgba(0, 0, 0, 0.30);
 }
-
-
-
-}
-
-
-
-
-
-
-
-
-
-/* MOBILE */
-
-
-@media(max-width:600px){
-
-
-
-.hero {
-
-
-    padding:50px 20px 40px;
-
-
-}
-
-
-
-
-
-.hero h1 {
-
-
-    font-size:2rem;
-
-
-    line-height:1.2;
-
-
-}
-
-
-
-
-
+/* ============================================================
+   TITLE SPANS
+============================================================ */
 .hero h1 span {
-
-
-    margin-left:4px;
-
-
+    display: inline;
+    margin-left: 8px;
+    color: #ffffff;
 }
-
-
-
-
-
+/* ============================================================
+   DESCRIPTION
+============================================================ */
 .hero p {
-
-
-    font-size:.95rem;
-
-
-    margin-bottom:25px;
-
-
+    max-width: 670px;
+    margin: 0 auto 36px;
+    color:
+        rgba(255, 255, 255, 0.96);
+    font-size: 1.12rem;
+    line-height: 1.65;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-shadow:
+        0 2px 12px
+        rgba(0, 0, 0, 0.35);
 }
-
-
-
-
-
-
+/* ============================================================
+   BUTTON CONTAINER
+============================================================ */
 .hero-button {
-
-
-    flex-direction:column;
-
-
-    width:100%;
-
-
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
 }
-
-
-
-
-
-
-.primary-btn,
-.secondary-btn {
-
-
-    width:100%;
-
-
-    justify-content:center;
-
-
-    padding:14px 20px;
-
-
+/* ============================================================
+   BUTTON BASE
+============================================================ */
+.hero .primary-btn,
+.hero .secondary-btn {
+    min-height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-sizing: border-box;
+    padding: 0 25px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1;
+    font-weight: 750;
+    cursor: pointer;
+    transition:
+        transform 0.22s ease,
+        background 0.22s ease,
+        border-color 0.22s ease,
+        box-shadow 0.22s ease,
+        color 0.22s ease;
 }
-
-
-
+/* ============================================================
+   PRIMARY BUTTON
+============================================================ */
+.hero .primary-btn {
+    border: 1px solid #ffffff;
+    background: #ffffff;
+    color: #df3e3e;
+    box-shadow:
+        0 8px 25px
+        rgba(137, 18, 18, 0.2);
+}
+/* ============================================================
+   PRIMARY HOVER
+============================================================ */
+.hero .primary-btn:hover {
+    background:  transparent;
+    transform:
+        translateY(-3px);
+    box-shadow:
+        0 13px 30px
+        rgba(192, 44, 30, 0.28);
+}
+/* ============================================================
+   PRIMARY ACTIVE
+============================================================ */
+.hero .primary-btn:active {
+    transform:
+        translateY(-1px);
+}
+/* ============================================================
+   SECONDARY BUTTON
+============================================================ */
+.hero .secondary-btn {
+    border: 1px solid
+        rgba(238, 78, 78, 0.8);
+    background:
+        rgba(0, 0, 0, 0.18);
+    color: #ffffff;
+}
+/* ============================================================
+   SECONDARY HOVER
+============================================================ */
+.hero .secondary-btn:hover {
+    background:
+        rgba(255, 255, 255, 0.14);
+    border-color: #ffffff;
+    transform:
+        translateY(-3px);
+    box-shadow:
+        0 12px 28px
+        rgba(138, 8, 8, 0.22)2
+}
+/* ============================================================
+   SECONDARY ACTIVE
+============================================================ */
+.hero .secondary-btn:active {
+    transform:
+        translateY(-1px);
+}
+/* ============================================================
+   ICONS
+============================================================ */
+.hero-button-icon {
+    font-size: 13px;
+    transition:
+        transform 0.22s ease;
+}
+.hero .primary-btn:hover
+.hero-button-icon {
+    transform:
+        translateX(3px);
+}
+.hero .secondary-btn:hover
+.hero-button-icon {
+    transform:
+        translateX(3px);
+}
+.host-icon {
+    font-size: 14px;
+}
+/* ============================================================
+   FOCUS ACCESSIBILITY
+============================================================ */
+.hero button:focus-visible {
+    outline:
+        3px solid
+        rgba(255, 255, 255, 0.85);
+    outline-offset: 3px;
+}
+/* ============================================================
+   TABLET
+============================================================ */
+@media (max-width: 900px) {
+    .hero {
+        min-height: 530px;
+        padding:
+            80px
+            5%
+            70px;
+    }
+    .hero h1 {
+        font-size:
+            clamp(
+                2.7rem,
+                6vw,
+                3.8rem
+            );
+        letter-spacing: -2px;
+    }
+    .hero p {
+        max-width: 620px;
+        font-size: 1.05rem;
+    }
+}
+/* ============================================================
+   MOBILE
+============================================================ */
+@media (max-width: 600px) {
+    .hero {
+        min-height: 590px;
+        padding:
+            65px
+            20px
+            55px;
+    }
+    /* Slightly stronger overlay on phones */
+    .hero::after {
+        background:
+            linear-gradient(
+                180deg,
+                rgba(0, 0, 0, 0.60),
+                rgba(0, 0, 0, 0.74)
+            );
+    }
+    /* Keep image sharp */
+    .hero::before {
+        background-position:
+            center center;
+        background-size:
+            cover;
+    }
+    .hero-content {
+        max-width: 500px;
+    }
+    /* Kicker */
+    .hero-kicker {
+        margin-bottom: 18px;
+        padding:
+            7px
+            12px;
+        font-size: 11px;
+    }
+    /* Title */
+    .hero h1 {
+        margin-bottom: 18px;
+        font-size:
+            clamp(
+                2.25rem,
+                10vw,
+                3rem
+            );
+        line-height: 1.08;
+        letter-spacing: -1.5px;
+    }
+    .hero h1 span {
+        margin-left: 4px;
+    }
+    /* Description */
+    .hero p {
+        max-width: 440px;
+        margin-bottom: 28px;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+    /* Buttons */
+    .hero-button {
+        flex-direction: column;
+        gap: 11px;
+    }
+    .hero .primary-btn,
+    .hero .secondary-btn {
+        width: 100%;
+        min-height: 53px;
+        padding:
+            0
+            20px;
+        border-radius: 10px;
+        font-size: 15px;
+    }
+}
+/* ============================================================
+   SMALL PHONES
+============================================================ */
+@media (max-width: 390px) {
+    .hero {
+        min-height: 560px;
+        padding:
+            58px
+            16px
+            45px;
+    }
+    .hero-kicker {
+        font-size: 10.5px;
+    }
+    .hero h1 {
+        font-size: 2.05rem;
+        letter-spacing: -1.2px;
+    }
+    .hero p {
+        font-size: 0.94rem;
+        line-height: 1.55;
+    }
+    .hero .primary-btn,
+    .hero .secondary-btn {
+        min-height: 51px;
+        font-size: 14px;
+    }
+}
+/* ============================================================
+   REDUCE MOTION
+============================================================ */
+@media (prefers-reduced-motion: reduce) {
+    .hero .primary-btn,
+    .hero .secondary-btn,
+    .hero-button-icon {
+        transition: none;
+    }
 }

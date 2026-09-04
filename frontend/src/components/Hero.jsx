@@ -1,89 +1,122 @@
 import "./Hero.css";
-import {motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { FaArrowRight, FaMicrophone } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import { canCreateEvent } from "../utils/hostAccess";
-
-function Hero( {handleExploreEvents}) {
+function Hero({ handleExploreEvents }) {
     const navigate = useNavigate();
-
-const { user, refreshUser } = useAuth();
-
-useEffect(()=>{
-    if(user){
-        refreshUser();
-    }
-},[user?.email]);
-
-
-const handleHostEvent = () => {
-
-    if(!user){
-
-        navigate("/login", {
-            state:{
-                from:"/host-application"
-            }
-        });
-
-    }
-    else if(user.verifiedHost){
-
-        navigate("/dashboard");
-
-    }
-    else{
-
-        navigate("/host-application");
-
-    }
-
-
-};
-    
+    const { user, refreshUser } = useAuth();
+    // ============================================================
+    // REFRESH USER
+    // ============================================================
+    useEffect(() => {
+        if (user) {
+            refreshUser();
+        }
+    }, [user?.email]);
+    // ============================================================
+    // HOST EVENT
+    // ============================================================
+    const handleHostEvent = () => {
+        if (!user) {
+            navigate("/login", {
+                state: {
+                    from: "/host-application"
+                }
+            });
+        }
+        else if (user.verifiedHost) {
+            navigate("/dashboard");
+        }
+        else {
+            navigate("/host-application");
+        }
+    };
+    // ============================================================
+    // RENDER
+    // ============================================================
     return (
-        <motion.section 
-        className="hero"
-        initial={{opacity:0, y: 40}}
-        animate={{opacity:1, y: 0}}
-        transition={{duration: 0.8}}  
+        <motion.section
+            className="hero"
+            initial={{
+                opacity: 0,
+                y: 35
+            }}
+            animate={{
+                opacity: 1,
+                y: 0
+            }}
+            transition={{
+                duration: 0.8,
+                ease: "easeOut"
+            }}
         >
             <div className="hero-content">
+                {/* ==================================================
+                    SMALL LABEL
+                ================================================== */}
+                <div className="hero-kicker">
+                    <span className="hero-kicker-dot"></span>
+                    Discover what's happening around you
+                </div>
+                {/* ==================================================
+                    TITLE
+                ================================================== */}
                 <h1>
                     Discover.
                     <span> Connect.</span>
                     <span> Experience.</span>
                 </h1>
-
+                {/* ==================================================
+                    DESCRIPTION
+                ================================================== */}
                 <p>
-                    Finds concerts, picnics, workshop,
+                    Find concerts, picnics, workshops,
                     sports events and unforgettable
                     experiences around you.
                 </p>
-
+                {/* ==================================================
+                    BUTTONS
+                ================================================== */}
                 <div className="hero-button">
-                    <button className="primary-btn"
-                    onClick={handleExploreEvents}>
-                        Explore Events
-                    </button>
-
-                    <button 
-                    className="secondary-btn" 
-                    onClick={handleHostEvent}
+                    {/* ==================================================
+                        EXPLORE
+                    ================================================== */}
+                    <button
+                        className="primary-btn"
+                        type="button"
+                        onClick={handleExploreEvents}
                     >
                         <span>
-                        {
-                        user?.verifiedHost
-                        ?
-                        "🎤 Host Dashboard"
-                        :
-                        "🚀 Become a Host"
-                        }
+                            Explore Events
                         </span>
-
-                        <span>›</span>
-                                
+                        <FaArrowRight
+                            className="hero-button-icon"
+                        />
+                    </button>
+                    {/* ==================================================
+                        HOST
+                    ================================================== */}
+                    <button
+                        className="secondary-btn"
+                        type="button"
+                        onClick={handleHostEvent}
+                    >
+                        <FaMicrophone
+                            className="host-icon"
+                        />
+                        <span>
+                            {
+                                user?.verifiedHost
+                                    ? "Host Dashboard"
+                                    : "Become a Host"
+                            }
+                        </span>
+                        <FaArrowRight
+                            className="hero-button-icon"
+                        />
                     </button>
                 </div>
             </div>
