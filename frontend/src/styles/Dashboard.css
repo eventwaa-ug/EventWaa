@@ -186,7 +186,7 @@
   transform: translateY(-2px);
 
   box-shadow:
-    0 10px 22px rgba(37, 99, 235, 0.24);
+    0 10px 22px rgba(216, 92, 69, 0.24);
 }
 
 .create-event-btn:active {
@@ -204,9 +204,9 @@
 }
 
 .inbox-btn:hover {
-  background: #f8fafc;
+  background: #fff7f5;
 
-  border-color: #cbd5e1;
+  border-color: #f5c7c2;
 
   color: #d85c45;
 
@@ -295,8 +295,8 @@
 
 .stat-card:hover {
   transform: translateY(-4px);
-  border-color: #d8e1ec;
-  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.09);
+  border-color: #f0c9c2;
+  box-shadow: 0 14px 32px rgba(216, 92, 69, 0.12);
 }
 
 
@@ -477,7 +477,7 @@
 
   background: transparent;
 
-  color: #d85c45;
+  color: #000000;
 
   display: inline-flex;
   align-items: center;
@@ -499,7 +499,7 @@
 }
 
 .view-all-events-btn:hover {
-  color: #b34a36;
+  color: #d85c45;
 
   gap: 10px;
 }
@@ -1005,10 +1005,10 @@
 }
 
 .ticket-breakdown-item:hover {
-  border-color: #bfdbfe;
+  border-color: #f5c7c2;
 
   box-shadow:
-    0 5px 14px rgba(37, 99, 235, 0.06);
+    0 5px 14px rgba(216, 92, 69, 0.10);
 }
 
 .ticket-type-header {
@@ -1120,19 +1120,19 @@
 }
 
 .edit-btn:hover {
-  background: #eff6ff;
+  background: #fff0ec;
 
-  border-color: #bfdbfe;
+  border-color: #f5c7c2;
 
   color: #d85c45;
 }
 
 .duplicate-btn:hover {
-  background: #f5f3ff;
+  background: #fff7ed;
 
-  border-color: #ddd6fe;
+  border-color: #fed7aa;
 
-  color: #b34a36;
+  color: #c2410c;
 }
 
 .scan-btn:hover {
@@ -1144,23 +1144,30 @@
 }
 
 .attendees-btn:hover {
-  background: #ecfeff;
+  background: #ecfdf5;
 
-  border-color: #a5f3fc;
+  border-color: #a7f3d0;
 
-  color: #0891b2;
+  color: #047857;
 }
 
 .delete-btn {
-  color: #dc2626 !important;
+  width: 100%;
+  min-width: 0;
+
+  color: #f4f1f1 !important;
 }
 
 .delete-btn:hover {
-  background: #fef2f2 !important;
+  background: #fee2e2 !important;
 
-  border-color: #fecaca !important;
+  border-color: #d77373 !important;
 
-  color: #b91c1c !important;
+  color: #1d1c1c !important;
+
+  box-shadow:
+    0 0 0 3px rgba(239, 68, 68, 0.16),
+    0 7px 16px rgba(220, 38, 38, 0.14);
 }
 
 
@@ -1436,6 +1443,8 @@
 
   .delete-btn {
     grid-column: 1 / -1;
+
+    min-height: 48px;
   }
 
 }
@@ -1732,6 +1741,8 @@
 
   .delete-btn {
     grid-column: 1 / -1;
+
+    min-height: 48px;
   }
 
 

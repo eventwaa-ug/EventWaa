@@ -8,6 +8,7 @@ import {
     MessageCircle,
     Users,
     UserRound,
+    ScanSearch,
     LogOut,
     Menu,
     X,
@@ -15,12 +16,14 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { usePlatformSettings } from "../context/PlatformSettingsContext.jsx";
 import "./HostSidebar.css";
+
 function HostSidebar() {
     const navigate = useNavigate();
     const location = useLocation();
     const { user } = useAuth();
     const { settings } = usePlatformSettings();
     const [isOpen, setIsOpen] = useState(false);
+
     /* ============================================================
        HOST SIDEBAR MENU
     ============================================================ */
@@ -56,11 +59,17 @@ function HostSidebar() {
             path: "/team-members",
         },
         {
+            label: "Ticket Lookup",
+            icon: ScanSearch,
+            path: "/host-ticket-lookup",
+        },
+        {
             label: "Profile",
             icon: UserRound,
             path: "/profile",
         },
     ];
+
     /* ============================================================
        NAVIGATION
     ============================================================ */
@@ -68,6 +77,7 @@ function HostSidebar() {
         setIsOpen(false);
         navigate(path);
     };
+
     /* ============================================================
        LOGOUT
     ============================================================ */
@@ -76,13 +86,16 @@ function HostSidebar() {
         setIsOpen(false);
         navigate("/login");
     };
+
     /* ============================================================
        PLATFORM BRAND
     ============================================================ */
     const platformName =
         settings?.platformName || "EventWaa";
+
     const platformLogo =
         settings?.platformLogo || "";
+
     /* ============================================================
        RENDER
     ============================================================ */
@@ -100,6 +113,7 @@ function HostSidebar() {
             >
                 <Menu size={24} strokeWidth={2.3} />
             </button>
+
             {/* =====================================================
                 MOBILE OVERLAY
             ===================================================== */}
@@ -110,6 +124,7 @@ function HostSidebar() {
                     aria-hidden="true"
                 />
             )}
+
             {/* =====================================================
                 SIDEBAR
             ===================================================== */}
@@ -152,6 +167,7 @@ function HostSidebar() {
                             </span>
                         )}
                     </div>
+
                     {/* =================================================
                         MOBILE CLOSE BUTTON
                     ================================================= */}
@@ -166,6 +182,7 @@ function HostSidebar() {
                         <X size={25} strokeWidth={2.2} />
                     </button>
                 </div>
+
                 {/* =================================================
                     HOST ACCOUNT
                 ================================================= */}
@@ -175,15 +192,18 @@ function HostSidebar() {
                             .charAt(0)
                             .toUpperCase()}
                     </div>
+
                     <div className="host-profile-info">
                         <strong>
                             {user?.name || "Host"}
                         </strong>
+
                         <span>
                             Host Account
                         </span>
                     </div>
                 </div>
+
                 {/* =================================================
                     NAVIGATION
                 ================================================= */}
@@ -194,8 +214,10 @@ function HostSidebar() {
                     <p className="host-menu-title">
                         MENU
                     </p>
+
                     {menuItems.map((item) => {
                         const Icon = item.icon;
+
                         /*
                          * Dashboard and normal pages use exact
                          * matching.
@@ -211,6 +233,7 @@ function HostSidebar() {
                                     "/team-members"
                                 )
                             );
+
                         return (
                             <button
                                 type="button"
@@ -232,6 +255,7 @@ function HostSidebar() {
                                         strokeWidth={2.1}
                                     />
                                 </span>
+
                                 <span className="host-nav-label">
                                     {item.label}
                                 </span>
@@ -239,6 +263,7 @@ function HostSidebar() {
                         );
                     })}
                 </nav>
+
                 {/* =================================================
                     LOGOUT
                 ================================================= */}
@@ -254,6 +279,7 @@ function HostSidebar() {
                                 strokeWidth={2.1}
                             />
                         </span>
+
                         <span className="host-nav-label">
                             Logout
                         </span>
@@ -263,4 +289,5 @@ function HostSidebar() {
         </>
     );
 }
+
 export default HostSidebar;

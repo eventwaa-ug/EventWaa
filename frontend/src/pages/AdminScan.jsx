@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  FiCamera,
+  FiSearch,
+  FiX,
+  FiCalendar
+} from "react-icons/fi";
 import "./AdminScan.css";
 
 const API_BASE_URL = "http://localhost:5000";

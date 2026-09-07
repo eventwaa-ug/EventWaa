@@ -1385,25 +1385,116 @@ function AdminTeamMembers() {
     };
 
 
-    /* =========================================================
-       CURRENT ASSIGNMENT DISPLAY
-    ========================================================= */
-
     const renderCurrentAssignment = (
         member
     ) => {
 
-        const event =
-            String(
-                member.event || ""
-            ).trim();
+        const currentAssignment =
+            member?.currentAssignment &&
+            typeof member.currentAssignment === "object"
+                ? member.currentAssignment
+                : null;
 
+        const assignments =
+            Array.isArray(member?.assignments)
+                ? member.assignments
+                : [];
 
-        const host =
-            String(
-                member.host || ""
-            ).trim();
+        // ========================================================
+        // 1. CANONICAL CURRENT ASSIGNMENT
+        // ========================================================
 
+        let assignment =
+            currentAssignment;
+
+        // ========================================================
+        // 2. FALLBACK TO ACTIVE / UPCOMING ASSIGNMENT
+        // ========================================================
+
+        if (!assignment) {
+
+            for (
+                let i = assignments.length - 1;
+                i >= 0;
+                i--
+            ) {
+
+                const item =
+                    assignments[i];
+
+                if (
+                    !item ||
+                    typeof item !== "object"
+                ) {
+                    continue;
+                }
+
+                const status =
+                    String(
+                        item.status || ""
+                    )
+                        .trim()
+                        .toLowerCase();
+
+                if (
+                    status === "active" ||
+                    status === "upcoming"
+                ) {
+
+                    assignment = item;
+
+                    break;
+                }
+            }
+        }
+
+        // ========================================================
+        // 3. READ CANONICAL ASSIGNMENT
+        // ========================================================
+
+        let event = "";
+        let host = "";
+
+        if (assignment) {
+
+            event =
+                String(
+                    assignment.eventName ||
+                    assignment.event ||
+                    ""
+                ).trim();
+
+            host =
+                String(
+                    assignment.hostName ||
+                    assignment.host ||
+                    ""
+                ).trim();
+        }
+
+        // ========================================================
+        // 4. LEGACY FALLBACK
+        // ========================================================
+
+        if (!event) {
+
+            event =
+                String(
+                    member?.event || ""
+                ).trim();
+        }
+
+        if (!host) {
+
+            host =
+                String(
+                    member?.host || ""
+                ).trim();
+        }
+
+        // ========================================================
+        // 5. NOTHING CURRENTLY ASSIGNED
+        // ========================================================
 
         if (!event && !host) {
 
@@ -1420,9 +1511,11 @@ function AdminTeamMembers() {
 
                 </div>
             );
-
         }
 
+        // ========================================================
+        // 6. CURRENT ASSIGNMENT DISPLAY
+        // ========================================================
 
         return (
             <div className="admin-team-current-assignment">
@@ -1431,11 +1524,9 @@ function AdminTeamMembers() {
                     CURRENT ASSIGNMENT
                 </span>
 
-
                 <strong>
                     {event || "Event not specified"}
                 </strong>
-
 
                 {host && (
                     <small>
@@ -1445,7 +1536,6 @@ function AdminTeamMembers() {
 
             </div>
         );
-
     };
 
 
@@ -2233,9 +2323,23 @@ function AdminTeamMembers() {
                                                 }
                                             >
 
-                                                {member.event
+                                                {
+                                                (
+                                                    member?.currentAssignment ||
+                                                    member?.assignments?.some(
+                                                        (assignment) =>
+                                                            assignment &&
+                                                            ["active", "upcoming"].includes(
+                                                                String(
+                                                                    assignment.status || ""
+                                                                ).trim().toLowerCase()
+                                                            )
+                                                    ) ||
+                                                    member?.event
+                                                )
                                                     ? "Reassign Event"
-                                                    : "Assign Event"}
+                                                    : "Assign Event"
+                                            }
 
                                             </button>
 

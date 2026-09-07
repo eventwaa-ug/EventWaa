@@ -65,7 +65,7 @@ function Hero({ handleExploreEvents }) {
                     TITLE
                 ================================================== */}
                 <h1>
-                    Discover.
+                    <span className="hero-title-highlight">Discover.</span>
                     <span> Connect.</span>
                     <span> Experience.</span>
                 </h1>

@@ -20,12 +20,21 @@ export function AuthProvider({ children }) {
   // LOGIN
   // ==========================================================
 
-  const login = (userData) => {
+  const login = (userData, token = null) => {
 
     localStorage.setItem(
       "user",
       JSON.stringify(userData)
     );
+
+    if (token) {
+
+      localStorage.setItem(
+        "eventwaa_user_token",
+        token
+      );
+
+    }
 
     setUser(userData);
   };

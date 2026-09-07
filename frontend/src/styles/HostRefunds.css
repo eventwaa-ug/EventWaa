@@ -5,10 +5,18 @@
 .host-refunds-page {
   width: 100%;
   min-height: 100vh;
+  max-width: 1440px;
+  margin: 0 auto;
   padding: 32px;
   box-sizing: border-box;
+  overflow-x: hidden;
+  font-family: Arial, Helvetica, sans-serif;
   background: #f6f7fb;
   color: #1f2937;
+}
+
+.host-refunds-page * {
+  font-family: inherit;
 }
 
 /* ============================================================
@@ -34,9 +42,19 @@
 
 .refunds-header h1 {
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
   font-size: 32px;
   font-weight: 800;
   color: #111827;
+  overflow-wrap: anywhere;
+}
+
+.refund-title-icon {
+  flex-shrink: 0;
+  color: #ef5047;
+  stroke: currentColor;
 }
 
 .refunds-header p {
@@ -64,7 +82,6 @@
 
 .refresh-refunds-btn:hover {
   background: #000;
-  transform: translateY(-1px);
 }
 
 /* ============================================================
@@ -127,7 +144,7 @@
 }
 
 .money-icon {
-  background: #eff6ff;
+  background: #f3f4f6;
 }
 
 .refund-summary-card span {
@@ -142,6 +159,63 @@
   font-size: 21px;
   font-weight: 800;
   color: #111827;
+}
+
+/* ============================================================
+   FILTERS
+============================================================ */
+
+.refund-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.refund-filters button {
+  min-height: 38px;
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111111;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.refund-filters button span {
+  min-width: 20px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #111111;
+  font-size: 11px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.refund-filters button:hover,
+.refund-filters button.active {
+  border-color: #f2b8b2;
+  background: #fff7f5;
+  color: #111111;
+}
+
+.refund-filters button.active span,
+.refund-filters button:hover span {
+  background: #fce2de;
+  color: #111111;
 }
 
 /* ============================================================
@@ -275,6 +349,7 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 20px;
+  min-width: 0;
   padding-bottom: 20px;
   border-bottom: 1px solid #f0f1f4;
 }
@@ -425,7 +500,6 @@
 
 .approve-refund-btn:hover {
   background: #065f46;
-  transform: translateY(-1px);
 }
 
 .reject-refund-btn {
@@ -498,10 +572,12 @@
 @media (max-width: 700px) {
   .host-refunds-page {
     padding: 20px 14px;
+    max-width: 100%;
   }
 
   .refunds-header {
     flex-direction: column;
+    gap: 14px;
   }
 
   .refunds-header h1 {
@@ -516,6 +592,14 @@
     grid-template-columns: 1fr;
   }
 
+  .refund-filters {
+    gap: 8px;
+  }
+
+  .refund-filters button {
+    flex: 1 1 auto;
+  }
+
   .refund-section-header {
     align-items: flex-start;
     flex-direction: column;
@@ -527,6 +611,7 @@
 
   .refund-card-top {
     flex-direction: column;
+    gap: 14px;
   }
 
   .refund-details {

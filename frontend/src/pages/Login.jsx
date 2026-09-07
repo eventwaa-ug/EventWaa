@@ -59,7 +59,10 @@ function Login() {
 
       if(response.user){
 
-        login(response.user);
+        login(
+          response.user,
+          response.token
+        );
 
 
         const redirect =
@@ -126,7 +129,10 @@ function Login() {
 
     if(data.success){
 
-      login(data.user);
+      login(
+        data.user,
+        data.token
+      );
 
       navigate("/");
 

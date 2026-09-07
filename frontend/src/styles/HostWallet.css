@@ -1,13 +1,46 @@
 .host-wallet-page{
     padding:30px;
-    max-width:1100px;
-    margin:auto;
+    width:min(100%,1100px);
+    margin:0 auto;
+    box-sizing:border-box;
+    color:#1f2937;
+    font-family:Arial, Helvetica, sans-serif;
+    overflow-x:hidden;
+}
+.host-wallet-page *{
+    box-sizing:border-box;
+    font-family:inherit;
 }
 .host-wallet-header{
     margin-bottom:30px;
 }
 .host-wallet-header h1{
-    font-size:32px;
+    font-size:clamp(1.65rem,3vw,2.2rem);
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+.wallet-title-icon,
+.wallet-section-icon,
+.wallet-detail-icon{
+    flex-shrink:0;
+    color:#168a58;
+    stroke:currentColor;
+}
+.wallet-title-icon{
+    width:30px;
+    height:30px;
+}
+.wallet-section-icon{
+    width:23px;
+    height:23px;
+    vertical-align:middle;
+}
+.wallet-detail-icon{
+    width:16px;
+    height:16px;
+    margin-right:6px;
+    vertical-align:-3px;
 }
 .host-wallet-cards{
     display:grid;
@@ -25,6 +58,8 @@
 }
 .host-wallet-card h2{
     margin-top:10px;
+    font-size:clamp(1.15rem,2vw,1.55rem);
+    overflow-wrap:anywhere;
 }
 .host-withdraw-section{
     margin-top:40px;
@@ -44,11 +79,14 @@
 .host-withdraw-section button{
     width:100%;
     padding:15px;
-    background:#111;
+    background:#168a58;
     color:white;
     border:none;
     border-radius:10px;
     cursor:pointer;
+}
+.host-withdraw-section button:hover{
+    background:#0f6f49;
 }
 .wallet-message{
     margin-top:15px;
@@ -66,7 +104,7 @@
     border-radius:10px;
 }
 .pending{
-    color:orange;
+    color:#b7791f;
     font-weight:bold;
 }
 .completed{
@@ -85,7 +123,7 @@
 
 .earnings-card h2 {
     margin-bottom: 20px;
-    font-size: 22px;
+    font-size: clamp(1.15rem, 2vw, 1.45rem);
 }
 
 
@@ -111,7 +149,7 @@
 
 .earnings-row strong {
     font-size: 18px;
-    color: #111;
+    color: #1f2937;
 }
 
 
@@ -186,7 +224,8 @@
 
 .transaction-amount {
     font-weight: 700;
-    font-size: 15px;
+    font-size: clamp(0.82rem, 1.5vw, 0.95rem);
+    overflow-wrap: anywhere;
 }
 
 .transaction-amount.income {
@@ -198,6 +237,26 @@
 }
 
 @media (max-width: 768px) {
+    .host-wallet-page {
+        padding: 22px 16px;
+    }
+
+    .host-wallet-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .host-wallet-card,
+    .host-withdraw-section,
+    .earnings-card {
+        padding: 18px;
+    }
+
+    .host-history-row {
+        flex-wrap: wrap;
+        gap: 8px 14px;
+    }
+
     .wallet-transactions {
         padding: 18px;
     }
@@ -209,5 +268,30 @@
 
     .transaction-amount {
         font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .host-wallet-page {
+        padding: 18px 12px;
+    }
+
+    .host-wallet-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .host-wallet-card h2 {
+        font-size: 1.2rem;
+    }
+
+    .host-withdraw-section {
+        margin-top: 26px;
+        padding: 16px;
+    }
+
+    .host-history-row,
+    .wallet-transaction-row {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }

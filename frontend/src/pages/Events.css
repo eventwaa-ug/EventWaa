@@ -148,17 +148,12 @@
         13px 0;
     background:
         rgba(247, 247, 245, 0.94);
-    backdrop-filter:
-        blur(12px);
-    -webkit-backdrop-filter:
-        blur(12px);
     border-bottom:
         1px solid
         rgba(225, 222, 216, 0.7);
     -ms-overflow-style:
         none;
-    scrollbar-width:
-        none;
+
 }
 .sticky-filters::-webkit-scrollbar {
     display: none;

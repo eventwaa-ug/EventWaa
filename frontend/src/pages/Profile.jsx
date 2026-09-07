@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  FiCalendar,
+  FiCheckCircle,
+  FiChevronRight,
+  FiHeart,
+  FiLogOut,
+  FiMessageCircle,
+  FiMic,
+  FiSettings,
+  FiTag,
+} from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
 import { canCreateEvent } from "../utils/hostAccess";
 import "../styles/Profile.css";
@@ -132,7 +143,8 @@ function Profile() {
 
             {isVerifiedHost ? (
               <span className="profile-badge verified">
-                ✓ Verified Host
+                <FiCheckCircle aria-hidden="true" />
+                Verified Host
               </span>
             ) : (
               <span className="profile-badge">
@@ -162,7 +174,7 @@ function Profile() {
           <div className="profile-menu-left">
 
             <span className="profile-menu-icon">
-              🎟️
+              <FiTag aria-hidden="true" />
             </span>
 
             <div>
@@ -173,7 +185,7 @@ function Profile() {
           </div>
 
           <span className="profile-arrow">
-            ›
+            <FiChevronRight aria-hidden="true" />
           </span>
         </button>
 
@@ -187,7 +199,7 @@ function Profile() {
           <div className="profile-menu-left">
 
             <span className="profile-menu-icon">
-              💚
+              <FiHeart aria-hidden="true" />
             </span>
 
             <div>
@@ -198,7 +210,7 @@ function Profile() {
           </div>
 
           <span className="profile-arrow">
-            ›
+            <FiChevronRight aria-hidden="true" />
           </span>
         </button>
 
@@ -212,7 +224,7 @@ function Profile() {
           <div className="profile-menu-left">
 
             <span className="profile-menu-icon">
-              💬
+              <FiMessageCircle aria-hidden="true" />
             </span>
 
             <div>
@@ -233,7 +245,7 @@ function Profile() {
             )}
 
             <span className="profile-arrow">
-              ›
+              <FiChevronRight aria-hidden="true" />
             </span>
 
           </div>
@@ -250,7 +262,7 @@ function Profile() {
           <div className="profile-menu-left">
 
             <span className="profile-menu-icon">
-              🎤
+              <FiMic aria-hidden="true" />
             </span>
 
             <div>
@@ -272,7 +284,7 @@ function Profile() {
           </div>
 
           <span className="profile-arrow">
-            ›
+            <FiChevronRight aria-hidden="true" />
           </span>
 
         </button>
@@ -287,7 +299,7 @@ function Profile() {
           <div className="profile-menu-left">
 
             <span className="profile-menu-icon">
-              📅
+              <FiCalendar aria-hidden="true" />
             </span>
 
             <div>
@@ -298,7 +310,7 @@ function Profile() {
           </div>
 
           <span className="profile-arrow">
-            ›
+            <FiChevronRight aria-hidden="true" />
           </span>
 
         </button>
@@ -313,7 +325,7 @@ function Profile() {
           <div className="profile-menu-left">
 
             <span className="profile-menu-icon">
-              ⚙️
+              <FiSettings aria-hidden="true" />
             </span>
 
             <div>
@@ -324,7 +336,7 @@ function Profile() {
           </div>
 
           <span className="profile-arrow">
-            ›
+            <FiChevronRight aria-hidden="true" />
           </span>
 
         </button>
@@ -342,7 +354,7 @@ function Profile() {
           className="profile-logout-button"
           onClick={handleLogout}
         >
-          <span>🚪</span>
+          <FiLogOut aria-hidden="true" />
           <span>Logout</span>
         </button>
 

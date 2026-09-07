@@ -1,4 +1,13 @@
 import { useEffect, useState } from "react";
+import {
+  FiAlertTriangle,
+  FiCheckCircle,
+  FiClipboard,
+  FiClock,
+  FiCornerUpLeft,
+  FiDollarSign,
+  FiRefreshCw,
+} from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
 import "../styles/HostRefunds.css";
 
@@ -426,7 +435,11 @@ function HostRefunds() {
           </span>
 
           <h1>
-            ↩️ Refunds
+            <FiCornerUpLeft
+              className="refund-title-icon"
+              aria-hidden="true"
+            />
+            Refunds
           </h1>
 
           <p>
@@ -440,7 +453,8 @@ function HostRefunds() {
           className="refresh-refunds-btn"
           onClick={loadRefunds}
         >
-          🔄 Refresh
+          <FiRefreshCw aria-hidden="true" />
+          Refresh
         </button>
 
       </div>
@@ -452,7 +466,8 @@ function HostRefunds() {
       {error && (
 
         <div className="refund-error">
-          ⚠️ {error}
+          <FiAlertTriangle aria-hidden="true" />
+          {error}
         </div>
 
       )}
@@ -466,7 +481,7 @@ function HostRefunds() {
         <div className="refund-summary-card">
 
           <div className="summary-icon">
-            📋
+            <FiClipboard aria-hidden="true" />
           </div>
 
           <div>
@@ -486,7 +501,7 @@ function HostRefunds() {
         <div className="refund-summary-card">
 
           <div className="summary-icon pending-icon">
-            ⏳
+            <FiClock aria-hidden="true" />
           </div>
 
           <div>
@@ -506,7 +521,7 @@ function HostRefunds() {
         <div className="refund-summary-card">
 
           <div className="summary-icon completed-icon">
-            ✅
+            <FiCheckCircle aria-hidden="true" />
           </div>
 
           <div>
@@ -526,7 +541,7 @@ function HostRefunds() {
         <div className="refund-summary-card">
 
           <div className="summary-icon money-icon">
-            💰
+            <FiDollarSign aria-hidden="true" />
           </div>
 
           <div>
@@ -671,7 +686,7 @@ function HostRefunds() {
         <div className="refund-empty">
 
           <div className="empty-icon">
-            ↩️
+            <FiCornerUpLeft aria-hidden="true" />
           </div>
 
           <h2>

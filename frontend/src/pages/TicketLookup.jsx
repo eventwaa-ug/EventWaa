@@ -56,9 +56,20 @@ function TicketLookup() {
             "/team-lookup/"
         );
 
+    /* ========================================================
+       REGULAR HOST LOOKUP
+    ======================================================== */
+
+    const isHostLookup =
+        location.pathname === "/host-ticket-lookup" ||
+        location.pathname.startsWith(
+            "/host-ticket-lookup/"
+        );
+
     const isMainAdminLookup =
         !isAdminTeamLookup &&
-        !isRegularTeamLookup;
+        !isRegularTeamLookup &&
+        !isHostLookup;
 
 
     const portalName =
@@ -66,7 +77,9 @@ function TicketLookup() {
             ? "ADMIN PORTAL"
             : isAdminTeamLookup
                 ? "ADMIN TEAM PORTAL"
-                : "TEAM PORTAL";
+                : isRegularTeamLookup
+                    ? "TEAM PORTAL"
+                    : "HOST PORTAL";
 
 
     /* ========================================================
@@ -78,6 +91,9 @@ function TicketLookup() {
 
     const [ticket, setTicket] =
         useState(null);
+
+    const [searchResults, setSearchResults] =
+        useState([]);
 
     const [loading, setLoading] =
         useState(false);
@@ -134,6 +150,24 @@ function TicketLookup() {
             ) ||
             sessionStorage.getItem(
                 "eventwaa_admin_team_token"
+            )
+        );
+
+    };
+
+
+    /* ========================================================
+       REGULAR HOST TOKEN
+    ======================================================== */
+
+    const getHostToken = () => {
+
+        return (
+            localStorage.getItem(
+                "eventwaa_user_token"
+            ) ||
+            sessionStorage.getItem(
+                "eventwaa_user_token"
             )
         );
 
@@ -198,15 +232,43 @@ function TicketLookup() {
            REGULAR TEAM
         ================================================== */
 
-        const regularTeamToken =
-            getRegularTeamToken();
+        if (isRegularTeamLookup) {
 
-        if (regularTeamToken) {
+            const regularTeamToken =
+                getRegularTeamToken();
 
-            headers.Authorization =
-                `Bearer ${regularTeamToken}`;
+            if (regularTeamToken) {
+
+                headers.Authorization =
+                    `Bearer ${regularTeamToken}`;
+
+            }
+
+            return headers;
 
         }
+
+
+        /* ==================================================
+           REGULAR HOST
+        ================================================== */
+
+        if (isHostLookup) {
+
+            const hostToken =
+                getHostToken();
+
+            if (hostToken) {
+
+                headers.Authorization =
+                    `Bearer ${hostToken}`;
+
+            }
+
+            return headers;
+
+        }
+
 
         return headers;
 
@@ -214,7 +276,7 @@ function TicketLookup() {
 
 
     /* ========================================================
-       LOOKUP ENDPOINT
+       EXACT ID LOOKUP ENDPOINT
     ======================================================== */
 
     const getLookupEndpoint =
@@ -236,6 +298,21 @@ function TicketLookup() {
 
 
             /* ==================================================
+               REGULAR HOST
+            ================================================== */
+
+            if (isHostLookup) {
+
+                return (
+                    `${BACKEND_URL}/host/ticket-lookup/${encodeURIComponent(
+                        cleanId
+                    )}`
+                );
+
+            }
+
+
+            /* ==================================================
                ADMIN TEAM + REGULAR TEAM
             ================================================== */
 
@@ -249,6 +326,250 @@ function TicketLookup() {
 
 
     /* ========================================================
+       CREATE DISPLAY DATA FOR SEARCH RESULT
+       
+       Search endpoint returns individual result objects.
+       This helper normalizes them so the result list can
+       safely display different existing field names.
+    ======================================================== */
+
+    const getSearchResultData = (result) => {
+
+        const resultTicket =
+            result?.ticket || {};
+
+        const resultEvent =
+            result?.event || {};
+
+        const resultBuyer =
+            resultTicket?.buyer ||
+            result?.buyer ||
+            {};
+
+        const resultTicketId =
+            result?.entryId ||
+            resultTicket?.ticketId ||
+            resultTicket?.passId ||
+            result?.ticketId ||
+            result?.passId ||
+            "Not available";
+
+        const resultEventTitle =
+            resultTicket?.eventTitle ||
+            resultEvent?.eventTitle ||
+            resultEvent?.title ||
+            resultEvent?.name ||
+            result?.eventTitle ||
+            "Not available";
+
+        const resultName =
+            resultBuyer?.name ||
+            result?.name ||
+            "Not available";
+
+        const resultEmail =
+            resultBuyer?.email ||
+            result?.email ||
+            "Not available";
+
+        const resultStatus =
+            result?.status ||
+            (
+                resultTicket?.checkedIn === true
+                    ? "Already used"
+                    : "Valid"
+            );
+
+        return {
+            resultTicket,
+            resultEvent,
+            resultBuyer,
+            resultTicketId,
+            resultEventTitle,
+            resultName,
+            resultEmail,
+            resultStatus,
+        };
+
+    };
+
+
+    /* ========================================================
+    SELECT SEARCH RESULT
+    ======================================================== */
+
+    const selectSearchResult = async (result) => {
+
+        setError("");
+
+        const data =
+            getSearchResultData(result);
+
+        const selectedEntryId =
+            data.resultTicketId;
+
+        if (
+            !selectedEntryId ||
+            selectedEntryId ===
+                "Not available"
+        ) {
+
+            setError(
+                "This search result does not contain a valid ticket or pass ID."
+            );
+
+            return;
+
+        }
+
+        /*
+        * The Admin search endpoint already returns the
+        * complete ticket information.
+        *
+        * Therefore, Admin does not need an additional
+        * exact-ID endpoint.
+        */
+
+        if (isMainAdminLookup) {
+
+            setEntryId(
+                selectedEntryId
+            );
+
+            setTicket(
+                result
+            );
+
+            setSearchResults([]);
+
+            return;
+
+        }
+
+        /*
+        * Host keeps using the existing exact lookup endpoint
+        * so ownership validation remains enforced.
+        */
+
+        try {
+
+            setLoading(true);
+
+            const response =
+                await fetch(
+                    getLookupEndpoint(
+                        selectedEntryId
+                    ),
+                    {
+                        method: "GET",
+                        headers:
+                            getAuthHeaders(),
+                    }
+                );
+
+            const contentType =
+                response.headers.get(
+                    "content-type"
+                ) || "";
+
+            let dataResponse = {};
+
+            if (
+                contentType
+                    .toLowerCase()
+                    .includes(
+                        "application/json"
+                    )
+            ) {
+
+                dataResponse =
+                    await response.json();
+
+            } else {
+
+                const text =
+                    await response.text();
+
+                throw new Error(
+                    text ||
+                    `Server returned HTTP ${response.status}.`
+                );
+
+            }
+
+            if (
+                response.status === 401
+            ) {
+
+                setError(
+                    isHostLookup
+                        ? "Host authentication has expired. Please sign in again."
+                        : "Authentication has expired. Please sign in again."
+                );
+
+                return;
+
+            }
+
+            if (
+                response.status === 403
+            ) {
+
+                setError(
+                    dataResponse.message ||
+                    "You are not authorized to look up this ticket."
+                );
+
+                return;
+
+            }
+
+            if (
+                !response.ok ||
+                !dataResponse.success
+            ) {
+
+                setError(
+                    dataResponse.message ||
+                    "Ticket or pass could not be found."
+                );
+
+                return;
+
+            }
+
+            setEntryId(
+                selectedEntryId
+            );
+
+            setTicket(
+                dataResponse
+            );
+
+            setSearchResults([]);
+
+        } catch (selectionError) {
+
+            console.error(
+                "TICKET SEARCH RESULT ERROR:",
+                selectionError
+            );
+
+            setError(
+                selectionError.message ||
+                "Unable to load the selected ticket."
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+
+    };
+
+
+    /* ========================================================
        LOOKUP
     ======================================================== */
 
@@ -259,6 +580,7 @@ function TicketLookup() {
 
             setError("");
             setTicket(null);
+            setSearchResults([]);
 
             const cleanId =
                 entryId.trim();
@@ -266,7 +588,9 @@ function TicketLookup() {
             if (!cleanId) {
 
                 setError(
-                    "Please enter a ticket or pass ID."
+                    isMainAdminLookup || isHostLookup
+                        ? "Please enter a ticket ID, attendee name, or email."
+                        : "Please enter a ticket or pass ID."
                 );
 
                 return;
@@ -285,8 +609,8 @@ function TicketLookup() {
 
                 if (!adminToken) {
 
-                    console.warn(
-                        "No EventWaa admin token found."
+                    setError(
+                        "Admin authentication missing. Please sign in again."
                     );
 
                 }
@@ -306,7 +630,7 @@ function TicketLookup() {
 
                 }
 
-            } else {
+            } else if (isRegularTeamLookup) {
 
                 const regularTeamToken =
                     getRegularTeamToken();
@@ -321,12 +645,238 @@ function TicketLookup() {
 
                 }
 
+            } else if (isHostLookup) {
+
+                const hostToken =
+                    getHostToken();
+
+                if (!hostToken) {
+
+                    setError(
+                        "Host authentication is missing. Please sign in again."
+                    );
+
+                    return;
+
+                }
+
             }
 
 
             try {
 
                 setLoading(true);
+
+
+                /* ==================================================
+                FLEXIBLE SEARCH
+                ADMIN / ADMIN TEAM / REGULAR TEAM / HOST
+                ================================================== */
+
+                if (
+                    isMainAdminLookup ||
+                    isAdminTeamLookup ||
+                    isRegularTeamLookup ||
+                    isHostLookup
+                ) {
+
+                    const searchEndpoint =
+                        isMainAdminLookup
+                            ? `${BACKEND_URL}/ticket-lookup?search=${encodeURIComponent(
+                                cleanId
+                            )}`
+                            : isHostLookup
+                                ? `${BACKEND_URL}/host/ticket-lookup?search=${encodeURIComponent(
+                                    cleanId
+                                )}`
+                                : `${BACKEND_URL}/team/ticket-lookup?search=${encodeURIComponent(
+                                    cleanId
+                                )}`;
+
+
+                    const response =
+                        await fetch(
+                            searchEndpoint,
+                            {
+                                method: "GET",
+                                headers:
+                                    getAuthHeaders(),
+                            }
+                        );
+
+
+                    const contentType =
+                        response.headers.get(
+                            "content-type"
+                        ) || "";
+
+
+                    let data = {};
+
+
+                    if (
+                        contentType
+                            .toLowerCase()
+                            .includes(
+                                "application/json"
+                            )
+                    ) {
+
+                        data =
+                            await response.json();
+
+                    } else {
+
+                        const text =
+                            await response.text();
+
+                        throw new Error(
+                            text ||
+                            `Server returned HTTP ${response.status}.`
+                        );
+
+                    }
+
+
+                    console.log(
+                        "EVENTWAA TICKET SEARCH:",
+                        {
+                            portal:
+                                isMainAdminLookup
+                                    ? "ADMIN"
+                                    : isAdminTeamLookup
+                                        ? "ADMIN TEAM"
+                                        : isRegularTeamLookup
+                                            ? "TEAM"
+                                            : "HOST",
+                            status:
+                                response.status,
+                            data
+                        }
+                    );
+
+
+                    /* ==================================================
+                    AUTH ERROR
+                    ================================================== */
+
+                    if (
+                        response.status ===
+                        401
+                    ) {
+
+                        setError(
+                            isMainAdminLookup
+                                ? "Admin authentication has expired. Please sign in again."
+                                : isAdminTeamLookup
+                                    ? "Admin Team authentication has expired. Please sign in again."
+                                    : isRegularTeamLookup
+                                        ? "Team authentication has expired. Please sign in again."
+                                        : "Host authentication has expired. Please sign in again."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /* ==================================================
+                    FORBIDDEN
+                    ================================================== */
+
+                    if (
+                        response.status ===
+                        403
+                    ) {
+
+                        setError(
+                            data.message ||
+                            "You are not authorized to search these tickets."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /* ==================================================
+                    ERROR / NOT FOUND
+                    ================================================== */
+
+                    if (
+                        !response.ok ||
+                        !data.success
+                    ) {
+
+                        setError(
+                            data.message ||
+                            "No matching ticket or attendee was found."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /* ==================================================
+                    RESULTS
+                    ================================================== */
+
+                    const results =
+                        Array.isArray(
+                            data.results
+                        )
+                            ? data.results
+                            : [];
+
+
+                    if (
+                        results.length === 0
+                    ) {
+
+                        setError(
+                            "No matching ticket or attendee was found."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /* ==================================================
+                    ONE MATCH
+                    ================================================== */
+
+                    if (
+                        results.length === 1
+                    ) {
+
+                        await selectSearchResult(
+                            results[0]
+                        );
+
+                        return;
+
+                    }
+
+
+                    /* ==================================================
+                    MULTIPLE MATCHES
+                    ================================================== */
+
+                    setSearchResults(
+                        results
+                    );
+
+                    return;
+
+                }
+
+
+                /* ==================================================
+                   EXISTING EXACT-ID LOOKUP
+                   ADMIN / ADMIN TEAM / REGULAR TEAM
+                ================================================== */
 
                 const response =
                     await fetch(
@@ -478,6 +1028,7 @@ function TicketLookup() {
 
         setEntryId("");
         setTicket(null);
+        setSearchResults([]);
         setError("");
 
     };
@@ -512,6 +1063,21 @@ function TicketLookup() {
 
             navigate(
                 "/team-dashboard"
+            );
+
+            return;
+
+        }
+
+
+        /* ==================================================
+           REGULAR HOST
+        ================================================== */
+
+        if (isHostLookup) {
+
+            navigate(
+                "/dashboard"
             );
 
             return;
@@ -815,6 +1381,23 @@ function TicketLookup() {
 
 
         /* ==================================================
+           REGULAR HOST
+        ================================================== */
+
+        if (isHostLookup) {
+
+            navigate(
+                `/scanner/${encodeURIComponent(
+                    eventId
+                )}`
+            );
+
+            return;
+
+        }
+
+
+        /* ==================================================
            REGULAR TEAM
         ================================================== */
 
@@ -853,7 +1436,9 @@ function TicketLookup() {
                             ? "Admin Dashboard"
                             : isAdminTeamLookup
                                 ? "Admin Team Dashboard"
-                                : "Team Dashboard"}
+                                : isRegularTeamLookup
+                                    ? "Team Dashboard"
+                                    : "Host Dashboard"}
                     </span>
                 </button>
 
@@ -890,7 +1475,9 @@ function TicketLookup() {
                             ? "TICKET MANAGEMENT"
                             : isAdminTeamLookup
                                 ? "ADMIN TEAM TICKET LOOKUP"
-                                : "TEAM TICKET LOOKUP"}
+                                : isRegularTeamLookup
+                                    ? "TEAM TICKET LOOKUP"
+                                    : "HOST TICKET LOOKUP"}
                     </p>
 
                     <h1>
@@ -922,8 +1509,12 @@ function TicketLookup() {
                         </h2>
 
                         <p>
-                            Enter the Ticket ID or Pass ID
-                            shown on the attendee's ticket.
+                            {isMainAdminLookup || 
+                            isHostLookup ||
+                            isAdminTeamLookup ||
+                            isRegularTeamLookup
+                                ? "Search by Ticket ID, attendee name, or email."
+                                : "Enter the Ticket ID or Pass ID shown on the attendee's ticket."}
                         </p>
 
                     </div>
@@ -953,7 +1544,14 @@ function TicketLookup() {
                                     event.target.value
                                 )
                             }
-                            placeholder="e.g. EW-123456 or FREE-123456"
+                            placeholder={
+                                isMainAdminLookup ||
+                                isHostLookup ||
+                                isAdminTeamLookup ||
+                                isRegularTeamLookup
+                                    ? "Ticket ID, attendee name, or email"
+                                    : "e.g. EW-123456 or FREE-123456"
+                            }
                             autoComplete="off"
                             disabled={loading}
                             spellCheck="false"
@@ -984,7 +1582,9 @@ function TicketLookup() {
                     </button>
 
 
-                    {(ticket || error) && (
+                    {(ticket ||
+                        searchResults.length > 0 ||
+                        error) && (
 
                         <button
                             type="button"
@@ -998,6 +1598,148 @@ function TicketLookup() {
                     )}
 
                 </form>
+
+
+                {/* ==================================================
+                    SEARCH RESULTS
+                ================================================== */}
+
+                {( 
+                    isMainAdminLookup || 
+                    isAdminTeamLookup ||
+                    isRegularTeamLookup ||
+                    isHostLookup 
+                ) &&
+                searchResults.length > 0 && (
+
+                    <div className="ticket-lookup-search-results">
+
+                        <div className="ticket-lookup-search-results-header">
+
+                            <div>
+
+                                <h3>
+                                    {isAdminTeamLookup
+                                        ? "Admin Team Matching Tickets"
+                                        :isRegularTeamLookup
+                                          ? "Team Matching Tickets"
+                                          : "Matching Tickets"}
+                                </h3>
+
+                                <p>
+                                    {searchResults.length} matching individual ticket
+                                    {searchResults.length === 1
+                                        ? ""
+                                        : "s"} found. Select the correct attendee.
+                                </p>
+
+                            </div>
+
+                            <Ticket size={23} />
+
+                        </div>
+
+
+                        <div className="ticket-lookup-results-list">
+
+                            {searchResults.map(
+                                (result, index) => {
+
+                                    const resultData =
+                                        getSearchResultData(
+                                            result
+                                        );
+
+                                    return (
+
+                                        <button
+                                            type="button"
+                                            key={
+                                                resultData.resultTicketId !==
+                                                "Not available"
+                                                    ? resultData.resultTicketId
+                                                    : index
+                                            }
+                                            className="ticket-lookup-result-item"
+                                            onClick={() =>
+                                                selectSearchResult(
+                                                    result
+                                                )
+                                            }
+                                            disabled={loading}
+                                        >
+
+                                            <div className="ticket-lookup-result-icon">
+
+                                                <Ticket size={20} />
+
+                                            </div>
+
+
+                                            <div className="ticket-lookup-result-main">
+
+                                                <strong>
+                                                    {resultData.resultTicketId}
+                                                </strong>
+
+                                                <span>
+                                                    {resultData.resultName}
+                                                </span>
+
+                                                <small>
+                                                    {resultData.resultEmail}
+                                                </small>
+
+                                            </div>
+
+
+                                            <div className="ticket-lookup-result-event">
+
+                                                <span>
+                                                    Event
+                                                </span>
+
+                                                <strong>
+                                                    {resultData.resultEventTitle}
+                                                </strong>
+
+                                            </div>
+
+
+                                            <div className="ticket-lookup-result-status">
+
+                                                <span>
+                                                    Status
+                                                </span>
+
+                                                <strong>
+                                                    {resultData.resultStatus}
+                                                </strong>
+
+                                            </div>
+
+
+                                            <ArrowLeft
+                                                size={18}
+                                                className="ticket-lookup-result-arrow"
+                                                style={{
+                                                    transform:
+                                                        "rotate(180deg)",
+                                                }}
+                                            />
+
+                                        </button>
+
+                                    );
+
+                                }
+                            )}
+
+                        </div>
+
+                    </div>
+
+                )}
 
 
                 {/* ERROR */}
@@ -1650,6 +2392,7 @@ function TicketLookup() {
                                         Ticket is valid and has not
                                         been used.
                                     </span>
+
                                 </>
 
                             ) : (

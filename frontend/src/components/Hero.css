@@ -12,6 +12,7 @@
     position: relative;
     width: 100%;
     min-height: 570px;
+    font-family: Arial, Helvetica, sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -19,9 +20,13 @@
     padding: 90px 7% 80px;
     overflow: hidden;
     background: #202124;
-    color: #ffffff;
+    color: #fff9f9;
     text-align: center;
     isolation: isolate;
+}
+
+.hero * {
+    font-family: inherit;
 }
 /* ============================================================
    REAL BACKGROUND IMAGE
@@ -78,10 +83,10 @@
     margin-bottom: 20px;
     padding: 8px 14px;
     border: 1px solid
-        rgba(255, 255, 255, 0.35);
+        rgba(215, 137, 12, 0.35);
     border-radius: 999px;
     background:
-        rgba(239, 139, 143, 0.2);
+        rgba(231, 112, 116, 0.2);
     color: #faf5f5;
     font-size: 32px;
     line-height: 2.2;
@@ -105,20 +110,19 @@
    TITLE
 ============================================================ */
 .hero h1 {
-    margin: 0 0 22px;
-    color: #d06969;
+    margin: 0 0 24px;
     font-size:
         clamp(
-            3rem,
-            5.5vw,
-            4.7rem
+            2.9rem,
+            6vw,
+            4.2rem
         );
-    line-height: 1.04;
+    line-height: 1.08;
     font-weight: 800;
-    letter-spacing: -2.8px;
+    letter-spacing: -2px;
     text-shadow:
-        0 4px 20px
-        rgba(0, 0, 0, 0.30);
+        0 3px 12px
+        rgba(223, 45, 45, 0.35);
 }
 /* ============================================================
    TITLE SPANS
@@ -126,7 +130,12 @@
 .hero h1 span {
     display: inline;
     margin-left: 8px;
-    color: #ffffff;
+    color: #f3ecec;
+}
+
+.hero h1 .hero-title-highlight {
+    margin-left: 0;
+    color: #ef5047;
 }
 /* ============================================================
    DESCRIPTION
@@ -142,17 +151,17 @@
     letter-spacing: 0;
     text-shadow:
         0 2px 12px
-        rgba(0, 0, 0, 0.35);
+        rgba(223, 45, 45, 0.35);
 }
 /* ============================================================
    BUTTON CONTAINER
 ============================================================ */
 .hero-button {
-    width: 100%;
+    width: 80%;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 /* ============================================================

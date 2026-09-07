@@ -5,9 +5,14 @@
 .ticket-lookup-page {
     width: 100%;
     min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
     background: #f6f7fb;
     padding-bottom: 60px;
     color: #172033;
+}
+
+.ticket-lookup-page * {
+    font-family: inherit;
 }
 
 
@@ -49,7 +54,7 @@
 
 
 .ticket-lookup-back-btn:hover {
-    color: #5b3df5;
+    color: #ef5047;
 }
 
 
@@ -90,8 +95,8 @@
     align-items: center;
     justify-content: center;
 
-    background: #eeeaff;
-    color: #5b3df5;
+    background: #f3f4f6;
+    color: #ef5047;
 }
 
 
@@ -171,7 +176,7 @@
 
 
 .ticket-lookup-search-icon {
-    color: #5b3df5;
+    color: #ef5047;
 }
 
 
@@ -212,10 +217,10 @@
 
 
 .ticket-lookup-input-wrapper:focus-within {
-    border-color: #5b3df5;
+    border-color: #171717;
 
     box-shadow:
-        0 0 0 4px rgba(91, 61, 245, 0.1);
+        0 0 0 4px rgba(23, 23, 23, 0.1);
 }
 
 
@@ -270,17 +275,17 @@
 
 
 .ticket-lookup-search-btn {
-    border: 1px solid #5b3df5;
-    background: #5b3df5;
+    border: 1px solid #ef5047;
+    background: #ef5047;
     color: #ffffff;
 }
 
 
 .ticket-lookup-search-btn:hover:not(:disabled) {
-    background: #4c30e6;
+    background: #c64646;
 
     box-shadow:
-        0 8px 18px rgba(91, 61, 245, 0.22);
+        0 8px 18px rgba(198, 70, 70, 0.22);
 
     transform: translateY(-1px);
 }
@@ -541,8 +546,8 @@
 
     border-radius: 11px;
 
-    background: #f0edff;
-    color: #5b3df5;
+    background: #f3f4f6;
+    color: #ef5047;
 
     display: flex;
     align-items: center;
@@ -640,7 +645,7 @@
 
 
 .ticket-lookup-entry-header > svg {
-    color: #5b3df5;
+    color: #ef5047;
 }
 
 
@@ -733,7 +738,7 @@
 
     border-radius: inherit;
 
-    background: #5b3df5;
+    background: #171717;
 
     transition:
         width 0.3s ease;
@@ -774,16 +779,16 @@
 
 
 .ticket-lookup-warning.refunded {
-    background: #fff7ed;
-    border: 1px solid #fed7aa;
-    color: #c2410c;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    color: #374151;
 }
 
 
 .ticket-lookup-warning.limit {
-    background: #fff7ed;
-    border: 1px solid #fed7aa;
-    color: #c2410c;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    color: #374151;
 }
 
 
@@ -870,7 +875,7 @@
 
 
 .ticket-lookup-history-header > svg {
-    color: #5b3df5;
+    color: #ef5047;
 }
 
 
@@ -926,7 +931,7 @@
 
 .ticket-lookup-admin-detail > svg {
     flex-shrink: 0;
-    color: #5b3df5;
+    color: #ef5047;
 }
 
 
@@ -995,9 +1000,9 @@
 
 
 .ticket-lookup-scan-btn {
-    border: 1px solid #5b3df5;
+    border: 1px solid #171717;
 
-    background: #5b3df5;
+    background: #171717;
     color: #ffffff;
 }
 
@@ -1006,7 +1011,7 @@
     transform: translateY(-1px);
 
     box-shadow:
-        0 8px 18px rgba(91, 61, 245, 0.2);
+        0 8px 18px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -1252,6 +1257,198 @@
 
     .ticket-lookup-warning {
         padding: 15px;
+    }
+
+}
+/* ============================================================
+   HOST SEARCH RESULTS
+   ============================================================ */
+
+.ticket-lookup-search-results {
+    margin-top: 24px;
+    border-top: 1px solid var(--border, #e5e7eb);
+    padding-top: 22px;
+}
+
+.ticket-lookup-search-results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.ticket-lookup-search-results-header h3 {
+    margin: 0 0 5px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.ticket-lookup-search-results-header p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #6b7280;
+}
+
+.ticket-lookup-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ticket-lookup-result-item {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto minmax(180px, 1.4fr) minmax(150px, 1fr) auto auto;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 14px;
+    background: #ffffff;
+    text-align: left;
+    cursor: pointer;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.ticket-lookup-result-item:hover {
+    border-color: var(--accent, #d85c45);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+}
+
+.ticket-lookup-result-item:disabled {
+    opacity: 0.65;
+    cursor: wait;
+    transform: none;
+}
+
+.ticket-lookup-result-icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    background: var(--accent-bg, rgba(216, 92, 69, 0.1));
+    color: var(--accent, #d85c45);
+    flex-shrink: 0;
+}
+
+.ticket-lookup-result-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.ticket-lookup-result-main strong {
+    font-size: 15px;
+    color: var(--text-h, #17201b);
+    overflow-wrap: anywhere;
+}
+
+.ticket-lookup-result-main span {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text, #4d504c);
+}
+
+.ticket-lookup-result-main small {
+    font-size: 13px;
+    color: #737873;
+    overflow-wrap: anywhere;
+}
+
+.ticket-lookup-result-event,
+.ticket-lookup-result-status {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ticket-lookup-result-event span,
+.ticket-lookup-result-status span {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #8a8f8a;
+}
+
+.ticket-lookup-result-event strong,
+.ticket-lookup-result-status strong {
+    font-size: 13px;
+    color: var(--text-h, #17201b);
+    overflow-wrap: anywhere;
+}
+
+.ticket-lookup-result-arrow {
+    color: #8a8f8a;
+    flex-shrink: 0;
+}
+
+@media (max-width: 850px) {
+
+    .ticket-lookup-result-item {
+        grid-template-columns: auto 1fr auto;
+    }
+
+    .ticket-lookup-result-event,
+    .ticket-lookup-result-status {
+        grid-column: 2 / -1;
+    }
+
+    .ticket-lookup-result-arrow {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+}
+
+@media (max-width: 560px) {
+
+    .ticket-lookup-search-results-header {
+        align-items: flex-start;
+    }
+
+    .ticket-lookup-result-item {
+        grid-template-columns: auto 1fr auto;
+        gap: 12px;
+        padding: 14px;
+    }
+
+    .ticket-lookup-result-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .ticket-lookup-result-main strong {
+        font-size: 14px;
+    }
+
+    .ticket-lookup-result-main span {
+        font-size: 13px;
+    }
+
+    .ticket-lookup-result-main small {
+        font-size: 12px;
+    }
+
+    .ticket-lookup-result-event,
+    .ticket-lookup-result-status {
+        grid-column: 1 / -1;
+        padding-top: 3px;
+    }
+
+    .ticket-lookup-result-arrow {
+        grid-column: 3;
+        grid-row: 1;
     }
 
 }

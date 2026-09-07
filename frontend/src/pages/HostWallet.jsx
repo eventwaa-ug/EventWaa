@@ -1,4 +1,11 @@
 import { useEffect, useState } from "react";
+import {
+    FiBriefcase,
+    FiCreditCard,
+    FiDollarSign,
+    FiTag,
+    FiUser,
+} from "react-icons/fi";
 import "./../styles/HostWallet.css";
 import { useAuth } from "../context/AuthContext";
 const API_URL = "http://localhost:5000";
@@ -207,7 +214,11 @@ function HostWallet() {
             ================================================== */}
             <div className="host-wallet-header">
                 <h1>
-                    Host Wallet 💰
+                    <FiCreditCard
+                        className="wallet-title-icon"
+                        aria-hidden="true"
+                    />
+                    Host Wallet
                 </h1>
                 <p>
                     Manage your EventWaa event earnings.
@@ -312,24 +323,40 @@ function HostWallet() {
             ================================================== */}
             <div className="earnings-card">
                 <h2>
-                    💰 Earnings Breakdown
+                    <FiDollarSign
+                        className="wallet-section-icon"
+                        aria-hidden="true"
+                    />
+                    Earnings Breakdown
                 </h2>
                 <p>
-                    🎟️ Total Ticket Sales:
+                    <FiTag
+                        className="wallet-detail-icon"
+                        aria-hidden="true"
+                    />
+                    Total Ticket Sales:
                     <strong>
                         UGX{" "}
                         {earnings.totalSales.toLocaleString()}
                     </strong>
                 </p>
                 <p>
-                    🏦 EventWaa Commission:
+                    <FiBriefcase
+                        className="wallet-detail-icon"
+                        aria-hidden="true"
+                    />
+                    EventWaa Commission:
                     <strong>
                         UGX{" "}
                         {earnings.commission.toLocaleString()}
                     </strong>
                 </p>
                 <p>
-                    👤 Your Earnings:
+                    <FiUser
+                        className="wallet-detail-icon"
+                        aria-hidden="true"
+                    />
+                    Your Earnings:
                     <strong>
                         UGX{" "}
                         {earnings.hostEarnings.toLocaleString()}

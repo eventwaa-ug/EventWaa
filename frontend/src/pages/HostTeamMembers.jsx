@@ -1,5 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+    FiAlertCircle,
+    FiArrowLeft,
+    FiCalendar,
+    FiCheck,
+    FiCheckCircle,
+    FiCircle,
+    FiClock,
+    FiLock,
+    FiPlus,
+    FiTag,
+    FiUsers,
+    FiX,
+} from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
 import "../styles/HostTeamMembers.css";
 
@@ -668,6 +682,112 @@ function HostTeamMembers() {
 
     /*
      * ============================================================
+     * REASSIGN MEMBER EVENT
+     * ============================================================
+     */
+
+    const reassignMemberEvent =
+        async (member, eventId) => {
+
+            if (!hasHostIdentity || !eventId) {
+                return;
+            }
+
+            const selectedEventData =
+                events.find(
+                    (event) =>
+                        String(event.id) ===
+                        String(eventId)
+                );
+
+            if (!selectedEventData) {
+                return;
+            }
+
+            try {
+
+                setActionLoading(
+                    `event-${member.id}`
+                );
+
+                const response =
+                    await fetch(
+                        `${API_BASE}/host/team-members/${encodeURIComponent(
+                            member.id
+                        )}`,
+                        {
+                            method: "PUT",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    hostId:
+                                        hostId || null,
+
+                                    hostEmail:
+                                        hostEmail || null,
+
+                                    eventIds: [
+                                        String(eventId)
+                                    ]
+                                })
+                        }
+                    );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(
+                        data.message ||
+                        "Unable to reassign scanner."
+                    );
+                }
+
+                setMembers(
+                    (previous) =>
+                        previous.map(
+                            (item) =>
+                                item.id === member.id
+                                    ? {
+                                        ...item,
+                                        ...(data.member || {})
+                                    }
+                                    : item
+                        )
+                );
+
+                setSuccessMessage(
+                    `${member.name} was assigned to ${
+                        selectedEventData.title
+                    }.`
+                );
+
+            } catch (err) {
+
+                console.error(
+                    "REASSIGN TEAM MEMBER ERROR:",
+                    err
+                );
+
+                setError(
+                    err.message ||
+                    "Unable to reassign scanner."
+                );
+
+            } finally {
+
+                setActionLoading("");
+            }
+        };
+
+
+    /*
+     * ============================================================
      * REMOVE MEMBER
      * ============================================================
      */
@@ -894,7 +1014,8 @@ function HostTeamMembers() {
                             navigate("/dashboard")
                         }
                     >
-                        ← Dashboard
+                        <FiArrowLeft aria-hidden="true" />
+                        Dashboard
                     </button>
 
                     <div className="host-team-title-wrap">
@@ -921,7 +1042,7 @@ function HostTeamMembers() {
                     className="host-team-add-button"
                     onClick={openAddMember}
                 >
-                    <span>+</span>
+                    <FiPlus aria-hidden="true" />
                     Add Scanner
                 </button>
 
@@ -936,7 +1057,7 @@ function HostTeamMembers() {
 
                 <div className="host-team-alert error">
 
-                    <span>!</span>
+                    <FiAlertCircle aria-hidden="true" />
 
                     <p>
                         {error}
@@ -947,7 +1068,7 @@ function HostTeamMembers() {
                             setError("")
                         }
                     >
-                        ×
+                        <FiX aria-hidden="true" />
                     </button>
 
                 </div>
@@ -958,7 +1079,7 @@ function HostTeamMembers() {
 
                 <div className="host-team-alert success">
 
-                    <span>✓</span>
+                    <FiCheckCircle aria-hidden="true" />
 
                     <p>
                         {successMessage}
@@ -969,7 +1090,7 @@ function HostTeamMembers() {
                             setSuccessMessage("")
                         }
                     >
-                        ×
+                        <FiX aria-hidden="true" />
                     </button>
 
                 </div>
@@ -983,7 +1104,7 @@ function HostTeamMembers() {
             <section className="host-team-info">
 
                 <div className="host-team-info-icon">
-                    🎟
+                    <FiTag aria-hidden="true" />
                 </div>
 
                 <div>
@@ -1014,7 +1135,7 @@ function HostTeamMembers() {
                 <div className="host-team-stat">
 
                     <div className="host-team-stat-icon">
-                        👥
+                        <FiUsers aria-hidden="true" />
                     </div>
 
                     <div>
@@ -1037,7 +1158,7 @@ function HostTeamMembers() {
                 <div className="host-team-stat">
 
                     <div className="host-team-stat-icon active">
-                        ●
+                        <FiCheckCircle aria-hidden="true" />
                     </div>
 
                     <div>
@@ -1060,7 +1181,7 @@ function HostTeamMembers() {
                 <div className="host-team-stat">
 
                     <div className="host-team-stat-icon disabled">
-                        ◌
+                        <FiCircle aria-hidden="true" />
                     </div>
 
                     <div>
@@ -1083,7 +1204,7 @@ function HostTeamMembers() {
                 <div className="host-team-stat">
 
                     <div className="host-team-stat-icon event">
-                        📅
+                        <FiCalendar aria-hidden="true" />
                     </div>
 
                     <div>
@@ -1143,7 +1264,7 @@ function HostTeamMembers() {
                     <div className="host-team-scan-card">
 
                         <span className="scan-card-icon">
-                            🎟
+                            <FiTag aria-hidden="true" />
                         </span>
 
                         <strong>
@@ -1164,7 +1285,7 @@ function HostTeamMembers() {
                     <div className="host-team-scan-card">
 
                         <span className="scan-card-icon">
-                            ✓
+                            <FiCheck aria-hidden="true" />
                         </span>
 
                         <strong>
@@ -1185,7 +1306,7 @@ function HostTeamMembers() {
                     <div className="host-team-scan-card">
 
                         <span className="scan-card-icon">
-                            !
+                            <FiAlertCircle aria-hidden="true" />
                         </span>
 
                         <strong>
@@ -1206,7 +1327,7 @@ function HostTeamMembers() {
                     <div className="host-team-scan-card">
 
                         <span className="scan-card-icon">
-                            ◷
+                            <FiClock aria-hidden="true" />
                         </span>
 
                         <strong>
@@ -1288,7 +1409,7 @@ function HostTeamMembers() {
                     <div className="host-team-empty">
 
                         <div className="host-team-empty-icon">
-                            🎟
+                            <FiTag aria-hidden="true" />
                         </div>
 
                         <h3>
@@ -1356,7 +1477,8 @@ function HostTeamMembers() {
                                                     </h3>
 
                                                     <span className="host-team-role-badge">
-                                                        🎟 Scanner
+                                                        <FiTag aria-hidden="true" />
+                                                        Scanner
                                                     </span>
 
                                                 </div>
@@ -1383,6 +1505,48 @@ function HostTeamMembers() {
 
                                                 </div>
 
+                                                <label className="host-team-reassign-control">
+                                                    <span>
+                                                        Reassign event
+                                                    </span>
+
+                                                    <select
+                                                        value={
+                                                            member.eventId ||
+                                                            member.eventIds?.[0] ||
+                                                            ""
+                                                        }
+                                                        onChange={(e) =>
+                                                            reassignMemberEvent(
+                                                                member,
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            eventsLoading ||
+                                                            actionLoading ===
+                                                                `event-${member.id}` ||
+                                                            isUpdating ||
+                                                            isRemoving
+                                                        }
+                                                    >
+                                                        <option value="" disabled>
+                                                            Select an event
+                                                        </option>
+
+                                                        {events.map(
+                                                            (event) => (
+                                                                <option
+                                                                    key={event.id}
+                                                                    value={event.id}
+                                                                >
+                                                                    {event.title}
+                                                                </option>
+                                                            )
+                                                        )}
+                                                    </select>
+                                                </label>
+
                                             </div>
 
                                         </div>
@@ -1399,7 +1563,7 @@ function HostTeamMembers() {
                                                 }`}
                                             >
                                                 <span>
-                                                    ●
+                                                    <FiCheckCircle aria-hidden="true" />
                                                 </span>
 
                                                 {member.status}
@@ -1503,7 +1667,7 @@ function HostTeamMembers() {
                                     "add"
                                 }
                             >
-                                ×
+                                    <FiX aria-hidden="true" />
                             </button>
 
                         </div>
@@ -1513,7 +1677,7 @@ function HostTeamMembers() {
 
                             <div className="host-team-form-error">
 
-                                <span>!</span>
+                                <FiAlertCircle aria-hidden="true" />
 
                                 {formError}
 
@@ -1594,7 +1758,7 @@ function HostTeamMembers() {
                                 <div className="host-team-role-display">
 
                                     <span>
-                                        🎟
+                                        <FiTag aria-hidden="true" />
                                     </span>
 
                                     <div>
@@ -1692,7 +1856,7 @@ function HostTeamMembers() {
                             <div className="host-team-permission-box">
 
                                 <div className="host-team-permission-icon">
-                                    🔐
+                                        <FiLock aria-hidden="true" />
                                 </div>
 
                                 <div>
@@ -1770,7 +1934,7 @@ function HostTeamMembers() {
                     <div className="host-team-password-modal">
 
                         <div className="host-team-password-icon">
-                            ✓
+                            <FiCheckCircle aria-hidden="true" />
                         </div>
 
                         <span className="host-team-eyebrow">

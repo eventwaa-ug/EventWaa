@@ -4,10 +4,15 @@
 .footer {
   width: 100%;
   box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
   background: #111827;
   color: #ffffff;
   padding: 64px 24px 24px;
   margin-top: 60px;
+}
+
+.footer * {
+  font-family: inherit;
 }
 /* =========================================================
    CONTAINER
@@ -54,11 +59,12 @@
 /* PLATFORM NAME */
 .footer-brand-name {
   display: inline-block;
-  color: #ffffff;
-  font-size: 25px;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.6px;
+  color: #ef5047;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.65rem;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: -0.5px;
   white-space: nowrap;
 }
 /* DESCRIPTION */

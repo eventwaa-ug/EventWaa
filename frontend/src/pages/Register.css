@@ -12,6 +12,8 @@
 .register-page,
 .register-page * {
   box-sizing: border-box;
+
+  font-style: normal;
 }
 
 .register-page {
@@ -42,12 +44,7 @@
       #197c78 100%
     );
 
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 
   color: #111827;
 
@@ -273,12 +270,12 @@
 
 
 .input-group input:focus {
-  border-color: #7c3aed;
+  border-color: #0f766e;
 
   background: #ffffff;
 
   box-shadow:
-    0 0 0 4px rgba(124, 58, 237, 0.11);
+    0 0 0 4px rgba(15, 118, 110, 0.11);
 }
 
 
@@ -363,9 +360,9 @@
 
 
 .password-toggle:hover {
-  color: #7c3aed;
+  color: #0f766e;
 
-  background: #f3e8ff;
+  background: #ccfbf1;
 }
 
 
@@ -386,7 +383,7 @@
 
 
 .password-toggle:focus-visible {
-  outline: 3px solid rgba(124, 58, 237, 0.20);
+  outline: 3px solid rgba(15, 118, 110, 0.20);
 
   outline-offset: 2px;
 }
@@ -464,8 +461,8 @@
   background:
     linear-gradient(
       135deg,
-      #7c3aed,
-      #ec4899
+      #0f766e,
+      #0ea5e9
     );
 
   color: #ffffff;
@@ -481,7 +478,7 @@
   cursor: pointer;
 
   box-shadow:
-    0 8px 20px rgba(124, 58, 237, 0.18);
+    0 8px 20px rgba(15, 118, 110, 0.18);
 
   transition:
     transform 0.2s ease,
@@ -494,7 +491,7 @@
   transform: translateY(-2px);
 
   box-shadow:
-    0 12px 28px rgba(124, 58, 237, 0.25);
+    0 12px 28px rgba(15, 118, 110, 0.25);
 }
 
 
@@ -537,7 +534,7 @@
 
 
 .register-footer a {
-  color: #7c3aed;
+  color: #0f766e;
 
   text-decoration: none;
 
@@ -549,7 +546,7 @@
 
 
 .register-footer a:hover {
-  color: #ec4899;
+  color: #0284c7;
 
   text-decoration: underline;
 }
@@ -825,7 +822,7 @@
 
 
 .register-page a:focus-visible {
-  outline: 3px solid rgba(124, 58, 237, 0.20);
+  outline: 3px solid rgba(15, 118, 110, 0.20);
 
   outline-offset: 3px;
 

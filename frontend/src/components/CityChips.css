@@ -54,7 +54,6 @@
     padding: 5px 2px 12px;
     scroll-behavior: smooth;
     scroll-snap-type: x mandatory;
-    scrollbar-width: none;
     -ms-overflow-style: none;
 }
 .city-chips::-webkit-scrollbar {
