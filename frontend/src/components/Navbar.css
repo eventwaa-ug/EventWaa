@@ -68,7 +68,7 @@
 }
 
 .logo-text {
-  color: #ef5047;
+  color: #702e2e;
 
   font-family: Arial, Helvetica, sans-serif;
 
@@ -120,7 +120,7 @@
 .desktop-nav-link:hover {
   background: #f3f2ef;
 
-  color: #171717;
+  color: #d11b1b;
 
   transform: translateY(-1px);
 }

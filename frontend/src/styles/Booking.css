@@ -1,110 +1,132 @@
 .booking-page {
   min-height: 100vh;
   background: #f7f7f7;
-
   display: flex;
   justify-content: center;
   align-items: flex-start;
-
   padding: 50px 20px;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
 }
-
-
 .booking-card {
   width: 100%;
   max-width: 600px;
-
   background: #ffffff;
-
   border-radius: 24px;
-
   overflow: hidden;
-
   box-shadow:
     0 15px 45px rgba(0, 0, 0, 0.08);
+  font-family: inherit;
 }
-
-
+/* ============================================================
+   BACK BUTTON
+============================================================ */
+.booking-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 32px 0;
+  padding: 9px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #374151;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s,
+    transform 0.2s;
+}
+.booking-back-btn:hover {
+  background: #fff7f5;
+  border-color: #d85c45;
+  color: #d85c45;
+  transform: translateX(-2px);
+}
+.booking-back-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.booking-back-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
 /* ============================================================
    EVENT POSTER
 ============================================================ */
-
 .booking-event-image {
   width: 100%;
   height: 280px;
   overflow: hidden;
 }
-
-
 .booking-event-image img {
   width: 100%;
   height: 100%;
-
   object-fit: cover;
-
   display: block;
 }
-
-
 /* ============================================================
    EVENT INFORMATION
 ============================================================ */
-
 .booking-event-info {
   padding: 28px 32px 10px;
 }
-
-
 .booking-label {
   display: inline-block;
-
+  font-family: inherit;
   font-size: 12px;
   font-weight: 700;
-
   letter-spacing: 1px;
-
   color: #d85c45;
-
   background: #fff0ec;
-
   padding: 6px 12px;
-
   border-radius: 999px;
-
   margin-bottom: 12px;
 }
-
-
 .booking-card h1 {
+  font-family: inherit;
   font-size: 30px;
   line-height: 1.25;
-
   margin: 0 0 15px;
-
   color: #111827;
 }
-
-
 .event-meta {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 9px;
 }
-
-
 .event-meta p {
   margin: 0;
-
+  display: flex;
+  align-items: center;
+  gap: 9px;
   color: #6b7280;
-
+  font-family: inherit;
   font-size: 15px;
+  line-height: 1.4;
 }
-
-
+.event-meta p svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  color: #d85c45;
+}
 /* ============================================================
    CONTENT
 ============================================================ */
-
 .booking-card > h2,
 .booking-card > .summary-row,
 .booking-card > .payment-options,
@@ -116,376 +138,305 @@
   margin-left: 32px;
   margin-right: 32px;
 }
-
-
 .booking-card h2 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: inherit;
   font-size: 20px;
-
   margin-top: 25px;
   margin-bottom: 18px;
-
   color: #111827;
 }
-
-
+.booking-card h2 svg {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  color: #d85c45;
+}
 .booking-card hr {
   border: none;
-
   border-top: 1px solid #e5e7eb;
-
   margin-top: 24px;
   margin-bottom: 24px;
 }
-
-
 /* ============================================================
    SELECTED TICKET
 ============================================================ */
-
 .selected-ticket-box {
   display: flex;
-
   justify-content: space-between;
   align-items: center;
-
   gap: 20px;
-
   padding: 16px;
-
   background: #fafafa;
-
   border: 1px solid #e5e7eb;
-
   border-radius: 14px;
-
   margin-bottom: 20px;
+  font-family: inherit;
 }
-
-
 .selected-ticket-box div {
   display: flex;
   flex-direction: column;
-
   gap: 5px;
 }
-
-
 .selected-ticket-box span {
+  font-family: inherit;
   font-size: 13px;
-
   color: #6b7280;
 }
-
-
 .selected-ticket-box strong {
+  font-family: inherit;
   color: #111827;
 }
-
-
 /* ============================================================
    SUMMARY
 ============================================================ */
-
 .summary-row {
   display: flex;
-
   justify-content: space-between;
   align-items: center;
-
   margin-bottom: 14px;
-
   color: #374151;
-
+  font-family: inherit;
   font-size: 15px;
 }
-
-
 .summary-row strong {
+  font-family: inherit;
   color: #111827;
 }
-
-
-/* ============================================================
-   QUANTITY
-============================================================ */
-
 .quantity-controls {
   display: flex;
-
   align-items: center;
-
-  gap: 15px;
+  justify-content: center;
+  gap: 16px;
+  min-height: 42px;
 }
-
 
 .quantity-controls button {
-  width: 36px;
-  height: 36px;
-
-  border: none;
-
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  padding: 0 !important;
+  border: none !important;
   border-radius: 10px;
-
-  background: #111827;
-
-  color: white;
-
-  font-size: 20px;
-
+  background: #111827 !important;
+  color: #ffffff !important;
+  font-size: 25px !important;
+  line-height: 1 !important;
   cursor: pointer;
-
-  transition: 0.2s;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
-
-
-.quantity-controls button:hover {
-  background: #d85c45;
-}
-
 
 .quantity-controls button:disabled {
-  opacity: 0.5;
-
+  background: #9ca3af !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
   cursor: not-allowed;
 }
 
-
-.quantity-controls span {
-  min-width: 25px;
-
-  text-align: center;
-
+.quantity-symbol {
+  display: block;
+  color: #ffffff !important;
+  font-family: Arial, sans-serif;
+  font-size: 25px;
   font-weight: 700;
+  line-height: 1;
+  visibility: visible !important;
 }
 
-
+.quantity-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  color: #111827;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
 /* ============================================================
    TOTAL
 ============================================================ */
-
 .total-row {
+  font-family: inherit;
   font-size: 20px;
-
   font-weight: 700;
-
   margin-top: 5px;
 }
-
-
 .total-row strong {
   color: #d85c45;
 }
-
-
 /* ============================================================
    PAYMENT OPTIONS
 ============================================================ */
-
 .payment-options {
   display: flex;
-
   flex-direction: column;
-
   gap: 12px;
 }
-
-
 .payment-options label {
   display: flex;
-
   align-items: center;
-
   gap: 12px;
-
   padding: 15px;
-
   border: 1px solid #e5e7eb;
-
   border-radius: 13px;
-
   cursor: pointer;
-
   color: #374151;
-
+  font-family: inherit;
   transition: 0.2s;
 }
-
-
 .payment-options label:hover {
   border-color: #d85c45;
-
   background: #fff7f5;
 }
-
-
 .payment-options input {
   accent-color: #d85c45;
 }
-
-
 /* ============================================================
    PHONE
 ============================================================ */
-
 .phone-section {
   margin-top: 20px;
-
   margin-bottom: 10px;
 }
-
-
 .phone-section label {
-  display: block;
-
+  display: flex;
+  align-items: center;
+  gap: 7px;
   margin-bottom: 8px;
-
+  font-family: inherit;
   font-weight: 600;
-
   color: #111827;
 }
-
-
+.phone-section label svg {
+  width: 16px;
+  height: 16px;
+  color: #d85c45;
+  flex-shrink: 0;
+}
 .phone-section input {
   width: 100%;
-
   box-sizing: border-box;
-
   padding: 14px;
-
   border: 1px solid #d1d5db;
-
   border-radius: 12px;
-
+  font-family: inherit;
   font-size: 16px;
-
   outline: none;
-
   transition: 0.2s;
 }
-
-
 .phone-section input:focus {
   border-color: #d85c45;
-
   box-shadow:
     0 0 0 3px rgba(239, 80, 71, 0.1);
 }
-
-
 /* ============================================================
    PAYMENT BUTTON
 ============================================================ */
-
 .pay-btn {
   width: calc(100% - 64px);
-
   margin-top: 28px;
-
   padding: 16px;
-
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
   border: none;
-
   border-radius: 14px;
-
   background: #d85c45;
-
   color: white;
-
+  font-family: inherit;
   font-size: 16px;
-
   font-weight: 700;
-
   cursor: pointer;
-
   transition: 0.2s;
 }
-
-
+.pay-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
 .pay-btn:hover {
   background: #b34a36;
-
   transform: translateY(-1px);
 }
-
-
 .pay-btn:disabled {
   opacity: 0.7;
-
   cursor: not-allowed;
-
   transform: none;
 }
-
-
 /* ============================================================
    SECURITY MESSAGE
 ============================================================ */
-
 .secure-payment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   text-align: center;
-
   color: #9ca3af;
-
+  font-family: inherit;
   font-size: 13px;
-
   padding: 15px 0 25px;
 }
-
-
+.secure-payment svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
 /* ============================================================
    MESSAGE STATES
 ============================================================ */
-
 .booking-message {
   min-height: 60vh;
-
   display: flex;
-
   justify-content: center;
   align-items: center;
-
   padding: 30px;
-
   text-align: center;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
 }
-
-
 .booking-message h2 {
   color: #374151;
+  font-family: inherit;
 }
-
-
 /* ============================================================
    MOBILE
 ============================================================ */
-
 @media (max-width: 768px) {
-
   .booking-page {
     padding: 20px 12px;
   }
-
-
   .booking-card {
     border-radius: 18px;
   }
-
-
+  .booking-back-btn {
+    margin: 18px 20px 0;
+    font-size: 14px;
+  }
   .booking-event-image {
     height: 220px;
   }
-
-
   .booking-event-info {
     padding: 22px 20px 8px;
   }
-
-
   .booking-card h1 {
     font-size: 24px;
   }
-
-
   .booking-card > h2,
   .booking-card > .summary-row,
   .booking-card > .payment-options,
@@ -495,60 +446,45 @@
   .booking-card > hr,
   .booking-card > .selected-ticket-box {
     margin-left: 20px;
-
     margin-right: 20px;
   }
-
-
   .pay-btn {
     width: calc(100% - 40px);
   }
-
-
   .selected-ticket-box {
     padding: 14px;
   }
-
-
   .summary-row {
     font-size: 14px;
   }
-
 }
-
-
 /* ============================================================
    SMALL PHONES
 ============================================================ */
-
 @media (max-width: 420px) {
-
+  .booking-page {
+    padding: 15px 10px;
+  }
+  .booking-back-btn {
+    margin: 15px 16px 0;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
   .booking-event-image {
     height: 190px;
   }
-
-
   .booking-card h1 {
     font-size: 22px;
   }
-
-
   .booking-card h2 {
     font-size: 18px;
   }
-
-
   .payment-options label {
     padding: 13px;
-
     font-size: 14px;
   }
-
-
   .pay-btn {
     font-size: 15px;
-
     padding: 15px;
   }
-
 }
