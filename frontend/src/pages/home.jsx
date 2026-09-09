@@ -102,11 +102,11 @@ function Home() {
 
       <VerifiedHosts />
 
-      /*........
+      
       {/* PLATFORM STATS */}
 
       <PlatformStats />
-      */
+      
 
 
       {/* WHY EVENTWAA */}
