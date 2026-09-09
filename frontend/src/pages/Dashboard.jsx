@@ -40,7 +40,7 @@ function Dashboard() {
      BACKEND URL
   ========================================================= */
 
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "https://eventwaa-production-7fbb.up.railway.app0";
 
   /* =========================================================
      HOST EVENTS
@@ -98,7 +98,7 @@ function Dashboard() {
     const loadDashboardData = async () => {
       try {
         const bookingsResponse = await fetch(
-          "http://localhost:5000/bookings"
+          "https://eventwaa-production-7fbb.up.railway.app0/bookings"
         );
 
         if (!bookingsResponse.ok) {
@@ -126,7 +126,7 @@ function Dashboard() {
 
       try {
         const checkedInResponse = await fetch(
-          "http://localhost:5000/bookings/checked-in"
+          "https://eventwaa-production-7fbb.up.railway.app0/bookings/checked-in"
         );
 
         if (!checkedInResponse.ok) {
@@ -166,7 +166,7 @@ function Dashboard() {
     const loadUnread = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/messages/unread/${user.id}`
+          `https://eventwaa-production-7fbb.up.railway.app0/messages/unread/${user.id}`
         );
 
         if (!response.ok) return;

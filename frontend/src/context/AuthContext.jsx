@@ -51,7 +51,7 @@ export function AuthProvider({ children }) {
     try {
 
       const response = await fetch(
-        "http://localhost:5000/users"
+        "https://eventwaa-production-7fbb.up.railway.app0/users"
       );
 
       // ------------------------------------------------------
@@ -165,7 +165,7 @@ export function AuthProvider({ children }) {
     );
 
     const response = await fetch(
-      `http://localhost:5000/users/${user.id}/profile-photo`,
+      `https://eventwaa-production-7fbb.up.railway.app0/users/${user.id}/profile-photo`,
       {
         method: "POST",
         body: formData

@@ -24,7 +24,7 @@ useEffect(() => {
     if (!user) return;
     const checkApplication = async () => {
         const response = await fetch(
-            "http://localhost:5000/host-applications"
+            "https://eventwaa-production-7fbb.up.railway.app0/host-applications"
         );
         const applications = await response.json();
         const myApplication = applications.find(

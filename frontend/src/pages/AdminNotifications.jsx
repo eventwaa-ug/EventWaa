@@ -9,7 +9,7 @@ const [notifications, setNotifications] = useState([]);
 const [filter, setFilter] = useState('unread');
 const loadNotifications = async () => {
     try {
-        const res = await fetch('http://localhost:5000/admin/notifications');
+        const res = await fetch('https://eventwaa-production-7fbb.up.railway.app0/admin/notifications');
         const data = await res.json();
         setNotifications(data);
     } catch (err) {
@@ -21,7 +21,7 @@ useEffect(() => {
 }, []);
 const markAsRead = async (id) => {
     try {
-        await fetch(`http://localhost:5000/notifications/read/${id}`, {
+        await fetch(`https://eventwaa-production-7fbb.up.railway.app0/notifications/read/${id}`, {
             method: 'PUT'
         });
         setNotifications(prev =>
@@ -37,7 +37,7 @@ const markAsRead = async (id) => {
 };
 const deleteNotification = async (id) => {
     try {
-        await fetch(`http://localhost:5000/notifications/${id}`, {
+        await fetch(`https://eventwaa-production-7fbb.up.railway.app0/notifications/${id}`, {
             method: 'DELETE'
         });
         setNotifications(prev =>

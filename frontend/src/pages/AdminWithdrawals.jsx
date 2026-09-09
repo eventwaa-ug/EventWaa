@@ -31,7 +31,7 @@ function AdminWithdrawals() {
 
 
             const response = await fetch(
-                "http://localhost:5000/admin/host-withdrawals",
+                "https://eventwaa-production-7fbb.up.railway.app0/admin/host-withdrawals",
                 {
                     method: "GET",
 
@@ -100,7 +100,7 @@ function AdminWithdrawals() {
             setActionId(actionKey);
 
             const response = await fetch(
-                `http://localhost:5000/admin/host-withdrawals/approve/${hostId}/${withdrawalId}`,
+                `https://eventwaa-production-7fbb.up.railway.app0/admin/host-withdrawals/approve/${hostId}/${withdrawalId}`,
                 {
                     method: "PUT"
                 }
@@ -176,7 +176,7 @@ function AdminWithdrawals() {
 
             const response = await fetch(
 
-                `http://localhost:5000/admin/host-withdrawals/transfer-status/${hostId}/${withdrawalId}`,
+                `https://eventwaa-production-7fbb.up.railway.app0/admin/host-withdrawals/transfer-status/${hostId}/${withdrawalId}`,
 
                 {
                     method: "GET",

@@ -20,7 +20,7 @@ function UserMessages(){
 
 
         const response = await fetch(
-            `http://localhost:5000/messages/user/${user.id}`
+            `https://eventwaa-production-7fbb.up.railway.app0/messages/user/${user.id}`
         );
 
 
@@ -116,7 +116,7 @@ function UserMessages(){
 
 
         await fetch(
-            `http://localhost:5000/messages/${id}`,
+            `https://eventwaa-production-7fbb.up.railway.app0/messages/${id}`,
             {
                 method:"DELETE"
             }

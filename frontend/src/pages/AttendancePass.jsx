@@ -12,7 +12,7 @@ function AttendancePass() {
     const loadPass = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/attendance/${attendanceId}`
+          `https://eventwaa-production-7fbb.up.railway.app0/attendance/${attendanceId}`
         );
 
         const data = await response.json();

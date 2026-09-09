@@ -11,7 +11,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import "../styles/HostRefunds.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://eventwaa-production-7fbb.up.railway.app0";
 
 function HostRefunds() {
   const { user } = useAuth();

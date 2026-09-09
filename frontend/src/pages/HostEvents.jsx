@@ -185,7 +185,7 @@ function HostEvents() {
    * ============================================================
    */
   const BACKEND_URL =
-    "http://localhost:5000";
+    "https://eventwaa-production-7fbb.up.railway.app0";
   const getImageUrl = (event) => {
     const image =
       event?.eventPoster ||

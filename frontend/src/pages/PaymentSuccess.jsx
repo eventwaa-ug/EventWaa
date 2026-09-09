@@ -12,7 +12,7 @@ import {
 } from "react-router-dom";
 import "../styles/PaymentSuccess.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://eventwaa-production-7fbb.up.railway.app0";
 
 function PaymentSuccess() {
   const navigate = useNavigate();

@@ -28,7 +28,7 @@ function MaintenanceGuard({ children }) {
     const checkMaintenance = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/admin/settings"
+          "https://eventwaa-production-7fbb.up.railway.app0/admin/settings"
         );
         /*
          * Settings endpoint should normally return 200.

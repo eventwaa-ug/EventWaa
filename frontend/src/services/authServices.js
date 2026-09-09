@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000";
+const API_URL = "https://eventwaa-production-7fbb.up.railway.app0";
 
 
 export async function registerUser(userData){

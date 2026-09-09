@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminEvents.css";
 
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "https://eventwaa-production-7fbb.up.railway.app0";
 
 function AdminEvents() {
   const [events, setEvents] = useState([]);

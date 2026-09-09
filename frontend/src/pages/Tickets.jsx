@@ -29,7 +29,7 @@ function Tickets() {
 
   const BACKEND_URL =
     import.meta.env.VITE_API_URL ||
-    "http://localhost:5000";
+    "https://eventwaa-production-7fbb.up.railway.app0";
 
 
   // ============================================================

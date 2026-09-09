@@ -94,7 +94,7 @@ data.append("hostEmail", "admin@eventwaa.com");
 data.append("verifiedHost", true);
 data.append("adminEvent", "true");
 try {
-  const response = await fetch("http://localhost:5000/events", {
+  const response = await fetch("https://eventwaa-production-7fbb.up.railway.app0/events", {
     method: "POST",
     body: data,
   });

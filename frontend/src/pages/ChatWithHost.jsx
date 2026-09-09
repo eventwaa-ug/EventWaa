@@ -53,7 +53,7 @@ function ChatWithHost(){
     useEffect(()=>{
 
 
-        fetch("http://localhost:5000/users")
+        fetch("https://eventwaa-production-7fbb.up.railway.app0/users")
 
         .then(res=>res.json())
 
@@ -89,7 +89,7 @@ function ChatWithHost(){
 
         const response = await fetch(
 
-            `http://localhost:5000/messages/${conversationId}`
+            `https://eventwaa-production-7fbb.up.railway.app0/messages/${conversationId}`
 
         );
 
@@ -166,7 +166,7 @@ function ChatWithHost(){
 
             const response = await fetch(
 
-                "http://localhost:5000/messages",
+                "https://eventwaa-production-7fbb.up.railway.app0/messages",
 
                 {
 

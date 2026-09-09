@@ -12,7 +12,7 @@ function FreePassDetails() {
 
     useEffect(() => {
 
-        fetch(`http://localhost:5000/attendance/${attendanceId}`)
+        fetch(`https://eventwaa-production-7fbb.up.railway.app0/attendance/${attendanceId}`)
             .then(res => res.json())
             .then(data => {
 
