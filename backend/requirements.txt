@@ -1,0 +1,11 @@
+Flask
+flask-cors
+requests
+qrcode
+google-auth
+Flask-Mail
+python-dotenv
+Werkzeug
+itsdangerous
+Pillow
+gunicorn
