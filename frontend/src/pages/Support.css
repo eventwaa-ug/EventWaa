@@ -263,3 +263,47 @@
 
 
 }
+/* =========================================
+   SUPPORT ICONS
+========================================= */
+
+.support-eyebrow {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+
+.support-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.support-icon svg {
+  width: 25px;
+  height: 25px;
+  stroke-width: 1.9;
+}
+
+.faq-title-icon {
+  width: 21px;
+  height: 21px;
+  margin-right: 8px;
+  vertical-align: -3px;
+  flex-shrink: 0;
+}
+
+.support-contact a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.support-contact a svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}

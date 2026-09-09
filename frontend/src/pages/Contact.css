@@ -297,3 +297,77 @@
 
 
 }
+
+/* =========================================
+   CONTACT ICONS
+========================================= */
+
+.contact-eyebrow {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+
+.contact-title-icon {
+  width: 21px;
+  height: 21px;
+  margin-right: 8px;
+  vertical-align: -3px;
+  flex-shrink: 0;
+}
+
+.info-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+}
+
+.info-icon {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.info-card h3 {
+  display: flex;
+  align-items: center;
+  margin-top: 0;
+}
+
+.info-card p {
+  margin-top: 4px;
+}
+
+.info-card a {
+  word-break: break-word;
+}
+
+.contact-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.contact-field label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.contact-field input,
+.contact-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.contact-field textarea {
+  resize: vertical;
+}
+
+.contact-button-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}

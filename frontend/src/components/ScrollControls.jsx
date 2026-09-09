@@ -25,13 +25,6 @@ function ScrollControls() {
     ============================================================
     PAGE GROUP
     Query parameters do NOT create a new page.
-    Example:
-        /events
-        /events?city=Gulu
-        /events?filter=this-week
-        /events?category=Music
-    All belong to:
-        /events
   */
   const getPageKey = (pathname) => {
     return pathname;
@@ -61,11 +54,6 @@ function ScrollControls() {
     }
     /*
       Ignore query-string changes.
-      Example:
-        /events
-        /events?city=Gulu
-      pathname is still /events,
-      so nothing is added.
     */
     if (
       getPageKey(currentPath) ===
@@ -75,8 +63,7 @@ function ScrollControls() {
     }
     /*
       A REAL PAGE changed.
-      Add the previous page to our
-      custom history.
+      Add the previous page to custom history.
     */
     pageHistoryRef.current.push(
       previousPath
@@ -94,19 +81,42 @@ function ScrollControls() {
     location.pathname === "";
   /*
     ============================================================
-    BACK TO TOP VISIBILITY
+    SHOW UP ARROW ONLY AT THE BOTTOM
     ============================================================
   */
   useEffect(() => {
-    if (isHomePage) {
-      setShowTop(false);
-      return;
-    }
+    /*
+      Reset the button whenever the user
+      navigates to another page.
+    */
+    setShowTop(false);
     const handleScroll = () => {
+      const scrollTop =
+        window.scrollY ||
+        document.documentElement.scrollTop;
+      const viewportHeight =
+        window.innerHeight;
+      const documentHeight =
+        document.documentElement.scrollHeight;
+      /*
+        Small tolerance prevents the button
+        from failing to appear because of
+        fractional pixels on some devices.
+      */
+      const distanceFromBottom =
+        documentHeight -
+        (scrollTop + viewportHeight);
+      /*
+        Show only when the user has reached
+        the bottom of the page.
+      */
       setShowTop(
-        window.scrollY > 400
+        distanceFromBottom <= 10
       );
     };
+    /*
+      Check initial position.
+    */
     handleScroll();
     window.addEventListener(
       "scroll",
@@ -115,16 +125,21 @@ function ScrollControls() {
         passive: true
       }
     );
+    window.addEventListener(
+      "resize",
+      handleScroll
+    );
     return () => {
       window.removeEventListener(
         "scroll",
         handleScroll
       );
+      window.removeEventListener(
+        "resize",
+        handleScroll
+      );
     };
-  }, [
-    location.pathname,
-    isHomePage
-  ]);
+  }, [location.pathname]);
   /*
     ============================================================
     BACK TO TOP
@@ -175,7 +190,7 @@ function ScrollControls() {
     <>
       {/* ======================================================
           BACK BUTTON
-          Hidden on Home
+          Hidden only on Home
       ====================================================== */}
       {!isHomePage && (
         <button
@@ -186,16 +201,16 @@ function ScrollControls() {
           title="Go back"
         >
           <ArrowLeft
-            size={22}
-            strokeWidth={2.2}
+            size={19}
+            strokeWidth={2}
           />
         </button>
       )}
       {/* ======================================================
           BACK TO TOP
-          Hidden on Home
+          Appears only at the bottom
       ====================================================== */}
-      {!isHomePage && showTop && (
+      {showTop && (
         <button
           type="button"
           className="scroll-top-button"
@@ -204,7 +219,7 @@ function ScrollControls() {
           title="Back to top"
         >
           <ArrowUp
-            size={22}
+            size={20}
             strokeWidth={2.2}
           />
         </button>
