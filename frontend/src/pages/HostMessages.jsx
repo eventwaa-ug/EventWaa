@@ -25,7 +25,7 @@ function HostMessages(){
 
         const response = await fetch(
 
-            `https://eventwaa-production-7fbb.up.railway.app0/host-messages/${user.id}`
+            `https://eventwaa-production-7fbb.up.railway.app/host-messages/${user.id}`
 
         );
 
@@ -75,7 +75,7 @@ function HostMessages(){
 
         await fetch(
 
-            `https://eventwaa-production-7fbb.up.railway.app0/messages/read/${messageId}`,
+            `https://eventwaa-production-7fbb.up.railway.app/messages/read/${messageId}`,
 
             {
                 method:"PUT"
@@ -96,7 +96,7 @@ function HostMessages(){
 
         await fetch(
 
-            `https://eventwaa-production-7fbb.up.railway.app0/messages/${messageId}`,
+            `https://eventwaa-production-7fbb.up.railway.app/messages/${messageId}`,
 
             {
                 method:"DELETE"

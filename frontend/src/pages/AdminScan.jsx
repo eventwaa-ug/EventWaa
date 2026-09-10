@@ -8,7 +8,7 @@ import {
 } from "react-icons/fi";
 import "./AdminScan.css";
 
-const API_BASE_URL = "https://eventwaa-production-7fbb.up.railway.app0";
+const API_BASE_URL = "https://eventwaa-production-7fbb.up.railway.app";
 
 function AdminScan() {
   const navigate = useNavigate();

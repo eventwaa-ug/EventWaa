@@ -105,7 +105,7 @@ function Login() {
   try {
 
     const response = await fetch(
-      "https://eventwaa-production-7fbb.up.railway.app0/google-login",
+      "https://eventwaa-production-7fbb.up.railway.app/google-login",
       {
         method:"POST",
         headers:{

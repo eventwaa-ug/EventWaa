@@ -19,7 +19,7 @@ export function EventProvider({ children }) {
         try {
 
             const response = await fetch(
-                "https://eventwaa-production-7fbb.up.railway.app0/events"
+                "https://eventwaa-production-7fbb.up.railway.app/events"
             );
 
             const data = await response.json();
@@ -95,7 +95,7 @@ export function EventProvider({ children }) {
         try {
 
             const response = await fetch(
-                `https://eventwaa-production-7fbb.up.railway.app0/events/${id}`,
+                `https://eventwaa-production-7fbb.up.railway.app/events/${id}`,
                 {
                     method: "DELETE"
                 }

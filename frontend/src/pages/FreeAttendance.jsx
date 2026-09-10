@@ -28,7 +28,7 @@ function FreeAttendance() {
 
     setLoading(true);
 
-    const response = await fetch("https://eventwaa-production-7fbb.up.railway.app0/attendance", {
+    const response = await fetch("https://eventwaa-production-7fbb.up.railway.app/attendance", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

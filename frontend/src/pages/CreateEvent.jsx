@@ -23,7 +23,7 @@ function CreateEvent() {
         location.state?.duplicateEvent;
 
     const BACKEND_URL =
-        "https://eventwaa-production-7fbb.up.railway.app0";
+        "https://eventwaa-production-7fbb.up.railway.app";
 
     // ============================================================
     // OPTIONS

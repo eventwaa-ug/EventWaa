@@ -32,7 +32,7 @@ function EditHostProfile() {
       uploadData.append("image", file);
 
       const response = await fetch(
-        `https://eventwaa-production-7fbb.up.railway.app0/users/${user.id}/upload-image`,
+        `https://eventwaa-production-7fbb.up.railway.app/users/${user.id}/upload-image`,
         {
           method: "POST",
           body: uploadData,
@@ -65,7 +65,7 @@ function EditHostProfile() {
 
     try {
       const response = await fetch(
-        `https://eventwaa-production-7fbb.up.railway.app0/users/${user.id}`,
+        `https://eventwaa-production-7fbb.up.railway.app/users/${user.id}`,
         {
           method: "PUT",
           headers: {

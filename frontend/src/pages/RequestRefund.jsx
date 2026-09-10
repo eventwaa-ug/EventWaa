@@ -86,7 +86,7 @@ if (!bookingId) {
 try {
     setSubmitting(true);
     const response = await fetch(
-        "https://eventwaa-production-7fbb.up.railway.app0/refunds",
+        "https://eventwaa-production-7fbb.up.railway.app/refunds",
         {
             method: "POST",
             headers: {

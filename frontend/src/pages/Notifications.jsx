@@ -16,7 +16,7 @@ function Notifications() {
         if (!user) return;
 
         const response = await fetch(
-            `https://eventwaa-production-7fbb.up.railway.app0/notifications/${user.id}`
+            `https://eventwaa-production-7fbb.up.railway.app/notifications/${user.id}`
         );
 
         const data = await response.json();
@@ -37,7 +37,7 @@ function Notifications() {
     const openNotification = async (notification) => {
 
         await fetch(
-            `https://eventwaa-production-7fbb.up.railway.app0/notifications/read/${notification.id}`,
+            `https://eventwaa-production-7fbb.up.railway.app/notifications/read/${notification.id}`,
             {
                 method: "PUT"
             }

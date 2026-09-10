@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://eventwaa-production-7fbb.up.railway.app0";
+const API_BASE_URL = "https://eventwaa-production-7fbb.up.railway.app";
 
 export async function adminFetch(
     endpoint,

@@ -40,7 +40,7 @@ function Dashboard() {
      BACKEND URL
   ========================================================= */
 
-  const BACKEND_URL = "https://eventwaa-production-7fbb.up.railway.app0";
+  const BACKEND_URL = "https://eventwaa-production-7fbb.up.railway.app";
 
   /* =========================================================
      HOST EVENTS
@@ -98,7 +98,7 @@ function Dashboard() {
     const loadDashboardData = async () => {
       try {
         const bookingsResponse = await fetch(
-          "https://eventwaa-production-7fbb.up.railway.app0/bookings"
+          "https://eventwaa-production-7fbb.up.railway.app/bookings"
         );
 
         if (!bookingsResponse.ok) {
@@ -126,7 +126,7 @@ function Dashboard() {
 
       try {
         const checkedInResponse = await fetch(
-          "https://eventwaa-production-7fbb.up.railway.app0/bookings/checked-in"
+          "https://eventwaa-production-7fbb.up.railway.app/bookings/checked-in"
         );
 
         if (!checkedInResponse.ok) {
@@ -166,7 +166,7 @@ function Dashboard() {
     const loadUnread = async () => {
       try {
         const response = await fetch(
-          `https://eventwaa-production-7fbb.up.railway.app0/messages/unread/${user.id}`
+          `https://eventwaa-production-7fbb.up.railway.app/messages/unread/${user.id}`
         );
 
         if (!response.ok) return;

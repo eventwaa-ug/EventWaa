@@ -8,7 +8,7 @@ function AdminReports(){
 
     useEffect(()=>{
 
-        fetch("https://eventwaa-production-7fbb.up.railway.app0/admin/event-reports")
+        fetch("https://eventwaa-production-7fbb.up.railway.app/admin/event-reports")
         .then(res => res.json())
         .then(data => {
 
@@ -24,7 +24,7 @@ function AdminReports(){
 
 
         await fetch(
-            `https://eventwaa-production-7fbb.up.railway.app0/admin/event-reports/${id}/dismiss`,
+            `https://eventwaa-production-7fbb.up.railway.app/admin/event-reports/${id}/dismiss`,
             {
                 method:"PUT"
             }
@@ -52,7 +52,7 @@ function AdminReports(){
 
 
         await fetch(
-            `https://eventwaa-production-7fbb.up.railway.app0/events/${eventId}`,
+            `https://eventwaa-production-7fbb.up.railway.app/events/${eventId}`,
             {
                 method:"DELETE"
             }

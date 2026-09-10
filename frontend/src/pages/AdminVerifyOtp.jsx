@@ -161,7 +161,7 @@ function AdminVerifyOtp() {
 
 
             const response = await fetch(
-                "https://eventwaa-production-7fbb.up.railway.app0/admin/verify-otp",
+                "https://eventwaa-production-7fbb.up.railway.app/admin/verify-otp",
                 {
                     method: "POST",
 

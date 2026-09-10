@@ -58,7 +58,7 @@ function AdminLogin() {
             // -------------------------------------------------
 
             const response = await fetch(
-                "https://eventwaa-production-7fbb.up.railway.app0/admin/login",
+                "https://eventwaa-production-7fbb.up.railway.app/admin/login",
                 {
                     method: "POST",
 

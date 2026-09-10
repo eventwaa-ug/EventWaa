@@ -21,7 +21,7 @@ async function loadWallet(){
     try{
 
         const response = await fetch(
-            "https://eventwaa-production-7fbb.up.railway.app0/admin/wallet"
+            "https://eventwaa-production-7fbb.up.railway.app/admin/wallet"
         );
 
         const data = await response.json();
@@ -74,7 +74,7 @@ async function loadWallet(){
     try{
 
         const response = await fetch(
-            "https://eventwaa-production-7fbb.up.railway.app0/admin/wallet/withdraw",
+            "https://eventwaa-production-7fbb.up.railway.app/admin/wallet/withdraw",
             {
                 method:"POST",
 

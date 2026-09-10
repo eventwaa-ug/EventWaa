@@ -31,7 +31,7 @@ function Profile() {
     const loadUnreadMessages = async () => {
       try {
         const response = await fetch(
-          `https://eventwaa-production-7fbb.up.railway.app0/messages/unread/${user.id}`
+          `https://eventwaa-production-7fbb.up.railway.app/messages/unread/${user.id}`
         );
 
         if (!response.ok) return;

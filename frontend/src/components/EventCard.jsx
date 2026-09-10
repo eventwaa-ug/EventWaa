@@ -31,7 +31,7 @@ function EventCard({ event }) {
     // BACKEND URL
     // ============================================================
 
-    const BACKEND_URL = "https://eventwaa-production-7fbb.up.railway.app0";
+    const BACKEND_URL = "https://eventwaa-production-7fbb.up.railway.app";
 
 
     // ============================================================

@@ -19,7 +19,7 @@ function UpcomingEvents(){
 
         if(user){
 
-            fetch("https://eventwaa-production-7fbb.up.railway.app0/bookings")
+            fetch("https://eventwaa-production-7fbb.up.railway.app/bookings")
 
             .then(res=>res.json())
 

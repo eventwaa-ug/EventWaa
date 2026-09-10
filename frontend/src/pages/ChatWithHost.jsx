@@ -53,7 +53,7 @@ function ChatWithHost(){
     useEffect(()=>{
 
 
-        fetch("https://eventwaa-production-7fbb.up.railway.app0/users")
+        fetch("https://eventwaa-production-7fbb.up.railway.app/users")
 
         .then(res=>res.json())
 
@@ -89,7 +89,7 @@ function ChatWithHost(){
 
         const response = await fetch(
 
-            `https://eventwaa-production-7fbb.up.railway.app0/messages/${conversationId}`
+            `https://eventwaa-production-7fbb.up.railway.app/messages/${conversationId}`
 
         );
 
@@ -166,7 +166,7 @@ function ChatWithHost(){
 
             const response = await fetch(
 
-                "https://eventwaa-production-7fbb.up.railway.app0/messages",
+                "https://eventwaa-production-7fbb.up.railway.app/messages",
 
                 {
 

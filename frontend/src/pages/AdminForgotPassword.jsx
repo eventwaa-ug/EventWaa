@@ -46,7 +46,7 @@ function AdminForgotPassword() {
 
 
             const response = await fetch(
-                "https://eventwaa-production-7fbb.up.railway.app0/admin/forgot-password",
+                "https://eventwaa-production-7fbb.up.railway.app/admin/forgot-password",
                 {
                     method: "POST",
 

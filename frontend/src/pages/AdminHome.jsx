@@ -46,7 +46,7 @@ function AdminHome() {
     ============================================================ */
     const loadNotifications = () => {
         fetch(
-            "https://eventwaa-production-7fbb.up.railway.app0/admin/notifications"
+            "https://eventwaa-production-7fbb.up.railway.app/admin/notifications"
         )
             .then(res =>
                 res.json()
@@ -72,7 +72,7 @@ function AdminHome() {
             ==================================================== */
             const usersRes =
                 await fetch(
-                    "https://eventwaa-production-7fbb.up.railway.app0/users"
+                    "https://eventwaa-production-7fbb.up.railway.app/users"
                 );
             const usersData =
                 await usersRes.json();
@@ -85,7 +85,7 @@ function AdminHome() {
             ==================================================== */
             const eventsRes =
                 await fetch(
-                    "https://eventwaa-production-7fbb.up.railway.app0/events"
+                    "https://eventwaa-production-7fbb.up.railway.app/events"
                 );
             const eventsData =
                 await eventsRes.json();
@@ -98,7 +98,7 @@ function AdminHome() {
             ==================================================== */
             const hostRes =
                 await fetch(
-                    "https://eventwaa-production-7fbb.up.railway.app0/host-applications"
+                    "https://eventwaa-production-7fbb.up.railway.app/host-applications"
                 );
             const applicationsData =
                 await hostRes.json();

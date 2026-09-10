@@ -37,7 +37,7 @@ function Attendees() {
       // EVENT
       // -------------------------------------------------------
       const eventResponse = await fetch(
-        `https://eventwaa-production-7fbb.up.railway.app0/events/${id}`
+        `https://eventwaa-production-7fbb.up.railway.app/events/${id}`
       );
       const eventData = await eventResponse.json();
       setEvent(eventData);
@@ -45,7 +45,7 @@ function Attendees() {
       // REFUND SETTINGS
       // -------------------------------------------------------
       const refundResponse = await fetch(
-        "https://eventwaa-production-7fbb.up.railway.app0/refund-settings"
+        "https://eventwaa-production-7fbb.up.railway.app/refund-settings"
       );
       const refundData = await refundResponse.json();
       setRefundSettings(refundData);
@@ -55,11 +55,11 @@ function Attendees() {
       let response;
       if (eventData.eventType === "Free") {
         response = await fetch(
-          `https://eventwaa-production-7fbb.up.railway.app0/attendance/event/${id}`
+          `https://eventwaa-production-7fbb.up.railway.app/attendance/event/${id}`
         );
       } else {
         response = await fetch(
-          `https://eventwaa-production-7fbb.up.railway.app0/bookings/event/${id}`
+          `https://eventwaa-production-7fbb.up.railway.app/bookings/event/${id}`
         );
       }
       const data = await response.json();
@@ -86,7 +86,7 @@ function Attendees() {
   const checkInAttendee = async (ticket) => {
     try {
       const response = await fetch(
-        `https://eventwaa-production-7fbb.up.railway.app0/check-ticket/${ticket.ticketId}`,
+        `https://eventwaa-production-7fbb.up.railway.app/check-ticket/${ticket.ticketId}`,
         {
           method: "PUT",
           headers: {
@@ -213,7 +213,7 @@ function Attendees() {
     if (!confirmed) return;
     try {
       const response = await fetch(
-        "https://eventwaa-production-7fbb.up.railway.app0/refunds",
+        "https://eventwaa-production-7fbb.up.railway.app/refunds",
         {
           method: "POST",
           headers: {

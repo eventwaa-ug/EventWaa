@@ -20,7 +20,7 @@ function AdminUsers(){
 
     const loadUsers = ()=>{
 
-        fetch("https://eventwaa-production-7fbb.up.railway.app0/admin/users")
+        fetch("https://eventwaa-production-7fbb.up.railway.app/admin/users")
 
         .then(res=>res.json())
 
@@ -38,7 +38,7 @@ function AdminUsers(){
 
 
         await fetch(
-            `https://eventwaa-production-7fbb.up.railway.app0/admin/users/${user.id}`,
+            `https://eventwaa-production-7fbb.up.railway.app/admin/users/${user.id}`,
             {
 
                 method:"PUT",

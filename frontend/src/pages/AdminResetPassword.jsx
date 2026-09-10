@@ -139,7 +139,7 @@ function AdminResetPassword() {
 
 
             const response = await fetch(
-                "https://eventwaa-production-7fbb.up.railway.app0/admin/reset-password",
+                "https://eventwaa-production-7fbb.up.railway.app/admin/reset-password",
                 {
                     method: "POST",
 

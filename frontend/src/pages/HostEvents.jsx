@@ -185,7 +185,7 @@ function HostEvents() {
    * ============================================================
    */
   const BACKEND_URL =
-    "https://eventwaa-production-7fbb.up.railway.app0";
+    "https://eventwaa-production-7fbb.up.railway.app";
   const getImageUrl = (event) => {
     const image =
       event?.eventPoster ||

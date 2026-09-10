@@ -16,7 +16,7 @@ import "../styles/Review.css";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
-  "https://eventwaa-production-7fbb.up.railway.app0";
+  "https://eventwaa-production-7fbb.up.railway.app";
 
 function Review() {
   const navigate = useNavigate();
