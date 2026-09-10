@@ -1479,10 +1479,6 @@ print(
     len(FLW_SECRET_KEY)
 )
 
-print(
-    "FLW SECRET KEY PREFIX:",
-    FLW_SECRET_KEY[:8]
-)
 
 FLW_SECRET_HASH = os.getenv(
     "FLW_SECRET_HASH",
@@ -24179,7 +24175,7 @@ def initialize_payment():
                 "UGX",
 
             "redirect_url":
-                "http://localhost:5173/payment-success",
+                f"{FRONTEND_URL}/payment-success",
 
             "customer": {
 
