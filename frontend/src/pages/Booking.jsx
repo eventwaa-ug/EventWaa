@@ -16,7 +16,7 @@ import {
   FiLock,
 } from "react-icons/fi";
 import "../styles/Booking.css";
-const API_URL = "https://eventwaa-production-7fbb.up.railway.app";
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 function Booking() {
   const { id } = useParams();
   const navigate = useNavigate();

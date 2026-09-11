@@ -40751,7 +40751,7 @@ if __name__ == "__main__":
     print("Settings:", load_admin_settings())
 
     port = int(os.environ.get("PORT", 5000))
-    # On Railway, use 8080. At home, use 5000.
+    # Railway provides ports automatically, use 5000 locally.
     
     app.run(
         host="0.0.0.0",

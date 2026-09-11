@@ -8,7 +8,7 @@ import {
 } from "react-icons/fi";
 import "./../styles/HostWallet.css";
 import { useAuth } from "../context/AuthContext";
-const API_URL = "https://eventwaa-production-7fbb.up.railway.app";
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 function HostWallet() {
     const { user } = useAuth();
     const [wallet, setWallet] = useState({

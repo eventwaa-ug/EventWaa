@@ -56,7 +56,7 @@ function UpcomingEvents(){
 
 
     // Events created by user
-    const today = new Data();
+    const today = new Date();
 
     const hostedEvents = events.filter(
 

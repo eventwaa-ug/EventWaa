@@ -11,7 +11,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import "../styles/HostRefunds.css";
 
-const API_URL = "https://eventwaa-production-7fbb.up.railway.app";
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 function HostRefunds() {
   const { user } = useAuth();
