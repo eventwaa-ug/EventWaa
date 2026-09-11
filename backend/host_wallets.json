@@ -1,32 +1,165 @@
 [
     {
         "hostId": 1784987628896,
-        "availableBalance": 0,
-        "pendingPayouts": 9000,
-        "totalEarned": 9000,
-        "totalWithdrawn": 0,
-        "withdrawals": [],
-        "scheduledPayouts": [
+        "availableBalance": 88599,
+        "pendingPayouts": 100,
+        "totalEarned": 90000,
+        "totalWithdrawn": 1301,
+        "withdrawals": [
             {
-                "amount": 9000,
-                "availableAt": 1786630034.856145,
-                "createdAt": "2026-08-12 17:07:14"
+                "id": 1,
+                "amount": 100,
+                "method": "Mobile Money",
+                "account": "07888777887",
+                "status": "completed",
+                "date": "2026-08-17 16:16:36",
+                "reviewedAt": "2026-08-17"
+            },
+            {
+                "id": 2,
+                "amount": 1000,
+                "method": "MTN Mobile Money",
+                "account": "0777364017",
+                "status": "completed",
+                "date": "2026-08-17 20:41:10",
+                "transferId": 2204415,
+                "transferReference": "EVENTWAA-WD-1784987628896-2",
+                "flutterwaveStatus": "successful",
+                "approvedAt": "2026-08-18 09:30:41",
+                "lastCheckedAt": "2026-08-18 09:57:00",
+                "accountingFinalized": true,
+                "reviewedAt": "2026-08-18"
+            },
+            {
+                "id": 3,
+                "amount": 100,
+                "method": "MTN Mobile Money",
+                "account": "0763556673",
+                "status": "completed",
+                "date": "2026-08-18 10:28:04",
+                "transferId": 2204433,
+                "transferReference": "EVENTWAA-WD-1784987628896-3",
+                "flutterwaveStatus": "successful",
+                "approvedAt": "2026-08-18 10:28:29",
+                "lastCheckedAt": "2026-08-18 10:51:35",
+                "accountingFinalized": true,
+                "reviewedAt": "2026-08-18"
+            },
+            {
+                "id": 4,
+                "amount": 100,
+                "method": "Airtel Mobile Money",
+                "account": "07888665444",
+                "status": "completed",
+                "date": "2026-08-18 11:37:46",
+                "transferId": 2204457,
+                "transferReference": "EVENTWAA-WD-1784987628896-4",
+                "flutterwaveStatus": "successful",
+                "approvedAt": "2026-08-18 11:38:12",
+                "lastCheckedAt": "2026-08-18 19:15:07",
+                "accountingFinalized": true,
+                "reviewedAt": "2026-08-18"
+            },
+            {
+                "id": 5,
+                "amount": 1,
+                "method": "MTN Mobile Money",
+                "account": "07646646664",
+                "status": "completed",
+                "date": "2026-08-18 19:16:12",
+                "transferId": 2204632,
+                "transferReference": "EVENTWAA-WD-1784987628896-5",
+                "flutterwaveStatus": "successful",
+                "approvedAt": "2026-08-18 19:17:03",
+                "lastCheckedAt": "2026-08-19 12:10:15",
+                "accountingFinalized": true,
+                "reviewedAt": "2026-08-19"
+            },
+            {
+                "id": 6,
+                "amount": 100,
+                "method": "MTN Mobile Money",
+                "account": "0763552277",
+                "status": "pending",
+                "date": "2026-08-24 10:39:29"
             }
         ],
+        "scheduledPayouts": [],
         "transactions": [
             {
-                "type": "sale",
-                "eventId": 1,
-                "eventTitle": "sex party",
-                "amount": 9000,
-                "grossAmount": 10000,
-                "commission": 1000,
-                "commissionPercent": 10.0,
-                "serviceFee": 500,
-                "customerTotal": 10500,
-                "date": "2026-08-12 17:07:14"
+                "id": "withdrawal_1",
+                "type": "withdrawal",
+                "description": "Withdrawal request",
+                "amount": -100,
+                "method": "Mobile Money",
+                "date": "2026-08-17 16:16:36",
+                "status": "pending"
+            },
+            {
+                "id": "withdrawal_2",
+                "type": "withdrawal",
+                "description": "Withdrawal request",
+                "amount": -1000,
+                "method": "MTN Mobile Money",
+                "date": "2026-08-17 20:41:10",
+                "status": "processing",
+                "transferId": 2204415,
+                "approvedAt": "2026-08-18 09:30:41"
+            },
+            {
+                "id": "withdrawal_3",
+                "type": "withdrawal",
+                "description": "Withdrawal request",
+                "amount": -100,
+                "method": "MTN Mobile Money",
+                "date": "2026-08-18 10:28:04",
+                "status": "processing",
+                "transferId": 2204433,
+                "approvedAt": "2026-08-18 10:28:29"
+            },
+            {
+                "id": "withdrawal_4",
+                "type": "withdrawal",
+                "description": "Withdrawal request",
+                "amount": -100,
+                "method": "Airtel Mobile Money",
+                "date": "2026-08-18 11:37:46",
+                "status": "processing",
+                "transferId": 2204457,
+                "approvedAt": "2026-08-18 11:38:12"
+            },
+            {
+                "id": "withdrawal_5",
+                "type": "withdrawal",
+                "description": "Withdrawal request",
+                "amount": -1,
+                "method": "MTN Mobile Money",
+                "date": "2026-08-18 19:16:12",
+                "status": "processing",
+                "transferId": 2204632,
+                "approvedAt": "2026-08-18 19:17:03"
+            },
+            {
+                "id": "withdrawal_6",
+                "type": "withdrawal",
+                "description": "Withdrawal request",
+                "amount": -100,
+                "method": "MTN Mobile Money",
+                "date": "2026-08-24 10:39:29",
+                "status": "pending"
             }
         ],
+        "refunds": 0
+    },
+    {
+        "hostId": 0,
+        "availableBalance": 18000,
+        "pendingPayouts": 0,
+        "totalEarned": 18000,
+        "totalWithdrawn": 0,
+        "withdrawals": [],
+        "scheduledPayouts": [],
+        "transactions": [],
         "refunds": 0
     }
 ]

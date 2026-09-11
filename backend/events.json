@@ -1,12 +1,50 @@
 [
     {
-        "id": 1,
-        "title": "sex partyyyyyyyyyyyy",
+        "id": 2,
+        "title": "EventWaa test",
+        "description": "enjoy",
+        "venue": "ACHOLI INN",
+        "city": "Gulu",
+        "category": "Music",
+        "date": "2222-02-22",
+        "startTime": "22:02",
+        "endTime": "22:02",
+        "capacity": "5000",
+        "contact": "",
+        "eventType": "Paid",
+        "ticketType": "Paid",
+        "tickets": [
+            {
+                "name": "Regular",
+                "price": "10000",
+                "quantity": "10",
+                "remaining": 8
+            }
+        ],
+        "organizerName": "EventWaa",
+        "hostId": 0,
+        "hostName": "EventWaa",
+        "hostEmail": "admin@eventwaa.com",
+        "verifiedHost": true,
+        "adminEvent": true,
+        "eventPoster": "/uploads/events/1787222563294_baraka.jpeg",
+        "image": "/uploads/events/1787222563294_baraka.jpeg",
+        "ticketsSold": 2,
+        "revenue": 20000,
+        "attendees": 0,
+        "status": "published",
+        "featured": true,
+        "createdAt": "2026-08-20 12:31:19",
+        "checkedIn": 0
+    },
+    {
+        "id": 3,
+        "title": "siaka festival",
         "description": "",
-        "venue": "",
-        "city": "gulu",
-        "category": "",
-        "date": "2026-09-20",
+        "venue": "Timelez club",
+        "city": "Gulu",
+        "category": "Festival",
+        "date": "2026-08-30",
         "startTime": "",
         "endTime": "",
         "capacity": "",
@@ -17,25 +55,24 @@
             {
                 "name": "Regular",
                 "price": "10000",
-                "quantity": "18"
-            },
-            {
-                "name": "VIP",
-                "price": "20000",
-                "quantity": "50"
+                "quantity": "20",
+                "remaining": 11
             }
         ],
-        "organizerName": "",
+        "organizerName": "sia",
         "hostId": 1784987628896,
         "hostName": "STEWARD CHRISTO",
         "hostEmail": "stewardchristo5@gmail.com",
         "verifiedHost": true,
-        "eventPoster": "/uploads/events/1786543563658_picnic.jpeg",
-        "image": "/uploads/events/1786543563658_picnic.jpeg",
-        "ticketsSold": 0,
-        "revenue": 1000,
+        "adminEvent": false,
+        "eventPoster": "/uploads/events/1787481794363_baraka.jpeg",
+        "image": "/uploads/events/1787481794363_baraka.jpeg",
+        "ticketsSold": 9,
+        "revenue": 90000,
+        "attendees": 0,
         "status": "published",
         "featured": false,
-        "poster": "/uploads/events/1786543563658_picnic.jpeg"
+        "createdAt": "2026-08-23 13:43:14",
+        "checkedIn": 0
     }
 ]

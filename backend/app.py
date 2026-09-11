@@ -43,15 +43,17 @@ app = Flask(
     )
 
 # React frontend
+
 CORS(
     app,
-    resources={
-        r"/*": {
-            "origins": "*"
-        }
-    },
+    resources={r"/*": {"origins": [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://eventwaa-production-7fbb.up.railway.app"
+    ]}},
     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"]
+    allow_headers=["Content-Type", "Authorization"],
+    supports_credentials=True
 )
 
 
@@ -40745,28 +40747,16 @@ def server_error(error):
 # ============================================================
 
 if __name__ == "__main__":
+    print("==========================================")
+    print(" EventWaa Backend Starting...")
+    print("==========================================")
+    print("Settings:", load_admin_settings())
 
-    print(
-        "=========================================="
-    )
-
-    print(
-        " EventWaa Backend Starting..."
-    )
-
-    print(
-        "=========================================="
-    )
-
-    print(
-        "Settings:",
-        load_admin_settings()
-    )
-
+    port = int(os.environ.get("PORT", 5000))
+    # On Railway, use 8080. At home, use 5000.
+    
     app.run(
-        debug=True,
         host="0.0.0.0",
-        port=5000
+        port=port,
+        debug=False
     )
-
-app = app

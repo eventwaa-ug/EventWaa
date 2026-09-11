@@ -1,0 +1,19 @@
+[
+    {
+        "id": "TEAM-1788708801721",
+        "userId": 1788708801551,
+        "teamAccountId": "TEAM-1788708801551",
+        "hostId": 1784987628896,
+        "hostEmail": "stewardchristo5@gmail.com",
+        "name": "okelo team",
+        "email": "eventwaa.ug@gmail.com",
+        "role": "Scanner",
+        "eventIds": [
+            "3"
+        ],
+        "eventId": 3,
+        "eventTitle": "siaka festival",
+        "status": "Active",
+        "createdAt": "2026-09-06 18:33:21"
+    }
+]

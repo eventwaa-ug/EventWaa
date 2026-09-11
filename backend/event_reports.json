@@ -1,1 +1,11 @@
-[]
+[
+    {
+        "id": 1,
+        "eventId": 3,
+        "eventTitle": "siaka festival",
+        "reason": "Fake event",
+        "reportedBy": "opirosteward5@gmail.com",
+        "status": "dismissed",
+        "createdAt": "2026-08-24 11:04:11"
+    }
+]

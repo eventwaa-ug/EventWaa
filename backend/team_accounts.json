@@ -1,0 +1,34 @@
+[
+    {
+        "id": "TEAM-1788708801551",
+        "memberId": "TEAM-1788708801551",
+        "userId": 1788708801551,
+        "name": "okelo team",
+        "email": "eventwaa.ug@gmail.com",
+        "password": "scrypt:32768:8:1$vkynNl443ZDuBTVR$22517cc9f25211df6531aa07a8d4a07b9cfc5bdd165e159a8b7c8773a08847e9a7cd5c189920add59eba9b1012de11f23b5d5afa312224435f0269a723a268b6",
+        "role": "Scanner",
+        "host": "STEWARD CHRISTO",
+        "hostId": 1784987628896,
+        "hostEmail": "stewardchristo5@gmail.com",
+        "event": "siaka festival",
+        "eventId": 3,
+        "eventIds": [
+            "3"
+        ],
+        "status": "Active",
+        "teamMember": true,
+        "createdAt": "2026-09-06T18:33:21.710666"
+    },
+    {
+        "id": "TEAM-1",
+        "memberId": 1,
+        "name": "okelo admin team",
+        "email": "opirosteward5@gmail.com",
+        "password": "scrypt:32768:8:1$vHPGpbfkiaWSpODg$0b9398e1e73099b73ce083e86d3eea448c02c46f1e7019c9ebc3919f50c447f2ab4695cabb915c28d53e100d18fab5e8059a2f559ef0b280d4288b4bbb337b7e",
+        "role": "Scanner",
+        "host": "",
+        "event": "",
+        "status": "Active",
+        "createdAt": "2026-09-07T14:42:41.240585"
+    }
+]

@@ -1,7 +1,121 @@
 {
-    "availableBalance": 0,
+    "availableBalance": 17000,
     "pendingPayouts": 0,
-    "totalCommission": 0,
-    "totalWithdrawn": 0,
-    "withdrawals": []
+    "totalCommission": 12000,
+    "totalServiceFees": 6000,
+    "totalRevenue": 18000,
+    "totalWithdrawn": 1000,
+    "withdrawals": [
+        {
+            "id": 1,
+            "amount": 1000,
+            "method": "MTN Mobile Money",
+            "account": "07366366363",
+            "status": "completed",
+            "date": "2026-08-18 11:22:57"
+        }
+    ],
+    "transactions": [
+        {
+            "type": "sale",
+            "eventId": 3,
+            "eventTitle": "siaka festival",
+            "transactionId": "10476677",
+            "txRef": "EVENTWAA-3-1786631683343-1788868874278",
+            "paymentProvider": "flutterwave",
+            "ticketSubtotal": 10000,
+            "commission": 1000,
+            "commissionPercent": 10.0,
+            "serviceFee": 500,
+            "amount": 1500,
+            "customerPaid": 10500,
+            "date": "2026-09-08 15:02:18"
+        },
+        {
+            "type": "sale",
+            "eventId": 3,
+            "eventTitle": "siaka festival",
+            "transactionId": "10476663",
+            "txRef": "EVENTWAA-3-1786631683343-1788868285782",
+            "paymentProvider": "flutterwave",
+            "ticketSubtotal": 10000,
+            "commission": 1000,
+            "commissionPercent": 10.0,
+            "serviceFee": 500,
+            "amount": 1500,
+            "customerPaid": 10500,
+            "date": "2026-09-08 14:52:14"
+        },
+        {
+            "type": "sale",
+            "eventId": 3,
+            "eventTitle": "siaka festival",
+            "transactionId": "10476491",
+            "txRef": "EVENTWAA-3-1786631683343-1788863935137",
+            "paymentProvider": "flutterwave",
+            "ticketSubtotal": 10000,
+            "commission": 1000,
+            "commissionPercent": 10.0,
+            "serviceFee": 500,
+            "amount": 1500,
+            "customerPaid": 10500,
+            "date": "2026-09-08 13:41:55"
+        },
+        {
+            "type": "sale",
+            "eventId": 2,
+            "eventTitle": "EventWaa test",
+            "transactionId": "10460930",
+            "txRef": "EVENTWAA-2-1786631683343-1788007805586",
+            "ticketSubtotal": 20000,
+            "commission": 2000,
+            "commissionPercent": 10.0,
+            "serviceFee": 1000,
+            "amount": 3000,
+            "customerPaid": 21000,
+            "date": "2026-08-29 15:50:47"
+        },
+        {
+            "type": "sale",
+            "eventId": 3,
+            "eventTitle": "siaka festival",
+            "transactionId": "10460915",
+            "txRef": "EVENTWAA-3-1786631683343-1788006110542",
+            "ticketSubtotal": 10000,
+            "commission": 1000,
+            "commissionPercent": 10.0,
+            "serviceFee": 500,
+            "amount": 1500,
+            "customerPaid": 10500,
+            "date": "2026-08-29 15:22:40"
+        },
+        {
+            "type": "sale",
+            "eventId": 3,
+            "eventTitle": "siaka festival",
+            "transactionId": "10460840",
+            "txRef": "EVENTWAA-3-1786631683343-1788000334631",
+            "ticketSubtotal": 40000,
+            "commission": 4000,
+            "commissionPercent": 10.0,
+            "serviceFee": 2000,
+            "amount": 6000,
+            "customerPaid": 42000,
+            "date": "2026-08-29 13:46:16"
+        },
+        {
+            "type": "sale",
+            "eventId": 3,
+            "eventTitle": "siaka festival",
+            "transactionId": "10452323",
+            "txRef": "EVENTWAA-3-1786631683343-1787587146305",
+            "ticketSubtotal": 10000,
+            "commission": 1000,
+            "commissionPercent": 10.0,
+            "serviceFee": 500,
+            "amount": 1500,
+            "customerPaid": 10500,
+            "date": "2026-08-24 19:00:23"
+        }
+    ]
 }

@@ -1,0 +1,42 @@
+[
+    {
+        "id": 1,
+        "name": "okelo admin team",
+        "email": "opirosteward5@gmail.com",
+        "host": "",
+        "event": "",
+        "role": "Scanner",
+        "status": "Active",
+        "invitationStatus": "Accepted",
+        "invitationSentAt": "2026-09-07T14:30:12.855877",
+        "invitationExpiresAt": "2026-09-09T14:30:12.855877",
+        "invitationAcceptedAt": "2026-09-07T14:42:41.241724",
+        "accountCreated": true,
+        "assignments": [
+            {
+                "event": "siaka festival",
+                "host": "steward christo",
+                "assignedAt": "2026-09-07T13:29:07.702591",
+                "unassignedAt": "2026-09-07T15:56:09.856858",
+                "status": "Completed",
+                "completedAt": "2026-09-07T15:56:09.856858"
+            }
+        ],
+        "createdAt": "2026-09-07T13:29:07.702607",
+        "updatedAt": "2026-09-07T14:41:02.025629",
+        "assignmentHistory": [
+            {
+                "id": "1-1788781262918",
+                "event": "siaka festival",
+                "host": "steward christo",
+                "role": "Scanner",
+                "assignedAt": "2026-09-07T13:29:07.702611",
+                "endedAt": "2026-09-07T14:41:02.025629",
+                "completedAt": "2026-09-07T14:41:02.025629",
+                "reason": "Event completed",
+                "status": "Completed"
+            }
+        ],
+        "assignmentStartedAt": ""
+    }
+]
