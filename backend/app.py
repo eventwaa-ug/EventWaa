@@ -43,17 +43,15 @@ app = Flask(
     )
 
 # React frontend
-
 CORS(
     app,
-    resources={r"/*": {"origins": [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "https://eventwaa-production-7fbb.up.railway.app"
-    ]}},
+    resources={
+        r"/*": {
+            "origins": "*"
+        }
+    },
     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
-    supports_credentials=True
+    allow_headers=["Content-Type", "Authorization"]
 )
 
 
