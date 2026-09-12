@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "../styles/Notifications.css";
-
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function Notifications() {
 
     const { user } = useAuth();
@@ -16,7 +16,7 @@ function Notifications() {
         if (!user) return;
 
         const response = await fetch(
-            `https://eventwaa-production-7fbb.up.railway.app/notifications/${user.id}`
+            `${BACKEND_URL}/notifications/${user.id}`
         );
 
         const data = await response.json();
@@ -37,7 +37,7 @@ function Notifications() {
     const openNotification = async (notification) => {
 
         await fetch(
-            `https://eventwaa-production-7fbb.up.railway.app/notifications/read/${notification.id}`,
+            `${BACKEND_URL}/notifications/read/${notification.id}`,
             {
                 method: "PUT"
             }

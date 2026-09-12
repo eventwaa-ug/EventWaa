@@ -2,6 +2,16 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/ForgotPassword.css";
 
+/* ============================================================
+   BACKEND API URL
+============================================================ */
+
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
+/* ============================================================
+   FORGOT PASSWORD
+============================================================ */
+
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -9,62 +19,78 @@ function ForgotPassword() {
 
   const navigate = useNavigate();
 
+  /* ==========================================================
+     SUBMIT PASSWORD RECOVERY REQUEST
+  ========================================================== */
+
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  setMessage("");
-  setError("");
+    setMessage("");
+    setError("");
 
-  if (!email.trim()) {
-    setError("Please enter your email address.");
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      "http://127.0.0.1:5000/forgot-password",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email.trim().toLowerCase(),
-        }),
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      setError(
-        data.message || "Unable to process your request."
-      );
+    if (!email.trim()) {
+      setError("Please enter your email address.");
       return;
     }
 
-    setMessage(data.message);
+    try {
+      if (!API_URL) {
+        setError(
+          "Login service is not configured. Please try again later."
+        );
+        return;
+      }
 
-    setTimeout(() => {
-      navigate("/reset-password", {
-        state: {
-          email: email.trim().toLowerCase(),
-        },
-      });
-    }, 1500);
+      const response = await fetch(
+        `${API_URL}/forgot-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email.trim().toLowerCase(),
+          }),
+        }
+      );
 
-  } catch (error) {
+      const data = await response.json();
 
-    console.error(
-      "Forgot password error:",
-      error
-    );
+      if (!response.ok) {
+        setError(
+          data.message ||
+            "Unable to process your request."
+        );
+        return;
+      }
 
-    setError(
-      "Unable to connect to the server. Please try again."
-    );
-  }
-};
+      setMessage(data.message);
+
+      setTimeout(() => {
+        navigate("/reset-password", {
+          state: {
+            email: email.trim().toLowerCase(),
+          },
+        });
+      }, 1500);
+
+    } catch (error) {
+      console.error(
+        "Forgot password error:",
+        error
+      );
+
+      setError(
+        "Unable to connect to the server. Please try again."
+      );
+    }
+  };
+
+  /* ==========================================================
+     PAGE
+  ========================================================== */
+
   return (
     <div className="forgot-password-page">
       <div className="forgot-password-card">
@@ -83,14 +109,18 @@ function ForgotPassword() {
         <form onSubmit={handleSubmit}>
 
           <div className="form-group">
-            <label htmlFor="email">Email Address</label>
+            <label htmlFor="email">
+              Email Address
+            </label>
 
             <input
               id="email"
               type="email"
               placeholder="Enter your email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
               autoComplete="email"
             />
           </div>
@@ -107,7 +137,10 @@ function ForgotPassword() {
             </div>
           )}
 
-          <button type="submit" className="recover-button">
+          <button
+            type="submit"
+            className="recover-button"
+          >
             Continue
           </button>
 

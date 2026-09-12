@@ -22,26 +22,16 @@ function HostTeamMembers() {
     const { user } = useAuth();
 
     /*
-     * ============================================================
-     * API BASE URL
-     * ============================================================
-     *
-     * If VITE_API_URL exists, use it.
-     *
-     * Otherwise use the local Flask backend.
-     *
-     * Example .env:
-     *
-     * VITE_API_URL=http://127.0.0.1:5000
-     *
-     */
-
-    const API_BASE =
-        import.meta.env.VITE_API_BASE_URL ||
-        import.meta.env.VITE_API_URL ||
-        "http://127.0.0.1:5000";
-
-
+    * ============================================================
+    * API BASE URL
+    * ============================================================
+    *
+    * The frontend API URL is provided through
+    * VITE_API_BASE_URL for development, preview,
+    * and production environments.
+    *
+    */
+    const API_BASE = import.meta.env.VITE_API_BASE_URL;
     /*
      * ============================================================
      * STATE

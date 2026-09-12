@@ -14,9 +14,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import "../styles/Review.css";
 
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "https://eventwaa-production-7fbb.up.railway.app";
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 function Review() {
   const navigate = useNavigate();
@@ -74,7 +72,7 @@ function Review() {
         setLoadingEvent(true);
 
         const response = await fetch(
-          `${API_URL}/events/${ticket.eventId}`
+          `${BACKEND_URL}/events/${ticket.eventId}`
         );
 
         if (!response.ok) {
@@ -170,10 +168,10 @@ function Review() {
     }
 
     if (imagePath.startsWith("/")) {
-      return `${API_URL}${imagePath}`;
+      return `${BACKEND_URL}${imagePath}`;
     }
 
-    return `${API_URL}/${imagePath}`;
+    return `${BACKEND_URL}/${imagePath}`;
   };
 
   const posterUrl = getPosterUrl();
@@ -219,7 +217,7 @@ function Review() {
       setSubmitting(true);
 
       const response = await fetch(
-        `${API_URL}/reviews`,
+        `${BACKEND_URL}/reviews`,
         {
           method: "POST",
           headers: {

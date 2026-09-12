@@ -4,7 +4,7 @@ import {
   useState,
   useEffect
 } from "react";
-
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
@@ -51,7 +51,7 @@ export function AuthProvider({ children }) {
     try {
 
       const response = await fetch(
-        "https://eventwaa-production-7fbb.up.railway.app/users"
+        `${BACKEND_URL}/users`
       );
 
       // ------------------------------------------------------
@@ -165,7 +165,7 @@ export function AuthProvider({ children }) {
     );
 
     const response = await fetch(
-      `https://eventwaa-production-7fbb.up.railway.app/users/${user.id}/profile-photo`,
+      `${BACKEND_URL}/users/${user.id}/profile-photo`,
       {
         method: "POST",
         body: formData

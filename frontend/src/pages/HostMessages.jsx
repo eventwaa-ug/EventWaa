@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "../styles/HostMessages.css";
-
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 function HostMessages(){
 
@@ -25,7 +25,7 @@ function HostMessages(){
 
         const response = await fetch(
 
-            `https://eventwaa-production-7fbb.up.railway.app/host-messages/${user.id}`
+            `${BACKEND_URL}/host-messages/${user.id}`
 
         );
 
@@ -75,7 +75,7 @@ function HostMessages(){
 
         await fetch(
 
-            `https://eventwaa-production-7fbb.up.railway.app/messages/read/${messageId}`,
+            `${BACKEND_URL}/messages/read/${messageId}`,
 
             {
                 method:"PUT"
@@ -96,7 +96,7 @@ function HostMessages(){
 
         await fetch(
 
-            `https://eventwaa-production-7fbb.up.railway.app/messages/${messageId}`,
+            `${BACKEND_URL}/messages/${messageId}`,
 
             {
                 method:"DELETE"

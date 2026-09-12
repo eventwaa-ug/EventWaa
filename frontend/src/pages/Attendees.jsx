@@ -16,6 +16,11 @@ import {
   FiShield,
 } from "react-icons/fi";
 import "../styles/Attendees.css";
+    /* =========================================================
+       BACKEND
+    ========================================================= */
+
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function Attendees() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -37,7 +42,7 @@ function Attendees() {
       // EVENT
       // -------------------------------------------------------
       const eventResponse = await fetch(
-        `https://eventwaa-production-7fbb.up.railway.app/events/${id}`
+        `${BACKEND_URL}/events/${id}`
       );
       const eventData = await eventResponse.json();
       setEvent(eventData);
@@ -45,7 +50,7 @@ function Attendees() {
       // REFUND SETTINGS
       // -------------------------------------------------------
       const refundResponse = await fetch(
-        "https://eventwaa-production-7fbb.up.railway.app/refund-settings"
+        `${BACKEND_URL}/refund-settings`
       );
       const refundData = await refundResponse.json();
       setRefundSettings(refundData);
@@ -55,11 +60,11 @@ function Attendees() {
       let response;
       if (eventData.eventType === "Free") {
         response = await fetch(
-          `https://eventwaa-production-7fbb.up.railway.app/attendance/event/${id}`
+          `${BACKEND_URL}/attendance/event/${id}`
         );
       } else {
         response = await fetch(
-          `https://eventwaa-production-7fbb.up.railway.app/bookings/event/${id}`
+          `${BACKEND_URL}/bookings/event/${id}`
         );
       }
       const data = await response.json();
@@ -86,7 +91,7 @@ function Attendees() {
   const checkInAttendee = async (ticket) => {
     try {
       const response = await fetch(
-        `https://eventwaa-production-7fbb.up.railway.app/check-ticket/${ticket.ticketId}`,
+        `${BACKEND_URL}/check-ticket/${ticket.ticketId}`,
         {
           method: "PUT",
           headers: {
@@ -213,7 +218,7 @@ function Attendees() {
     if (!confirmed) return;
     try {
       const response = await fetch(
-        "https://eventwaa-production-7fbb.up.railway.app/refunds",
+        `${BACKEND_URL}/refunds`,
         {
           method: "POST",
           headers: {

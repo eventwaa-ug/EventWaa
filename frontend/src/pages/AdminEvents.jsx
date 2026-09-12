@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminEvents.css";
 
-const API_BASE_URL = "https://eventwaa-production-7fbb.up.railway.app";
+//BACKEND URL
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 function AdminEvents() {
   const [events, setEvents] = useState([]);
@@ -27,7 +28,7 @@ function AdminEvents() {
       setError("");
 
       const response = await fetch(
-        `${API_BASE_URL}/admin/events`
+        `${BACKEND_URL}/admin/events`
       );
 
       if (!response.ok) {
@@ -243,10 +244,10 @@ function AdminEvents() {
     if (
       imagePath.startsWith("/")
     ) {
-      return `${API_BASE_URL}${imagePath}`;
+      return `${BACKEND_URL}${imagePath}`;
     }
 
-    return `${API_BASE_URL}/${imagePath}`;
+    return `${BACKEND_URL}/${imagePath}`;
   };
 
   // ============================================================
@@ -274,7 +275,7 @@ function AdminEvents() {
   async function toggleFeatured(id) {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/admin/events/${id}/feature`,
+        `${BACKEND_URL}/admin/events/${id}/feature`,
         {
           method: "PUT",
         }
@@ -320,7 +321,7 @@ function AdminEvents() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/events/${id}`,
+        `${BACKEND_URL}/events/${id}`,
         {
           method: "DELETE",
         }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminCreateEvent.css";
 
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function AdminCreateEvent() {
 const navigate = useNavigate();
 
@@ -94,7 +95,7 @@ data.append("hostEmail", "admin@eventwaa.com");
 data.append("verifiedHost", true);
 data.append("adminEvent", "true");
 try {
-  const response = await fetch("https://eventwaa-production-7fbb.up.railway.app/events", {
+  const response = await fetch(`${BACKEND_URL}/events`, {
     method: "POST",
     body: data,
   });

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./AdminRefunds.css";
 
-const API_URL = "http://127.0.0.1:5000";
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 function AdminRefunds() {
   const [refunds, setRefunds] = useState([]);
@@ -24,7 +24,7 @@ function AdminRefunds() {
       setError("");
 
       const response = await fetch(
-        `${API_URL}/admin/refunds`
+        `${BACKEND_URL}/admin/refunds`
       );
 
       const data = await response.json();

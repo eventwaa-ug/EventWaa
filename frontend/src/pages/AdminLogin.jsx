@@ -3,7 +3,7 @@ import {Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ShieldCheck, LockKeyhole, ArrowLeft } from "lucide-react";
 import { usePlatformSettings } from "../context/PlatformSettingsContext.jsx";
 import "../styles/AdminLogin.css";
-
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function AdminLogin() {
     const navigate = useNavigate();
 
@@ -58,7 +58,7 @@ function AdminLogin() {
             // -------------------------------------------------
 
             const response = await fetch(
-                "https://eventwaa-production-7fbb.up.railway.app/admin/login",
+                `${BACKEND_URL}/admin/login`,
                 {
                     method: "POST",
 

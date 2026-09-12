@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://eventwaa-production-7fbb.up.railway.app";
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 export async function adminFetch(
     endpoint,
@@ -20,7 +20,7 @@ export async function adminFetch(
     };
 
     const response = await fetch(
-        `${API_BASE_URL}${endpoint}`,
+        `${BACKEND_URL}${endpoint}`,
         {
             ...options,
             headers,

@@ -14,7 +14,11 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { canCreateEvent } from "../utils/hostAccess";
 import "../styles/Profile.css";
+    /* =========================================================
+       BACKEND
+    ========================================================= */
 
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function Profile() {
   const navigate = useNavigate();
   const { user, logout, refreshUser } = useAuth();
@@ -31,7 +35,7 @@ function Profile() {
     const loadUnreadMessages = async () => {
       try {
         const response = await fetch(
-          `https://eventwaa-production-7fbb.up.railway.app/messages/unread/${user.id}`
+          `${BACKEND_URL}/messages/unread/${user.id}`
         );
 
         if (!response.ok) return;

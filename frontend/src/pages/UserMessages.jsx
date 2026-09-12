@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "../styles/UserMessages.css";
-
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 function UserMessages(){
 
@@ -20,7 +20,7 @@ function UserMessages(){
 
 
         const response = await fetch(
-            `https://eventwaa-production-7fbb.up.railway.app/messages/user/${user.id}`
+            `${BACKEND_URL}/messages/user/${user.id}`
         );
 
 
@@ -116,7 +116,7 @@ function UserMessages(){
 
 
         await fetch(
-            `https://eventwaa-production-7fbb.up.railway.app/messages/${id}`,
+            `${BACKEND_URL}/messages/${id}`,
             {
                 method:"DELETE"
             }

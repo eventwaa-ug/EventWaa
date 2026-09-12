@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./AdminCreateEvent.css";
 
-const API_BASE_URL = "https://eventwaa-production-7fbb.up.railway.app";
+//BACKEND URL
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 function AdminEditEvent() {
   const { id } = useParams();
@@ -49,7 +50,7 @@ function AdminEditEvent() {
       setLoading(true);
 
       const response = await fetch(
-        `${API_BASE_URL}/events/${id}`
+        `${BACKEND_URL}/events/${id}`
       );
 
       if (!response.ok) {
@@ -139,11 +140,11 @@ function AdminEditEvent() {
           posterPath.startsWith("/")
         ) {
           setExistingPoster(
-            `${API_BASE_URL}${posterPath}`
+            `${BACKEND_URL}${posterPath}`
           );
         } else {
           setExistingPoster(
-            `${API_BASE_URL}/${posterPath}`
+            `${BACKEND_URL}/${posterPath}`
           );
         }
       } else {
@@ -430,7 +431,7 @@ function AdminEditEvent() {
 
       const response =
         await fetch(
-          `${API_BASE_URL}/events/${id}`,
+          `${BACKEND_URL}/events/${id}`,
           {
             method: "PUT",
             body: data,

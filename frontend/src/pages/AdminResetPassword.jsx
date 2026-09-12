@@ -8,7 +8,7 @@ import {
     ShieldCheck
 } from "lucide-react";
 import "../styles/AdminResetPassword.css";
-
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function AdminResetPassword() {
 
     const navigate = useNavigate();
@@ -139,7 +139,7 @@ function AdminResetPassword() {
 
 
             const response = await fetch(
-                "https://eventwaa-production-7fbb.up.railway.app/admin/reset-password",
+                `${BACKEND_URL}/admin/reset-password`,
                 {
                     method: "POST",
 

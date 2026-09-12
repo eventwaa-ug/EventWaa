@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminNotifications.css";
-
+import { Bell } from "lucide-react";
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function AdminNotifications() {
 
 const navigate = useNavigate();
@@ -9,7 +10,7 @@ const [notifications, setNotifications] = useState([]);
 const [filter, setFilter] = useState('unread');
 const loadNotifications = async () => {
     try {
-        const res = await fetch('https://eventwaa-production-7fbb.up.railway.app/admin/notifications');
+        const res = await fetch(`${BACKEND_URL}/admin/notifications`);
         const data = await res.json();
         setNotifications(data);
     } catch (err) {
@@ -21,7 +22,7 @@ useEffect(() => {
 }, []);
 const markAsRead = async (id) => {
     try {
-        await fetch(`https://eventwaa-production-7fbb.up.railway.app/notifications/read/${id}`, {
+        await fetch(`${BACKEND_URL}/notifications/read/${id}`, {
             method: 'PUT'
         });
         setNotifications(prev =>
@@ -37,7 +38,7 @@ const markAsRead = async (id) => {
 };
 const deleteNotification = async (id) => {
     try {
-        await fetch(`https://eventwaa-production-7fbb.up.railway.app/notifications/${id}`, {
+        await fetch(`${BACKEND_URL}/notifications/${id}`, {
             method: 'DELETE'
         });
         setNotifications(prev =>
@@ -55,7 +56,10 @@ const filteredNotifications = notifications.filter(notification => {
 });
 return (
     <div className='admin-notifications-page'>
-        <h1>🔔 Admin Notification Center</h1>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <Bell size={26} />
+        Admin Notification Centre
+        </h1>
         <div className='notification-filters'>
             <button
                 className={filter === 'unread' ? 'active' : ''}

@@ -7,7 +7,7 @@ import {
     LockKeyhole
 } from "lucide-react";
 import "../styles/AdminForgotPassword.css";
-
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function AdminForgotPassword() {
 
     const navigate = useNavigate();
@@ -46,7 +46,7 @@ function AdminForgotPassword() {
 
 
             const response = await fetch(
-                "https://eventwaa-production-7fbb.up.railway.app/admin/forgot-password",
+                `${BACKEND_URL}/admin/forgot-password`,
                 {
                     method: "POST",
 

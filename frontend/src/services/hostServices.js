@@ -1,7 +1,8 @@
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 export async function createHostApplication(applicationData) {
 
     const response = await fetch(
-        "https://eventwaa-production-7fbb.up.railway.app/host-applications",
+        `${BACKEND_URL}/host-applications`,
         {
             method: "POST",
             body: applicationData,

@@ -13,7 +13,10 @@ import {
   FiBell,
   FiShield,
 } from "react-icons/fi";
-const API_URL = "http://127.0.0.1:5000";
+
+//BACKEND URL
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+
 const DEFAULT_SETTINGS = {
   platformName: "EventWaa",
   platformLogo: "",
@@ -59,7 +62,7 @@ function AdminSettings() {
       setError("");
       const response =
         await fetch(
-          `${API_URL}/admin/settings`
+          `${BACKEND_URL}/admin/settings`
         );
       if (!response.ok) {
         throw new Error(
@@ -172,7 +175,7 @@ function AdminSettings() {
       );
       const response =
         await fetch(
-          `${API_URL}/admin/upload-logo`,
+          `${BACKEND_URL}/admin/upload-logo`,
           {
             method: "POST",
             body: formData,
@@ -274,7 +277,7 @@ function AdminSettings() {
       };
       const response =
         await fetch(
-          `${API_URL}/admin/settings`,
+          `${BACKEND_URL}/admin/settings`,
           {
             method: "PUT",
             headers: {
@@ -428,7 +431,7 @@ function AdminSettings() {
                 className="remove-logo"
                 onClick={async () => {
                   try {
-                    await fetch(`${API_URL}/admin/remove-logo`, {
+                    await fetch(`${BACKEND_URL}/admin/remove-logo`, {
                       method: "DELETE",
                     });
                     setSettings((previous) => ({

@@ -1,28 +1,60 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import "../styles/ResetPassword.css";
+
+/* ============================================================
+   BACKEND API URL
+============================================================ */
+
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
+/* ============================================================
+   RESET PASSWORD
+============================================================ */
 
 function ResetPassword() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const email = location.state?.email || "";
+  const email =
+    location.state?.email || "";
 
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] =
+    useState("");
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPassword, setShowPassword] =
+    useState(false);
 
-  const [resetToken, setResetToken] = useState("");
-  const [otpVerified, setOtpVerified] = useState(false);
+  const [
+    showConfirmPassword,
+    setShowConfirmPassword,
+  ] = useState(false);
 
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
+  const [resetToken, setResetToken] =
+    useState("");
 
-  const [loading, setLoading] = useState(false);
+  const [otpVerified, setOtpVerified] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [message, setMessage] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  /* ==========================================================
+     SUBMIT
+  ========================================================== */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,15 +69,29 @@ function ResetPassword() {
       return;
     }
 
-    // Step 1: Verify OTP
+    if (!API_URL) {
+      setError(
+        "Password recovery service is not configured. Please try again later."
+      );
+      return;
+    }
+
+    /* ========================================================
+       STEP 1: VERIFY OTP
+    ======================================================== */
+
     if (!otpVerified) {
       if (!otp.trim()) {
-        setError("Please enter the verification code.");
+        setError(
+          "Please enter the verification code."
+        );
         return;
       }
 
       if (!/^\d{6}$/.test(otp)) {
-        setError("The verification code must contain 6 digits.");
+        setError(
+          "The verification code must contain 6 digits."
+        );
         return;
       }
 
@@ -53,11 +99,12 @@ function ResetPassword() {
         setLoading(true);
 
         const response = await fetch(
-          "http://127.0.0.1:5000/verify-otp",
+          `${API_URL}/verify-otp`,
           {
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
+              "Content-Type":
+                "application/json",
             },
             body: JSON.stringify({
               email,
@@ -66,23 +113,37 @@ function ResetPassword() {
           }
         );
 
-        const data = await response.json();
+        const data =
+          await response.json();
 
         if (!response.ok) {
-          setError(data.message || "Invalid verification code.");
+          setError(
+            data.message ||
+              "Invalid verification code."
+          );
           return;
         }
 
-        setResetToken(data.resetToken);
+        setResetToken(
+          data.resetToken
+        );
+
         setOtpVerified(true);
+
         setMessage(
           "Code verified. You can now create a new password."
         );
+
       } catch (error) {
-        console.error("OTP verification error:", error);
+        console.error(
+          "OTP verification error:",
+          error
+        );
+
         setError(
           "Unable to connect to the server. Please try again."
         );
+
       } finally {
         setLoading(false);
       }
@@ -90,9 +151,14 @@ function ResetPassword() {
       return;
     }
 
-    // Step 2: Validate new password
+    /* ========================================================
+       STEP 2: VALIDATE NEW PASSWORD
+    ======================================================== */
+
     if (!password) {
-      setError("Please enter a new password.");
+      setError(
+        "Please enter a new password."
+      );
       return;
     }
 
@@ -104,12 +170,16 @@ function ResetPassword() {
     }
 
     if (!confirmPassword) {
-      setError("Please confirm your new password.");
+      setError(
+        "Please confirm your new password."
+      );
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(
+        "Passwords do not match."
+      );
       return;
     }
 
@@ -120,16 +190,20 @@ function ResetPassword() {
       return;
     }
 
-    // Step 3: Reset password
+    /* ========================================================
+       STEP 3: RESET PASSWORD
+    ======================================================== */
+
     try {
       setLoading(true);
 
       const response = await fetch(
-        "http://127.0.0.1:5000/reset-password",
+        `${API_URL}/reset-password`,
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
           body: JSON.stringify({
             email,
@@ -139,11 +213,13 @@ function ResetPassword() {
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
         setError(
-          data.message || "Unable to reset your password."
+          data.message ||
+            "Unable to reset your password."
         );
         return;
       }
@@ -155,15 +231,25 @@ function ResetPassword() {
       setTimeout(() => {
         navigate("/login");
       }, 2000);
+
     } catch (error) {
-      console.error("Password reset error:", error);
+      console.error(
+        "Password reset error:",
+        error
+      );
+
       setError(
         "Unable to connect to the server. Please try again."
       );
+
     } finally {
       setLoading(false);
     }
   };
+
+  /* ==========================================================
+     RESEND VERIFICATION CODE
+  ========================================================== */
 
   const handleResendCode = async () => {
     setError("");
@@ -176,15 +262,23 @@ function ResetPassword() {
       return;
     }
 
+    if (!API_URL) {
+      setError(
+        "Password recovery service is not configured. Please try again later."
+      );
+      return;
+    }
+
     try {
       setLoading(true);
 
       const response = await fetch(
-        "http://127.0.0.1:5000/forgot-password",
+        `${API_URL}/forgot-password`,
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
           body: JSON.stringify({
             email,
@@ -192,7 +286,8 @@ function ResetPassword() {
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
         setError(
@@ -209,22 +304,38 @@ function ResetPassword() {
       setMessage(
         "If an account exists with this email, a new recovery code has been sent."
       );
+
     } catch (error) {
-      console.error("Resend OTP error:", error);
+      console.error(
+        "Resend OTP error:",
+        error
+      );
+
       setError(
         "Unable to connect to the server. Please try again."
       );
+
     } finally {
       setLoading(false);
     }
   };
 
+  /* ==========================================================
+     PAGE
+  ========================================================== */
+
   return (
     <div className="reset-password-page">
-      <div className="reset-password-card">
-        <div className="reset-password-icon">🔐</div>
 
-        <h1>Reset Password</h1>
+      <div className="reset-password-card">
+
+        <div className="reset-password-icon">
+          🔐
+        </div>
+
+        <h1>
+          Reset Password
+        </h1>
 
         <p className="reset-description">
           {otpVerified
@@ -234,13 +345,23 @@ function ResetPassword() {
 
         {email && (
           <div className="recovery-email">
-            Code sent to <strong>{email}</strong>
+            Code sent to{" "}
+            <strong>{email}</strong>
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
+
+          {/* ==================================================
+              OTP
+          ================================================== */}
+
           <div className="form-group">
-            <label htmlFor="otp">Verification Code</label>
+
+            <label htmlFor="otp">
+              Verification Code
+            </label>
+
             <input
               id="otp"
               type="text"
@@ -249,32 +370,71 @@ function ResetPassword() {
               placeholder="Enter 6-digit code"
               value={otp}
               onChange={(e) =>
-                setOtp(e.target.value.replace(/\D/g, ""))
+                setOtp(
+                  e.target.value.replace(
+                    /\D/g,
+                    ""
+                  )
+                )
               }
               autoComplete="one-time-code"
-              disabled={otpVerified || loading}
+              disabled={
+                otpVerified ||
+                loading
+              }
             />
+
           </div>
 
+          {/* ==================================================
+              NEW PASSWORD
+          ================================================== */}
+
           <div className="form-group">
-            <label htmlFor="password">New Password</label>
+
+            <label htmlFor="password">
+              New Password
+            </label>
+
             <div className="password-input-wrapper">
+
               <input
                 id="password"
-                type={showPassword ? "text" : "password"}
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
                 placeholder="Enter new password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) =>
+                  setPassword(
+                    e.target.value
+                  )
+                }
                 autoComplete="new-password"
-                disabled={!otpVerified || loading}
+                disabled={
+                  !otpVerified ||
+                  loading
+                }
               />
+
               <button
                 type="button"
                 className="password-toggle"
-                onClick={() => setShowPassword(!showPassword)}
-                disabled={!otpVerified || loading}
+                onClick={() =>
+                  setShowPassword(
+                    !showPassword
+                  )
+                }
+                disabled={
+                  !otpVerified ||
+                  loading
+                }
                 aria-label={
-                  showPassword ? "Hide password" : "Show password"
+                  showPassword
+                    ? "Hide password"
+                    : "Show password"
                 }
               >
                 {showPassword ? (
@@ -283,34 +443,58 @@ function ResetPassword() {
                   <Eye size={18} />
                 )}
               </button>
+
             </div>
+
           </div>
 
+          {/* ==================================================
+              CONFIRM PASSWORD
+          ================================================== */}
+
           <div className="form-group">
+
             <label htmlFor="confirmPassword">
               Confirm New Password
             </label>
+
             <div className="password-input-wrapper">
+
               <input
                 id="confirmPassword"
                 type={
-                  showConfirmPassword ? "text" : "password"
+                  showConfirmPassword
+                    ? "text"
+                    : "password"
                 }
                 placeholder="Confirm new password"
-                value={confirmPassword}
+                value={
+                  confirmPassword
+                }
                 onChange={(e) =>
-                  setConfirmPassword(e.target.value)
+                  setConfirmPassword(
+                    e.target.value
+                  )
                 }
                 autoComplete="new-password"
-                disabled={!otpVerified || loading}
+                disabled={
+                  !otpVerified ||
+                  loading
+                }
               />
+
               <button
                 type="button"
                 className="password-toggle"
                 onClick={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
+                  setShowConfirmPassword(
+                    !showConfirmPassword
+                  )
                 }
-                disabled={!otpVerified || loading}
+                disabled={
+                  !otpVerified ||
+                  loading
+                }
                 aria-label={
                   showConfirmPassword
                     ? "Hide password"
@@ -323,13 +507,30 @@ function ResetPassword() {
                   <Eye size={18} />
                 )}
               </button>
+
             </div>
+
           </div>
 
-          {error && <div className="reset-error">{error}</div>}
-          {message && (
-            <div className="reset-success">{message}</div>
+          {/* ==================================================
+              MESSAGES
+          ================================================== */}
+
+          {error && (
+            <div className="reset-error">
+              {error}
+            </div>
           )}
+
+          {message && (
+            <div className="reset-success">
+              {message}
+            </div>
+          )}
+
+          {/* ==================================================
+              SUBMIT
+          ================================================== */}
 
           <button
             type="submit"
@@ -342,26 +543,48 @@ function ResetPassword() {
               ? "Reset Password"
               : "Verify Code"}
           </button>
+
         </form>
+
+        {/* ====================================================
+            RESEND CODE
+        ==================================================== */}
 
         {!otpVerified && (
           <div className="resend-section">
-            <span>Didn't receive the code?</span>
+
+            <span>
+              Didn't receive the code?
+            </span>
+
             <button
               type="button"
               className="resend-button"
-              onClick={handleResendCode}
+              onClick={
+                handleResendCode
+              }
               disabled={loading}
             >
               Resend Code
             </button>
+
           </div>
         )}
 
+        {/* ====================================================
+            BACK TO LOGIN
+        ==================================================== */}
+
         <div className="back-to-login">
-          <Link to="/login">← Back to Login</Link>
+
+          <Link to="/login">
+            ← Back to Login
+          </Link>
+
         </div>
+
       </div>
+
     </div>
   );
 }

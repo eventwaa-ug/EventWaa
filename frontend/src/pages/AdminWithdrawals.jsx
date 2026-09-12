@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import "./AdminWithdrawals.css";
 import { adminFetch } from "../utils/adminAPI";
+    /* =========================================================
+       BACKEND
+    ========================================================= */
 
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function AdminWithdrawals() {
     const [withdrawals, setWithdrawals] = useState([]);
     const [filter, setFilter] = useState("all");
@@ -31,7 +35,7 @@ function AdminWithdrawals() {
 
 
             const response = await fetch(
-                "https://eventwaa-production-7fbb.up.railway.app/admin/host-withdrawals",
+            `${BACKEND_URL}/admin/host-withdrawals`,
                 {
                     method: "GET",
 
@@ -100,7 +104,7 @@ function AdminWithdrawals() {
             setActionId(actionKey);
 
             const response = await fetch(
-                `https://eventwaa-production-7fbb.up.railway.app/admin/host-withdrawals/approve/${hostId}/${withdrawalId}`,
+                `${BACKEND_URL}/admin/host-withdrawals/approve/${hostId}/${withdrawalId}`,
                 {
                     method: "PUT"
                 }
@@ -176,7 +180,7 @@ function AdminWithdrawals() {
 
             const response = await fetch(
 
-                `https://eventwaa-production-7fbb.up.railway.app/admin/host-withdrawals/transfer-status/${hostId}/${withdrawalId}`,
+                `${BACKEND_URL}/admin/host-withdrawals/transfer-status/${hostId}/${withdrawalId}`,
 
                 {
                     method: "GET",

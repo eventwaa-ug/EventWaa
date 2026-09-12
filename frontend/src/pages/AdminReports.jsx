@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./AdminReports.css";
-
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function AdminReports(){
 
     const [reports, setReports] = useState([]);
@@ -8,7 +8,7 @@ function AdminReports(){
 
     useEffect(()=>{
 
-        fetch("https://eventwaa-production-7fbb.up.railway.app/admin/event-reports")
+        fetch(`${BACKEND_URL}/admin/event-reports`)
         .then(res => res.json())
         .then(data => {
 
@@ -24,7 +24,7 @@ function AdminReports(){
 
 
         await fetch(
-            `https://eventwaa-production-7fbb.up.railway.app/admin/event-reports/${id}/dismiss`,
+            `${BACKEND_URL}/admin/event-reports/${id}/dismiss`,
             {
                 method:"PUT"
             }
@@ -52,7 +52,7 @@ function AdminReports(){
 
 
         await fetch(
-            `https://eventwaa-production-7fbb.up.railway.app/events/${eventId}`,
+            `${BACKEND_URL}/events/${eventId}`,
             {
                 method:"DELETE"
             }

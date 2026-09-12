@@ -9,7 +9,7 @@ FiCheck,
 FiShield,
 FiArrowRight
 } from "react-icons/fi";
-
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function HostVerification() {
 
 const navigate = useNavigate();
@@ -24,7 +24,7 @@ useEffect(() => {
     if (!user) return;
     const checkApplication = async () => {
         const response = await fetch(
-            "https://eventwaa-production-7fbb.up.railway.app/host-applications"
+            `${BACKEND_URL}/host-applications`
         );
         const applications = await response.json();
         const myApplication = applications.find(

@@ -2,7 +2,11 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import "../styles/AttendancePass.css";
+    /* =========================================================
+       BACKEND
+    ========================================================= */
 
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function AttendancePass() {
   const { attendanceId } = useParams();
 
@@ -12,7 +16,7 @@ function AttendancePass() {
     const loadPass = async () => {
       try {
         const response = await fetch(
-          `https://eventwaa-production-7fbb.up.railway.app/attendance/${attendanceId}`
+          `${BACKEND_URL}/attendance/${attendanceId}`
         );
 
         const data = await response.json();

@@ -2,7 +2,11 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "../styles/TicketDetails.css";
 import { QRCodeCanvas } from "qrcode.react";
+    /* =========================================================
+       BACKEND
+    ========================================================= */
 
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function FreePassDetails() {
 
     const { attendanceId } = useParams();
@@ -12,7 +16,7 @@ function FreePassDetails() {
 
     useEffect(() => {
 
-        fetch(`https://eventwaa-production-7fbb.up.railway.app/attendance/${attendanceId}`)
+        fetch(`${BACKEND_URL}/attendance/${attendanceId}`)
             .then(res => res.json())
             .then(data => {
 

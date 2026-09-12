@@ -25,7 +25,11 @@ import {
   ArrowRight,
   Inbox,
 } from "lucide-react";
+    /* =========================================================
+       BACKEND
+    ========================================================= */
 
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function Dashboard() {
   const navigate = useNavigate();
 
@@ -40,7 +44,7 @@ function Dashboard() {
      BACKEND URL
   ========================================================= */
 
-  const BACKEND_URL = "https://eventwaa-production-7fbb.up.railway.app";
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
   /* =========================================================
      HOST EVENTS
@@ -98,7 +102,7 @@ function Dashboard() {
     const loadDashboardData = async () => {
       try {
         const bookingsResponse = await fetch(
-          "https://eventwaa-production-7fbb.up.railway.app/bookings"
+          `${BACKEND_URL}/bookings`
         );
 
         if (!bookingsResponse.ok) {
@@ -126,7 +130,7 @@ function Dashboard() {
 
       try {
         const checkedInResponse = await fetch(
-          "https://eventwaa-production-7fbb.up.railway.app/bookings/checked-in"
+          `${BACKEND_URL}/bookings/checked-in`
         );
 
         if (!checkedInResponse.ok) {
@@ -166,7 +170,7 @@ function Dashboard() {
     const loadUnread = async () => {
       try {
         const response = await fetch(
-          `https://eventwaa-production-7fbb.up.railway.app/messages/unread/${user.id}`
+          `${BACKEND_URL}/messages/unread/${user.id}`
         );
 
         if (!response.ok) return;

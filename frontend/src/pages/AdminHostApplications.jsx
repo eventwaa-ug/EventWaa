@@ -21,9 +21,7 @@ import "./AdminHostApplications.css";
 /* ============================================================
    BACKEND
 ============================================================ */
-const BACKEND_URL =
-    import.meta.env.VITE_API_URL ||
-    "https://eventwaa-production-7fbb.up.railway.app";
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 /* ============================================================
    HOST APPLICATIONS
 ============================================================ */

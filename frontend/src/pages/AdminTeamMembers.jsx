@@ -15,14 +15,12 @@ import {
     FiX
 } from "react-icons/fi";
 import "../styles/AdminTeamMembers.css";
-
-function AdminTeamMembers() {
-
     /* =========================================================
        BACKEND
     ========================================================= */
 
-    const BACKEND_URL = "https://eventwaa-production-7fbb.up.railway.app";
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+function AdminTeamMembers() {
 
 
     /* =========================================================

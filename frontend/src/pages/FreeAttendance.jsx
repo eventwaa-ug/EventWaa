@@ -3,7 +3,11 @@ import { useContext, useState } from "react";
 import { EventContext } from "../context/EventContext";
 import { useAuth } from "../context/AuthContext";
 import "./FreeAttendance.css";
+    /* =========================================================
+       BACKEND
+    ========================================================= */
 
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function FreeAttendance() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -28,7 +32,7 @@ function FreeAttendance() {
 
     setLoading(true);
 
-    const response = await fetch("https://eventwaa-production-7fbb.up.railway.app/attendance", {
+    const response = await fetch(`${BACKEND_URL}/attendance`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

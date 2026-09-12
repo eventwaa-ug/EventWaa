@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import "./AdminUsers.css";
+    /* =========================================================
+       BACKEND
+    ========================================================= */
 
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 function AdminUsers(){
 
@@ -20,7 +24,9 @@ function AdminUsers(){
 
     const loadUsers = ()=>{
 
-        fetch("https://eventwaa-production-7fbb.up.railway.app/admin/users")
+        fetch(
+            `${BACKEND_URL}/admin/users`
+        )
 
         .then(res=>res.json())
 
@@ -38,7 +44,7 @@ function AdminUsers(){
 
 
         await fetch(
-            `https://eventwaa-production-7fbb.up.railway.app/admin/users/${user.id}`,
+            `${BACKEND_URL}/admin/users/${user.id}`,
             {
 
                 method:"PUT",

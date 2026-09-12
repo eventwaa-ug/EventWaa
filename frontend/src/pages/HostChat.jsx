@@ -3,7 +3,11 @@ import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/HostChat.css";
 
+    /* =========================================================
+       BACKEND
+    ========================================================= */
 
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function HostChat(){
 
     const { user } = useAuth();
@@ -53,7 +57,7 @@ function HostChat(){
 
 
     const response = await fetch(
-        `https://eventwaa-production-7fbb.up.railway.app/messages/${conversationId}`
+        `${BACKEND_URL}/messages/${conversationId}`
     );
 
 
@@ -73,7 +77,7 @@ function HostChat(){
         ){
 
             await fetch(
-                `https://eventwaa-production-7fbb.up.railway.app/messages/read/${msg.id}`,
+                `${BACKEND_URL}/messages/read/${msg.id}`,
                 {
                     method:"PUT"
                 }
@@ -131,7 +135,7 @@ function HostChat(){
 
         await fetch(
 
-            "https://eventwaa-production-7fbb.up.railway.app/messages",
+            `${BACKEND_URL}/messages`,
 
             {
 
@@ -193,7 +197,7 @@ function HostChat(){
     for(const msg of unreadMessages){
 
         await fetch(
-            `https://eventwaa-production-7fbb.up.railway.app/messages/read/${msg.id}`,
+            `${BACKEND_URL}/messages/read/${msg.id}`,
             {
                 method:"PUT"
             }

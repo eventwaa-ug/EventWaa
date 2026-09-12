@@ -7,8 +7,7 @@ import {
   FiCalendar
 } from "react-icons/fi";
 import "./AdminScan.css";
-
-const API_BASE_URL = "https://eventwaa-production-7fbb.up.railway.app";
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 function AdminScan() {
   const navigate = useNavigate();
@@ -33,7 +32,7 @@ function AdminScan() {
       setError("");
 
       const response = await fetch(
-        `${API_BASE_URL}/admin/events`
+        `${BACKEND_URL}/admin/events`
       );
 
       if (!response.ok) {
@@ -94,10 +93,10 @@ function AdminScan() {
     }
 
     if (imagePath.startsWith("/")) {
-      return `${API_BASE_URL}${imagePath}`;
+      return `${BACKEND_URL}${imagePath}`;
     }
 
-    return `${API_BASE_URL}/${imagePath}`;
+    return `${BACKEND_URL}/${imagePath}`;
   }
 
   // ============================================================

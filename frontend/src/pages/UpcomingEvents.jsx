@@ -3,7 +3,11 @@ import { EventContext } from "../context/EventContext";
 import { AuthContext } from "../context/AuthContext";
 import "../styles/UpcomingEvents.css";
 
+    /* =========================================================
+       BACKEND
+    ========================================================= */
 
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function UpcomingEvents(){
 
     const {events} = useContext(EventContext);
@@ -19,7 +23,7 @@ function UpcomingEvents(){
 
         if(user){
 
-            fetch("https://eventwaa-production-7fbb.up.railway.app/bookings")
+            fetch(`${BACKEND_URL}/bookings`)
 
             .then(res=>res.json())
 

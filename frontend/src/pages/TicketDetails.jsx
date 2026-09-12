@@ -72,9 +72,7 @@ function TicketDetails() {
   // BACKEND
   // ============================================================
 
-  const API_URL =
-    import.meta.env.VITE_API_URL ||
-    "https://eventwaa-production-7fbb.up.railway.app";
+  const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 
   // ============================================================
@@ -118,7 +116,7 @@ function TicketDetails() {
 
           const response =
             await fetch(
-              `${API_URL}/bookings`
+              `${BACKEND_URL}/bookings`
             );
 
 
@@ -283,7 +281,7 @@ function TicketDetails() {
 
   }, [
     bookingId,
-    API_URL,
+    BACKEND_URL,
   ]);
 
 
@@ -338,12 +336,12 @@ function TicketDetails() {
         )
       ) {
 
-        return `${API_URL}${imagePath}`;
+        return `${BACKEND_URL}${imagePath}`;
 
       }
 
 
-      return `${API_URL}/${imagePath}`;
+      return `${BACKEND_URL}/${imagePath}`;
 
     };
 

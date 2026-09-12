@@ -2,6 +2,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import "../styles/RequestRefund.css";
+
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function RequestRefund() {
     const navigate = useNavigate();
     const location = useLocation();
@@ -86,7 +88,7 @@ if (!bookingId) {
 try {
     setSubmitting(true);
     const response = await fetch(
-        "https://eventwaa-production-7fbb.up.railway.app/refunds",
+        `${BACKEND_URL}/refunds`,
         {
             method: "POST",
             headers: {

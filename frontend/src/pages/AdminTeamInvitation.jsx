@@ -22,10 +22,7 @@ usePlatformSettings,
 BACKEND URL
 ============================================================ */
 
-const BACKEND_URL =
-import.meta.env.VITE_API_BASE_URL ||
-import.meta.env.VITE_API_URL ||
-"http://192.168.100.63:5000";
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 function AdminTeamInvitation() {
 

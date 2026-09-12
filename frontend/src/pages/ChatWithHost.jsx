@@ -3,7 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/ChatWithHost.css";
 
+    /* =========================================================
+       BACKEND
+    ========================================================= */
 
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function ChatWithHost(){
 
     const { hostId } = useParams();
@@ -53,7 +57,7 @@ function ChatWithHost(){
     useEffect(()=>{
 
 
-        fetch("https://eventwaa-production-7fbb.up.railway.app/users")
+        fetch(`${BACKEND_URL}/users`)
 
         .then(res=>res.json())
 
@@ -89,7 +93,7 @@ function ChatWithHost(){
 
         const response = await fetch(
 
-            `https://eventwaa-production-7fbb.up.railway.app/messages/${conversationId}`
+            `${BACKEND_URL}/messages/${conversationId}`
 
         );
 
@@ -166,7 +170,7 @@ function ChatWithHost(){
 
             const response = await fetch(
 
-                "https://eventwaa-production-7fbb.up.railway.app/messages",
+                `${BACKEND_URL}/messages`,
 
                 {
 

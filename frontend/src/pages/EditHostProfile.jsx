@@ -2,7 +2,11 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "../styles/EditHostProfile.css";
+    /* =========================================================
+       BACKEND
+    ========================================================= */
 
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function EditHostProfile() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
@@ -32,7 +36,7 @@ function EditHostProfile() {
       uploadData.append("image", file);
 
       const response = await fetch(
-        `https://eventwaa-production-7fbb.up.railway.app/users/${user.id}/upload-image`,
+        `${BACKEND_URL}/users/${user.id}/upload-image`,
         {
           method: "POST",
           body: uploadData,
@@ -65,7 +69,7 @@ function EditHostProfile() {
 
     try {
       const response = await fetch(
-        `https://eventwaa-production-7fbb.up.railway.app/users/${user.id}`,
+        `${BACKEND_URL}/users/${user.id}`,
         {
           method: "PUT",
           headers: {

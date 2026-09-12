@@ -6,7 +6,11 @@ import {
     KeyRound
 } from "lucide-react";
 import "../styles/AdminVerifyOtp.css";
+    /* =========================================================
+       BACKEND
+    ========================================================= */
 
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function AdminVerifyOtp() {
 
     const navigate = useNavigate();
@@ -161,7 +165,7 @@ function AdminVerifyOtp() {
 
 
             const response = await fetch(
-                "https://eventwaa-production-7fbb.up.railway.app/admin/verify-otp",
+                `${BACKEND_URL}/admin/verify-otp`,
                 {
                     method: "POST",
 

@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import "./AdminWallet.css";
 
+    /* =========================================================
+       BACKEND
+    ========================================================= */
 
+    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function AdminWallet(){
 
     const [wallet, setWallet] = useState({
@@ -21,8 +25,8 @@ async function loadWallet(){
     try{
 
         const response = await fetch(
-            "https://eventwaa-production-7fbb.up.railway.app/admin/wallet"
-        );
+                `${BACKEND_URL}/admin/wallet`
+            );
 
         const data = await response.json();
 
@@ -74,7 +78,7 @@ async function loadWallet(){
     try{
 
         const response = await fetch(
-            "https://eventwaa-production-7fbb.up.railway.app/admin/wallet/withdraw",
+           `${BACKEND_URL}/admin/wallet/withdraw`,
             {
                 method:"POST",
 
