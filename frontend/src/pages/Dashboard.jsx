@@ -23,28 +23,36 @@ import {
   ScanLine,
   Trash2,
   ArrowRight,
-  Inbox,
 } from "lucide-react";
-    /* =========================================================
-       BACKEND
-    ========================================================= */
 
-    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function Dashboard() {
   const navigate = useNavigate();
 
   const { events, deleteEvent } = useContext(EventContext);
   const { user } = useAuth();
 
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [bookings, setBookings] = useState([]);
-  const [checkedInTickets, setCheckedInTickets] = useState([]);
-
   /* =========================================================
      BACKEND URL
   ========================================================= */
 
-    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+  const BACKEND_URL =
+    import.meta.env.VITE_API_BASE_URL;
+
+  /* =========================================================
+     DASHBOARD STATE
+  ========================================================= */
+
+  const [unreadCount, setUnreadCount] =
+    useState(0);
+
+  const [bookings, setBookings] =
+    useState([]);
+
+  const [checkedInTickets, setCheckedInTickets] =
+    useState([]);
+
+  const [cancellingEvent, setCancellingEvent] =
+    useState(false);
 
   /* =========================================================
      HOST EVENTS
@@ -158,7 +166,7 @@ function Dashboard() {
     };
 
     loadDashboardData();
-  }, []);
+  }, [BACKEND_URL]);
 
   /* =========================================================
      UNREAD MESSAGES
@@ -197,7 +205,7 @@ function Dashboard() {
 
     return () =>
       clearInterval(interval);
-  }, [user]);
+  }, [user, BACKEND_URL]);
 
   /* =========================================================
      ACTIVE BOOKING
@@ -205,6 +213,99 @@ function Dashboard() {
 
   const isActiveBooking = (booking) =>
     booking?.refundStatus !== "refunded";
+
+  /* =========================================================
+     CANCEL EVENT
+  ========================================================= */
+
+  const handleCancelEvent = async () => {
+    if (!currentEvent) return;
+
+    if (
+      String(currentEvent.status || "").toLowerCase() ===
+      "cancelled"
+    ) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to cancel "${currentEvent.title}"?\n\n` +
+        `This will cancel the event and process eligible ` +
+        `refunds for customers.\n\n` +
+        `Cancelled tickets will no longer be valid.\n\n` +
+        `This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    if (!user?.email) {
+      window.alert(
+        "Your account email could not be found. Please log in again and try again."
+      );
+      return;
+    }
+
+    setCancellingEvent(true);
+
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/events/${currentEvent.id}/cancel`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            hostEmail: user.email,
+            reason: "Event cancelled by host",
+          }),
+        }
+      );
+
+      let data = {};
+
+      try {
+        data = await response.json();
+      } catch (error) {
+        console.error(
+          "CANCEL EVENT RESPONSE ERROR:",
+          error
+        );
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message ||
+            "Unable to cancel the event."
+        );
+      }
+
+      window.alert(
+        data?.message ||
+          "Event cancelled successfully."
+      );
+
+      /*
+       * EventContext already handles loading events.
+       * Reloading ensures the dashboard receives the
+       * updated cancelled status from the backend.
+       */
+      window.location.reload();
+
+    } catch (error) {
+      console.error(
+        "EVENT CANCELLATION ERROR:",
+        error
+      );
+
+      window.alert(
+        error?.message ||
+          "Something went wrong while cancelling the event."
+      );
+
+      setCancellingEvent(false);
+    }
+  };
 
   /* =========================================================
      HOST BOOKINGS
@@ -352,6 +453,15 @@ function Dashboard() {
         );
 
   /* =========================================================
+     CANCELLED EVENT CHECK
+  ========================================================= */
+
+  const isCancelled =
+    String(
+      currentEvent?.status || ""
+    ).toLowerCase() === "cancelled";
+
+  /* =========================================================
      RENDER
   ========================================================= */
 
@@ -391,7 +501,10 @@ function Dashboard() {
                 navigate("/create-event")
               }
             >
-              <Plus size={19} strokeWidth={2.5} />
+              <Plus
+                size={19}
+                strokeWidth={2.5}
+              />
 
               <span>
                 Create Event
@@ -628,11 +741,16 @@ function Dashboard() {
                         currentEvent.status ===
                         "published"
                           ? "event-status published"
+                          : currentEvent.status ===
+                            "cancelled"
+                          ? "event-status cancelled"
                           : "event-status"
                       }
                     >
-                      {currentEvent.status ||
-                        "Published"}
+                      {isCancelled
+                        ? "Cancelled"
+                        : currentEvent.status ||
+                          "Published"}
                     </span>
 
                   </div>
@@ -868,6 +986,8 @@ function Dashboard() {
 
               <div className="event-actions">
 
+                {/* EDIT */}
+
                 <button
                   className="edit-btn"
                   onClick={() =>
@@ -880,11 +1000,19 @@ function Dashboard() {
                       }
                     )
                   }
+                  disabled={isCancelled}
+                  title={
+                    isCancelled
+                      ? "Cancelled events cannot be edited."
+                      : "Edit event"
+                  }
                 >
                   <Pencil size={17} />
                   <span>Edit</span>
                 </button>
 
+
+                {/* DUPLICATE */}
 
                 <button
                   className="duplicate-btn"
@@ -899,11 +1027,19 @@ function Dashboard() {
                       }
                     )
                   }
+                  disabled={isCancelled}
+                  title={
+                    isCancelled
+                      ? "Cancelled events cannot be duplicated."
+                      : "Duplicate event"
+                  }
                 >
                   <Copy size={17} />
                   <span>Duplicate</span>
                 </button>
 
+
+                {/* SCAN */}
 
                 <button
                   className="scan-btn"
@@ -912,11 +1048,19 @@ function Dashboard() {
                       `/scanner/${currentEvent.id}`
                     )
                   }
+                  disabled={isCancelled}
+                  title={
+                    isCancelled
+                      ? "Tickets for cancelled events cannot be scanned."
+                      : "Scan tickets"
+                  }
                 >
                   <ScanLine size={17} />
                   <span>Scan Tickets</span>
                 </button>
 
+
+                {/* ATTENDEES */}
 
                 <button
                   className="attendees-btn"
@@ -925,11 +1069,48 @@ function Dashboard() {
                       `/attendees/${currentEvent.id}`
                     )
                   }
+                  disabled={isCancelled}
+                  title={
+                    isCancelled
+                      ? "Attendee management is unavailable for cancelled events."
+                      : "View attendees"
+                  }
                 >
                   <Users size={17} />
                   <span>View Attendees</span>
                 </button>
 
+
+                {/* CANCEL EVENT */}
+
+                <button
+                  className="cancel-event-btn"
+                  onClick={
+                    handleCancelEvent
+                  }
+                  disabled={
+                    cancellingEvent ||
+                    isCancelled
+                  }
+                  title={
+                    isCancelled
+                      ? "Event is already cancelled."
+                      : "Cancel event"
+                  }
+                >
+                  <Trash2 size={17} />
+
+                  <span>
+                    {cancellingEvent
+                      ? "Cancelling..."
+                      : isCancelled
+                      ? "Event Cancelled"
+                      : "Cancel Event"}
+                  </span>
+                </button>
+
+
+                {/* DELETE */}
 
                 <button
                   className="delete-btn"

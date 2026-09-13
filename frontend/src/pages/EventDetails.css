@@ -1812,4 +1812,84 @@
 
     }
 
+
+}
+/* ============================================================
+   CANCELLED EVENT
+   ============================================================ */
+
+.event-type-badge.cancelled {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.event-cancelled-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin: 22px 0;
+    padding: 18px 20px;
+    border: 1px solid #fecaca;
+    border-radius: 14px;
+    background: #fef2f2;
+    color: #7f1d1d;
+}
+
+.event-cancelled-notice-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.event-cancelled-notice strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.event-cancelled-notice p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.event-cancelled-notice .event-cancellation-reason {
+    margin-top: 8px;
+}
+
+.cancelled-event-section {
+    margin-top: 20px;
+}
+
+.cancelled-event-card {
+    padding: 22px;
+    border: 1px solid #fecaca;
+    border-radius: 14px;
+    background: #fef2f2;
+}
+
+.cancelled-event-card strong {
+    display: block;
+    margin-bottom: 7px;
+    color: #991b1b;
+    font-size: 16px;
+}
+
+.cancelled-event-card p {
+    margin: 0;
+    color: #7f1d1d;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.event-details-cancelled .book-btn {
+    cursor: not-allowed;
+    opacity: 0.6;
 }

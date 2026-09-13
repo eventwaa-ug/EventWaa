@@ -639,3 +639,163 @@
     font-size: 18px;
   }
 }
+/* ============================================================
+   HOST REFUNDS - ICON CLEANUP
+   ============================================================ */
+.refunds-header h1,
+.refresh-refunds-btn,
+.refund-error,
+.refund-filters button,
+.refund-status,
+.approve-refund-btn,
+.reject-refund-btn,
+.completed-message,
+.rejected-message {
+  display: inline-flex;
+  align-items: center;
+}
+.refund-title-icon {
+  margin-right: 9px;
+  vertical-align: middle;
+}
+.refresh-refunds-btn {
+  gap: 8px;
+}
+.refresh-refunds-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.refresh-refunds-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+.refund-error {
+  gap: 9px;
+}
+.refund-error svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.refund-filters button {
+  gap: 7px;
+}
+.refund-filters button svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+.refund-filters button span {
+  margin-left: 2px;
+}
+.refund-status {
+  gap: 6px;
+}
+.refund-status svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+.empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.empty-icon svg {
+  width: 42px;
+  height: 42px;
+}
+/* ============================================================
+   CANCELLATION REFUND NOTICE
+   ============================================================ */
+.refund-cancellation-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  background: #fff7ed;
+  color: #9a3412;
+}
+.refund-cancellation-notice > svg {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.refund-cancellation-notice strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.refund-cancellation-notice p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #9a3412;
+}
+/* ============================================================
+   REFUND ACTION ICONS
+   ============================================================ */
+.approve-refund-btn,
+.reject-refund-btn {
+  gap: 7px;
+}
+.approve-refund-btn svg,
+.reject-refund-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.approve-refund-btn:disabled,
+.reject-refund-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+/* ============================================================
+   COMPLETED / REJECTED STATUS MESSAGES
+   ============================================================ */
+.completed-message {
+  gap: 7px;
+}
+.completed-message svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+.rejected-message {
+  gap: 8px;
+}
+.rejected-message > svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+.rejected-message > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.rejected-message small {
+  display: block;
+  line-height: 1.45;
+}
+/* ============================================================
+   MOBILE
+   ============================================================ */
+@media (max-width: 768px) {
+  .refund-cancellation-notice {
+    padding: 13px 14px;
+  }
+  .refund-cancellation-notice p {
+    font-size: 12.5px;
+  }
+  .approve-refund-btn,
+  .reject-refund-btn {
+    min-height: 44px;
+  }
+}

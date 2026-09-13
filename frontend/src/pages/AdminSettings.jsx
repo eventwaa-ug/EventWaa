@@ -14,7 +14,7 @@ import {
   FiShield,
 } from "react-icons/fi";
 
-//BACKEND URL
+// BACKEND URL
 const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 const DEFAULT_SETTINGS = {
@@ -31,93 +31,117 @@ const DEFAULT_SETTINGS = {
   verifiedHostPayout: 1,
   trustedHostPayout: 0,
   currency: "UGX",
+
+  // Refund settings
   hostRefunds: true,
   autoRefundApproval: false,
-  refundWindow: 7,
+  refundWindow: 5,
+  refundFeePercent: 20,
+
   bookingNotifications: true,
   emailNotifications: true,
   twoFactor: false,
 };
+
 function AdminSettings() {
   const navigate = useNavigate();
   const { refreshSettings } =
     usePlatformSettings();
+
   const [settings, setSettings] =
     useState(DEFAULT_SETTINGS);
+
   const [loading, setLoading] =
     useState(true);
+
   const [saving, setSaving] =
     useState(false);
+
   const [error, setError] =
     useState("");
+
   /* ============================================================
      LOAD SETTINGS
   ============================================================ */
+
   useEffect(() => {
     loadSettings();
   }, []);
+
   const loadSettings = async () => {
     try {
       setLoading(true);
       setError("");
+
       const response =
         await fetch(
           `${BACKEND_URL}/admin/settings`
         );
+
       if (!response.ok) {
         throw new Error(
           "Failed to load settings"
         );
       }
+
       const data =
         await response.json();
+
       setSettings({
         ...DEFAULT_SETTINGS,
         ...(data || {}),
       });
+
     } catch (error) {
       console.error(
         "SETTINGS LOAD ERROR:",
         error
       );
+
       setError(
         "Unable to load settings from the server."
       );
+
     } finally {
       setLoading(false);
     }
   };
+
   /* ============================================================
      ADMIN LOGOUT
   ============================================================ */
+
   const handleAdminLogout = () => {
     /*
      * Remove the admin authentication token
      * from both possible browser storage locations.
      */
+
     localStorage.removeItem(
       "eventwaa_admin_token"
     );
+
     sessionStorage.removeItem(
       "eventwaa_admin_token"
     );
+
     /*
      * Remove stored admin information as well.
-     *
-     * We support both localStorage and
-     * sessionStorage so this does not interfere
-     * with whichever storage your Admin Login uses.
      */
+
     localStorage.removeItem(
       "eventwaa_admin_data"
     );
+
     sessionStorage.removeItem(
       "eventwaa_admin_data"
     );
+
     /*
      * Send the administrator back to
      * the admin login page.
      */
+
     navigate(
       "/admin/login",
       {
@@ -125,9 +149,11 @@ function AdminSettings() {
       }
     );
   };
+
   /* ============================================================
      TOGGLE
   ============================================================ */
+
   const handleToggle = (name) => {
     setSettings(
       (previous) => ({
@@ -139,15 +165,18 @@ function AdminSettings() {
       })
     );
   };
+
   /* ============================================================
      INPUT CHANGE
   ============================================================ */
+
   const handleChange = (event) => {
     const {
       name,
       value,
       type,
     } = event.target;
+
     setSettings(
       (previous) => ({
         ...previous,
@@ -160,19 +189,23 @@ function AdminSettings() {
       })
     );
   };
+
   /* ============================================================
      UPLOAD PLATFORM LOGO
   ============================================================ */
+
   const uploadLogo = async (
     file
   ) => {
     try {
       const formData =
         new FormData();
+
       formData.append(
         "logo",
         file
       );
+
       const response =
         await fetch(
           `${BACKEND_URL}/admin/upload-logo`,
@@ -181,8 +214,10 @@ function AdminSettings() {
             body: formData,
           }
         );
+
       const result =
         await response.json();
+
       if (result.success) {
         setSettings(
           (previous) => ({
@@ -191,8 +226,10 @@ function AdminSettings() {
               result.logo,
           })
         );
+
         await refreshSettings();
       }
+
     } catch (error) {
       console.error(
         "Logo upload failed",
@@ -200,98 +237,127 @@ function AdminSettings() {
       );
     }
   };
+
   /* ============================================================
      SAVE SETTINGS
   ============================================================ */
+
   const saveSettings = async () => {
     try {
       setSaving(true);
       setError("");
+
       const cleanedSettings = {
         ...DEFAULT_SETTINGS,
         ...settings,
+
         commission:
           Number(
             settings.commission
           ) || 0,
+
         newHostPayout:
           Number(
             settings.newHostPayout
           ) || 0,
+
         verifiedHostPayout:
           Number(
             settings.verifiedHostPayout
           ) || 0,
+
         trustedHostPayout:
           Number(
             settings.trustedHostPayout
           ) || 0,
+
         refundWindow:
           Number(
             settings.refundWindow
           ) || 0,
+
+        refundFeePercent:
+          Number(
+            settings.refundFeePercent
+          ) || 0,
+
         maintenanceMode:
           Boolean(
             settings.maintenanceMode
           ),
+
         allowRegistration:
           Boolean(
             settings.allowRegistration
           ),
+
         emailVerification:
           Boolean(
             settings.emailVerification
           ),
+
         hostVerification:
           Boolean(
             settings.hostVerification
           ),
+
         communityHosts:
           Boolean(
             settings.communityHosts
           ),
+
         autoApproveHosts:
           Boolean(
             settings.autoApproveHosts
           ),
+
         hostRefunds:
           Boolean(
             settings.hostRefunds
           ),
+
         autoRefundApproval:
           Boolean(
             settings.autoRefundApproval
           ),
+
         bookingNotifications:
           Boolean(
             settings.bookingNotifications
           ),
+
         emailNotifications:
           Boolean(
             settings.emailNotifications
           ),
+
         twoFactor:
           Boolean(
             settings.twoFactor
           ),
       };
+
       const response =
         await fetch(
           `${BACKEND_URL}/admin/settings`,
           {
             method: "PUT",
+
             headers: {
               "Content-Type":
                 "application/json",
             },
+
             body:
               JSON.stringify(
                 cleanedSettings
               ),
           }
         );
+
       const result =
         await response.json();
+
       if (
         !response.ok ||
         !result.success
@@ -301,6 +367,7 @@ function AdminSettings() {
           "Failed to save settings."
         );
       }
+
       setSettings({
         ...DEFAULT_SETTINGS,
         ...(
@@ -308,26 +375,33 @@ function AdminSettings() {
           cleanedSettings
         ),
       });
+
       await refreshSettings();
+
       alert(
         "Settings saved successfully!"
       );
+
     } catch (error) {
       console.error(
         "SETTINGS SAVE ERROR:",
         error
       );
+
       setError(
         error.message ||
         "Unable to connect to the server."
       );
+
     } finally {
       setSaving(false);
     }
   };
+
   /* ============================================================
      LOADING
   ============================================================ */
+
   if (loading) {
     return (
       <div className="admin-settings">
@@ -337,6 +411,7 @@ function AdminSettings() {
               <h1>
                 ⚙️ Admin Settings
               </h1>
+
               <p>
                 Loading platform settings...
               </p>
@@ -346,27 +421,36 @@ function AdminSettings() {
       </div>
     );
   }
+
   /* ============================================================
      RENDER
   ============================================================ */
+
   return (
     <div className="admin-settings">
+
       {/* ========================================================
           HEADER
       ======================================================== */}
+
       <div className="settings-header">
         <div className="settings-header-content">
+
           <div>
             <h1>
-              <FiSettings aria-hidden="true" /> Admin Settings
+              <FiSettings aria-hidden="true" />
+              {" "}Admin Settings
             </h1>
+
             <p>
               Control how EventWaa operates.
             </p>
           </div>
+
           {/* ====================================================
               LOGOUT
           ==================================================== */}
+
           <button
             type="button"
             className="admin-logout-button"
@@ -375,30 +459,41 @@ function AdminSettings() {
             <FiLogOut aria-hidden="true" />
             Logout
           </button>
+
         </div>
       </div>
+
       {/* ========================================================
           ERROR
       ======================================================== */}
+
       {error && (
         <div className="settings-error">
           {error}
         </div>
       )}
+
       {/* ========================================================
           SETTINGS GRID
       ======================================================== */}
+
       <div className="settings-grid">
+
         {/* ======================================================
             PLATFORM
         ====================================================== */}
+
         <div className="settings-card">
+
           <h2>
-            <FiBriefcase aria-hidden="true" /> Platform Settings
+            <FiBriefcase aria-hidden="true" />
+            {" "}Platform Settings
           </h2>
+
           <label>
             Platform Name
           </label>
+
           <input
             type="text"
             name="platformName"
@@ -407,9 +502,11 @@ function AdminSettings() {
             }
             onChange={handleChange}
           />
+
           <label>
             Platform Logo
           </label>
+
           <input
             type="file"
             accept="image/*"
@@ -419,209 +516,365 @@ function AdminSettings() {
               }
             }}
           />
+
           {settings.platformLogo && (
             <div className="logo-preview">
+
               <img
                 src={settings.platformLogo}
                 alt="Platform Logo"
                 className="preview-image"
               />
+
               <button
                 type="button"
                 className="remove-logo"
                 onClick={async () => {
                   try {
-                    await fetch(`${BACKEND_URL}/admin/remove-logo`, {
-                      method: "DELETE",
-                    });
-                    setSettings((previous) => ({
-                      ...previous,
-                      platformLogo: "",
-                    }));
+                    await fetch(
+                      `${BACKEND_URL}/admin/remove-logo`,
+                      {
+                        method: "DELETE",
+                      }
+                    );
+
+                    setSettings(
+                      (previous) => ({
+                        ...previous,
+                        platformLogo: "",
+                      })
+                    );
+
                     await refreshSettings();
+
                   } catch (error) {
-                    console.error("Failed to remove logo", error);
+                    console.error(
+                      "Failed to remove logo",
+                      error
+                    );
                   }
                 }}
               >
                 Remove Logo
               </button>
+
             </div>
           )}
+
           <Toggle
             title="Maintenance Mode"
             value={settings.maintenanceMode}
-            action={() => handleToggle("maintenanceMode")}
+            action={() =>
+              handleToggle(
+                "maintenanceMode"
+              )
+            }
           />
+
         </div>
+
         {/* ======================================================
             USERS
         ====================================================== */}
+
         <div className="settings-card">
+
           <h2>
-            <FiUsers aria-hidden="true" /> User Settings
+            <FiUsers aria-hidden="true" />
+            {" "}User Settings
           </h2>
+
           <Toggle
             title="Allow New Registrations"
             value={settings.allowRegistration}
-            action={() => handleToggle("allowRegistration")}
+            action={() =>
+              handleToggle(
+                "allowRegistration"
+              )
+            }
           />
+
           <Toggle
             title="Email Verification"
             value={settings.emailVerification}
-            action={() => handleToggle("emailVerification")}
+            action={() =>
+              handleToggle(
+                "emailVerification"
+              )
+            }
           />
+
         </div>
+
         {/* ======================================================
             HOSTS
         ====================================================== */}
+
         <div className="settings-card">
+
           <h2>
-            <FiHome aria-hidden="true" /> Host Settings
+            <FiHome aria-hidden="true" />
+            {" "}Host Settings
           </h2>
+
           <Toggle
             title="Require Host Verification"
             value={settings.hostVerification}
-            action={() => handleToggle("hostVerification")}
+            action={() =>
+              handleToggle(
+                "hostVerification"
+              )
+            }
           />
+
           <Toggle
             title="Allow Community Hosts"
             value={settings.communityHosts}
-            action={() => handleToggle("communityHosts")}
+            action={() =>
+              handleToggle(
+                "communityHosts"
+              )
+            }
           />
+
           <Toggle
             title="Auto Approve Hosts"
             value={settings.autoApproveHosts}
-            action={() => handleToggle("autoApproveHosts")}
+            action={() =>
+              handleToggle(
+                "autoApproveHosts"
+              )
+            }
           />
+
         </div>
+
         {/* ======================================================
             REVENUE
         ====================================================== */}
+
         <div className="settings-card">
+
           <h2>
-            <FiDollarSign aria-hidden="true" /> Revenue &amp; Payout Settings
+            <FiDollarSign aria-hidden="true" />
+            {" "}Revenue &amp; Payout Settings
           </h2>
+
           <label>
             Platform Commission (%)
           </label>
+
           <input
             type="number"
             min="0"
             max="100"
             name="commission"
-            value={settings.commission ?? 10}
+            value={
+              settings.commission ?? 10
+            }
             onChange={handleChange}
           />
+
           <label>
             New Host Payout Delay (days)
           </label>
+
           <input
             type="number"
             min="0"
             name="newHostPayout"
-            value={settings.newHostPayout ?? 2}
+            value={
+              settings.newHostPayout ?? 2
+            }
             onChange={handleChange}
           />
+
           <label>
             Verified Host Payout Delay (days)
           </label>
+
           <input
             type="number"
             min="0"
             name="verifiedHostPayout"
-            value={settings.verifiedHostPayout ?? 1}
+            value={
+              settings.verifiedHostPayout ?? 1
+            }
             onChange={handleChange}
           />
+
           <label>
             Trusted Host Payout Delay (days)
           </label>
+
           <input
             type="number"
             min="0"
             name="trustedHostPayout"
-            value={settings.trustedHostPayout ?? 0}
+            value={
+              settings.trustedHostPayout ?? 0
+            }
             onChange={handleChange}
           />
+
           <label>
             Currency
           </label>
+
           <select
             name="currency"
-            value={settings.currency || "UGX"}
+            value={
+              settings.currency || "UGX"
+            }
             onChange={handleChange}
           >
             <option value="UGX">
               UGX
             </option>
+
             <option value="USD">
               USD
             </option>
           </select>
+
         </div>
+
         {/* ======================================================
             REFUNDS
         ====================================================== */}
-        <div className="settings-card">
+
+        <div className="settings-card refund-settings-card">
+
           <h2>
-            <FiRefreshCcw aria-hidden="true" /> Refund Settings
+            <FiRefreshCcw aria-hidden="true" />
+            {" "}Refund Settings
           </h2>
+
           <Toggle
             title="Allow Hosts to Issue Refunds"
             value={settings.hostRefunds}
-            action={() => handleToggle("hostRefunds")}
+            action={() =>
+              handleToggle(
+                "hostRefunds"
+              )
+            }
           />
+
           <Toggle
             title="Automatically Approve Refunds"
             value={settings.autoRefundApproval}
-            action={() => handleToggle("autoRefundApproval")}
+            action={() =>
+              handleToggle(
+                "autoRefundApproval"
+              )
+            }
           />
+
           <label>
             Refund Window (days)
           </label>
+
           <input
             type="number"
             min="0"
             name="refundWindow"
-            value={settings.refundWindow ?? 7}
+            value={
+              settings.refundWindow ?? 5
+            }
             onChange={handleChange}
           />
+
+          <p className="settings-field-help">
+            Customers can request a normal refund
+            up to this many days before the event.
+          </p>
+
+          <label>
+            Refund Fee (%)
+          </label>
+
+          <input
+            type="number"
+            min="0"
+            max="100"
+            name="refundFeePercent"
+            value={
+              settings.refundFeePercent ?? 20
+            }
+            onChange={handleChange}
+          />
+
+          <p className="settings-field-help">
+            This fee applies to eligible
+            customer-requested refunds.
+            Event cancellation refunds are processed
+            without this normal refund fee.
+          </p>
+
         </div>
+
         {/* ======================================================
             NOTIFICATIONS
         ====================================================== */}
+
         <div className="settings-card">
+
           <h2>
-            <FiBell aria-hidden="true" /> Notifications
+            <FiBell aria-hidden="true" />
+            {" "}Notifications
           </h2>
+
           <Toggle
             title="Booking Notifications"
             value={settings.bookingNotifications}
-            action={() => handleToggle("bookingNotifications")}
+            action={() =>
+              handleToggle(
+                "bookingNotifications"
+              )
+            }
           />
+
           <Toggle
             title="Email Notifications"
             value={settings.emailNotifications}
-            action={() => handleToggle("emailNotifications")}
+            action={() =>
+              handleToggle(
+                "emailNotifications"
+              )
+            }
           />
+
         </div>
+
         {/* ======================================================
             SECURITY
         ====================================================== */}
+
         <div className="settings-card">
+
           <h2>
-            <FiShield aria-hidden="true" /> Security
+            <FiShield aria-hidden="true" />
+            {" "}Security
           </h2>
+
           <Toggle
             title="Two Factor Authentication"
             value={settings.twoFactor}
-            action={() => handleToggle("twoFactor")}
+            action={() =>
+              handleToggle(
+                "twoFactor"
+              )
+            }
           />
+
         </div>
+
       </div>
+
       {/* ========================================================
           SAVE SETTINGS
       ======================================================== */}
+
       <button
         className="save-settings"
         onClick={saveSettings}
@@ -631,12 +884,15 @@ function AdminSettings() {
           ? "Saving..."
           : "Save Settings"}
       </button>
+
     </div>
   );
 }
+
 /* ==============================================================
    TOGGLE COMPONENT
 ============================================================== */
+
 function Toggle({
   title,
   value,
@@ -644,9 +900,11 @@ function Toggle({
 }) {
   return (
     <div className="toggle-row">
+
       <span>
         {title}
       </span>
+
       <button
         type="button"
         className={
@@ -659,7 +917,9 @@ function Toggle({
       >
         <div></div>
       </button>
+
     </div>
   );
 }
+
 export default AdminSettings;

@@ -425,3 +425,56 @@
     min-height: 75px;
   }
 }
+/* ============================================================
+   ADMIN REFUNDS ICONS
+============================================================ */
+.refresh-refunds-btn,
+.refund-error,
+.refund-filters button,
+.refund-status,
+.admin-refund-note strong {
+  display: inline-flex;
+  align-items: center;
+}
+.refresh-refunds-btn {
+  gap: 8px;
+}
+.refund-error {
+  gap: 8px;
+}
+.refund-error svg {
+  flex-shrink: 0;
+  font-size: 18px;
+}
+.refund-filters button {
+  gap: 7px;
+}
+.refund-filters button svg {
+  flex-shrink: 0;
+  font-size: 15px;
+}
+.refund-status {
+  gap: 6px;
+}
+.refund-status svg {
+  flex-shrink: 0;
+  font-size: 14px;
+}
+.empty-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 42px;
+  color: #9ca3af;
+}
+.empty-icon svg {
+  width: 42px;
+  height: 42px;
+}
+.admin-refund-note strong {
+  gap: 7px;
+}
+.admin-refund-note strong svg {
+  flex-shrink: 0;
+  font-size: 16px;
+}

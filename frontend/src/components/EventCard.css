@@ -412,3 +412,21 @@
         height: 34px;
     }
 }
+/* ============================================================
+   CANCELLED EVENT
+   ============================================================ */
+
+.event-card-cancelled {
+    opacity: 0.94;
+}
+
+.event-type.cancelled {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.event-price.cancelled {
+    color: #b91c1c;
+    font-weight: 700;
+}

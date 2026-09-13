@@ -17023,9 +17023,23 @@ def complete_verified_eventwaa_payment(
         []
     )
 
+    if not isinstance(
+        events,
+        list
+    ):
+
+        events = []
+
     event = None
 
     for current_event in events:
+
+        if not isinstance(
+            current_event,
+            dict
+        ):
+
+            continue
 
         if str(
             current_event.get(
@@ -17052,6 +17066,80 @@ def complete_verified_eventwaa_payment(
         }, 404
 
     # ========================================================
+    # BLOCK PAYMENT FULFILLMENT FOR CANCELLED EVENTS
+    #
+    # IMPORTANT:
+    #
+    # A customer may have started payment while the event
+    # was active. The host can then cancel the event before
+    # the payment is verified.
+    #
+    # Never create a booking or ticket for that cancelled
+    # event.
+    # ========================================================
+
+    if str(
+        event.get(
+            "status",
+            ""
+        )
+    ).strip().lower() == "cancelled":
+
+        payment["status"] = (
+            "event_cancelled"
+        )
+
+        payment["eventCancelled"] = True
+
+        payment["eventCancelledAt"] = (
+            now
+        )
+
+        payment["bookingCreated"] = False
+
+        save_payments(
+            payments
+        )
+
+        return {
+
+            "success": False,
+
+            "message": (
+                "This event has been cancelled. "
+                "The payment cannot be converted "
+                "into a booking."
+            ),
+
+            "code":
+                "EVENT_CANCELLED",
+
+            "eventCancelled":
+                True,
+
+            "bookingCreated":
+                False,
+
+            "paymentNeedsRefund":
+                True,
+
+            "transactionId":
+                transaction_id,
+
+            "txRef":
+                payment.get(
+                    "txRef"
+                ),
+
+            "provider":
+                provider,
+
+            "amount":
+                paid_amount
+
+        }, 409
+
+    # ========================================================
     # LOAD BOOKINGS
     # ========================================================
 
@@ -17059,6 +17147,13 @@ def complete_verified_eventwaa_payment(
         "bookings.json",
         []
     )
+
+    if not isinstance(
+        bookings,
+        list
+    ):
+
+        bookings = []
 
     # ========================================================
     # EXTRA DUPLICATE PROTECTION
@@ -17086,7 +17181,9 @@ def complete_verified_eventwaa_payment(
                 )
             )
 
-            payment["processedAt"] = now
+            payment["processedAt"] = (
+                now
+            )
 
             save_payments(
                 payments
@@ -17261,7 +17358,7 @@ def complete_verified_eventwaa_payment(
     #       ↓
     # QUANTITY INDIVIDUAL TICKETS
     #
-    # We deliberately preserve your existing ticket structure.
+    # ONE INDIVIDUAL TICKET = ONE ENTRY
     # ========================================================
 
     tickets = []
@@ -17301,13 +17398,12 @@ def complete_verified_eventwaa_payment(
             "checkedInAt":
                 None,
 
+            # ONE TICKET = ONE ENTRY
             "checkInCount":
                 0,
 
-            # PRESERVED FROM YOUR EXISTING SYSTEM.
-            # We are NOT changing scanner behavior here.
             "checkInLimit":
-                3,
+                1,
 
             "checkInHistory":
                 [],
@@ -17460,8 +17556,6 @@ def complete_verified_eventwaa_payment(
                 "txRef"
             ),
 
-        # NEW:
-        # Keep the provider on the booking too.
         "paymentProvider":
             provider,
 
@@ -17876,11 +17970,7 @@ def complete_verified_eventwaa_payment(
     )
 
     # ========================================================
-    # IMPORTANT:
     # SAVE HOST WALLET
-    #
-    # Your pasted original function modified wallets but
-    # stopped after save_payments(). We explicitly save it here.
     # ========================================================
 
     save_host_wallets(
@@ -17981,7 +18071,6 @@ def complete_verified_eventwaa_payment(
             booking
 
     }, 200
-    
 
 # ============================================================
 # FLUTTERWAVE TRANSACTION REFERENCE
@@ -26541,6 +26630,559 @@ def update_event_booking(event_id):
         }), 500
 
 
+# ============================================================
+# CANCEL EVENT
+#
+# Host cancellation:
+# - Cancels the event without deleting it
+# - Ignores the normal refund window
+# - Gives full ticket-subtotal refunds
+# - Charges NO refund fee
+# - Reverses host earnings
+# - Reverses EventWaa commission/service-fee accounting
+# - Invalidates all affected tickets
+# - Preserves cancellation/refund history
+# ============================================================
+
+@app.route("/events/<int:event_id>/cancel", methods=["POST"])
+def cancel_event(event_id):
+
+    data = request.get_json() or {}
+
+    host_email = str(
+        data.get("hostEmail", "")
+    ).strip().lower()
+
+    cancellation_reason = str(
+        data.get(
+            "reason",
+            "Event cancelled by host"
+        )
+    ).strip()
+
+    if not cancellation_reason:
+        cancellation_reason = "Event cancelled by host"
+
+    # ========================================================
+    # LOAD DATA
+    # ========================================================
+
+    events = load_json_file("events.json", [])
+    bookings = load_json_file("bookings.json", [])
+    refunds = load_json_file("refunds.json", [])
+    host_wallets = load_json_file("host_wallets.json", [])
+    users = load_json_file("users.json", [])
+
+    admin_wallet = load_json_file(
+        "wallet.json",
+        {
+            "availableBalance": 0,
+            "totalCommission": 0,
+            "totalServiceFees": 0,
+            "totalRevenue": 0,
+            "transactions": []
+        }
+    )
+
+    # ========================================================
+    # FIND EVENT
+    # ========================================================
+
+    event = next(
+        (
+            e for e in events
+            if str(e.get("id")) == str(event_id)
+        ),
+        None
+    )
+
+    if not event:
+        return {
+            "success": False,
+            "message": "Event not found."
+        }, 404
+
+    # ========================================================
+    # HOST AUTHORIZATION
+    # ========================================================
+
+    event_host_email = str(
+        event.get("hostEmail", "")
+    ).strip().lower()
+
+    if not host_email:
+        return {
+            "success": False,
+            "message": "Host email is required."
+        }, 400
+
+    if host_email != event_host_email:
+        return {
+            "success": False,
+            "message": "You are not authorized to cancel this event."
+        }, 403
+
+    # ========================================================
+    # ALREADY CANCELLED
+    # ========================================================
+
+    if str(event.get("status", "")).lower() == "cancelled":
+
+        return {
+            "success": True,
+            "message": "Event is already cancelled.",
+            "event": event
+        }, 200
+
+    # ========================================================
+    # FIND BOOKINGS FOR THIS EVENT
+    # ========================================================
+
+    event_bookings = [
+        booking
+        for booking in bookings
+        if str(booking.get("eventId")) == str(event_id)
+    ]
+
+    # ========================================================
+    # IDENTIFY BOOKINGS THAT STILL NEED REFUNDING
+    # ========================================================
+
+    refundable_bookings = []
+
+    already_refunded = 0
+
+    for booking in event_bookings:
+
+        refund_status = str(
+            booking.get("refundStatus", "")
+        ).lower()
+
+        if refund_status == "refunded":
+            already_refunded += 1
+            continue
+
+        refundable_bookings.append(booking)
+
+    # ========================================================
+    # PRE-CHECK WALLET FUNDS
+    #
+    # We do this BEFORE changing the event status.
+    # This protects against cancelling an event halfway through
+    # because the host wallet cannot cover the refunds.
+    # ========================================================
+
+    settings = load_admin_settings()
+
+    commission_percent = float(
+        settings.get("commission", 10) or 0
+    )
+
+    commission_percent = max(
+        0,
+        min(100, commission_percent)
+    )
+
+    total_host_refund_required = 0
+    total_platform_reversal_required = 0
+
+    for booking in refundable_bookings:
+
+        original_amount = int(
+            float(
+                booking.get(
+                    "subtotal",
+                    booking.get("ticketPrice", 0)
+                ) or 0
+            )
+        )
+
+        if original_amount <= 0:
+            continue
+
+        host_original_amount = int(
+            round(
+                original_amount
+                -
+                (
+                    original_amount
+                    * commission_percent
+                    / 100
+                )
+            )
+        )
+
+        service_fee = int(
+            round(
+                float(
+                    booking.get(
+                        "serviceFee",
+                        0
+                    ) or 0
+                )
+            )
+        )
+
+        total_host_refund_required += host_original_amount
+
+        total_platform_reversal_required += (
+            original_amount
+            - host_original_amount
+            + service_fee
+        )
+
+    # ========================================================
+    # FIND HOST WALLET
+    # ========================================================
+
+    host_id = event.get("hostId")
+
+    host_wallet = next(
+        (
+            wallet for wallet in host_wallets
+            if str(wallet.get("hostId")) == str(host_id)
+        ),
+        None
+    )
+
+    # If the event has paid bookings, the host wallet must exist.
+    if total_host_refund_required > 0 and not host_wallet:
+
+        return {
+            "success": False,
+            "message": (
+                "The host wallet could not be found. "
+                "The event was not cancelled."
+            )
+        }, 400
+
+    # ========================================================
+    # CHECK HOST WALLET TOTAL FUNDS
+    # ========================================================
+
+    if host_wallet:
+
+        available_balance = float(
+            host_wallet.get(
+                "availableBalance",
+                0
+            ) or 0
+        )
+
+        pending_payouts = float(
+            host_wallet.get(
+                "pendingPayouts",
+                0
+            ) or 0
+        )
+
+        host_total_available = (
+            available_balance
+            + pending_payouts
+        )
+
+        if (
+            total_host_refund_required
+            > host_total_available
+        ):
+
+            return {
+                "success": False,
+                "message": (
+                    "The host wallet does not have enough "
+                    "funds to process all event cancellation "
+                    "refunds. The event was not cancelled."
+                ),
+                "required": total_host_refund_required,
+                "available": host_total_available
+            }, 400
+
+    # ========================================================
+    # CHECK EVENTWAA WALLET
+    # ========================================================
+
+    platform_available = float(
+        admin_wallet.get(
+            "availableBalance",
+            0
+        ) or 0
+    )
+
+    if (
+        total_platform_reversal_required
+        > platform_available
+    ):
+
+        return {
+            "success": False,
+            "message": (
+                "EventWaa does not currently have enough "
+                "platform balance to reverse the fees for "
+                "this cancellation. The event was not cancelled."
+            ),
+            "required": total_platform_reversal_required,
+            "available": platform_available
+        }, 400
+
+    # ========================================================
+    # PROCESS REFUNDS
+    # ========================================================
+
+    processed_refunds = 0
+    total_refunded = 0
+    free_bookings_cancelled = 0
+
+    for booking in refundable_bookings:
+
+        original_amount = int(
+            float(
+                booking.get(
+                    "subtotal",
+                    booking.get("ticketPrice", 0)
+                ) or 0
+            )
+        )
+
+        # ====================================================
+        # FREE BOOKING
+        #
+        # No money needs to move, but the ticket must become
+        # invalid because the event has been cancelled.
+        # ====================================================
+
+        if original_amount <= 0:
+
+            refund_ids = [
+                int(r.get("id"))
+                for r in refunds
+                if str(r.get("id", "")).isdigit()
+            ]
+
+            next_refund_id = (
+                max(refund_ids) + 1
+                if refund_ids
+                else 1
+            )
+
+            zero_refund = {
+                "id": next_refund_id,
+                "bookingId": booking.get("id"),
+                "eventId": event.get("id"),
+                "eventTitle": event.get("title"),
+                "buyer": booking.get("buyer"),
+                "quantity": booking.get("quantity", 0),
+                "originalAmount": 0,
+                "refundFeePercent": 0,
+                "refundFee": 0,
+                "amount": 0,
+                "refundAmount": 0,
+                "hostRefundAmount": 0,
+                "hostId": host_id,
+                "hostEmail": event_host_email,
+                "source": "event_cancellation",
+                "status": "refunded",
+                "reason": cancellation_reason,
+                "requestedAt": datetime.now().isoformat(),
+                "processedAt": datetime.now().isoformat(),
+                "reviewedAt": datetime.now().isoformat(),
+                "processedBy": host_email,
+                "reviewedBy": host_email,
+                "cancellation": True
+            }
+
+            refunds.append(zero_refund)
+
+            booking["refundStatus"] = "refunded"
+            booking["refundId"] = next_refund_id
+            booking["refundAmount"] = 0
+            booking["refundFee"] = 0
+            booking["refundFeePercent"] = 0
+            booking["refundedAt"] = datetime.now().isoformat()
+
+            for ticket in booking.get("tickets", []):
+
+                ticket["refundStatus"] = "refunded"
+                ticket["refundedAt"] = datetime.now().isoformat()
+
+            free_bookings_cancelled += 1
+
+            try:
+                create_notification(
+                    booking.get("buyer"),
+                    "Event cancelled",
+                    (
+                        f"{event.get('title', 'Your event')} "
+                        f"has been cancelled. "
+                        f"Your free ticket is no longer valid."
+                    ),
+                    "refund"
+                )
+            except Exception:
+                pass
+
+            continue
+
+        # ====================================================
+        # FIND EXISTING PENDING REFUND
+        #
+        # If the customer already requested a refund, we reuse
+        # that refund record and convert it into a cancellation
+        # refund.
+        # ====================================================
+
+        existing_refund = next(
+            (
+                r for r in refunds
+                if str(r.get("bookingId"))
+                == str(booking.get("id"))
+                and str(r.get("status", "")).lower()
+                == "pending"
+            ),
+            None
+        )
+
+        if existing_refund:
+
+            refund = existing_refund
+
+            refund["source"] = "event_cancellation"
+            refund["reason"] = cancellation_reason
+            refund["refundFeePercent"] = 0
+            refund["refundFee"] = 0
+            refund["amount"] = original_amount
+            refund["refundAmount"] = original_amount
+            refund["cancellation"] = True
+            refund["requestedAt"] = (
+                refund.get(
+                    "requestedAt",
+                    datetime.now().isoformat()
+                )
+            )
+
+        else:
+
+            refund_ids = [
+                int(r.get("id"))
+                for r in refunds
+                if str(r.get("id", "")).isdigit()
+            ]
+
+            next_refund_id = (
+                max(refund_ids) + 1
+                if refund_ids
+                else 1
+            )
+
+            refund = {
+                "id": next_refund_id,
+                "bookingId": booking.get("id"),
+                "eventId": event.get("id"),
+                "eventTitle": event.get("title"),
+                "buyer": booking.get("buyer"),
+                "quantity": booking.get("quantity", 0),
+                "originalAmount": original_amount,
+                "refundFeePercent": 0,
+                "refundFee": 0,
+                "amount": original_amount,
+                "refundAmount": original_amount,
+                "hostId": host_id,
+                "hostEmail": event_host_email,
+                "source": "event_cancellation",
+                "status": "pending",
+                "reason": cancellation_reason,
+                "requestedAt": datetime.now().isoformat(),
+                "cancellation": True
+            }
+
+            refunds.append(refund)
+
+        # Save the refund before the processor loads refunds.json.
+        save_json_file(
+            "refunds.json",
+            refunds
+        )
+
+        # ====================================================
+        # PROCESS USING THE SAME SHARED REFUND ENGINE
+        # ====================================================
+
+        result, status_code = process_eventwaa_refund(
+
+            refund=refund,
+
+            booking=booking,
+
+            event=event,
+
+            cancellation=True,
+
+            processed_by=host_email
+
+        )
+
+        if status_code >= 400:
+
+            return {
+                "success": False,
+                "message": (
+                    "A cancellation refund could not be "
+                    "processed. The event was not marked "
+                    "as cancelled."
+                ),
+                "refundError": result
+            }, status_code
+
+        processed_refunds += 1
+
+        total_refunded += original_amount
+
+    # ========================================================
+    # MARK EVENT CANCELLED
+    # ========================================================
+
+    now = datetime.now().isoformat()
+
+    event["status"] = "cancelled"
+    event["cancelled"] = True
+    event["cancelledAt"] = now
+    event["cancelledBy"] = host_email
+    event["cancellationReason"] = cancellation_reason
+
+    # ========================================================
+    # SAVE ALL DATA
+    # ========================================================
+
+    save_json_file(
+        "bookings.json",
+        bookings
+    )
+
+    save_json_file(
+        "refunds.json",
+        refunds
+    )
+
+    save_json_file(
+        "events.json",
+        events
+    )
+
+    # ========================================================
+    # RESPONSE
+    # ========================================================
+
+    return {
+        "success": True,
+        "message": "Event cancelled successfully.",
+        "eventId": event_id,
+        "eventStatus": "cancelled",
+        "processedRefunds": processed_refunds,
+        "freeBookingsCancelled": free_bookings_cancelled,
+        "alreadyRefunded": already_refunded,
+        "totalRefunded": total_refunded,
+        "refundFee": 0,
+        "cancellation": True
+    }, 200
 
 # ============================================================
 # REFUND SYSTEM
@@ -26626,9 +27268,7 @@ def create_refund():
 
     settings = load_admin_settings()
 
-    # Admin controls whether hosts are allowed
-    # to issue refunds.
-
+    # Hosts must be allowed to issue/process refunds.
     if not settings.get(
         "hostRefunds",
         True
@@ -26672,7 +27312,11 @@ def create_refund():
 
     # ========================================================
     # CHECK REFUND DEADLINE
-    # CUSTOMER MUST REQUEST AT LEAST 5 DAYS BEFORE EVENT
+    #
+    # DEFAULT = 5 DAYS
+    #
+    # ADMIN CAN CHANGE THIS USING:
+    # settings["refundWindow"]
     # ========================================================
 
     event_date = event.get("date")
@@ -26699,17 +27343,32 @@ def create_refund():
             - datetime.now().date()
         ).days
 
-        if days_until_event < 5:
+        refund_window = int(
+            settings.get(
+                "refundWindow",
+                5
+            )
+        )
+
+        # Prevent an invalid negative setting.
+        if refund_window < 0:
+            refund_window = 0
+
+        if days_until_event < refund_window:
 
             return jsonify({
                 "success": False,
                 "message": (
                     "Refund requests must be made "
-                    "at least 5 days before the event."
+                    f"at least {refund_window} "
+                    "days before the event."
                 )
             }), 400
 
-    except ValueError:
+    except (
+        ValueError,
+        TypeError
+    ):
 
         return jsonify({
             "success": False,
@@ -26738,32 +27397,94 @@ def create_refund():
     # QUANTITY
     # ========================================================
 
-    quantity = int(
-        booking.get(
-            "quantity",
-            1
-        ) or 1
-    )
+    try:
+
+        quantity = int(
+            booking.get(
+                "quantity",
+                1
+            ) or 1
+        )
+
+    except (
+        ValueError,
+        TypeError
+    ):
+
+        quantity = 1
 
     if quantity <= 0:
         quantity = 1
 
     # ========================================================
     # REFUND CALCULATION
+    #
+    # IMPORTANT:
+    #
+    # booking["subtotal"] = ticket amount
+    # booking["serviceFee"] = EventWaa service fee
+    # booking["totalPrice"] = host/event accounting amount
+    #
+    # Therefore the customer refund is based on SUBTOTAL.
     # ========================================================
 
-    original_amount = int(
-        booking.get(
-            "totalPrice",
-            0
-        ) or 0
-    )
+    try:
 
-    # Default refund fee = 20%
-    refund_fee_percent = float(
-        settings.get(
-            "refundFeePercent",
-            20
+        original_amount = int(
+            float(
+                booking.get(
+                    "subtotal",
+                    0
+                ) or 0
+            )
+        )
+
+    except (
+        ValueError,
+        TypeError
+    ):
+
+        original_amount = 0
+
+    if original_amount <= 0:
+
+        return jsonify({
+            "success": False,
+            "message": (
+                "This booking does not have a valid "
+                "refundable ticket amount."
+            )
+        }), 400
+
+    # ========================================================
+    # REFUND FEE
+    #
+    # DEFAULT = 20%
+    # ADMIN CONTROLLED
+    # ========================================================
+
+    try:
+
+        refund_fee_percent = float(
+            settings.get(
+                "refundFeePercent",
+                20
+            )
+        )
+
+    except (
+        ValueError,
+        TypeError
+    ):
+
+        refund_fee_percent = 20
+
+    # Keep the setting within a safe range.
+    refund_fee_percent = max(
+        0,
+        min(
+            100,
+            refund_fee_percent
         )
     )
 
@@ -26779,7 +27500,7 @@ def create_refund():
     )
 
     # ========================================================
-    # CREATE REFUND RECORD
+    # LOAD REFUNDS
     # ========================================================
 
     refunds = load_json_file(
@@ -26787,7 +27508,69 @@ def create_refund():
         []
     )
 
-    refund_id = len(refunds) + 1
+    # ========================================================
+    # SAFE REFUND ID
+    # ========================================================
+
+    existing_ids = []
+
+    for existing_refund in refunds:
+
+        try:
+
+            existing_ids.append(
+                int(
+                    existing_refund.get(
+                        "id",
+                        0
+                    )
+                )
+            )
+
+        except (
+            ValueError,
+            TypeError
+        ):
+
+            continue
+
+    refund_id = (
+        max(existing_ids)
+        + 1
+        if existing_ids
+        else 1
+    )
+
+    # ========================================================
+    # HOST INFORMATION
+    #
+    # Store this now so the refund record remains
+    # self-contained.
+    # ========================================================
+
+    host_id = event.get(
+        "hostId"
+    )
+
+    host_email = event.get(
+        "hostEmail"
+    )
+
+    host_name = event.get(
+        "hostName",
+        event.get(
+            "host",
+            ""
+        )
+    )
+
+    # ========================================================
+    # CREATE REFUND RECORD
+    # ========================================================
+
+    created_at = datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
 
     refund = {
 
@@ -26810,6 +27593,12 @@ def create_refund():
             event.get("title")
         ),
 
+        "hostId": host_id,
+
+        "hostEmail": host_email,
+
+        "hostName": host_name,
+
         "buyer": booking.get(
             "buyer"
         ),
@@ -26820,29 +27609,48 @@ def create_refund():
 
         "quantity": quantity,
 
-        # ORIGINAL PRICE
+        # ====================================================
+        # ORIGINAL REFUNDABLE TICKET AMOUNT
+        # ====================================================
+
         "originalAmount": original_amount,
 
+        # ====================================================
         # REFUND POLICY
+        # ====================================================
+
         "refundFeePercent": refund_fee_percent,
 
-        # MONEY KEPT AS REFUND FEE
         "refundFee": refund_fee,
 
-        # MONEY CUSTOMER WILL RECEIVE
         "amount": refund_amount,
+
+        # ====================================================
+        # SOURCE
+        # ====================================================
+
+        "source": "customer_request",
+
+        # ====================================================
+        # CUSTOMER REQUEST
+        # ====================================================
 
         "reason": reason,
 
         "details": details,
 
-        # HOST MUST REVIEW
+        # ====================================================
+        # HOST REVIEW
+        # ====================================================
+
         "status": "pending",
 
-        "createdAt": datetime.now().strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
+        "createdAt": created_at
     }
+
+    # ========================================================
+    # SAVE NEW REFUND REQUEST
+    # ========================================================
 
     refunds.append(
         refund
@@ -26854,181 +27662,158 @@ def create_refund():
     )
 
     # ========================================================
-    # UPDATE BOOKING
+    # AUTOMATIC REFUND APPROVAL
+    #
+    # If enabled in Admin Settings, the refund is processed
+    # immediately using the SAME processor used by host
+    # approval.
+    #
+    # This prevents separate accounting logic for:
+    # - automatic refunds
+    # - host-approved refunds
+    # - event-cancellation refunds
     # ========================================================
 
-    booking["refundStatus"] = "pending"
-
-    booking["refundId"] = refund_id
-
-    booking["refundRequestedAt"] = (
-        refund["createdAt"]
+    auto_refund_approval = bool(
+        settings.get(
+            "autoRefundApproval",
+            False
+        )
     )
 
-    save_json_file(
-        "bookings.json",
-        bookings
-    )
+    if auto_refund_approval:
 
-    # ========================================================
-    # NOTIFY HOST
-    # ========================================================
+        result, status_code = process_eventwaa_refund(
 
-    host_id = event.get(
-        "hostId"
-    )
+            refund=refund,
 
-    if host_id:
+            booking=booking,
 
-        create_notification(
+            event=event,
 
-            host_id,
+            cancellation=False,
 
-            "New refund request",
-
-            (
-                f"A refund request of UGX "
-                f"{refund['amount']:,} "
-                f"was submitted for "
-                f"{refund['eventTitle']}."
-            ),
-
-            "refund_request",
-
-            "/host/refunds"
+            processed_by="system"
 
         )
 
+        return result, status_code
+
     # ========================================================
-    # RESPONSE
+    # NORMAL MANUAL REVIEW FLOW
     # ========================================================
 
-    return jsonify({
-
-        "success": True,
-
-        "message": (
-            "Refund request submitted "
-            "to the event host for review."
+    create_notification(
+        host_email,
+        "New refund request",
+        (
+            f"A refund request has been submitted for "
+            f"{event.get('title', 'your event')}."
         ),
-
-        "refund": refund
-
-    }), 201
-
-# ============================================================
-# GET HOST REFUND REQUESTS
-# ============================================================
-
-# ============================================================
-# HOST REFUNDS
-# ============================================================
-
-@app.route("/refunds/host", methods=["GET"])
-def get_host_refunds():
-
-    host_email = request.args.get(
-        "email",
-        ""
-    ).strip().lower()
-
-    if not host_email:
-        return jsonify({
-            "success": False,
-            "message": "Host email is required.",
-            "refunds": []
-        }), 400
-
-    refunds = load_json_file(
-        "refunds.json",
-        []
+        "refund"
     )
 
-    events = load_json_file(
-        "events.json",
-        []
-    )
-
-    host_refunds = []
-
-    for refund in refunds:
-
-        event_id = refund.get("eventId")
-
-        refund_host_email = str(
-            refund.get(
-                "hostEmail",
-                ""
-            )
-        ).strip().lower()
-
-        if refund_host_email == host_email:
-            host_refunds.append(refund)
-            continue
-
-        for event in events:
-
-            if str(
-                event.get("id")
-            ) == str(event_id):
-
-                event_host_email = str(
-                    event.get(
-                        "hostEmail",
-                        ""
-                    )
-                ).strip().lower()
-
-                if event_host_email == host_email:
-
-                    refund["hostEmail"] = event_host_email
-                    refund["hostId"] = event.get("hostId")
-                    refund["hostName"] = event.get("hostName")
-
-                    host_refunds.append(refund)
-
-                break
-
-    return jsonify({
+    return {
         "success": True,
-        "refunds": host_refunds
-    }), 200
+        "message": (
+            "Refund request submitted and is "
+            "waiting for host approval."
+        ),
+        "autoApproved": False,
+        "refund": refund
+    }, 201
 
 
 # ============================================================
 # REFUND HELPERS
 # ============================================================
 
-def refund_booking_money(booking, event):
+def refund_booking_money(
+    booking,
+    event,
+    cancellation=False
+):
 
     settings = load_admin_settings()
 
-    # Customer refund is based on the ticket subtotal,
-    # NOT the service fee.
-    original_amount = int(
-        booking.get(
-            "subtotal",
-            booking.get(
-                "ticketPrice",
-                0
+    # ========================================================
+    # CUSTOMER REFUND IS BASED ON TICKET SUBTOTAL
+    #
+    # NOT:
+    # - service fee
+    # - customer total
+    # - host accounting totalPrice
+    # ========================================================
+
+    try:
+
+        original_amount = int(
+            float(
+                booking.get(
+                    "subtotal",
+                    booking.get(
+                        "ticketPrice",
+                        0
+                    )
+                )
+                or 0
             )
         )
-        or 0
-    )
 
-    refund_fee_percent = float(
-        settings.get(
-            "refundFeePercent",
-            20
+    except (
+        ValueError,
+        TypeError
+    ):
+
+        original_amount = 0
+
+    if original_amount < 0:
+        original_amount = 0
+
+    # ========================================================
+    # REFUND FEE
+    #
+    # Normal customer-requested refund:
+    #     Use Admin refundFeePercent.
+    #
+    # Host cancellation:
+    #     No customer refund penalty.
+    # ========================================================
+
+    if cancellation:
+
+        refund_fee_percent = 0
+
+    else:
+
+        try:
+
+            refund_fee_percent = float(
+                settings.get(
+                    "refundFeePercent",
+                    20
+                )
+            )
+
+        except (
+            ValueError,
+            TypeError
+        ):
+
+            refund_fee_percent = 20
+
+    # Safety
+    refund_fee_percent = max(
+        0,
+        min(
+            100,
+            refund_fee_percent
         )
     )
 
-    # Safety
-    if refund_fee_percent < 0:
-        refund_fee_percent = 0
-
-    if refund_fee_percent > 100:
-        refund_fee_percent = 100
+    # ========================================================
+    # CALCULATE REFUND
+    # ========================================================
 
     refund_fee = int(
         round(
@@ -27043,7 +27828,12 @@ def refund_booking_money(booking, event):
         original_amount - refund_fee
     )
 
+    # ========================================================
+    # RETURN CONSISTENT REFUND DATA
+    # ========================================================
+
     return {
+
         "originalAmount":
             original_amount,
 
@@ -27053,228 +27843,207 @@ def refund_booking_money(booking, event):
         "refundFee":
             refund_fee,
 
+        "refundAmount":
+            refund_amount,
+
+        # Keep this temporarily for compatibility with
+        # existing code that may already read totalAmount.
         "totalAmount":
-            refund_amount
+            refund_amount,
+
+        "cancellation":
+            bool(cancellation)
     }
 
-#host review refund
 
-@app.route(
-    "/refunds/<int:refund_id>/host-review",
-    methods=["PUT"]
-)
-def host_review_refund(refund_id):
-    data = request.get_json(
-        silent=True
-    ) or {}
-    action = data.get("action")
-    host_email = str(
-        data.get("hostEmail", "")
-    ).strip().lower()
-    note = data.get(
-        "note",
-        ""
-    )
-    # ========================================================
-    # VALIDATION
-    # ========================================================
-    if action not in [
-        "approve",
-        "reject"
-    ]:
-        return jsonify({
-            "success": False,
-            "message": "Action must be approve or reject."
-        }), 400
-    if not host_email:
-        return jsonify({
-            "success": False,
-            "message": "Host email is required."
-        }), 400
-    # ========================================================
-    # LOAD DATA
-    # ========================================================
-    refunds = load_json_file(
-        "refunds.json",
-        []
-    )
-    bookings = load_json_file(
-        "bookings.json",
-        []
-    )
-    events = load_json_file(
-        "events.json",
-        []
-    )
-    users = load_json_file(
-        "users.json",
-        []
-    )
-    host_wallets = load_host_wallets()
 
-    settings = load_admin_settings ()
+
+# ============================================================
+# COMMON REFUND PROCESSOR
+#
+# SHARED BY:
+# - Host-approved customer refunds
+# - Automatically approved refunds
+# - Event cancellation refunds
+#
+# cancellation=False:
+#     Normal customer refund.
+#     Admin refund fee applies.
+#
+# cancellation=True:
+#     Host/event cancellation.
+#     Customer receives the full ticket subtotal.
+#     No refund fee.
+#
+# IMPORTANT:
+# This function performs EventWaa's INTERNAL accounting.
+# Actual Flutterwave/PesaPal money reversal is separate.
+# ============================================================
+
+def process_eventwaa_refund(
+    refund,
+    booking,
+    event,
+    cancellation=False,
+    processed_by=""
+):
+
+    now = datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
+
+    settings = load_admin_settings()
+
     # ========================================================
-    # FIND REFUND
+    # BASIC VALIDATION
     # ========================================================
-    refund = None
-    for current_refund in refunds:
-        try:
-            current_id = int(
-                current_refund.get(
-                    "id",
-                    0
-                )
-            )
-        except (
-            ValueError,
-            TypeError
-        ):
-            current_id = 0
-        if current_id == int(refund_id):
-            refund = current_refund
-            break
-    if not refund:
-        return jsonify({
+
+    if not booking:
+        return {
             "success": False,
-            "message": "Refund request not found."
-        }), 404
-    # ========================================================
-    # ONLY PENDING REFUNDS
-    # ========================================================
-    if refund.get("status") != "pending":
-        return jsonify({
-            "success": False,
-            "message": (
-                "This refund has already been processed."
-            )
-        }), 400
-    # ========================================================
-    # FIND EVENT
-    # ========================================================
-    event = None
-    for current_event in events:
-        if str(
-            current_event.get("id")
-        ) == str(
-            refund.get("eventId")
-        ):
-            event = current_event
-            break
+            "message": "Booking not found."
+        }, 404
+
     if not event:
-        return jsonify({
+        return {
             "success": False,
             "message": "Event not found."
-        }), 404
-    # ========================================================
-    # VERIFY HOST OWNS EVENT
-    # ========================================================
-    event_host_email = str(
-        event.get(
-            "hostEmail",
+        }, 404
+
+    current_refund_status = str(
+        refund.get(
+            "status",
             ""
         )
     ).strip().lower()
-    if event_host_email != host_email:
-        return jsonify({
-            "success": False,
-            "message": (
-                "You are not authorized to "
-                "process this refund."
-            )
-        }), 403
-    # ========================================================
-    # FIND BOOKING
-    # ========================================================
-    booking = None
-    for current_booking in bookings:
-        if str(
-            current_booking.get("id")
-        ) == str(
-            refund.get("bookingId")
-        ):
-            booking = current_booking
-            break
-    if not booking:
-        return jsonify({
-            "success": False,
-            "message": (
-                "Booking associated with refund "
-                "was not found."
-            )
-        }), 404
-    # ========================================================
-    # CHECKED-IN TICKET
-    # ========================================================
-    if booking.get(
-        "checkedIn",
-        False
+
+    if current_refund_status == "refunded":
+        return {
+            "success": True,
+            "message": "Refund has already been processed.",
+            "alreadyProcessed": True,
+            "refund": refund
+        }, 200
+
+    if current_refund_status not in (
+        "pending",
+        "approved"
     ):
-        return jsonify({
+        return {
+            "success": False,
+            "message": (
+                "This refund cannot be processed "
+                "from its current status."
+            )
+        }, 400
+
+    # ========================================================
+    # DO NOT REFUND CHECKED-IN TICKETS
+    #
+    # Event cancellation is still allowed to refund them.
+    # The host cancelled the event, so the customer should
+    # not lose their money because they had already checked in.
+    # ========================================================
+
+    if (
+        not cancellation
+        and booking.get(
+            "checkedIn",
+            False
+        )
+    ):
+
+        return {
             "success": False,
             "message": (
                 "Checked-in tickets cannot be refunded."
             )
-        }), 400
+        }, 400
+
     # ========================================================
-    # REJECT REFUND
+    # LOAD FILES
     # ========================================================
-    if action == "reject":
-        processed_at = datetime.now().strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
-        refund["status"] = "rejected"
-        refund["reviewedAt"] = processed_at
-        refund["reviewedBy"] = host_email
-        refund["reviewNote"] = (
-            note
-            or
-            "Refund rejected by event host."
-        )
-        booking["refundStatus"] = "rejected"
-        save_json_file(
-            "refunds.json",
-            refunds
-        )
-        save_json_file(
-            "bookings.json",
-            bookings
-        )
-        # ====================================================
-        # NOTIFY CUSTOMER
-        # ====================================================
-        buyer = booking.get(
-            "buyer"
-        ) or {}
-        buyer_id = buyer.get(
-            "id"
-        )
-        if buyer_id:
-            create_notification(
-                buyer_id,
-                "Refund rejected",
-                (
-                    f"Your refund request for "
-                    f"{refund.get('eventTitle', 'the event')} "
-                    f"was rejected by the event host."
-                ),
-                "refund_rejected",
-                "/tickets"
+
+    bookings = load_json_file(
+        "bookings.json",
+        []
+    )
+
+    events = load_json_file(
+        "events.json",
+        []
+    )
+
+    refunds = load_json_file(
+        "refunds.json",
+        []
+    )
+
+    host_wallets = load_host_wallets()
+
+    admin_wallet = load_wallet()
+
+    # ========================================================
+    # FIND THE CURRENT STORED BOOKING
+    # ========================================================
+
+    booking_id = booking.get(
+        "id"
+    )
+
+    stored_booking = None
+
+    for current_booking in bookings:
+
+        if str(
+            current_booking.get(
+                "id"
             )
-        return jsonify({
-            "success": True,
-            "message": (
-                "Refund rejected successfully."
-            ),
-            "refund": refund
-        }), 200
-    
+        ) == str(
+            booking_id
+        ):
+
+            stored_booking = current_booking
+
+            break
+
+    if not stored_booking:
+
+        return {
+            "success": False,
+            "message": "Booking no longer exists."
+        }, 404
+
+    booking = stored_booking
+
     # ========================================================
-    # APPROVE REFUND
+    # FINAL DUPLICATE PROTECTION
+    # ========================================================
+
+    if str(
+        booking.get(
+            "refundStatus",
+            ""
+        )
+    ).lower() == "refunded":
+
+        refund["status"] = "refunded"
+
+        return {
+            "success": True,
+            "message": "Booking has already been refunded.",
+            "alreadyProcessed": True,
+            "refund": refund
+        }, 200
+
+    # ========================================================
+    # CALCULATE REFUND
     # ========================================================
 
     money = refund_booking_money(
         booking,
-        event
+        event,
+        cancellation=cancellation
     )
 
     original_amount = int(
@@ -27288,8 +28057,9 @@ def host_review_refund(refund_id):
     refund_fee_percent = float(
         money.get(
             "refundFeePercent",
-            20
+            0
         )
+        or 0
     )
 
     refund_fee = int(
@@ -27302,56 +28072,125 @@ def host_review_refund(refund_id):
 
     refund_amount = int(
         money.get(
-            "totalAmount",
-            0
+            "refundAmount",
+            money.get(
+                "totalAmount",
+                0
+            )
         )
         or 0
     )
 
     if original_amount <= 0:
+        return {
+            "success": False,
+            "message": (
+                "This booking does not contain "
+                "a refundable ticket amount."
+            )
+        }, 400
 
-        return jsonify({
+    if refund_amount <= 0:
+        return {
             "success": False,
-            "message": "Invalid refund amount."
-        }), 400
+            "message": (
+                "Calculated refund amount is invalid."
+            )
+        }, 400
+
     # ========================================================
-    # GET HOST ID FROM EVENT
+    # HOST ACCOUNTING
+    #
+    # Normal customer refund:
+    # Host refund is limited to the host's original net share.
+    #
+    # Event cancellation:
+    # Customer receives the full ticket subtotal.
+    # The host contributes the original host earning.
+    # EventWaa's commission is also reversed below.
     # ========================================================
-    host_id = event.get(
-        "hostId"
-    )
-    if not host_id:
-        return jsonify({
-            "success": False,
-            "message": "Event host ID is missing."
-        }), 400
+
     try:
+
         host_id = int(
-            host_id
+            event.get(
+                "hostId"
+            )
         )
+
     except (
         TypeError,
         ValueError
     ):
-        return jsonify({
+
+        return {
             "success": False,
-            "message": "Invalid event host ID."
-        }), 400
+            "message": "Event host ID is invalid."
+        }, 400
+
+    commission_percent = float(
+        settings.get(
+            "commission",
+            10
+        )
+        or 0
+    )
+
+    if commission_percent < 0:
+        commission_percent = 0
+
+    if commission_percent > 100:
+        commission_percent = 100
+
+    host_original_amount = int(
+        round(
+            original_amount
+            -
+            (
+                original_amount
+                *
+                commission_percent
+                /
+                100
+            )
+        )
+    )
+
+    if cancellation:
+
+        host_refund_amount = host_original_amount
+
+        # The platform's original commission must also be
+        # reversed because the customer receives the entire
+        # ticket subtotal.
+        platform_commission_reversal = (
+            original_amount
+            -
+            host_original_amount
+        )
+
+    else:
+
+        host_refund_amount = min(
+            host_original_amount,
+            refund_amount
+        )
+
+        # Normal refunds retain EventWaa's commission.
+        platform_commission_reversal = 0
+
     # ========================================================
     # FIND HOST WALLET
     # ========================================================
 
-    wallets = load_host_wallets()
-
     host_wallet = None
 
-
-    for current_wallet in wallets:
+    for wallet in host_wallets:
 
         try:
 
             wallet_host_id = int(
-                current_wallet.get(
+                wallet.get(
                     "hostId",
                     0
                 )
@@ -27364,165 +28203,106 @@ def host_review_refund(refund_id):
 
             wallet_host_id = 0
 
-
         if wallet_host_id == host_id:
 
-            host_wallet = current_wallet
+            host_wallet = wallet
 
             break
 
-
     if not host_wallet:
 
-        return jsonify({
-
+        return {
             "success": False,
-
             "message": (
-                f"Host wallet not found for "
-                f"host ID {host_id}."
+                "Host wallet was not found."
             )
+        }, 404
 
-        }), 404
-    
-    # ========================================================
-    # HOST WALLET BALANCES
-    # ========================================================
     available_balance = int(
         host_wallet.get(
             "availableBalance",
             0
-        ) or 0
+        )
+        or 0
     )
+
     pending_balance = int(
         host_wallet.get(
             "pendingPayouts",
             0
-        ) or 0
+        )
+        or 0
     )
+
     host_total_funds = (
         available_balance
         +
         pending_balance
     )
-    # ========================================================
-    # IMPORTANT
-    #
-    # The host should only be responsible for the money
-    # that actually went to the host.
-    #
-    # Example:
-    #
-    # Ticket price       = 10,000
-    # EventWaa commission = 1,000
-    # Host receives      = 9,000
-    # Service fee        = 500
-    # Customer pays      = 10,500
-    #
-    # Therefore the host wallet should NOT be expected
-    # to contain the full 10,500.
-    #
-    # For now we calculate the host-side refund portion
-    # from the original ticket amount.
-    # ========================================================
-    ticket_amount = int(
-        money.get(
-            "originalAmount",
-            booking.get(
-                "ticketPrice",
-                0
-            )
-        )
-        or 0
-    )
-    settings = load_admin_settings()
-    commission_percent = float(
-        settings.get(
-            "commission",
-            10
-        )
-    )
-    host_original_amount = int(
-        ticket_amount
-        -
-        (
-            ticket_amount
-            * commission_percent
-            / 100
-        )
-    )
-    # ========================================================
-    # HOST REFUND PORTION
-    # ========================================================
-    host_refund_amount = min(
-        host_original_amount,
-        refund_amount
-    )
-    # ========================================================
-    # CHECK HOST HAS ENOUGH FUNDS
-    # ========================================================
+
     if host_total_funds < host_refund_amount:
-        return jsonify({
+
+        return {
             "success": False,
             "message": (
                 "The host does not have enough "
-                "funds available to cover the "
-                "host portion of this refund."
+                "funds to process this refund."
             ),
-            "wallet": {
-                "availableBalance":
-                    available_balance,
-                "pendingPayouts":
-                    pending_balance,
-                "totalFunds":
-                    host_total_funds,
-                "hostRefundRequired":
-                    host_refund_amount
-            }
-        }), 400
+            "required":
+                host_refund_amount,
+            "available":
+                host_total_funds
+        }, 400
+
     # ========================================================
-    # DEDUCT HOST REFUND
+    # DEDUCT HOST FUNDS
     #
-    # AVAILABLE FIRST
-    # THEN PENDING
+    # Available funds are used first.
+    # Remaining amount comes from pending payouts.
     # ========================================================
-    remaining_refund = host_refund_amount
+
     available_used = min(
         available_balance,
-        remaining_refund
+        host_refund_amount
     )
-    host_wallet["availableBalance"] = (
+
+    remaining_host_refund = (
+        host_refund_amount
+        -
+        available_used
+    )
+
+    pending_used = min(
+        pending_balance,
+        remaining_host_refund
+    )
+
+    remaining_host_refund -= pending_used
+
+    if remaining_host_refund > 0:
+
+        return {
+            "success": False,
+            "message": (
+                "Unable to reconcile the host "
+                "wallet for this refund."
+            )
+        }, 400
+
+    host_wallet["availableBalance"] = max(
+        0,
         available_balance
         -
         available_used
     )
-    remaining_refund -= available_used
-    pending_used = 0
-    if remaining_refund > 0:
-        pending_used = min(
-            pending_balance,
-            remaining_refund
-        )
-        host_wallet["pendingPayouts"] = (
-            pending_balance
-            -
-            pending_used
-        )
-        remaining_refund -= pending_used
-    # ========================================================
-    # SAFETY CHECK
-    # ========================================================
-    if remaining_refund > 0:
-        return jsonify({
-            "success": False,
-            "message": (
-                "Unable to complete refund because "
-                "wallet funds changed."
-            )
-        }), 400
-    # ========================================================
-    # UPDATE HOST WALLET
-    # ========================================================
+
+    host_wallet["pendingPayouts"] = max(
+        0,
+        pending_balance
+        -
+        pending_used
+    )
+
     host_wallet["totalEarned"] = max(
         0,
         int(
@@ -27530,305 +28310,1130 @@ def host_review_refund(refund_id):
                 "totalEarned",
                 0
             )
+            or 0
         )
         -
         host_refund_amount
     )
+
     host_wallet["refunds"] = (
         int(
             host_wallet.get(
                 "refunds",
                 0
             )
+            or 0
         )
         +
         host_refund_amount
     )
+
     # ========================================================
-    # WALLET TRANSACTION
+    # IMPORTANT:
+    # REDUCE SCHEDULED PAYOUTS TOO
+    #
+    # pendingPayouts is only the aggregate number.
+    # scheduledPayouts contains the actual future payout
+    # records, so the same refunded money must not become
+    # available later.
+    #
+    # Your current scheduled payout records do not contain
+    # booking IDs, so we reconcile by payout amount.
     # ========================================================
+
+    if pending_used > 0:
+
+        amount_to_remove = pending_used
+
+        scheduled_payouts = host_wallet.setdefault(
+            "scheduledPayouts",
+            []
+        )
+
+        for payout in scheduled_payouts:
+
+            if amount_to_remove <= 0:
+                break
+
+            payout_amount = int(
+                payout.get(
+                    "amount",
+                    0
+                )
+                or 0
+            )
+
+            if payout_amount <= 0:
+                continue
+
+            deduction = min(
+                payout_amount,
+                amount_to_remove
+            )
+
+            payout["amount"] = (
+                payout_amount
+                -
+                deduction
+            )
+
+            amount_to_remove -= deduction
+
+        # Remove empty scheduled payouts.
+        host_wallet["scheduledPayouts"] = [
+            payout
+            for payout in scheduled_payouts
+            if int(
+                payout.get(
+                    "amount",
+                    0
+                )
+                or 0
+            ) > 0
+        ]
+
+        if amount_to_remove > 0:
+
+            return {
+                "success": False,
+                "message": (
+                    "Pending refund could not be fully "
+                    "matched against scheduled payouts."
+                )
+            }, 400
+
+    # ========================================================
+    # HOST REFUND TRANSACTION
+    # ========================================================
+
     host_wallet.setdefault(
         "transactions",
         []
     )
-    processed_at = datetime.now().strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-    buyer = booking.get(
-        "buyer"
-    ) or {}
+
     host_wallet["transactions"].insert(
+
         0,
+
         {
-            "type": "refund",
-            "eventId": event.get(
-                "id"
-            ),
-            "eventTitle": refund.get(
-                "eventTitle",
-                event.get("title")
-            ),
-            "amount": -host_refund_amount,
+
+            "type":
+                "refund",
+
+            "eventId":
+                event.get(
+                    "id"
+                ),
+
+            "eventTitle":
+                event.get(
+                    "title",
+                    ""
+                ),
+
+            "bookingId":
+                booking.get(
+                    "id"
+                ),
+
+            "amount":
+                -host_refund_amount,
+
             "originalAmount":
                 original_amount,
+
             "refundAmount":
                 refund_amount,
+
             "hostRefundAmount":
                 host_refund_amount,
+
             "availableUsed":
                 available_used,
+
             "pendingUsed":
                 pending_used,
+
             "refundFeePercent":
                 refund_fee_percent,
+
             "refundFee":
                 refund_fee,
+
+            "cancellation":
+                bool(cancellation),
+
             "date":
-                processed_at,
-            "description": (
-                f"Refund issued to "
-                f"{buyer.get('name', 'customer')}"
-            )
+                now,
+
+            "description":
+                (
+                    "Event cancellation refund"
+                    if cancellation
+                    else
+                    "Customer refund"
+                )
+
         }
     )
+
     # ========================================================
-    # SAVE HOST WALLET
+    # EVENTWAA PLATFORM WALLET
+    #
+    # Normal refund:
+    # - Commission remains with EventWaa.
+    # - Refund fee remains with EventWaa.
+    #
+    # Cancellation:
+    # - Commission must be reversed.
+    # - Service fee must also be reversed because the
+    #   customer receives the full ticket subtotal, not
+    #   the original service fee.
+    #
+    # Therefore cancellation reverses the original
+    # EventWaa commission + service fee.
     # ========================================================
-    save_json_file(
-        "host_wallets.json",
-        host_wallets
-    )
-    # ========================================================
-    # UPDATE REFUND
-    # ========================================================
-    refund["status"] = "refunded"
-    refund["originalAmount"] = (
-        original_amount
-    )
-    refund["refundFeePercent"] = (
-        refund_fee_percent
-    )
-    refund["refundFee"] = (
-        refund_fee
-    )
-    refund["amount"] = (
-        refund_amount
-    )
-    refund["refundAmount"] = (
-        refund_amount
-    )
-    refund["hostRefundAmount"] = (
-        host_refund_amount
-    )
-    refund["processedBy"] = (
-        host_email
-    )
-    refund["reviewedBy"] = (
-        host_email
-    )
-    refund["processedAt"] = (
-        processed_at
-    )
-    refund["reviewedAt"] = (
-        processed_at
-    )
-    refund["reviewNote"] = (
-        note
-        or
-        "Refund approved and processed "
-        "by event host."
-    )
+
+    if cancellation:
+
+        original_service_fee = int(
+            booking.get(
+                "serviceFee",
+                0
+            )
+            or 0
+        )
+
+        platform_reversal = (
+            platform_commission_reversal
+            +
+            original_service_fee
+        )
+
+        admin_available = int(
+            admin_wallet.get(
+                "availableBalance",
+                0
+            )
+            or 0
+        )
+
+        if admin_available < platform_reversal:
+
+            return {
+                "success": False,
+                "message": (
+                    "EventWaa does not have enough "
+                    "available balance to reverse "
+                    "the platform earnings."
+                ),
+                "required":
+                    platform_reversal,
+                "available":
+                    admin_available
+            }, 400
+
+        admin_wallet["availableBalance"] = (
+            admin_available
+            -
+            platform_reversal
+        )
+
+        admin_wallet["totalCommission"] = max(
+            0,
+            int(
+                admin_wallet.get(
+                    "totalCommission",
+                    0
+                )
+                or 0
+            )
+            -
+            platform_commission_reversal
+        )
+
+        admin_wallet["totalServiceFees"] = max(
+            0,
+            int(
+                admin_wallet.get(
+                    "totalServiceFees",
+                    0
+                )
+                or 0
+            )
+            -
+            original_service_fee
+        )
+
+        admin_wallet["totalRevenue"] = max(
+            0,
+            int(
+                admin_wallet.get(
+                    "totalRevenue",
+                    0
+                )
+                or 0
+            )
+            -
+            platform_reversal
+        )
+
+        admin_wallet.setdefault(
+            "transactions",
+            []
+        )
+
+        admin_wallet["transactions"].insert(
+
+            0,
+
+            {
+
+                "type":
+                    "event_cancellation_refund",
+
+                "eventId":
+                    event.get(
+                        "id"
+                    ),
+
+                "eventTitle":
+                    event.get(
+                        "title",
+                        ""
+                    ),
+
+                "bookingId":
+                    booking.get(
+                        "id"
+                    ),
+
+                "amount":
+                    -platform_reversal,
+
+                "commissionReversed":
+                    platform_commission_reversal,
+
+                "serviceFeeReversed":
+                    original_service_fee,
+
+                "date":
+                    now
+
+            }
+        )
+
     # ========================================================
     # UPDATE BOOKING
     # ========================================================
-    booking["refundStatus"] = (
-        "refunded"
-    )
+
+    booking["refundStatus"] = "refunded"
+
     booking["refundId"] = (
-        refund_id
+        refund.get(
+            "id"
+        )
     )
-    booking["refundedAt"] = (
-        processed_at
-    )
+
+    booking["refundedAt"] = now
+
     booking["refundAmount"] = (
         refund_amount
     )
+
     booking["refundFee"] = (
         refund_fee
     )
 
-    # ========================================================
-    # RESTORE EVENT INVENTORY
-    # ========================================================
-
-    quantity = int(
-        booking.get(
-            "quantity",
-            refund.get(
-                "quantity",
-                1
-            )
-        ) or 1
+    booking["refundFeePercent"] = (
+        refund_fee_percent
     )
 
-    if quantity <= 0:
-        quantity = 1
+    # ========================================================
+    # INVALIDATE INDIVIDUAL TICKETS
+    #
+    # One refunded ticket must not remain usable.
+    # ========================================================
+
+    if isinstance(
+        booking.get(
+            "tickets"
+        ),
+        list
+    ):
+
+        for ticket in booking["tickets"]:
+
+            ticket["refundStatus"] = "refunded"
+
+            ticket["refundedAt"] = now
+
+    # ========================================================
+    # UPDATE REFUND RECORD
+    # ========================================================
+
+    refund["status"] = "refunded"
+
+    refund["originalAmount"] = (
+        original_amount
+    )
+
+    refund["refundFeePercent"] = (
+        refund_fee_percent
+    )
+
+    refund["refundFee"] = (
+        refund_fee
+    )
+
+    refund["amount"] = (
+        refund_amount
+    )
+
+    refund["refundAmount"] = (
+        refund_amount
+    )
+
+    refund["hostRefundAmount"] = (
+        host_refund_amount
+    )
+
+    refund["availableUsed"] = (
+        available_used
+    )
+
+    refund["pendingUsed"] = (
+        pending_used
+    )
+
+    refund["cancellation"] = (
+        bool(cancellation)
+    )
+
+    refund["source"] = (
+        "event_cancellation"
+        if cancellation
+        else
+        refund.get(
+            "source",
+            "customer_request"
+        )
+    )
+
+    refund["processedAt"] = now
+
+    refund["reviewedAt"] = now
+
+    if processed_by:
+
+        refund["processedBy"] = (
+            processed_by
+        )
+
+        refund["reviewedBy"] = (
+            processed_by
+        )
+
+    # ========================================================
+    # UPDATE EVENT
+    #
+    # IMPORTANT:
+    # The verified-payment fulfillment function stores
+    # event.revenue as GROSS ticket subtotal.
+    #
+    # We therefore reverse the ticket subtotal here.
+    # ========================================================
+
+    event_id = event.get(
+        "id"
+    )
+
+    stored_event = None
 
     for current_event in events:
 
         if str(
-            current_event.get("id")
+            current_event.get(
+                "id"
+            )
         ) == str(
-            booking.get("eventId")
+            event_id
         ):
 
-            # ----------------------------------------------------
-            # REDUCE TICKETS SOLD
-            # ----------------------------------------------------
+            stored_event = current_event
 
-            current_event["ticketsSold"] = max(
-                0,
-                int(
-                    current_event.get(
-                        "ticketsSold",
-                        0
-                    )
-                ) - quantity
+            break
+
+    if stored_event:
+
+        quantity = int(
+            booking.get(
+                "quantity",
+                1
             )
+            or 1
+        )
 
-            # ----------------------------------------------------
-            # IMPORTANT:
-            # EVENT REVENUE REPRESENTS THE HOST'S NET EARNINGS.
-            # Therefore subtract ONLY THE CUSTOMER REFUND AMOUNT.
-            #
-            # Example:
-            # Host earned 9,000
-            # Refund = 8,000
-            # Remaining host revenue = 1,000
-            # ----------------------------------------------------
-
-            current_event["revenue"] = max(
-                0,
-                int(
-                    current_event.get(
-                        "revenue",
-                        0
-                    )
-                ) - refund_amount
+        stored_event["ticketsSold"] = max(
+            0,
+            int(
+                stored_event.get(
+                    "ticketsSold",
+                    0
+                )
+                or 0
             )
+            -
+            quantity
+        )
 
-            # ----------------------------------------------------
-            # RESTORE TICKET INVENTORY
-            # ----------------------------------------------------
-
-            ticket_type = booking.get(
-                "ticketType"
+        stored_event["revenue"] = max(
+            0,
+            int(
+                stored_event.get(
+                    "revenue",
+                    0
+                )
+                or 0
             )
+            -
+            original_amount
+        )
 
-            for ticket in current_event.get(
-                "tickets",
-                []
-            ):
+        # Return tickets to inventory.
+        for ticket_type in stored_event.get(
+            "tickets",
+            []
+        ):
 
-                if str(
-                    ticket.get(
-                        "name",
-                        ""
+            if str(
+                ticket_type.get(
+                    "name",
+                    ""
+                )
+            ).strip().lower() == str(
+                booking.get(
+                    "ticketType",
+                    ""
+                )
+            ).strip().lower():
+
+                ticket_type["remaining"] = (
+
+                    int(
+                        ticket_type.get(
+                            "remaining",
+                            0
+                        )
+                        or 0
                     )
-                ).strip().lower() == str(
-                    ticket_type or ""
-                ).strip().lower():
+                    +
+                    quantity
 
-                    ticket["remaining"] = (
-                        int(
-                            ticket.get(
-                                "remaining",
-                                0
-                            )
-                        ) + quantity
-                    )
+                )
 
-                    break
-
-        break
-
-
+                break
 
     # ========================================================
-    # SAVE EVERYTHING
+    # SAVE ALL ACCOUNTING CHANGES
     # ========================================================
-    save_json_file(
-        "events.json",
-        events
+
+    save_host_wallets(
+        host_wallets
     )
+
+    save_wallet(
+        admin_wallet
+    )
+
     save_json_file(
         "bookings.json",
         bookings
     )
+
+    save_json_file(
+        "events.json",
+        events
+    )
+
     save_json_file(
         "refunds.json",
         refunds
     )
+
     # ========================================================
-    # NOTIFY CUSTOMER
+    # CUSTOMER NOTIFICATION
     # ========================================================
-    buyer_id = buyer.get(
-        "id"
+
+    buyer = booking.get(
+        "buyer",
+        {}
     )
-    if buyer_id:
+
+    buyer_email = ""
+
+    if isinstance(
+        buyer,
+        dict
+    ):
+
+        buyer_email = str(
+            buyer.get(
+                "email",
+                ""
+            )
+        ).strip()
+
+    buyer_name = ""
+
+    if isinstance(
+        buyer,
+        dict
+    ):
+
+        buyer_name = str(
+            buyer.get(
+                "name",
+                ""
+            )
+        ).strip()
+
+    try:
+
         create_notification(
-            buyer_id,
-            "Refund approved",
+
+            buyer_email,
+
+            "Refund processed",
+
             (
-                f"Your refund of UGX "
-                f"{refund_amount:,} "
-                f"for "
-                f"{refund.get('eventTitle', 'the event')} "
-                f"has been approved."
+                f"Your refund of "
+                f"{refund_amount:,} UGX for "
+                f"{event.get('title', 'your event')} "
+                f"has been processed."
             ),
-            "refund_approved",
-            "/tickets"
+
+            "refund"
+
         )
+
+    except Exception:
+
+        # Notification failure must not undo the
+        # completed financial/accounting operation.
+        pass
+
     # ========================================================
-    # RESPONSE
+    # SUCCESS
     # ========================================================
-    return jsonify({
-        "success": True,
-        "message": (
-            f"Refund of UGX "
-            f"{refund_amount:,} "
-            f"issued successfully."
-        ),
-        "refund": refund,
-        "money": {
-            "originalAmount":
-                original_amount,
-            "refundFeePercent":
-                refund_fee_percent,
-            "refundFee":
-                refund_fee,
-            "refundAmount":
-                refund_amount,
-            "hostRefundAmount":
-                host_refund_amount,
-            "availableUsed":
-                available_used,
-            "pendingUsed":
-                pending_used
-        },
-        "wallet": {
-            "availableBalance":
-                host_wallet.get(
-                    "availableBalance",
-                    0
-                ),
-            "pendingPayouts":
-                host_wallet.get(
-                    "pendingPayouts",
+
+    return {
+
+        "success":
+            True,
+
+        "message":
+            (
+                "Event cancellation refund processed successfully."
+                if cancellation
+                else
+                "Refund processed successfully."
+            ),
+
+        "alreadyProcessed":
+            False,
+
+        "refund":
+            refund,
+
+        "money":
+            {
+
+                "originalAmount":
+                    original_amount,
+
+                "refundFeePercent":
+                    refund_fee_percent,
+
+                "refundFee":
+                    refund_fee,
+
+                "refundAmount":
+                    refund_amount,
+
+                "hostRefundAmount":
+                    host_refund_amount,
+
+                "platformReversal":
+                    (
+                        platform_commission_reversal
+                        +
+                        int(
+                            booking.get(
+                                "serviceFee",
+                                0
+                            )
+                            or 0
+                        )
+                        if cancellation
+                        else 0
+                    )
+
+            },
+
+        "wallet":
+            {
+
+                "hostAvailableBalance":
+                    host_wallet.get(
+                        "availableBalance",
+                        0
+                    ),
+
+                "hostPendingPayouts":
+                    host_wallet.get(
+                        "pendingPayouts",
+                        0
+                    )
+
+            }
+
+    }, 200
+
+# ============================================================
+# HOST REVIEW REFUND
+#
+# Hosts can:
+# - approve a pending refund
+# - reject a pending refund
+#
+# APPROVAL IS DELEGATED TO:
+#     process_eventwaa_refund()
+#
+# This keeps all refund accounting in one place.
+# ============================================================
+
+@app.route(
+    "/refunds/<int:refund_id>/host-review",
+    methods=["PUT"]
+)
+def host_review_refund(refund_id):
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    action = str(
+        data.get(
+            "action",
+            ""
+        )
+    ).strip().lower()
+
+    host_email = str(
+        data.get(
+            "hostEmail",
+            ""
+        )
+    ).strip().lower()
+
+    note = str(
+        data.get(
+            "note",
+            ""
+        )
+    ).strip()
+
+    # ========================================================
+    # VALIDATE REQUEST
+    # ========================================================
+
+    if action not in (
+        "approve",
+        "reject"
+    ):
+
+        return {
+            "success": False,
+            "message": (
+                "Action must be approve or reject."
+            )
+        }, 400
+
+    if not host_email:
+
+        return {
+            "success": False,
+            "message": (
+                "Host email is required."
+            )
+        }, 400
+
+    # ========================================================
+    # LOAD DATA
+    # ========================================================
+
+    refunds = load_json_file(
+        "refunds.json",
+        []
+    )
+
+    bookings = load_json_file(
+        "bookings.json",
+        []
+    )
+
+    events = load_json_file(
+        "events.json",
+        []
+    )
+
+    # ========================================================
+    # FIND REFUND
+    # ========================================================
+
+    refund = None
+
+    for current_refund in refunds:
+
+        try:
+
+            current_refund_id = int(
+                current_refund.get(
+                    "id",
                     0
                 )
-        }
-    }), 200
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            current_refund_id = 0
+
+        if current_refund_id == refund_id:
+
+            refund = current_refund
+
+            break
+
+    if not refund:
+
+        return {
+            "success": False,
+            "message": "Refund request not found."
+        }, 404
+
+    # ========================================================
+    # ONLY PENDING REFUNDS CAN BE REVIEWED
+    # ========================================================
+
+    refund_status = str(
+        refund.get(
+            "status",
+            ""
+        )
+    ).strip().lower()
+
+    if refund_status != "pending":
+
+        if refund_status == "refunded":
+
+            return {
+                "success": True,
+                "message": (
+                    "This refund has already been processed."
+                ),
+                "alreadyProcessed": True,
+                "refund": refund
+            }, 200
+
+        return {
+            "success": False,
+            "message": (
+                "This refund is no longer pending."
+            ),
+            "status": refund_status
+        }, 400
+
+    # ========================================================
+    # FIND EVENT
+    # ========================================================
+
+    event = None
+
+    for current_event in events:
+
+        if str(
+            current_event.get(
+                "id"
+            )
+        ) == str(
+            refund.get(
+                "eventId"
+            )
+        ):
+
+            event = current_event
+
+            break
+
+    if not event:
+
+        return {
+            "success": False,
+            "message": (
+                "The event associated with "
+                "this refund was not found."
+            )
+        }, 404
+
+    # ========================================================
+    # VERIFY HOST
+    #
+    # The host must own the event associated with the refund.
+    # ========================================================
+
+    event_host_email = str(
+        event.get(
+            "hostEmail",
+            ""
+        )
+    ).strip().lower()
+
+    if (
+        not event_host_email
+        or
+        event_host_email != host_email
+    ):
+
+        return {
+            "success": False,
+            "message": (
+                "You are not authorized to review "
+                "this refund request."
+            )
+        }, 403
+
+    # ========================================================
+    # FIND BOOKING
+    # ========================================================
+
+    booking = None
+
+    for current_booking in bookings:
+
+        if str(
+            current_booking.get(
+                "id"
+            )
+        ) == str(
+            refund.get(
+                "bookingId"
+            )
+        ):
+
+            booking = current_booking
+
+            break
+
+    if not booking:
+
+        return {
+            "success": False,
+            "message": (
+                "The booking associated with "
+                "this refund was not found."
+            )
+        }, 404
+
+    # ========================================================
+    # REJECT REFUND
+    #
+    # Rejection does not touch wallets, inventory,
+    # revenue, or tickets.
+    # ========================================================
+
+    if action == "reject":
+
+        refund["status"] = "rejected"
+
+        refund["reviewedAt"] = (
+            datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+        )
+
+        refund["processedAt"] = None
+
+        refund["reviewedBy"] = (
+            host_email
+        )
+
+        refund["processedBy"] = (
+            host_email
+        )
+
+        refund["reviewNote"] = (
+            note
+        )
+
+        booking["refundStatus"] = (
+            "rejected"
+        )
+
+        booking["refundRejectedAt"] = (
+            refund["reviewedAt"]
+        )
+
+        booking["refundReviewNote"] = (
+            note
+        )
+
+        save_json_file(
+            "refunds.json",
+            refunds
+        )
+
+        save_json_file(
+            "bookings.json",
+            bookings
+        )
+
+        # ====================================================
+        # NOTIFY CUSTOMER
+        # ====================================================
+
+        buyer = booking.get(
+            "buyer",
+            {}
+        )
+
+        buyer_email = ""
+
+        if isinstance(
+            buyer,
+            dict
+        ):
+
+            buyer_email = str(
+                buyer.get(
+                    "email",
+                    ""
+                )
+            ).strip()
+
+        if buyer_email:
+
+            try:
+
+                create_notification(
+
+                    buyer_email,
+
+                    "Refund request rejected",
+
+                    (
+                        f"Your refund request for "
+                        f"{event.get('title', 'your event')} "
+                        f"was rejected by the host."
+                    ),
+
+                    "refund"
+
+                )
+
+            except Exception:
+
+                pass
+
+        return {
+
+            "success":
+                True,
+
+            "message":
+                "Refund request rejected.",
+
+            "refund":
+                refund
+
+        }, 200
+
+    # ========================================================
+    # APPROVE REFUND
+    #
+    # ALL FINANCIAL PROCESSING NOW HAPPENS IN THE
+    # COMMON REFUND PROCESSOR.
+    # ========================================================
+
+    result, status_code = process_eventwaa_refund(
+
+        refund=refund,
+
+        booking=booking,
+
+        event=event,
+
+        cancellation=False,
+
+        processed_by=host_email
+
+    )
+
+    # ========================================================
+    # ADD HOST REVIEW NOTE
+    #
+    # The processor has already saved the refund.
+    # We update the note and save once more.
+    # ========================================================
+
+    if (
+        status_code == 200
+        and
+        isinstance(
+            result,
+            dict
+        )
+        and
+        result.get(
+            "success"
+        )
+    ):
+
+        refund["reviewNote"] = (
+            note
+        )
+
+        refund["reviewedBy"] = (
+            host_email
+        )
+
+        refund["processedBy"] = (
+            host_email
+        )
+
+        refund["reviewedAt"] = (
+            refund.get(
+                "reviewedAt"
+            )
+            or
+            datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+        )
+
+        save_json_file(
+            "refunds.json",
+            refunds
+        )
+
+    # ========================================================
+    # RETURN PROCESSOR RESULT
+    # ========================================================
+
+    return result, status_code
 
 
 # ============================================================
@@ -27964,6 +29569,20 @@ def create_booking():
             "message": "Event not found."
         }), 404
 
+    # ============================================================
+    # BLOCK BOOKINGS FOR CANCELLED EVENTS
+    # ============================================================
+
+    if str(event.get("status", "")).lower() == "cancelled":
+
+        return {
+            "success": False,
+            "message": (
+                "This event has been cancelled. "
+                "New bookings are no longer available."
+            ),
+            "eventCancelled": True
+        }, 400
 
     # --------------------------------------------------------
     # FIND TICKET TYPE
@@ -29077,7 +30696,9 @@ def delete_past_ticket(ticket_id):
 #
 # FREE ATTENDANCE PASS
 #
-# One free pass can be used up to 3 separate times.
+# One free pass = one attendee = one entry.
+# A used pass cannot be used again.
+# Cancelled events cannot accept new free attendance.
 # ============================================================
 
 @app.route(
@@ -29091,7 +30712,112 @@ def create_attendance():
     ) or {}
 
 
+    # ========================================================
+    # GET EVENT ID
+    # ========================================================
+
+    event_id = data.get(
+        "eventId"
+    )
+
+
+    # ========================================================
+    # LOAD EVENTS
+    # ========================================================
+
+    events = load_json_file(
+        "events.json",
+        []
+    )
+
+    if not isinstance(
+        events,
+        list
+    ):
+
+        events = []
+
+
+    # ========================================================
+    # FIND EVENT
+    # ========================================================
+
+    event = None
+
+    for current_event in events:
+
+        if not isinstance(
+            current_event,
+            dict
+        ):
+
+            continue
+
+        if str(
+            current_event.get("id", "")
+        ).strip() == str(
+            event_id or ""
+        ).strip():
+
+            event = current_event
+
+            break
+
+
+    # ========================================================
+    # EVENT MUST EXIST
+    # ========================================================
+
+    if not event:
+
+        return jsonify({
+
+            "success":
+                False,
+
+            "message":
+                "Event not found."
+
+        }), 404
+
+
+    # ========================================================
+    # BLOCK FREE ATTENDANCE FOR CANCELLED EVENTS
+    # ========================================================
+
+    if str(
+        event.get("status", "")
+    ).strip().lower() == "cancelled":
+
+        return jsonify({
+
+            "success":
+                False,
+
+            "message": (
+                "This event has been cancelled. "
+                "Free attendance registration is no longer available."
+            ),
+
+            "eventCancelled":
+                True
+
+        }), 400
+
+
+    # ========================================================
+    # LOAD ATTENDANCE
+    # ========================================================
+
     attendance = load_attendance()
+
+
+    if not isinstance(
+        attendance,
+        list
+    ):
+
+        attendance = []
 
 
     # ========================================================
@@ -29110,6 +30836,8 @@ def create_attendance():
 
     # ========================================================
     # CREATE ATTENDANCE RECORD
+    #
+    # ONE FREE PASS = ONE ENTRY
     # ========================================================
 
     record = {
@@ -29118,13 +30846,14 @@ def create_attendance():
             len(attendance) + 1,
 
         "eventId":
-            data.get(
-                "eventId"
-            ),
+            event_id,
 
         "eventTitle":
-            data.get(
-                "eventTitle"
+            event.get(
+                "title",
+                data.get(
+                    "eventTitle"
+                )
             ),
 
         "name":
@@ -29149,6 +30878,8 @@ def create_attendance():
 
         # ----------------------------------------------------
         # ENTRY TRACKING
+        #
+        # One pass can only be successfully checked in once.
         # ----------------------------------------------------
 
         "checkedIn":
@@ -29158,7 +30889,7 @@ def create_attendance():
             0,
 
         "checkInLimit":
-            3,
+            1,
 
         "checkInHistory":
             [],
@@ -29193,34 +30924,18 @@ def create_attendance():
     # UPDATE EVENT ATTENDEE COUNT
     # ========================================================
 
-    events = load_json_file(
-        "events.json",
-        []
-    )
+    event["attendees"] = (
 
-
-    for event in events:
-
-        if str(
-            event.get("id")
-        ) == str(
-            data.get("eventId")
-        ):
-
-            event["attendees"] = (
-
-                int(
-                    event.get(
-                        "attendees",
-                        0
-                    )
-                )
-                +
-                1
-
+        int(
+            event.get(
+                "attendees",
+                0
             )
+        )
+        +
+        1
 
-            break
+    )
 
 
     save_json_file(
@@ -29243,6 +30958,7 @@ def create_attendance():
 
     }), 201
 
+
 # ============================================================
 # GET ATTENDANCE
 # ============================================================
@@ -29257,6 +30973,10 @@ def get_attendance():
         load_attendance()
     )
 
+
+# ============================================================
+# GET ATTENDEES FOR EVENT
+# ============================================================
 
 @app.route(
     "/attendance/event/<int:event_id>",
@@ -29279,8 +30999,14 @@ def get_free_event_attendees(event_id):
     ]
 
 
-    return jsonify(attendees)
+    return jsonify(
+        attendees
+    )
 
+
+# ============================================================
+# GET ONE ATTENDANCE PASS
+# ============================================================
 
 @app.route(
     "/attendance/<int:attendance_id>",
@@ -29297,12 +31023,19 @@ def get_attendance_pass(attendance_id):
             person.get("id", 0)
         ) == attendance_id:
 
-            return jsonify(person)
+            return jsonify(
+                person
+            )
 
 
     return jsonify({
-        "success": False,
-        "message": "Attendance pass not found"
+
+        "success":
+            False,
+
+        "message":
+            "Attendance pass not found"
+
     }), 404
 
 
@@ -29825,6 +31558,30 @@ def verify_entry(entry_id):
                     "This entry does not belong "
                     "to this event."
             }), 403
+
+    # ========================================================
+    # CANCELLED EVENT CHECK
+    #
+    # Cancelled events cannot accept any entry.
+    # ========================================================
+
+    if selected_event is not None:
+
+        if str(
+            selected_event.get("status", "")
+        ).strip().lower() == "cancelled":
+
+            return jsonify({
+
+                "success": False,
+
+                "message":
+                    "This event has been cancelled. "
+                    "Entry is no longer allowed.",
+
+                "eventCancelled": True
+
+            }), 400
 
     # ========================================================
     # REFUND CHECK

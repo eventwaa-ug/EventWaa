@@ -1906,6 +1906,116 @@ object-position: center;
 
 }
 
+/* =========================================================
+   CANCEL EVENT BUTTON
+========================================================= */
+
+.cancel-event-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 42px;
+  padding: 0 16px;
+
+  border: 1px solid #f59e0b;
+  border-radius: 10px;
+
+  background: #fff7ed;
+  color: #c2410c;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.cancel-event-btn:hover:not(:disabled) {
+  background: #ffedd5;
+  border-color: #ea580c;
+  color: #9a3412;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 4px 12px rgba(234, 88, 12, 0.12);
+}
+
+.cancel-event-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.cancel-event-btn:focus-visible {
+  outline: 3px solid rgba(245, 158, 11, 0.25);
+  outline-offset: 2px;
+}
+
+.cancel-event-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+
+/* =========================================================
+   CANCELLED EVENT STATUS
+========================================================= */
+
+.event-status.cancelled {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 5px 10px;
+
+  border-radius: 999px;
+
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+
+  color: #b91c1c;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  text-transform: capitalize;
+}
+
+
+/* =========================================================
+   DISABLED EVENT ACTIONS
+========================================================= */
+
+.event-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.event-actions button:disabled:hover {
+  transform: none;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+  .cancel-event-btn {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
 
 
 

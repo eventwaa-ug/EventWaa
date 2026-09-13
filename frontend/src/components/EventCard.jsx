@@ -35,6 +35,15 @@ function EventCard({ event }) {
 
 
     // ============================================================
+    // EVENT STATUS
+    // ============================================================
+
+    const isCancelled =
+        String(event.status || "").toLowerCase() ===
+        "cancelled";
+
+
+    // ============================================================
     // EVENT IMAGE
     // ============================================================
 
@@ -64,6 +73,15 @@ function EventCard({ event }) {
     // ============================================================
 
     const getEventPrice = () => {
+
+        // --------------------------------------------------------
+        // CANCELLED EVENT
+        // --------------------------------------------------------
+
+        if (isCancelled) {
+            return "Event Cancelled";
+        }
+
 
         // --------------------------------------------------------
         // FREE EVENT
@@ -145,7 +163,13 @@ function EventCard({ event }) {
 
     return (
 
-        <div className="event-card">
+        <div
+            className={`event-card ${
+                isCancelled
+                    ? "event-card-cancelled"
+                    : ""
+            }`}
+        >
 
 
             {/* ====================================================
@@ -195,20 +219,24 @@ function EventCard({ event }) {
 
 
                 {/* =================================================
-                    EVENT TYPE
+                    EVENT TYPE / STATUS
                 ================================================= */}
 
                 <span
                     className={`event-type ${
-                        event.eventType?.toLowerCase() === "free"
-                            ? "free"
-                            : "paid"
+                        isCancelled
+                            ? "cancelled"
+                            : event.eventType?.toLowerCase() === "free"
+                                ? "free"
+                                : "paid"
                     }`}
                 >
 
-                    {event.eventType?.toLowerCase() === "free"
-                        ? "FREE"
-                        : "PAID"}
+                    {isCancelled
+                        ? "CANCELLED"
+                        : event.eventType?.toLowerCase() === "free"
+                            ? "FREE"
+                            : "PAID"}
 
                 </span>
 
@@ -294,7 +322,13 @@ function EventCard({ event }) {
                     PRICE
                 ================================================= */}
 
-                <p className="event-price">
+                <p
+                    className={`event-price ${
+                        isCancelled
+                            ? "cancelled"
+                            : ""
+                    }`}
+                >
 
                     {getEventPrice()}
 
@@ -302,7 +336,7 @@ function EventCard({ event }) {
 
 
                 {/* =================================================
-                    VIEW TICKETS
+                    VIEW TICKETS / DETAILS
                 ================================================= */}
 
                 <Link
@@ -316,7 +350,9 @@ function EventCard({ event }) {
                     />
 
                     <span>
-                        View Tickets
+                        {isCancelled
+                            ? "View Event"
+                            : "View Tickets"}
                     </span>
 
                     <span className="view-arrow">

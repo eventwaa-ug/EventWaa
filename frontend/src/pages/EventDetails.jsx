@@ -119,6 +119,15 @@ function EventDetails() {
 
 
     /* ============================================================
+       EVENT STATUS
+    ============================================================ */
+
+    const isCancelled =
+        String(event.status || "").toLowerCase() ===
+        "cancelled";
+
+
+    /* ============================================================
        IMAGE URL
     ============================================================ */
 
@@ -174,6 +183,21 @@ function EventDetails() {
     ============================================================ */
 
     const bookTicket = (ticket) => {
+
+        // --------------------------------------------------------
+        // CANCELLED EVENT
+        // --------------------------------------------------------
+
+        if (isCancelled) {
+
+            alert(
+                "This event has been cancelled and tickets are no longer available."
+            );
+
+            return;
+
+        }
+
 
         if (!user) {
 
@@ -505,7 +529,13 @@ function EventDetails() {
 
     return (
 
-        <div className="event-details-page">
+        <div
+            className={`event-details-page ${
+                isCancelled
+                    ? "event-details-cancelled"
+                    : ""
+            }`}
+        >
 
 
             {/* =====================================================
@@ -550,19 +580,31 @@ function EventDetails() {
 
                 <div className="event-hero-overlay">
 
-                    <span
-                        className={`event-type-badge ${
-                            isFreeEvent
-                                ? "free"
-                                : "paid"
-                        }`}
-                    >
+                    {isCancelled ? (
 
-                        {isFreeEvent
-                            ? "Free Event"
-                            : "Paid Event"}
+                        <span className="event-type-badge cancelled">
 
-                    </span>
+                            Event Cancelled
+
+                        </span>
+
+                    ) : (
+
+                        <span
+                            className={`event-type-badge ${
+                                isFreeEvent
+                                    ? "free"
+                                    : "paid"
+                            }`}
+                        >
+
+                            {isFreeEvent
+                                ? "Free Event"
+                                : "Paid Event"}
+
+                        </span>
+
+                    )}
 
 
                     {event.verifiedHost && (
@@ -616,6 +658,54 @@ function EventDetails() {
                     </div>
 
                 </div>
+
+
+                {/* =================================================
+                    CANCELLED NOTICE
+                ================================================= */}
+
+                {isCancelled && (
+
+                    <div className="event-cancelled-notice">
+
+                        <div className="event-cancelled-notice-icon">
+
+                            <X
+                                size={22}
+                            />
+
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                This event has been cancelled
+                            </strong>
+
+                            <p>
+                                Ticket purchases and attendance
+                                reservations are no longer available.
+                            </p>
+
+                            {event.cancellationReason && (
+
+                                <p className="event-cancellation-reason">
+
+                                    <strong>
+                                        Reason:
+                                    </strong>{" "}
+
+                                    {event.cancellationReason}
+
+                                </p>
+
+                            )}
+
+                        </div>
+
+                    </div>
+
+                )}
 
 
                 {/* =================================================
@@ -996,7 +1086,54 @@ function EventDetails() {
                 TICKET SECTION
             ===================================================== */}
 
-            {isFreeEvent ? (
+            {isCancelled ? (
+
+                <section className="ticket-section cancelled-event-section">
+
+                    <div className="section-heading">
+
+                        <div className="section-heading-icon">
+
+                            <X
+                                size={22}
+                            />
+
+                        </div>
+
+                        <div>
+
+                            <h2>
+                                Event Cancelled
+                            </h2>
+
+                            <p>
+                                Ticket purchases and attendance
+                                reservations are unavailable.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div className="cancelled-event-card">
+
+                        <strong>
+                            This event is no longer accepting
+                            bookings.
+                        </strong>
+
+                        <p>
+                            If you previously purchased a ticket,
+                            please check your EventWaa notifications
+                            for refund information.
+                        </p>
+
+                    </div>
+
+                </section>
+
+            ) : isFreeEvent ? (
 
                 <section className="ticket-section free-event-section">
 
