@@ -1,7 +1,6 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, NavLink } from "react-router-dom";
 import "./AdminLayout.css";
 import { useState } from "react";
-
 import {
     LayoutDashboard,
     Users,
@@ -11,197 +10,138 @@ import {
     Mic2,
     Wallet,
     Banknote,
+    BarChart3,
     FileText,
     Settings,
     RotateCcw,
     Menu,
     X,
 } from "lucide-react";
-
-
 function AdminLayout() {
-
-    const [openMenu, setOpenMenu] =
-        useState(false);
-
-
+    const [openMenu, setOpenMenu] = useState(false);
     const closeMenu = () => {
         setOpenMenu(false);
     };
-
-
     return (
-
         <div className="admin-layout">
-
-
             {/* =====================================================
                 SIDEBAR
             ===================================================== */}
-
             <aside
                 className={`admin-sidebar ${
                     openMenu ? "active" : ""
                 }`}
             >
-
                 <h2>
                     EventWaa
                 </h2>
-
-
                 <p className="admin-title">
                     Admin Panel
                 </p>
-
-
                 <nav>
-
-
                     {/* DASHBOARD */}
-
-                    <Link
+                    <NavLink
                         to="/admin"
+                        end
                         onClick={closeMenu}
                     >
                         <LayoutDashboard size={19} />
                         <span>Dashboard</span>
-                    </Link>
-
-
+                    </NavLink>
                     {/* USERS */}
-
-                    <Link
+                    <NavLink
                         to="/admin/users"
                         onClick={closeMenu}
                     >
                         <Users size={19} />
                         <span>Users</span>
-                    </Link>
-
-
+                    </NavLink>
                     {/* TEAM MEMBERS */}
-
-                    <Link
+                    <NavLink
                         to="/admin/team-members"
                         onClick={closeMenu}
                     >
                         <UserRoundCog size={19} />
                         <span>Team Members</span>
-                    </Link>
-
-
+                    </NavLink>
                     {/* EVENTS */}
-
-                    <Link
+                    <NavLink
                         to="/admin/events"
                         onClick={closeMenu}
                     >
                         <CalendarDays size={19} />
                         <span>Events</span>
-                    </Link>
-
-
+                    </NavLink>
                     {/* SCAN */}
-
-                    <Link
+                    <NavLink
                         to="/admin/scan"
                         onClick={closeMenu}
                     >
                         <ScanLine size={19} />
                         <span>Scan Tickets</span>
-                    </Link>
-
-
+                    </NavLink>
                     {/* HOST APPLICATIONS */}
-
-                    <Link
+                    <NavLink
                         to="/admin/host-applications"
                         onClick={closeMenu}
                     >
                         <Mic2 size={19} />
                         <span>Host Applications</span>
-                    </Link>
-
-
+                    </NavLink>
                     {/* REVENUE */}
-
-                    <Link
+                    <NavLink
                         to="/admin/revenue"
                         onClick={closeMenu}
                     >
-                        <Banknote size={19} />
+                        <BarChart3 size={19} />
                         <span>Revenue</span>
-                    </Link>
-
-
+                    </NavLink>
                     {/* REFUNDS */}
-
-                    <Link
+                    <NavLink
                         to="/admin/refunds"
                         onClick={closeMenu}
                     >
                         <RotateCcw size={19} />
                         <span>Refunds</span>
-                    </Link>
-
-
+                    </NavLink>
                     {/* WALLET */}
-
-                    <Link
+                    <NavLink
                         to="/admin/wallet"
                         onClick={closeMenu}
                     >
                         <Wallet size={19} />
                         <span>Wallet</span>
-                    </Link>
-
-
+                    </NavLink>
                     {/* WITHDRAWALS */}
-
-                    <Link
+                    <NavLink
                         to="/admin/withdrawals"
                         onClick={closeMenu}
                     >
                         <Banknote size={19} />
                         <span>Host Withdrawals</span>
-                    </Link>
-
-
+                    </NavLink>
                     {/* REPORTS */}
-
-                    <Link
+                    <NavLink
                         to="/admin/reports"
                         onClick={closeMenu}
                     >
                         <FileText size={19} />
                         <span>Reports</span>
-                    </Link>
-
-
+                    </NavLink>
                     {/* SETTINGS */}
-
-                    <Link
+                    <NavLink
                         to="/admin/settings"
                         onClick={closeMenu}
                     >
                         <Settings size={19} />
                         <span>Settings</span>
-                    </Link>
-
-
+                    </NavLink>
                 </nav>
-
             </aside>
-
-
             {/* =====================================================
                 MAIN CONTENT
             ===================================================== */}
-
             <main className="admin-content">
-
-
                 <button
                     type="button"
                     className="menu-btn"
@@ -214,30 +154,18 @@ function AdminLayout() {
                             : "Open menu"
                     }
                 >
-
                     {openMenu ? (
                         <X size={24} />
                     ) : (
                         <Menu size={24} />
                     )}
-
                 </button>
-
-
                 {/* =================================================
                     CHILD ROUTES RENDER HERE
                 ================================================= */}
-
                 <Outlet />
-
             </main>
-
-
         </div>
-
     );
-
 }
-
-
 export default AdminLayout;

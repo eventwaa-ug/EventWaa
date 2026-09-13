@@ -1,33 +1,37 @@
 /* ============================================================
    EVENTWAA ADMIN HOME
-   PREMIUM ADMIN DASHBOARD
-   ============================================================ */
+============================================================ */
 
 :root {
     --admin-bg: #f6f7f9;
     --admin-white: #ffffff;
+
     --admin-text: #171717;
     --admin-text-soft: #404040;
     --admin-muted: #737373;
+
     --admin-border: #e5e5e5;
 
-    --admin-accent: #d85c45;
+    --admin-blue: #2563eb;
     --admin-blue-soft: #eff6ff;
+
+    --admin-orange: #ff6b00;
+    --admin-orange-soft: #fff7ed;
 
     --admin-green: #16a34a;
     --admin-green-soft: #f0fdf4;
 
-    --admin-orange: #ea580c;
-    --admin-orange-soft: #fff7ed;
+    --admin-purple: #6d4acb;
+    --admin-purple-soft: #f5f3ff;
 
-    --admin-accent: #d85c45;
-    --admin-accent-soft: #fff0eb;
+    --admin-red: #dc2626;
+    --admin-red-soft: #fef2f2;
 
     --admin-shadow:
-        0 4px 18px rgba(0, 0, 0, 0.045);
+        0 4px 18px rgba(15, 23, 42, 0.05);
 
     --admin-shadow-hover:
-        0 16px 35px rgba(0, 0, 0, 0.09);
+        0 16px 35px rgba(15, 23, 42, 0.09);
 
     --admin-radius: 18px;
 }
@@ -36,128 +40,94 @@
     box-sizing: border-box;
 }
 
-
 /* ============================================================
    MAIN PAGE
-   ============================================================ */
+============================================================ */
 
 .admin-home {
     width: 100%;
     min-height: 100vh;
 
-    padding: 44px 42px 70px;
-
-    background: var(--admin-bg);
+    padding: 8px 0 50px;
 
     color: var(--admin-text);
 }
 
-
-/* ============================================================
-   CENTERED DESKTOP CONTENT
-   ============================================================ */
-
-.admin-home > * {
-    width: 100%;
-    max-width: 1320px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-
 /* ============================================================
    HEADER
-   ============================================================ */
+============================================================ */
 
 .admin-home-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
 
-    gap: 50px;
+    gap: 32px;
 
-    margin-bottom: 54px;
+    margin-bottom: 44px;
 }
-
-
-/* ============================================================
-   EYEBROW
-   ============================================================ */
 
 .admin-eyebrow {
-    margin: 0 0 12px;
-
-    font-size: 13px;
-    line-height: 1.3;
-
-    font-weight: 800;
-
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
+    margin: 0 0 10px;
 
     color: var(--admin-blue);
+
+    font-size: 0.76rem;
+    font-weight: 850;
+
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
 }
-
-
-/* ============================================================
-   MAIN TITLE
-   ============================================================ */
 
 .admin-home-header h1 {
     margin: 0;
 
-    font-size: clamp(38px, 3vw, 52px);
+    color: var(--admin-text);
+
+    font-size: clamp(2rem, 3vw, 3rem);
+    font-weight: 900;
+
+    letter-spacing: -1.5px;
     line-height: 1.08;
-
-    font-weight: 800;
-
-    letter-spacing: -1.8px;
-
-    color: #171717;
 }
-
-
-/* ============================================================
-   SUBTITLE
-   ============================================================ */
 
 .admin-subtitle {
-    margin: 14px 0 0;
+    max-width: 700px;
 
-    max-width: 720px;
-
-    font-size: 18px;
-    line-height: 1.6;
+    margin: 12px 0 0;
 
     color: var(--admin-muted);
+
+    font-size: 1rem;
+    line-height: 1.6;
 }
 
-
 /* ============================================================
-   NOTIFICATION BUTTON
-   ============================================================ */
+   NOTIFICATIONS
+============================================================ */
 
 .admin-notification-button {
     flex-shrink: 0;
 
-    min-height: 54px;
-
-    padding: 0 20px;
+    min-height: 48px;
 
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
-    gap: 10px;
+    gap: 9px;
+
+    padding: 0 16px;
 
     border: 1px solid var(--admin-border);
-    border-radius: 14px;
+    border-radius: 12px;
 
     background: var(--admin-white);
 
-    color: #262626;
+    color: var(--admin-text-soft);
 
-    font-size: 15px;
+    font-family: inherit;
+    font-size: 0.9rem;
     font-weight: 750;
 
     cursor: pointer;
@@ -166,9 +136,8 @@
 
     transition:
         transform 0.2s ease,
-        box-shadow 0.2s ease,
         border-color 0.2s ease,
-        background 0.2s ease;
+        box-shadow 0.2s ease;
 }
 
 .admin-notification-button:hover {
@@ -176,99 +145,75 @@
 
     border-color: #d4d4d4;
 
-    background: #fafafa;
-
     box-shadow:
-        0 12px 28px rgba(0, 0, 0, 0.08);
+        0 10px 24px rgba(15, 23, 42, 0.08);
 }
-
-.admin-notification-button:active {
-    transform: translateY(0);
-}
-
-
-/* ============================================================
-   NOTIFICATION BADGE
-   ============================================================ */
 
 .notification-badge {
-    min-width: 24px;
-    height: 24px;
-
-    padding: 0 7px;
+    min-width: 23px;
+    height: 23px;
 
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
+    padding: 0 6px;
+
     border-radius: 999px;
 
-    background: #ef4444;
-
+    background: var(--admin-red);
     color: #ffffff;
 
-    font-size: 12px;
-    font-weight: 800;
+    font-size: 0.72rem;
+    font-weight: 850;
 }
 
-
 /* ============================================================
-   SECTION HEADINGS
-   ============================================================ */
+   SECTION HEADING
+============================================================ */
 
 .admin-section-heading {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
 
-    gap: 35px;
+    gap: 24px;
 
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
-
-
-/* ============================================================
-   SECTION TITLE
-   ============================================================ */
 
 .admin-section-heading h2 {
     margin: 0;
 
-    font-size: 27px;
-    line-height: 1.2;
+    color: var(--admin-text);
 
-    font-weight: 800;
+    font-size: 1.45rem;
+    font-weight: 850;
 
-    letter-spacing: -0.7px;
-
-    color: #171717;
+    letter-spacing: -0.5px;
 }
-
-
-/* ============================================================
-   SECTION DESCRIPTION
-   ============================================================ */
 
 .admin-section-heading p {
-    margin: 8px 0 0;
-
-    font-size: 16px;
-    line-height: 1.5;
+    margin: 6px 0 0;
 
     color: var(--admin-muted);
+
+    font-size: 0.9rem;
+    line-height: 1.5;
 }
 
+.tools-heading {
+    margin-top: 8px;
+}
 
 /* ============================================================
-   REFRESH BUTTON
-   ============================================================ */
+   REFRESH
+============================================================ */
 
 .refresh-dashboard {
     flex-shrink: 0;
 
-    min-height: 44px;
-
-    padding: 0 16px;
+    min-height: 42px;
 
     display: inline-flex;
     align-items: center;
@@ -276,22 +221,25 @@
 
     gap: 8px;
 
+    padding: 0 14px;
+
     border: 1px solid var(--admin-border);
-    border-radius: 12px;
+    border-radius: 11px;
 
-    background: #ffffff;
+    background: var(--admin-white);
 
-    color: #404040;
+    color: var(--admin-text-soft);
 
-    font-size: 14px;
-    font-weight: 700;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 750;
 
     cursor: pointer;
 
     transition:
         transform 0.2s ease,
-        box-shadow 0.2s ease,
-        border-color 0.2s ease;
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .refresh-dashboard:hover {
@@ -300,46 +248,33 @@
     border-color: #d4d4d4;
 
     box-shadow:
-        0 8px 20px rgba(0, 0, 0, 0.07);
+        0 7px 18px rgba(15, 23, 42, 0.07);
 }
-
-.refresh-dashboard:active {
-    transform: translateY(0);
-}
-
 
 /* ============================================================
-   PLATFORM STAT CARDS
-   DESKTOP = 3 PER ROW
-   ============================================================ */
+   DASHBOARD STAT CARDS
+============================================================ */
 
 .dashboard-cards {
-    width: 100%;
-    max-width: 1280px;
-
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
-    margin: 0 auto 58px;
-    align-items: stretch;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 18px;
+
+    margin-bottom: 46px;
 }
-
-
-/* ============================================================
-   DASHBOARD CARD
-   ============================================================ */
 
 .dashboard-card {
     position: relative;
 
     min-width: 0;
+    min-height: 190px;
 
-    min-height: 260px;
+    padding: 22px;
 
-    padding: 28px 30px;
-
-    display: flex;
-    flex-direction: column;
+    overflow: hidden;
 
     border: 1px solid var(--admin-border);
     border-radius: var(--admin-radius);
@@ -348,18 +283,11 @@
 
     box-shadow: var(--admin-shadow);
 
-    overflow: hidden;
-
     transition:
         transform 0.22s ease,
         box-shadow 0.22s ease,
         border-color 0.22s ease;
 }
-
-
-/* ============================================================
-   SUBTLE CARD TOP LINE
-   ============================================================ */
 
 .dashboard-card::before {
     content: "";
@@ -376,17 +304,11 @@
 
     opacity: 0;
 
-    transition:
-        opacity 0.22s ease;
+    transition: opacity 0.22s ease;
 }
 
-
-/* ============================================================
-   CARD HOVER
-   ============================================================ */
-
 .dashboard-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
 
     border-color: #d9d9d9;
 
@@ -397,28 +319,23 @@
     opacity: 1;
 }
 
-
 /* ============================================================
-   CARD TOP
-   ============================================================ */
+   STAT CARD TOP
+============================================================ */
 
 .dashboard-card-top {
-    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 14px;
+
+    gap: 12px;
+
+    margin-bottom: 20px;
 }
 
-
-/* ============================================================
-   CARD ICON
-   ============================================================ */
-
 .dashboard-card-icon {
-    width: 56px;
-    height: 56px;
+    width: 52px;
+    height: 52px;
 
     flex-shrink: 0;
 
@@ -426,20 +343,18 @@
     align-items: center;
     justify-content: center;
 
-    border-radius: 15px;
+    border-radius: 14px;
 
-    transition:
-        transform 0.22s ease;
+    transition: transform 0.2s ease;
 }
 
 .dashboard-card:hover .dashboard-card-icon {
     transform: scale(1.04);
 }
 
-
 /* ============================================================
-   ICON COLORS
-   ============================================================ */
+   STAT ICON COLORS
+============================================================ */
 
 .users-icon {
     background: var(--admin-blue-soft);
@@ -447,13 +362,18 @@
 }
 
 .events-icon {
-    background: var(--admin-accent-soft);
-    color: var(--admin-accent);
+    background: var(--admin-orange-soft);
+    color: var(--admin-orange);
+}
+
+.tickets-icon {
+    background: var(--admin-purple-soft);
+    color: var(--admin-purple);
 }
 
 .pending-icon {
-    background: var(--admin-orange-soft);
-    color: var(--admin-orange);
+    background: #fff7ed;
+    color: #ea580c;
 }
 
 .verified-icon {
@@ -461,101 +381,68 @@
     color: var(--admin-green);
 }
 
-.tickets-icon {
-    background: #f5f3ff;
-    color: #6d4acb;
-}
-
-
 /* ============================================================
-   CARD LABEL
-   ============================================================ */
+   STAT LABEL
+============================================================ */
 
 .dashboard-card-label {
-    margin-left: auto;
-
-    font-size: 12px;
-
-    font-weight: 800;
-
-    letter-spacing: 1.1px;
-
-    text-transform: uppercase;
-
     color: #8a8a8a;
+
+    font-size: 0.7rem;
+    font-weight: 850;
+
+    letter-spacing: 0.1em;
 
     white-space: nowrap;
 }
 
-
 /* ============================================================
-   LARGE STAT NUMBER
-   ============================================================ */
+   STAT NUMBER
+============================================================ */
 
 .dashboard-card h3 {
     margin: 0;
 
-    font-size: clamp(30px, 2.6vw, 46px);
+    color: var(--admin-text);
 
-    line-height: 1.04;
+    font-size: clamp(2rem, 3vw, 2.7rem);
+    font-weight: 900;
 
-    font-weight: 800;
-
-    letter-spacing: -1.6px;
-
-    color: #171717;
+    letter-spacing: -1.3px;
+    line-height: 1.05;
 
     overflow-wrap: anywhere;
-
-    word-break: break-word;
 }
 
 .dashboard-card p {
-    margin: 10px 0 0;
-    font-size: 14px;
+    margin: 8px 0 0;
+
+    color: var(--admin-muted);
+
+    font-size: 0.84rem;
     line-height: 1.5;
-    color: #737373;
 }
-
-
-/* ============================================================
-   ADMINISTRATION SECTION
-   ============================================================ */
-
-.tools-heading {
-    margin-top: 0;
-
-    margin-bottom: 24px;
-}
-
 
 /* ============================================================
    ADMIN TOOLS
-   ============================================================ */
+============================================================ */
 
 .admin-tools {
-    width: 100%;
-
     display: grid;
 
     grid-template-columns:
         repeat(2, minmax(0, 1fr));
 
-    gap: 22px;
+    gap: 16px;
 
-    padding-bottom: 25px;
+    padding-bottom: 20px;
 }
 
-
-/* ============================================================
-   ADMIN TOOL CARD
-   ============================================================ */
-
 .admin-tool-card {
-    width: 100%;
-    min-height: 145px;
+    position: relative;
 
-    padding: 26px 28px;
+    width: 100%;
+    min-height: 132px;
 
     display: grid;
 
@@ -564,87 +451,76 @@
 
     align-items: center;
 
-    gap: 22px;
+    gap: 18px;
+
+    padding: 22px;
 
     border: 1px solid var(--admin-border);
     border-radius: var(--admin-radius);
 
-    background: #ffffff;
+    background: var(--admin-white);
 
-    box-shadow:
-        0 4px 16px rgba(0, 0, 0, 0.035);
+    color: inherit;
 
     text-align: left;
 
     cursor: pointer;
 
+    box-shadow:
+        0 3px 15px rgba(15, 23, 42, 0.035);
+
     transition:
         transform 0.22s ease,
         box-shadow 0.22s ease,
-        border-color 0.22s ease,
-        background 0.22s ease;
+        border-color 0.22s ease;
 }
-
-
-/* ============================================================
-   TOOL CARD HOVER
-   ============================================================ */
 
 .admin-tool-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
 
-    border-color: #d4d4d4;
-
-    background: #ffffff;
+    border-color: #d5d5d5;
 
     box-shadow:
-        0 16px 32px rgba(0, 0, 0, 0.08);
+        0 14px 30px rgba(15, 23, 42, 0.08);
 }
-
 
 /* ============================================================
    TOOL ICON
-   ============================================================ */
+============================================================ */
 
 .admin-tool-icon {
-    width: 58px;
-    height: 58px;
-
-    flex-shrink: 0;
+    width: 54px;
+    height: 54px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    border-radius: 16px;
+    flex-shrink: 0;
+
+    border-radius: 15px;
 
     background: #f5f5f5;
 
     color: #404040;
 
     transition:
+        transform 0.22s ease,
         background 0.22s ease,
-        color 0.22s ease,
-        transform 0.22s ease;
+        color 0.22s ease;
 }
 
-
-/* ============================================================
-   TOOL ICON HOVER
-   ============================================================ */
-
 .admin-tool-card:hover .admin-tool-icon {
+    transform: scale(1.04);
+
     background: #eeeeee;
 
     color: #171717;
-
-    transform: scale(1.04);
 }
-
 
 /* ============================================================
    TOOL CONTENT
-   ============================================================ */
+============================================================ */
 
 .admin-tool-content {
     min-width: 0;
@@ -653,29 +529,26 @@
 .admin-tool-content h3 {
     margin: 0;
 
-    font-size: 19px;
-
-    line-height: 1.3;
-
-    font-weight: 800;
-
     color: #202020;
+
+    font-size: 1rem;
+    font-weight: 850;
+
+    line-height: 1.35;
 }
 
 .admin-tool-content p {
-    margin: 8px 0 0;
+    margin: 6px 0 0;
 
-    font-size: 15px;
+    color: var(--admin-muted);
 
-    line-height: 1.55;
-
-    color: #737373;
+    font-size: 0.84rem;
+    line-height: 1.5;
 }
-
 
 /* ============================================================
    TOOL ARROW
-   ============================================================ */
+============================================================ */
 
 .admin-tool-arrow {
     flex-shrink: 0;
@@ -688,277 +561,123 @@
 }
 
 .admin-tool-card:hover .admin-tool-arrow {
-    transform: translateX(5px);
+    transform: translateX(4px);
 
     color: #404040;
 }
 
-
 /* ============================================================
    LARGE DESKTOP
-   32" + responsiveness
-   ============================================================ */
+============================================================ */
 
-@media (min-width: 1600px) {
-    .admin-home > * {
-        max-width: 1460px;
-    }
-
+@media (min-width: 1500px) {
     .dashboard-cards {
-        max-width: 1460px;
-        gap: 28px;
-    }
-
-    .dashboard-card {
-        min-height: 310px;
-        padding: 28px 26px 22px;
-    }
-
-    .dashboard-card-top {
-        margin-bottom: 18px;
-    }
-
-    .dashboard-card h3 {
-        font-size: clamp(28px, 1.7vw, 42px);
-        letter-spacing: -1px;
-    }
-
-    .dashboard-card p {
-        font-size: 15px;
-    }
-}
-
-@media (min-width: 2000px) {
-    .dashboard-cards {
-        max-width: 1560px;
-        gap: 30px;
-    }
-
-    .dashboard-card {
-        min-height: 330px;
-        padding: 30px 28px 24px;
-    }
-
-    .dashboard-card h3 {
-        font-size: clamp(30px, 1.5vw, 46px);
-    }
-}
-
-/* ============================================================
-   MEDIUM DESKTOP
-   1101px - 1399px
-   ============================================================ */
-
-@media (min-width: 1101px) and (max-width: 1399px) {
-    .dashboard-cards {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 20px;
     }
 
     .dashboard-card {
-        min-height: 250px;
-        padding: 24px 20px 18px;
-    }
-
-    .dashboard-card h3 {
-        font-size: clamp(25px, 2.3vw, 34px);
-        letter-spacing: -0.8px;
-    }
-}
-
-
-/* ============================================================
-   TABLET
-   ============================================================ */
-
-@media (max-width: 1100px) {
-
-    .admin-home {
-        padding: 32px 26px 55px;
-    }
-
-    .admin-home-header {
-        margin-bottom: 44px;
-    }
-
-    .admin-home-header h1 {
-        font-size: 42px;
-    }
-
-    .admin-subtitle {
-        font-size: 17px;
-    }
-
-    /*
-     * Keep 3 cards for as long as there is enough room.
-     */
-
-    .dashboard-cards {
-        grid-template-columns:
-            repeat(3, minmax(0, 1fr));
-
-        gap: 16px;
-    }
-
-    .dashboard-card {
-        min-height: 225px;
-        padding: 20px 22px 18px;
-    }
-
-    .dashboard-card h3 {
-        font-size: clamp(24px, 2.8vw, 36px);
-        letter-spacing: -1px;
-    }
-
-    .dashboard-card p {
-        font-size: 14px;
+        min-height: 205px;
+        padding: 24px;
     }
 
     .admin-tools {
-        gap: 16px;
-    }
-
-    .admin-tool-card {
-        padding: 22px;
+        gap: 18px;
     }
 }
 
-
 /* ============================================================
-   SMALL TABLET
-   ============================================================ */
+   TABLET
+============================================================ */
 
-@media (max-width: 850px) {
-
-    .admin-home {
-        padding: 28px 22px 50px;
-    }
-
+@media (max-width: 1000px) {
     .admin-home-header {
-        flex-direction: column;
-
-        gap: 24px;
-    }
-
-    .admin-notification-button {
-        width: fit-content;
+        margin-bottom: 36px;
     }
 
     .dashboard-cards {
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
-
-        gap: 18px;
     }
 
-    .dashboard-card {
-        min-height: 210px;
-    }
-
-    .dashboard-card h3 {
-        font-size: clamp(30px, 4vw, 38px);
-        letter-spacing: -1.3px;
+    .admin-tools {
+        grid-template-columns: 1fr;
     }
 }
 
-
 /* ============================================================
    MOBILE
-   ============================================================ */
+============================================================ */
 
 @media (max-width: 600px) {
-
     .admin-home {
-        padding: 24px 16px 42px;
+        padding: 0 0 30px;
     }
-
-
-    /* HEADER */
 
     .admin-home-header {
-        margin-bottom: 38px;
-        gap: 20px;
-    }
+        flex-direction: column;
 
-    .admin-eyebrow {
-        font-size: 11px;
+        gap: 20px;
+
+        margin-bottom: 34px;
     }
 
     .admin-home-header h1 {
-        font-size: 34px;
-        letter-spacing: -1.2px;
+        font-size: 2rem;
+        letter-spacing: -1px;
+    }
+
+    .admin-eyebrow {
+        font-size: 0.68rem;
     }
 
     .admin-subtitle {
-        margin-top: 11px;
-        font-size: 15px;
+        font-size: 0.9rem;
     }
 
     .admin-notification-button {
         width: 100%;
     }
-
-
-    /* SECTION */
 
     .admin-section-heading {
         align-items: flex-start;
 
         flex-direction: column;
 
-        gap: 15px;
+        gap: 14px;
 
-        margin-bottom: 20px;
+        margin-bottom: 18px;
     }
 
     .admin-section-heading h2 {
-        font-size: 24px;
-    }
-
-    .admin-section-heading p {
-        font-size: 15px;
+        font-size: 1.25rem;
     }
 
     .refresh-dashboard {
         width: 100%;
     }
 
-
-    /* STAT CARDS */
-
     .dashboard-cards {
         grid-template-columns: 1fr;
 
         gap: 14px;
 
-        margin-bottom: 42px;
+        margin-bottom: 38px;
     }
 
     .dashboard-card {
-        min-height: 200px;
-        padding: 20px 18px 18px;
-    }
+        min-height: 175px;
 
-    .dashboard-card-top {
-        margin-bottom: 16px;
+        padding: 20px;
     }
 
     .dashboard-card-icon {
-        width: 50px;
-        height: 50px;
+        width: 48px;
+        height: 48px;
     }
 
     .dashboard-card h3 {
-        font-size: clamp(26px, 7vw, 38px);
-        letter-spacing: -1px;
+        font-size: 2.1rem;
     }
-
-    .dashboard-card p {
-        font-size: 14px;
-    }
-
-
-    /* TOOLS */
 
     .admin-tools {
         grid-template-columns: 1fr;
@@ -967,90 +686,78 @@
     }
 
     .admin-tool-card {
-        min-height: 200px;
-
-        padding: 20px;
+        min-height: 150px;
 
         grid-template-columns:
             auto minmax(0, 1fr);
 
-        gap: 16px;
+        padding: 20px;
 
-        position: relative;
+        gap: 15px;
     }
 
     .admin-tool-icon {
-        width: 52px;
-        height: 52px;
+        width: 50px;
+        height: 50px;
     }
 
     .admin-tool-content {
-        padding-right: 28px;
+        padding-right: 26px;
     }
 
     .admin-tool-content h3 {
-        font-size: 18px;
+        font-size: 0.95rem;
     }
 
     .admin-tool-content p {
-        font-size: 14px;
+        font-size: 0.8rem;
     }
 
     .admin-tool-arrow {
         position: absolute;
 
         top: 20px;
-        right: 18px;
+        right: 17px;
     }
 }
-
 
 /* ============================================================
    SMALL PHONES
-   ============================================================ */
+============================================================ */
 
 @media (max-width: 380px) {
-
-    .admin-home {
-        padding: 20px 13px 36px;
-    }
-
     .admin-home-header h1 {
-        font-size: 30px;
-    }
-
-    .admin-section-heading h2 {
-        font-size: 22px;
+        font-size: 1.8rem;
     }
 
     .dashboard-card {
-        padding: 20px;
+        padding: 18px;
     }
 
-    .dashboard-card h3 {
-        font-size: clamp(28px, 8vw, 38px);
+    .admin-tool-card {
+        padding: 18px;
     }
 }
 
-
 /* ============================================================
    TOUCH DEVICES
-   ============================================================ */
+============================================================ */
 
 @media (hover: none) {
-
     .dashboard-card:hover,
     .admin-tool-card:hover,
     .admin-notification-button:hover,
     .refresh-dashboard:hover {
         transform: none;
-
-        box-shadow:
-            var(--admin-shadow);
     }
 
-    .dashboard-card:hover::before {
-        opacity: 0;
+    .dashboard-card:hover {
+        box-shadow: var(--admin-shadow);
+    }
+
+    .admin-tool-card:hover {
+        box-shadow:
+            0 3px 15px rgba(15, 23, 42, 0.035);
     }
 
     .dashboard-card:hover .dashboard-card-icon,
@@ -1060,23 +767,20 @@
     }
 }
 
-
 /* ============================================================
    ACCESSIBILITY
-   ============================================================ */
+============================================================ */
 
-button:focus-visible {
-    outline: 3px solid rgba(37, 99, 235, 0.25);
+.admin-home button:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.22);
     outline-offset: 3px;
 }
 
-
 /* ============================================================
    REDUCED MOTION
-   ============================================================ */
+============================================================ */
 
 @media (prefers-reduced-motion: reduce) {
-
     .dashboard-card,
     .dashboard-card::before,
     .dashboard-card-icon,
