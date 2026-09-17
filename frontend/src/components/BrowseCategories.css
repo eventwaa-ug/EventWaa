@@ -1,22 +1,16 @@
 /* ============================================================
    EVENTWAA — BROWSE CATEGORIES
-   Warm / Modern / Premium
-   ============================================================ */
+   Round + Orange Brand
+============================================================ */
 .browse-categories {
     width: 100%;
     box-sizing: border-box;
     padding: 54px 6% 60px;
-    background:
-        linear-gradient(
-            180deg,
-            #ffffff 0%,
-            #fcfaf7 100%
-        );
+    background: linear-gradient(180deg, #ffffff 0%, #FFFBF5 100%);
     font-family: Arial, Helvetica, sans-serif;
 }
-/* ============================================================
-   HEADER
-   ============================================================ */
+
+/* HEADER */
 .section-header {
     max-width: 1180px;
     margin: 0 auto 28px;
@@ -26,46 +20,42 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 6px 12px;
+    padding: 6px 14px;
     margin-bottom: 10px;
     border-radius: 999px;
-    background: rgba(181, 139, 94, 0.12);
-    color: #79583d;
+    background: #FFF1E6;
+    color: #FF6B00;
     font-size: 0.76rem;
-    font-weight: 700;
-    letter-spacing: 0.01em;
+    font-weight: 800;
+    letter-spacing: 0.02em;
 }
 .section-header h2 {
     margin: 0 0 7px;
-    color: #22201e;
+    color: #111827;
     font-size: 2rem;
-    font-weight: 750;
+    font-weight: 800;
     line-height: 1.2;
-    letter-spacing: -0.035em;
+    letter-spacing: -0.04em;
 }
 .section-header p {
     margin: 0 auto;
     max-width: 600px;
-    color: #625d58;
+    color: #6B7280;
     font-size: 0.96rem;
-    font-weight: 400;
     line-height: 1.55;
 }
-/* ============================================================
-   CATEGORY GRID
-   ============================================================ */
+
+/* GRID */
 .category-grid {
     width: 100%;
     max-width: 1180px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns:
-        repeat(3, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
 }
-/* ============================================================
-   CATEGORY CARD
-   ============================================================ */
+
+/* CARD - ROUND */
 .category-card {
     position: relative;
     width: 100%;
@@ -74,15 +64,11 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 16px 17px;
-    border: 1px solid
-        rgba(111, 91, 72, 0.15);
-    border-radius: 15px;
-    background:
-        rgba(255, 255, 255, 0.58);
-    box-shadow:
-        0 3px 12px
-        rgba(72, 54, 38, 0.055);
+    padding: 18px 20px;
+    border: 1.5px solid #F3F4F6;
+    border-radius: 24px; /* ROUND */
+    background: #ffffff;
+    box-shadow: 0 4px 16px rgba(17, 24, 39, 0.05);
     color: #252321;
     text-align: left;
     cursor: pointer;
@@ -90,89 +76,54 @@
     appearance: none;
     outline: none;
     overflow: hidden;
-    transition:
-        transform 0.22s ease,
-        box-shadow 0.22s ease,
-        border-color 0.22s ease,
-        background 0.22s ease;
+    transition: all 0.22s ease;
 }
-/* ============================================================
-   SUBTLE HOVER GLOW
-   ============================================================ */
+
 .category-card::before {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background:
-        linear-gradient(
-            135deg,
-            rgba(214, 184, 150, 0.14),
-            rgba(255, 255, 255, 0.05)
-        );
+    background: radial-gradient(400px at 0% 0%, rgba(255,107,0,0.08), transparent 60%);
     opacity: 0;
-    transition:
-        opacity 0.22s ease;
+    transition: opacity 0.22s ease;
 }
+
 .category-card:hover {
-    transform: translateY(-3px);
-    border-color:
-        rgba(143, 108, 75, 0.28);
-    background:
-        rgba(255, 252, 247, 0.82);
-    box-shadow:
-        0 12px 28px
-        rgba(77, 57, 39, 0.11),
-        0 3px 8px
-        rgba(77, 57, 39, 0.05);
+    transform: translateY(-4px);
+    border-color: #FFD7B8;
+    background: #FFFBF5;
+    box-shadow: 0 16px 32px rgba(255, 107, 0, 0.12), 0 4px 12px rgba(17,24,39,0.06);
 }
-.category-card:hover::before {
-    opacity: 1;
-}
-.category-card:active {
-    transform: translateY(-1px);
-    box-shadow:
-        0 6px 15px
-        rgba(77, 57, 39, 0.09);
-}
+.category-card:hover::before { opacity: 1; }
+.category-card:active { transform: translateY(-1px); }
 .category-card:focus-visible {
-    outline:
-        3px solid
-        rgba(181, 139, 94, 0.22);
+    outline: 3px solid rgba(255,107,0,0.25);
     outline-offset: 3px;
 }
-/* ============================================================
-   ICON
-   ============================================================ */
+
+/* ICON - ROUNDER */
 .category-icon {
     position: relative;
     z-index: 1;
-    width: 47px;
-    height: 47px;
-    flex: 0 0 47px;
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 13px;
-    background:
-        rgba(181, 139, 94, 0.105);
-    color: #79583d;
-    transition:
-        transform 0.22s ease,
-        background 0.22s ease,
-        color 0.22s ease;
+    border-radius: 16px; /* ROUND ICON */
+    background: #FFF1E6;
+    color: #FF6B00;
+    transition: all 0.22s ease;
 }
 .category-card:hover .category-icon {
-    transform:
-        translateY(-1px)
-        rotate(-2deg);
-    background:
-        rgba(181, 139, 94, 0.18);
-    color: #5e432e;
+    transform: translateY(-1px) rotate(-3deg) scale(1.05);
+    background: #FF6B00;
+    color: white;
 }
-/* ============================================================
-   CONTENT
-   ============================================================ */
+
+/* CONTENT */
 .category-content {
     position: relative;
     z-index: 1;
@@ -181,189 +132,95 @@
 }
 .category-content h3 {
     margin: 0 0 4px;
-    color: #262321;
+    color: #111827;
     font-size: 1rem;
     font-weight: 700;
     line-height: 1.25;
-    letter-spacing: -0.01em;
 }
 .category-content p {
     margin: 0;
-    color: #69635d;
-    font-size: 0.83rem;
-    font-weight: 400;
-    line-height: 1.4;
+    color: #6B7280;
+    font-size: 0.84rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-/* ============================================================
-   ARROW
-   ============================================================ */
+
+/* ARROW - FULL ROUND */
 .category-arrow {
     position: relative;
     z-index: 1;
-    width: 30px;
-    height: 30px;
-    flex: 0 0 30px;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    background:
-        rgba(90, 70, 51, 0.055);
-    color: #70675f;
-    transition:
-        transform 0.22s ease,
-        background 0.22s ease,
-        color 0.22s ease;
+    border-radius: 999px; /* FULL ROUND */
+    background: #F3F4F6;
+    color: #9CA3AF;
+    transition: all 0.22s ease;
 }
 .category-card:hover .category-arrow {
-    transform:
-        translate(2px, -2px);
-    background:
-        rgba(181, 139, 94, 0.16);
-    color: #65472f;
+    transform: translate(2px, -2px);
+    background: #111827;
+    color: white;
 }
-/* ============================================================
-   TABLET
-   ============================================================ */
+
+/* TABLET */
 @media (max-width: 900px) {
-    .browse-categories {
-        padding:
-            48px
-            5%
-            54px;
-    }
+    .browse-categories { padding: 48px 5% 54px; }
     .category-grid {
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
     }
-    .section-header {
-        margin-bottom: 24px;
-    }
-    .section-header h2 {
-        font-size: 1.85rem;
-    }
+    .section-header { margin-bottom: 24px; }
+    .section-header h2 { font-size: 1.85rem; }
 }
-/* ============================================================
-   MOBILE
-   ============================================================ */
+
+/* MOBILE - HORIZONTAL ROUND SCROLL */
 @media (max-width: 650px) {
-    .browse-categories {
-        padding:
-            42px
-            18px
-            48px;
-    }
-    .section-header {
-        text-align: left;
-        margin-bottom: 21px;
-    }
-    .section-header .badge {
-        margin-bottom: 9px;
-    }
-    .section-header h2 {
-        font-size: 1.65rem;
-        letter-spacing: -0.03em;
-    }
-    .section-header p {
-        margin: 0;
-        font-size: 0.9rem;
-        line-height: 1.5;
-    }
-    /* --------------------------------------------------------
-       HORIZONTAL MOBILE SCROLL
-       -------------------------------------------------------- */
+    .browse-categories { padding: 42px 18px 48px; }
+    .section-header { text-align: left; margin-bottom: 21px; }
+    .section-header h2 { font-size: 1.65rem; }
+    .section-header p { margin: 0; font-size: 0.9rem; }
+
     .category-grid {
         display: flex;
         width: calc(100% + 18px);
-        gap: 11px;
-        padding:
-            2px
-            18px
-            8px
-            0;
+        gap: 12px;
+        padding: 2px 18px 12px 0;
         overflow-x: auto;
         scroll-snap-type: x mandatory;
-      
     }
-    .category-grid::-webkit-scrollbar {
-        display: none;
-    }
-    /* --------------------------------------------------------
-       MOBILE CARD
-       -------------------------------------------------------- */
+    .category-grid::-webkit-scrollbar { display: none; }
+
     .category-card {
-        flex:
-            0 0
-            238px;
-        padding: 15px;
+        flex: 0 0 250px;
+        padding: 16px;
         gap: 12px;
-        border-radius: 14px;
+        border-radius: 20px; /* ROUND ON MOBILE */
         scroll-snap-align: start;
     }
-    .category-card:hover {
-        transform: translateY(-2px);
-    }
     .category-icon {
-        width: 43px;
-        height: 43px;
-        flex-basis: 43px;
-        border-radius: 11px;
-    }
-    .category-content h3 {
-        font-size: 0.95rem;
-    }
-    .category-content p {
-        font-size: 0.78rem;
-    }
-    .category-arrow {
-        width: 27px;
-        height: 27px;
-        flex-basis: 27px;
+        width: 46px;
+        height: 46px;
+        flex-basis: 46px;
+        border-radius: 14px;
     }
 }
-/* ============================================================
-   SMALL PHONES
-   ============================================================ */
+
 @media (max-width: 390px) {
-    .browse-categories {
-        padding:
-            38px
-            15px
-            43px;
-    }
-    .section-header h2 {
-        font-size: 1.52rem;
-    }
-    .section-header p {
-        font-size: 0.86rem;
-    }
+    .browse-categories { padding: 38px 15px 43px; }
+    .section-header h2 { font-size: 1.52rem; }
     .category-grid {
         width: calc(100% + 15px);
         gap: 10px;
         padding-right: 15px;
     }
     .category-card {
-        flex-basis: 220px;
+        flex-basis: 230px;
         padding: 14px;
-    }
-    .category-icon {
-        width: 41px;
-        height: 41px;
-        flex-basis: 41px;
-    }
-}
-/* ============================================================
-   REDUCED MOTION
-   ============================================================ */
-@media (prefers-reduced-motion: reduce) {
-    .category-card,
-    .category-card::before,
-    .category-icon,
-    .category-arrow {
-        transition: none;
+        border-radius: 18px;
     }
 }

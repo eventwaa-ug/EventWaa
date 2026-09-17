@@ -1,3 +1,7 @@
+/* ============================================================
+   BOOKING PAGE - ORANGE THEME + MOBILE RESPONSIVE FIX
+============================================================ */
+
 .booking-page {
   min-height: 100vh;
   background: #f7f7f7;
@@ -5,29 +9,21 @@
   justify-content: center;
   align-items: flex-start;
   padding: 50px 20px;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Helvetica,
-    Arial,
-    sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
 }
+
 .booking-card {
   width: 100%;
   max-width: 600px;
   background: #ffffff;
   border-radius: 24px;
   overflow: hidden;
-  box-shadow:
-    0 15px 45px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 15px 45px rgba(0,0,0,0.08);
   font-family: inherit;
 }
-/* ============================================================
-   BACK BUTTON
-============================================================ */
+
+/* BACK BUTTON */
 .booking-back-btn {
   display: inline-flex;
   align-items: center;
@@ -38,95 +34,33 @@
   border-radius: 10px;
   background: #ffffff;
   color: #374151;
-  font-family: inherit;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    background 0.2s,
-    border-color 0.2s,
-    color 0.2s,
-    transform 0.2s;
+  transition: all 0.2s;
 }
-.booking-back-btn:hover {
-  background: #fff7f5;
-  border-color: #d85c45;
-  color: #d85c45;
-  transform: translateX(-2px);
-}
-.booking-back-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-.booking-back-btn svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-/* ============================================================
-   EVENT POSTER
-============================================================ */
-.booking-event-image {
-  width: 100%;
-  height: 280px;
-  overflow: hidden;
-}
-.booking-event-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-/* ============================================================
-   EVENT INFORMATION
-============================================================ */
-.booking-event-info {
-  padding: 28px 32px 10px;
-}
+.booking-back-btn:hover { background: #FFF4ED; border-color: #FF6B00; color: #FF6B00; transform: translateX(-2px); }
+.booking-back-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.booking-back-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* EVENT POSTER */
+.booking-event-image { width: 100%; height: 280px; overflow: hidden; }
+.booking-event-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* EVENT INFORMATION */
+.booking-event-info { padding: 28px 32px 10px; }
 .booking-label {
   display: inline-block;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #d85c45;
-  background: #fff0ec;
-  padding: 6px 12px;
-  border-radius: 999px;
-  margin-bottom: 12px;
+  font-size: 12px; font-weight: 700; letter-spacing: 1px;
+  color: #FF6B00; background: #FFF4ED;
+  padding: 6px 12px; border-radius: 999px; margin-bottom: 12px;
 }
-.booking-card h1 {
-  font-family: inherit;
-  font-size: 30px;
-  line-height: 1.25;
-  margin: 0 0 15px;
-  color: #111827;
-}
-.event-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-}
-.event-meta p {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  color: #6b7280;
-  font-family: inherit;
-  font-size: 15px;
-  line-height: 1.4;
-}
-.event-meta p svg {
-  width: 17px;
-  height: 17px;
-  flex-shrink: 0;
-  color: #d85c45;
-}
-/* ============================================================
-   CONTENT
-============================================================ */
+.booking-card h1 { font-size: 30px; line-height: 1.25; margin: 0 0 15px; color: #111827; }
+.event-meta { display: flex; flex-direction: column; gap: 9px; }
+.event-meta p { margin: 0; display: flex; align-items: center; gap: 9px; color: #6b7280; font-size: 15px; line-height: 1.4; }
+.event-meta p svg { width: 17px; height: 17px; flex-shrink: 0; color: #FF6B00; }
+
+/* CONTENT - FIXED FOR MOBILE */
 .booking-card > h2,
 .booking-card > .summary-row,
 .booking-card > .payment-options,
@@ -134,309 +68,122 @@
 .booking-card > .pay-btn,
 .booking-card > .secure-payment,
 .booking-card > hr,
-.booking-card > .selected-ticket-box {
+.booking-card > .selected-ticket-box,
+.booking-card > .service-providers-list {
   margin-left: 32px;
   margin-right: 32px;
-}
-.booking-card h2 {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-family: inherit;
-  font-size: 20px;
-  margin-top: 25px;
-  margin-bottom: 18px;
-  color: #111827;
-}
-.booking-card h2 svg {
-  width: 19px;
-  height: 19px;
-  flex-shrink: 0;
-  color: #d85c45;
-}
-.booking-card hr {
-  border: none;
-  border-top: 1px solid #e5e7eb;
-  margin-top: 24px;
-  margin-bottom: 24px;
-}
-/* ============================================================
-   SELECTED TICKET
-============================================================ */
-.selected-ticket-box {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  padding: 16px;
-  background: #fafafa;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  margin-bottom: 20px;
-  font-family: inherit;
-}
-.selected-ticket-box div {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.selected-ticket-box span {
-  font-family: inherit;
-  font-size: 13px;
-  color: #6b7280;
-}
-.selected-ticket-box strong {
-  font-family: inherit;
-  color: #111827;
-}
-/* ============================================================
-   SUMMARY
-============================================================ */
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
-  color: #374151;
-  font-family: inherit;
-  font-size: 15px;
-}
-.summary-row strong {
-  font-family: inherit;
-  color: #111827;
-}
-.quantity-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  min-height: 42px;
-}
-
-.quantity-controls button {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  width: 38px !important;
-  height: 38px !important;
-  min-width: 38px !important;
-  padding: 0 !important;
-  border: none !important;
-  border-radius: 10px;
-  background: #111827 !important;
-  color: #ffffff !important;
-  font-size: 25px !important;
-  line-height: 1 !important;
-  cursor: pointer;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-.quantity-controls button:disabled {
-  background: #9ca3af !important;
-  color: #ffffff !important;
-  opacity: 1 !important;
-  cursor: not-allowed;
-}
-
-.quantity-symbol {
-  display: block;
-  color: #ffffff !important;
-  font-family: Arial, sans-serif;
-  font-size: 25px;
-  font-weight: 700;
-  line-height: 1;
-  visibility: visible !important;
-}
-
-.quantity-value {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  color: #111827;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1;
-}
-/* ============================================================
-   TOTAL
-============================================================ */
-.total-row {
-  font-family: inherit;
-  font-size: 20px;
-  font-weight: 700;
-  margin-top: 5px;
-}
-.total-row strong {
-  color: #d85c45;
-}
-/* ============================================================
-   PAYMENT OPTIONS
-============================================================ */
-.payment-options {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.payment-options label {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 15px;
-  border: 1px solid #e5e7eb;
-  border-radius: 13px;
-  cursor: pointer;
-  color: #374151;
-  font-family: inherit;
-  transition: 0.2s;
-}
-.payment-options label:hover {
-  border-color: #d85c45;
-  background: #fff7f5;
-}
-.payment-options input {
-  accent-color: #d85c45;
-}
-/* ============================================================
-   PHONE
-============================================================ */
-.phone-section {
-  margin-top: 20px;
-  margin-bottom: 10px;
-}
-.phone-section label {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-bottom: 8px;
-  font-family: inherit;
-  font-weight: 600;
-  color: #111827;
-}
-.phone-section label svg {
-  width: 16px;
-  height: 16px;
-  color: #d85c45;
-  flex-shrink: 0;
-}
-.phone-section input {
-  width: 100%;
   box-sizing: border-box;
+  max-width: calc(100% - 64px);
+}
+
+.booking-card h2 { display: flex; align-items: center; gap: 9px; font-size: 20px; margin-top: 25px; margin-bottom: 18px; color: #111827; }
+.booking-card h2 svg { width: 19px; height: 19px; flex-shrink: 0; color: #FF6B00; }
+.booking-card hr { border: none; border-top: 1px solid #e5e7eb; margin-top: 24px; margin-bottom: 24px; }
+
+/* SELECTED TICKET - RESPONSIVE */
+.selected-ticket-box {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 16px; background: #FFF8F3; border: 1px solid #FFE5D0; border-radius: 14px; margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.selected-ticket-box div { display: flex; flex-direction: column; gap: 5px; min-width: 0; flex: 1; }
+.selected-ticket-box span { font-size: 13px; color: #6b7280; }
+.selected-ticket-box strong { color: #111827; word-break: break-word; }
+
+/* SERVICE PROVIDERS - NEW RESPONSIVE FIX */
+.service-providers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.service-provider-card {
+  display: flex;
+  gap: 14px;
   padding: 14px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
-  font-family: inherit;
-  font-size: 16px;
-  outline: none;
-  transition: 0.2s;
+  background: #fff;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
-.phone-section input:focus {
-  border-color: #d85c45;
-  box-shadow:
-    0 0 0 3px rgba(239, 80, 71, 0.1);
+
+.service-provider-card img {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
 }
-/* ============================================================
-   PAYMENT BUTTON
-============================================================ */
+
+.service-provider-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.service-provider-info h4 { margin: 0 0 4px; font-size: 15px; color: #111827; word-break: break-word; }
+.service-provider-info p { margin: 0; font-size: 13px; color: #6b7280; word-break: break-word; }
+
+/* SUMMARY */
+.summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; color: #374151; font-size: 15px; gap: 10px; flex-wrap: wrap; }
+.summary-row strong { color: #111827; }
+.quantity-controls { display: flex; align-items: center; justify-content: center; gap: 16px; min-height: 42px; }
+.quantity-controls button {
+  display: flex !important; align-items: center; justify-content: center;
+  width: 38px !important; height: 38px !important; min-width: 38px !important; padding: 0 !important;
+  border: none !important; border-radius: 10px; background: #111827 !important; color: #ffffff !important;
+  font-size: 25px !important; cursor: pointer;
+}
+.quantity-controls button:disabled { background: #9ca3af !important; cursor: not-allowed; }
+.quantity-symbol { color: #ffffff !important; font-size: 25px; font-weight: 700; }
+.quantity-value { min-width: 24px; color: #111827; font-size: 20px; font-weight: 700; }
+
+.total-row { font-size: 20px; font-weight: 700; margin-top: 5px; }
+.total-row strong { color: #FF6B00; }
+
+/* PAYMENT OPTIONS */
+.payment-options { display: flex; flex-direction: column; gap: 12px; }
+.payment-options label {
+  display: flex; align-items: center; gap: 12px; padding: 15px;
+  border: 1px solid #e5e7eb; border-radius: 13px; cursor: pointer; color: #374151; transition: 0.2s;
+}
+.payment-options label:hover { border-color: #FF6B00; background: #FFF4ED; }
+.payment-options input { accent-color: #FF6B00; }
+
+/* PHONE */
+.phone-section { margin-top: 20px; margin-bottom: 10px; }
+.phone-section label { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; font-weight: 600; color: #111827; }
+.phone-section label svg { width: 16px; height: 16px; color: #FF6B00; flex-shrink: 0; }
+.phone-section input {
+  width: 100%; box-sizing: border-box; padding: 14px; border: 1px solid #d1d5db; border-radius: 12px;
+  font-size: 16px; outline: none; transition: 0.2s;
+}
+.phone-section input:focus { border-color: #FF6B00; box-shadow: 0 0 0 3px rgba(255,107,0,0.12); }
+
+/* PAY BUTTON */
 .pay-btn {
-  width: calc(100% - 64px);
-  margin-top: 28px;
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  border: none;
-  border-radius: 14px;
-  background: #d85c45;
-  color: white;
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s;
+  width: calc(100% - 64px); margin-top: 28px; padding: 16px;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  border: none; border-radius: 14px; background: #FF6B00; color: white;
+  font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s;
 }
-.pay-btn svg {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
-.pay-btn:hover {
-  background: #b34a36;
-  transform: translateY(-1px);
-}
-.pay-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-}
-/* ============================================================
-   SECURITY MESSAGE
-============================================================ */
-.secure-payment {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  text-align: center;
-  color: #9ca3af;
-  font-family: inherit;
-  font-size: 13px;
-  padding: 15px 0 25px;
-}
-.secure-payment svg {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-}
-/* ============================================================
-   MESSAGE STATES
-============================================================ */
-.booking-message {
-  min-height: 60vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 30px;
-  text-align: center;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Helvetica,
-    Arial,
-    sans-serif;
-}
-.booking-message h2 {
-  color: #374151;
-  font-family: inherit;
-}
-/* ============================================================
-   MOBILE
-============================================================ */
+.pay-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+.pay-btn:hover { background: #E55F00; transform: translateY(-1px); }
+.pay-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+.secure-payment { display: flex; align-items: center; justify-content: center; gap: 7px; text-align: center; color: #9ca3af; font-size: 13px; padding: 15px 0 25px; }
+.secure-payment svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+.booking-message { min-height: 60vh; display: flex; justify-content: center; align-items: center; padding: 30px; text-align: center; }
+.booking-message h2 { color: #374151; }
+
+/* MOBILE - FIXED */
 @media (max-width: 768px) {
-  .booking-page {
-    padding: 20px 12px;
-  }
-  .booking-card {
-    border-radius: 18px;
-  }
-  .booking-back-btn {
-    margin: 18px 20px 0;
-    font-size: 14px;
-  }
-  .booking-event-image {
-    height: 220px;
-  }
-  .booking-event-info {
-    padding: 22px 20px 8px;
-  }
-  .booking-card h1 {
-    font-size: 24px;
-  }
+  .booking-page { padding: 0; background: #ffffff; }
+  .booking-card { border-radius: 0; box-shadow: none; max-width: 100%; }
+  .booking-back-btn { margin: 16px 16px 0; font-size: 14px; }
+  .booking-event-image { height: 220px; }
+  .booking-event-info { padding: 20px 16px 8px; }
+  .booking-card h1 { font-size: 22px; line-height: 1.3; }
   .booking-card > h2,
   .booking-card > .summary-row,
   .booking-card > .payment-options,
@@ -444,47 +191,31 @@
   .booking-card > .pay-btn,
   .booking-card > .secure-payment,
   .booking-card > hr,
-  .booking-card > .selected-ticket-box {
-    margin-left: 20px;
-    margin-right: 20px;
+  .booking-card > .selected-ticket-box,
+  .booking-card > .service-providers-list {
+    margin-left: 16px; margin-right: 16px; max-width: calc(100% - 32px);
   }
-  .pay-btn {
-    width: calc(100% - 40px);
-  }
-  .selected-ticket-box {
-    padding: 14px;
-  }
-  .summary-row {
-    font-size: 14px;
-  }
+  .pay-btn { width: calc(100% - 32px); }
+  .selected-ticket-box { padding: 12px; flex-direction: column; align-items: flex-start; }
+  .service-provider-card { padding: 12px; }
 }
-/* ============================================================
-   SMALL PHONES
-============================================================ */
+
 @media (max-width: 420px) {
-  .booking-page {
-    padding: 15px 10px;
+  .booking-page { padding: 0; }
+  .booking-back-btn { margin: 12px 12px 0; padding: 8px 12px; font-size: 13px; }
+  .booking-event-image { height: 190px; }
+  .booking-card h1 { font-size: 20px; }
+  .booking-card h2 { font-size: 17px; }
+  .booking-card > h2,
+  .booking-card > .summary-row,
+  .booking-card > .payment-options,
+  .booking-card > .phone-section,
+  .booking-card > .pay-btn,
+  .booking-card > .secure-payment,
+  .booking-card > hr,
+  .booking-card > .selected-ticket-box,
+  .booking-card > .service-providers-list {
+    margin-left: 12px; margin-right: 12px; max-width: calc(100% - 24px);
   }
-  .booking-back-btn {
-    margin: 15px 16px 0;
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-  .booking-event-image {
-    height: 190px;
-  }
-  .booking-card h1 {
-    font-size: 22px;
-  }
-  .booking-card h2 {
-    font-size: 18px;
-  }
-  .payment-options label {
-    padding: 13px;
-    font-size: 14px;
-  }
-  .pay-btn {
-    font-size: 15px;
-    padding: 15px;
-  }
+  .pay-btn { width: calc(100% - 24px); font-size: 15px; padding: 15px; }
 }

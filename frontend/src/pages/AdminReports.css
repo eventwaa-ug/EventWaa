@@ -1,151 +1,111 @@
 .admin-reports {
-
-    padding: 30px;
-
-    min-height: 100vh;
-
-    background: #f5f7fb;
-
+  padding: 32px 24px;
+  min-height: 100vh;
+  background: #FFFBF5;
 }
-
 
 .admin-reports h1 {
-
-    font-size: 32px;
-
-    margin-bottom: 25px;
-
-    color: #222;
-
+  font-size: 32px;
+  margin-bottom: 26px;
+  color: #111827;
+  font-weight: 900;
+  letter-spacing: -1px;
 }
 
-
-
-/* Report Card */
-
+/* Report Card - 24px */
 .report-card {
-
-    background: white;
-
-    border-radius: 14px;
-
-    padding: 25px;
-
-    margin-bottom: 20px;
-
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-
-    border-left: 5px solid #e53935;
-
+  background: white;
+  border-radius: 24px;
+  padding: 24px 26px;
+  margin-bottom: 16px;
+  border: 1.5px solid #F3F4F6;
+  border-left: 5px solid #FF6B00;
+  box-shadow: 0 4px 16px rgba(17,24,39,0.04);
+  transition: all 0.22s ease;
 }
 
+.report-card:hover {
+  transform: translateY(-3px);
+  border-left-color: #E65E00;
+  box-shadow: 0 12px 28px rgba(17,24,39,0.08);
+}
 
 .report-card h2 {
-
-    margin-bottom: 15px;
-
-    color: #333;
-
+  margin: 0 0 14px;
+  color: #111827;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.3;
 }
-
-
 
 .report-card p {
-
-    color: #555;
-
-    margin: 10px 0;
-
-    font-size: 15px;
-
+  color: #4B5563;
+  margin: 10px 0;
+  font-size: 14.5px;
+  line-height: 1.6;
 }
-
-
-
-/* Status */
 
 .report-card p:last-of-type {
-
-    font-weight: 600;
-
+  font-weight: 700;
+  color: #111827;
 }
 
-
-
-/* Buttons */
-
+/* Buttons - PILL */
 .report-actions {
-
-    display: flex;
-
-    gap: 15px;
-
-    margin-top: 20px;
-
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
 }
-
-
 
 .report-actions button {
-
-    padding: 10px 20px;
-
-    border: none;
-
-    border-radius: 8px;
-
-    cursor: pointer;
-
-    font-size: 14px;
-
-    font-weight: 600;
-
+  padding: 11px 20px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
 }
-
-
-
-/* Delete button */
 
 .report-actions button:first-child {
-
-    background: #e53935;
-
-    color: white;
-
+  background: #FEF2F2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
 }
-
 
 .report-actions button:first-child:hover {
-
-    background: #c62828;
-
+  background: #EF4444;
+  color: white;
+  border-color: #EF4444;
+  box-shadow: 0 6px 14px rgba(239,68,68,0.2);
 }
-
-
-
-/* Dismiss button */
 
 .report-actions button:last-child {
-
-    background: #e0e0e0;
-
-    color: #333;
-
+  background: #F9FAFB;
+  color: #374151;
+  border: 1.5px solid #E5E7EB;
 }
-
 
 .report-actions button:last-child:hover {
-
-    background: #bdbdbd;
-
+  background: #111827;
+  color: white;
+  border-color: #111827;
 }
 
+.admin-reports > p {
+  font-size: 15px;
+  color: #6B7280;
+}
 
+@media (max-width: 768px) {
+  .admin-reports { padding: 20px 16px; }
+  .admin-reports h1 { font-size: 26px; margin-bottom: 20px; }
+  .report-card { border-radius: 20px; padding: 20px 18px; }
+  .report-card h2 { font-size: 1.05rem; }
+  .report-actions button { flex: 1; min-width: 120px; }
+}
 
-/* Empty state */
-
-.admin-reports p {
-
-    font-size: 16px;
-
+@media (max-width: 380px) {
+  .report-card { border-radius: 18px; padding: 18px 16px; }
 }

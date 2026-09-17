@@ -31,14 +31,22 @@
   gap: 42px;
   align-items: start;
 }
-/* =========================================================
-   BRAND
-========================================================= */
-.footer-brand {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 18px;
+.footer-brand-name {
+  display: inline-flex;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: normal;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+}
+
+.footer-brand-name .event-part {
+  color: #ffffff;
+}
+
+.footer-brand-name .waa-part {
+  color: #FF6B00;
 }
 /* BRAND LINK */
 .footer-brand-link {

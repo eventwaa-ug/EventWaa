@@ -1,15 +1,13 @@
 /* ============================================================
-   PAID EVENTS
+   PAID EVENTS - Round + Orange Brand
 ============================================================ */
 .paid-events {
   width: 100%;
   padding: 72px 8%;
-  background: #f7f7f5;
+  background: #FFFBF5;
   box-sizing: border-box;
 }
-/* ============================================================
-   SECTION HEADER
-============================================================ */
+
 .paid-section-header {
   width: 100%;
   max-width: 1200px;
@@ -19,73 +17,71 @@
   justify-content: space-between;
   gap: 30px;
 }
-/* ============================================================
-   HEADER CONTENT
-============================================================ */
+
 .paid-header-content {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
+
 .paid-badge {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   width: fit-content;
   margin-bottom: 12px;
-  padding: 6px 11px;
+  padding: 7px 14px;
   border-radius: 999px;
-  background: #ebe8e2;
-  border: 1px solid #ded9d0;
-  color: #393631;
+  background: #111827;
+  border: 1px solid #111827;
+  color: #ffffff;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1;
 }
+
 .paid-header-content h2 {
   margin: 0 0 8px;
-  color: #171717;
+  color: #111827;
   font-size: 2.15rem;
-  font-weight: 750;
+  font-weight: 800;
   line-height: 1.15;
   letter-spacing: -0.7px;
 }
+
 .paid-header-content p {
   margin: 0;
   max-width: 620px;
-  color: #626262;
+  color: #6B7280;
   font-size: 1rem;
-  font-weight: 400;
   line-height: 1.6;
 }
-/* ============================================================
-   SEE ALL
-============================================================ */
+
+/* SEE ALL - PILL */
 .paid-see-all {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-  padding: 9px 12px;
-  border-radius: 10px;
-  color: #222222;
-  background: transparent;
+  padding: 10px 16px;
+  border-radius: 999px;
+  color: #111827;
+  background: white;
+  border: 1.5px solid #E5E7EB;
   text-decoration: none;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
-  transition:
-    background 0.22s ease,
-    transform 0.22s ease,
-    color 0.22s ease;
+  transition: all 0.22s ease;
 }
+
 .paid-see-all:hover {
-  background: #ebe8e2;
-  color: #111111;
+  background: #111827;
+  color: white;
+  border-color: #111827;
   transform: translateX(3px);
 }
-/* ============================================================
-   EVENTS SLIDER
-============================================================ */
+
+/* SLIDER */
 .paid-events-slider {
   width: 100%;
   max-width: 1200px;
@@ -97,33 +93,41 @@
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory;
 }
-/* ============================================================
-   HIDE SCROLLBAR
-============================================================ */
-.paid-events-slider::-webkit-scrollbar {
-  display: none;
-}
-/* ============================================================
-   TRACK
-============================================================ */
+
+.paid-events-slider::-webkit-scrollbar { display: none; }
+
 .paid-events-track {
   display: flex;
   align-items: stretch;
   gap: 22px;
   width: max-content;
 }
-/* ============================================================
-   EVENT SLIDE
-============================================================ */
+
+/* SLIDE - ROUND */
 .paid-event-slide {
   width: 285px;
   flex: 0 0 285px;
   scroll-snap-align: start;
   box-sizing: border-box;
+  border-radius: 24px;
+  overflow: hidden;
+  background: white;
+  border: 1.5px solid #F3F4F6;
+  transition: all 0.3s ease;
 }
-/* ============================================================
-   EMPTY STATE
-============================================================ */
+
+.paid-event-slide:hover {
+  transform: translateY(-4px);
+  border-color: #FFD7B8;
+  box-shadow: 0 20px 40px rgba(17,24,39,0.08);
+}
+
+.paid-event-slide > * {
+  border-radius: 24px !important;
+  overflow: hidden;
+}
+
+/* EMPTY - ROUND */
 .paid-events-empty {
   width: 100%;
   max-width: 1200px;
@@ -132,11 +136,11 @@
   box-sizing: border-box;
   text-align: center;
   background: #ffffff;
-  border: 1px solid #e5e2dc;
-  border-radius: 18px;
-  box-shadow:
-    0 8px 25px rgba(25, 23, 20, 0.05);
+  border: 1.5px dashed #E5E7EB;
+  border-radius: 24px;
+  box-shadow: 0 8px 25px rgba(17,24,39,0.04);
 }
+
 .paid-empty-icon {
   width: 58px;
   height: 58px;
@@ -144,130 +148,85 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: #efede8;
-  color: #3f3b35;
+  border-radius: 999px;
+  background: #FFF1E6;
+  color: #FF6B00;
 }
+
 .paid-events-empty h3 {
   margin: 0 0 8px;
-  color: #171717;
+  color: #111827;
   font-size: 1.2rem;
   font-weight: 700;
 }
+
 .paid-events-empty p {
   max-width: 480px;
   margin: 0 auto 22px;
-  color: #666666;
+  color: #6B7280;
   font-size: 0.95rem;
   line-height: 1.6;
 }
+
 .paid-browse-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 11px 18px;
-  border-radius: 10px;
-  background: #222222;
+  padding: 12px 22px;
+  border-radius: 999px;
+  background: #FF6B00;
   color: #ffffff;
   text-decoration: none;
   font-size: 14px;
-  font-weight: 700;
-  transition:
-    transform 0.22s ease,
-    box-shadow 0.22s ease,
-    background 0.22s ease;
+  font-weight: 800;
+  transition: all 0.22s ease;
 }
+
 .paid-browse-btn:hover {
-  background: #000000;
+  background: #E65E00;
   transform: translateY(-2px);
-  box-shadow:
-    0 8px 18px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 8px 18px rgba(255,107,0,0.25);
 }
-/* ============================================================
-   TABLET
-============================================================ */
+
 @media (max-width: 992px) {
-  .paid-events {
-    padding: 65px 5%;
-  }
-  .paid-section-header {
-    margin-bottom: 30px;
-  }
-  .paid-header-content h2 {
-    font-size: 1.95rem;
-  }
-  .paid-event-slide {
-    width: 270px;
-    flex-basis: 270px;
-  }
+  .paid-events { padding: 65px 5%; }
+  .paid-section-header { margin-bottom: 30px; }
+  .paid-header-content h2 { font-size: 1.95rem; }
+  .paid-event-slide { width: 270px; flex-basis: 270px; }
 }
-/* ============================================================
-   MOBILE
-============================================================ */
+
 @media (max-width: 768px) {
-  .paid-events {
-    padding: 55px 20px;
-  }
+  .paid-events { padding: 55px 20px; }
   .paid-section-header {
     align-items: flex-start;
     margin-bottom: 25px;
     gap: 14px;
   }
-  .paid-header-content h2 {
-    font-size: 1.75rem;
-    letter-spacing: -0.4px;
-  }
-  .paid-header-content p {
-    font-size: 0.94rem;
-    line-height: 1.55;
-    max-width: 520px;
-  }
-  .paid-see-all {
-    margin-top: 3px;
-    padding: 7px 8px;
-    font-size: 14px;
-  }
+  .paid-header-content h2 { font-size: 1.75rem; }
+  .paid-header-content p { font-size: 0.94rem; }
+  .paid-see-all { font-size: 13px; }
   .paid-events-slider {
     margin: 0 -20px;
     padding-left: 20px;
     padding-right: 20px;
   }
-  .paid-events-track {
-    gap: 16px;
-  }
+  .paid-events-track { gap: 16px; }
   .paid-event-slide {
     width: 78vw;
     max-width: 285px;
     flex-basis: 78vw;
+    border-radius: 20px;
   }
-  .paid-events-empty {
-    padding: 40px 20px;
-  }
+  .paid-events-empty { padding: 40px 20px; border-radius: 20px; }
 }
-/* ============================================================
-   SMALL PHONES
-============================================================ */
+
 @media (max-width: 420px) {
-  .paid-events {
-    padding: 48px 16px;
-  }
-  .paid-section-header {
-    margin-bottom: 22px;
-  }
-  .paid-header-content h2 {
-    font-size: 1.6rem;
-  }
-  .paid-header-content p {
-    font-size: 0.9rem;
-  }
-  .paid-badge {
-    font-size: 12px;
-    padding: 6px 10px;
-  }
-  .paid-see-all {
-    font-size: 13px;
-  }
+  .paid-events { padding: 48px 16px; }
+  .paid-section-header { margin-bottom: 22px; }
+  .paid-header-content h2 { font-size: 1.6rem; }
+  .paid-header-content p { font-size: 0.9rem; }
+  .paid-badge { font-size: 12px; padding: 6px 12px; }
   .paid-events-slider {
     margin: 0 -16px;
     padding-left: 16px;
@@ -277,5 +236,6 @@
     width: 82vw;
     max-width: 275px;
     flex-basis: 82vw;
+    border-radius: 20px;
   }
 }

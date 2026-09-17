@@ -84,7 +84,7 @@ function Navbar() {
           )}
 
           <span className="logo-text">
-            {platformName}
+            Event<span style={{color: "#FF6B00"}}>Waa</span>
           </span>
         </Link>
 
@@ -315,23 +315,17 @@ function Navbar() {
               />
             )}
 
-            <span>
-              {platformName}
-            </span>
+            <span style={{fontWeight: 800, letterSpacing: '-0.5px'}}>
+            <span style={{color: '#111'}}>Event</span><span
+            style={{color: '#FF6B00'}}>Waa</span>
+          </span>
 
           </Link>
 
 
-          <button
-            type="button"
-            className="mobile-close-button"
-            onClick={closeMenu}
-            aria-label="Close menu"
-          >
-            <X
-              size={22}
-              strokeWidth={2}
-            />
+          <button type="button" className="mobile-close-button" onClick={closeMenu} 
+          aria-label="Close menu">
+            <span style={{fontSize:'24px', lineHeight:'1', fontWeight:700}}>X</span>
           </button>
 
         </div>

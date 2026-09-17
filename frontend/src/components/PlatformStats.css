@@ -1,19 +1,12 @@
 /* =========================================================
-   EVENTWAA — PLATFORM STATS
-   MODERN / PREMIUM / NEUTRAL
+   EVENTWAA — PLATFORM STATS - Round + Orange Brand
 ========================================================= */
-
 .platform-stats {
   width: 100%;
   padding: 90px 20px;
   background: #ffffff;
   box-sizing: border-box;
 }
-
-
-/* =========================================================
-   HEADER
-========================================================= */
 
 .stats-header {
   max-width: 700px;
@@ -23,415 +16,167 @@
 
 .stats-header h2 {
   margin: 0 0 14px;
-
   font-size: 2.4rem;
   line-height: 1.15;
-
-  color: #0a0a0a;
-
-  font-weight: 750;
+  color: #111827;
+  font-weight: 800;
   letter-spacing: -0.8px;
 }
 
 .stats-header p {
   margin: 0;
-
-  color: #060606;
-
+  color: #6B7280;
   font-size: 1rem;
   line-height: 1.7;
-
-  font-weight: 400;
 }
-
-
-/* =========================================================
-   STATS GRID
-========================================================= */
 
 .stats-grid {
   width: 100%;
   max-width: 1200px;
-
   margin: 0 auto;
-
   display: grid;
-
   grid-template-columns: repeat(4, 1fr);
-
   gap: 20px;
 }
 
-
-/* =========================================================
-   STAT CARD
-========================================================= */
-
+/* CARD - ROUND 24px */
 .stat-card {
   position: relative;
-
   background: #ffffff;
-
   padding: 32px 24px;
-
-  border-radius: 16px;
-
+  border-radius: 24px;
   text-align: center;
+  border: 1.5px solid #F3F4F6;
+  box-shadow: 0 4px 16px rgba(17,24,39,0.04);
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
 
-  border: 1px solid #e8e8e5;
-
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.035);
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    border-color 0.25s ease;
+.stat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(300px at 50% 0%, rgba(255,107,0,0.06), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
-
-  border-color: #dcdcd8;
-
-  box-shadow:
-    0 12px 30px rgba(0, 0, 0, 0.075);
+  transform: translateY(-6px);
+  border-color: #FFD7B8;
+  box-shadow: 0 20px 40px rgba(17,24,39,0.07), 0 8px 16px rgba(255,107,0,0.06);
 }
 
-
-/* =========================================================
-   STAT ICON
-========================================================= */
+.stat-card:hover::before { opacity: 1; }
 
 .stat-icon {
-  width: 58px;
-  height: 58px;
-
+  width: 60px;
+  height: 60px;
   margin: 0 auto 20px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  border-radius: 14px;
-
-  background: #f4f4f2;
-
-  color: #b33636;
-
+  border-radius: 16px;
+  background: #FFF1E6;
+  color: #FF6B00;
   font-size: 1.35rem;
-
-  border: 1px solid #e9e9e6;
-
-  transition:
-    background 0.25s ease,
-    transform 0.25s ease;
+  border: 1px solid #FFD7B8;
+  transition: all 0.25s ease;
 }
 
 .stat-card:hover .stat-icon {
-  background: #ededeb;
-
-  transform: scale(1.04);
+  background: #FF6B00;
+  color: white;
+  transform: scale(1.08) rotate(-3deg);
 }
 
-
-/* =========================================================
-   STAT NUMBER
-========================================================= */
-
 .stat-card h3 {
+  position: relative;
   margin: 0 0 8px;
-
-  color: #21201f;
-
+  color: #111827;
   font-size: 2.35rem;
-
   line-height: 1;
-
   font-weight: 800;
-
   letter-spacing: -1px;
 }
 
-
-/* =========================================================
-   STAT LABEL
-========================================================= */
-
 .stat-card p {
+  position: relative;
   margin: 0;
-
-  color: #6b6b6b;
-
+  color: #6B7280;
   font-size: 0.9rem;
-
   line-height: 1.5;
-
   font-weight: 500;
 }
 
-
-/* =========================================================
-   TABLET
-========================================================= */
-
 @media (max-width: 900px) {
-
-  .platform-stats {
-    padding: 75px 20px;
-  }
-
-
-  .stats-header {
-    margin-bottom: 40px;
-  }
-
-
-  .stats-header h2 {
-    font-size: 2.1rem;
-  }
-
-
+  .platform-stats { padding: 75px 20px; }
+  .stats-header { margin-bottom: 40px; }
+  .stats-header h2 { font-size: 2.1rem; }
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
-
     gap: 18px;
   }
-
-
-  .stat-card {
-    padding: 30px 22px;
-  }
-
-
-  .stat-card h3 {
-    font-size: 2.2rem;
-  }
-
+  .stat-card { padding: 30px 22px; border-radius: 20px; }
+  .stat-card h3 { font-size: 2.2rem; }
 }
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
 
 @media (max-width: 600px) {
-
-  .platform-stats {
-    padding: 60px 16px;
-  }
-
-
-  /* -----------------------------------------
-     HEADER
-  ----------------------------------------- */
-
-  .stats-header {
-    max-width: 500px;
-
-    margin-bottom: 32px;
-  }
-
-
+  .platform-stats { padding: 60px 16px; }
+  .stats-header { max-width: 500px; margin-bottom: 32px; }
   .stats-header h2 {
     font-size: 1.85rem;
-
     line-height: 1.2;
-
     letter-spacing: -0.5px;
-
     margin-bottom: 10px;
   }
-
-
-  .stats-header p {
-    font-size: 0.9rem;
-
-    line-height: 1.6;
-  }
-
-
-  /* -----------------------------------------
-     GRID
-  ----------------------------------------- */
-
+  .stats-header p { font-size: 0.9rem; line-height: 1.6; }
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-
     gap: 12px;
   }
-
-
-  /* -----------------------------------------
-     CARD
-  ----------------------------------------- */
-
   .stat-card {
     padding: 24px 12px;
-
-    border-radius: 14px;
-
-    box-shadow:
-      0 3px 12px rgba(0, 0, 0, 0.035);
+    border-radius: 20px;
   }
-
-
-  .stat-card:hover {
-    transform: translateY(-3px);
-  }
-
-
-  /* -----------------------------------------
-     ICON
-  ----------------------------------------- */
-
+  .stat-card:hover { transform: translateY(-3px); }
   .stat-icon {
-    width: 50px;
-    height: 50px;
-
+    width: 52px;
+    height: 52px;
     margin-bottom: 15px;
-
-    border-radius: 12px;
-
+    border-radius: 14px;
     font-size: 1.15rem;
   }
-
-
-  /* -----------------------------------------
-     NUMBER
-  ----------------------------------------- */
-
-  .stat-card h3 {
-    font-size: 1.8rem;
-
-    letter-spacing: -0.7px;
-
-    margin-bottom: 7px;
-  }
-
-
-  /* -----------------------------------------
-     LABEL
-  ----------------------------------------- */
-
-  .stat-card p {
-    font-size: 0.78rem;
-
-    line-height: 1.4;
-
-    font-weight: 500;
-  }
-
+  .stat-card h3 { font-size: 1.8rem; margin-bottom: 7px; }
+  .stat-card p { font-size: 0.78rem; }
 }
-
-
-/* =========================================================
-   SMALL PHONES
-========================================================= */
 
 @media (max-width: 380px) {
-
-  .platform-stats {
-    padding: 50px 14px;
-  }
-
-
-  .stats-header {
-    margin-bottom: 28px;
-  }
-
-
-  .stats-header h2 {
-    font-size: 1.65rem;
-  }
-
-
-  .stats-header p {
-    font-size: 0.86rem;
-  }
-
-
-  .stats-grid {
-    gap: 10px;
-  }
-
-
-  .stat-card {
-    padding: 22px 10px;
-
-    border-radius: 13px;
-  }
-
-
+  .platform-stats { padding: 50px 14px; }
+  .stats-header { margin-bottom: 28px; }
+  .stats-header h2 { font-size: 1.65rem; }
+  .stats-header p { font-size: 0.86rem; }
+  .stats-grid { gap: 10px; }
+  .stat-card { padding: 22px 10px; border-radius: 18px; }
   .stat-icon {
-    width: 46px;
-    height: 46px;
-
+    width: 48px;
+    height: 48px;
     margin-bottom: 13px;
-
-    border-radius: 11px;
-
-    font-size: 1.05rem;
+    border-radius: 12px;
   }
-
-
-  .stat-card h3 {
-    font-size: 1.6rem;
-  }
-
-
-  .stat-card p {
-    font-size: 0.74rem;
-  }
-
+  .stat-card h3 { font-size: 1.6rem; }
+  .stat-card p { font-size: 0.74rem; }
 }
-
-
-/* =========================================================
-   VERY SMALL SCREENS
-========================================================= */
 
 @media (max-width: 330px) {
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-
-  .stat-card {
-    padding: 24px 20px;
-  }
-
-
-  .stat-card h3 {
-    font-size: 1.8rem;
-  }
-
-
-  .stat-card p {
-    font-size: 0.8rem;
-  }
-
+  .stats-grid { grid-template-columns: 1fr; }
+  .stat-card { padding: 24px 20px; border-radius: 20px; }
+  .stat-card h3 { font-size: 1.8rem; }
+  .stat-card p { font-size: 0.8rem; }
 }
 
-
-/* =========================================================
-   ACCESSIBILITY
-========================================================= */
-
 @media (prefers-reduced-motion: reduce) {
-
-  .stat-card,
-  .stat-icon {
-    transition: none;
-  }
-
-  .stat-card:hover {
-    transform: none;
-  }
-
-  .stat-card:hover .stat-icon {
-    transform: none;
-  }
-
+  .stat-card, .stat-icon { transition: none; }
+  .stat-card:hover { transform: none; }
+  .stat-card:hover .stat-icon { transform: none; }
 }

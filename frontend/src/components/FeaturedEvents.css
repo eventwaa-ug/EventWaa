@@ -1,666 +1,267 @@
 /* ============================================================
-   FEATURED EVENTS
-   ============================================================ */
-
+   FEATURED EVENTS - Round + Orange Brand
+============================================================ */
 .featured-events {
-
     width: 100%;
-
     box-sizing: border-box;
-
     padding: 72px 7% 78px;
-
     background: #ffffff;
-
 }
 
-
-/* ============================================================
-   SECTION HEADER ROW
-   ============================================================ */
-
+/* HEADER ROW */
 .section-header-row {
-
     width: 100%;
-
     max-width: 1200px;
-
     margin: 0 auto 38px;
-
     display: flex;
-
     align-items: flex-end;
-
     justify-content: space-between;
-
     gap: 30px;
-
 }
-
-
-/* ============================================================
-   SECTION HEADER
-   ============================================================ */
 
 .section-header {
-
     display: flex;
-
     flex-direction: column;
-
     align-items: flex-start;
-
     gap: 9px;
-
 }
 
-
-/* ============================================================
-   FEATURED BADGE
-   ============================================================ */
-
+/* BADGE - ORANGE */
 .featured-badge {
-
     display: inline-flex;
-
     align-items: center;
-
     gap: 7px;
-
     width: fit-content;
-
-    padding: 7px 12px;
-
+    padding: 7px 14px;
     border-radius: 999px;
-
-    background: #fff8df;
-
-    color: #9a6700;
-
-    border: 1px solid #f4e5ad;
-
+    background: #FFF1E6;
+    color: #FF6B00;
+    border: 1px solid #FFD7B8;
     font-size: 13px;
-
-    font-weight: 700;
-
+    font-weight: 800;
     line-height: 1;
-
 }
-
-
-/* ============================================================
-   HEADING
-   ============================================================ */
 
 .section-header h2 {
-
     margin: 0;
-
-    color: #1f2937;
-
+    color: #111827;
     font-size: 2.15rem;
-
     line-height: 1.18;
-
-    font-weight: 750;
-
-    letter-spacing: -0.6px;
-
+    font-weight: 800;
+    letter-spacing: -0.7px;
 }
-
 
 .section-header p {
-
     margin: 0;
-
     max-width: 600px;
-
-    color: #5f6368;
-
+    color: #6B7280;
     font-size: 1rem;
-
     line-height: 1.6;
-
-    font-weight: 400;
-
 }
 
-
-/* ============================================================
-   SEE ALL
-   ============================================================ */
-
+/* SEE ALL - ORANGE */
 .see-all-link {
-
     display: inline-flex;
-
     align-items: center;
-
     gap: 7px;
-
     flex-shrink: 0;
-
-    color: #252525;
-
+    color: #111827;
     text-decoration: none;
-
     font-size: 15px;
-
-    font-weight: 650;
-
-    padding: 9px 2px;
-
-    border-bottom: 1px solid transparent;
-
-    transition:
-        color 0.25s ease,
-        gap 0.25s ease,
-        border-color 0.25s ease;
-
+    font-weight: 700;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: #F3F4F6;
+    border: 1px solid transparent;
+    transition: all 0.25s ease;
 }
-
 
 .see-all-link:hover {
-
-    color: #9a6700;
-
-    gap: 11px;
-
-    border-color: #e8d58e;
-
+    color: white;
+    background: #111827;
+    gap: 10px;
 }
 
-
-/* ============================================================
-   EVENTS GRID
-   ============================================================ */
-
+/* GRID */
 .featured-grid {
-
     width: 100%;
-
     max-width: 1200px;
-
     margin: 0 auto;
-
     display: grid;
-
-    grid-template-columns:
-        repeat(3, minmax(0, 1fr));
-
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 24px;
-
 }
 
-
-/* ============================================================
-   EVENT WRAPPER
-   ============================================================ */
-
+/* EVENT WRAPPER - ROUND */
 .featured-event-item {
-
     min-width: 0;
-
-    border-radius: 18px;
-
-    transition:
-        transform 0.3s ease;
-
+    border-radius: 24px; /* ROUND */
+    overflow: hidden;
+    background: white;
+    border: 1.5px solid #F3F4F6;
+    transition: all 0.3s ease;
 }
-
 
 .featured-event-item:hover {
-
-    transform: translateY(-4px);
-
+    transform: translateY(-6px);
+    border-color: #FFD7B8;
+    box-shadow: 0 20px 40px rgba(17,24,39,0.08), 0 8px 16px rgba(255,107,0,0.08);
 }
 
+/* FORCE INNER EVENT CARD TO BE ROUND */
+.featured-event-item > * {
+    border-radius: 24px !important;
+    overflow: hidden;
+}
 
-/* ============================================================
-   EMPTY STATE
-   ============================================================ */
+.featured-event-item img {
+    border-radius: 24px 24px 0 0 !important;
+}
 
+/* EMPTY STATE - ROUND */
 .no-featured-events {
-
     grid-column: 1 / -1;
-
     width: 100%;
-
     box-sizing: border-box;
-
     text-align: center;
-
     padding: 54px 28px;
-
-    border: 1px solid #e8e8e8;
-
-    border-radius: 18px;
-
-    background:
-        linear-gradient(
-            180deg,
-            #ffffff 0%,
-            #fafafa 100%
-        );
-
-    box-shadow:
-        0 8px 28px rgba(0, 0, 0, 0.055);
-
+    border: 1.5px dashed #E5E7EB;
+    border-radius: 24px; /* ROUND */
+    background: #FFFBF5;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.04);
 }
-
-
-/* ============================================================
-   EMPTY ICON
-   ============================================================ */
 
 .no-featured-icon {
-
     width: 62px;
-
     height: 62px;
-
     margin: 0 auto 17px;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
-    border-radius: 50%;
-
-    background: #f7f3e7;
-
-    color: #8b6f28;
-
+    border-radius: 999px;
+    background: #FFF1E6;
+    color: #FF6B00;
 }
-
-
-/* ============================================================
-   EMPTY TITLE
-   ============================================================ */
 
 .no-featured-events h3 {
-
     margin: 0 0 9px;
-
-    color: #252525;
-
+    color: #111827;
     font-size: 1.25rem;
-
-    line-height: 1.35;
-
     font-weight: 700;
-
 }
-
-
-/* ============================================================
-   EMPTY TEXT
-   ============================================================ */
 
 .no-featured-events p {
-
     max-width: 500px;
-
     margin: 0 auto 23px;
-
-    color: #626262;
-
+    color: #6B7280;
     font-size: 0.96rem;
-
     line-height: 1.6;
-
 }
-
-
-/* ============================================================
-   BROWSE BUTTON
-   ============================================================ */
 
 .browse-events-btn {
-
     display: inline-flex;
-
     align-items: center;
-
     justify-content: center;
-
     gap: 8px;
-
     min-height: 44px;
-
-    padding: 0 18px;
-
+    padding: 0 20px;
     box-sizing: border-box;
-
-    border-radius: 10px;
-
-    background: #222222;
-
+    border-radius: 999px; /* PILL BUTTON */
+    background: #FF6B00;
     color: #ffffff;
-
     text-decoration: none;
-
     font-size: 14px;
-
-    font-weight: 700;
-
-    transition:
-        background 0.25s ease,
-        transform 0.25s ease,
-        box-shadow 0.25s ease;
-
+    font-weight: 800;
+    transition: all 0.25s ease;
 }
-
 
 .browse-events-btn:hover {
-
-    background: #000000;
-
+    background: #E65E00;
     transform: translateY(-2px);
-
-    box-shadow:
-        0 8px 20px rgba(0, 0, 0, 0.16);
-
+    box-shadow: 0 8px 20px rgba(255,107,0,0.3);
 }
 
-
-/* ============================================================
-   TABLET
-   ============================================================ */
-
+/* TABLET */
 @media (max-width: 1024px) {
-
-    .featured-events {
-
-        padding: 65px 5% 70px;
-
-    }
-
-
+    .featured-events { padding: 65px 5% 70px; }
     .featured-grid {
-
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-
-        gap: 21px;
-
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
     }
-
-
-    .section-header-row {
-
-        margin-bottom: 32px;
-
-    }
-
-
-    .section-header h2 {
-
-        font-size: 2rem;
-
-    }
-
+    .section-header-row { margin-bottom: 32px; }
+    .section-header h2 { font-size: 2rem; }
 }
 
-
-/* ============================================================
-   MOBILE
-   ============================================================ */
-
+/* MOBILE */
 @media (max-width: 768px) {
-
-    .featured-events {
-
-        padding: 55px 20px 60px;
-
-    }
-
-
+    .featured-events { padding: 55px 20px 60px; }
     .section-header-row {
-
         align-items: flex-start;
-
         flex-direction: column;
-
         gap: 17px;
-
         margin-bottom: 28px;
-
     }
-
-
-    .section-header {
-
-        width: 100%;
-
-    }
-
-
-    .section-header h2 {
-
-        font-size: 1.8rem;
-
-        letter-spacing: -0.4px;
-
-    }
-
-
-    .section-header p {
-
-        font-size: 0.95rem;
-
-        line-height: 1.55;
-
-    }
-
-
-    .see-all-link {
-
-        font-size: 14px;
-
-    }
-
-
-    /* --------------------------------------------------------
-       MOBILE EVENT SCROLLER
-       -------------------------------------------------------- */
+    .section-header { width: 100%; }
+    .section-header h2 { font-size: 1.8rem; }
+    .section-header p { font-size: 0.95rem; }
 
     .featured-grid {
-
         display: flex;
-
         width: auto;
-
         margin-left: -20px;
-
         margin-right: -20px;
-
         padding-left: 20px;
-
         padding-right: 20px;
-
         gap: 16px;
-
         overflow-x: auto;
-
         overflow-y: hidden;
-
         scroll-snap-type: x mandatory;
-
+        padding-bottom: 12px;
     }
-
-
-    .featured-grid::-webkit-scrollbar {
-
-        height: 0;
-
-    }
-
+    .featured-grid::-webkit-scrollbar { height: 0; }
 
     .featured-event-item {
-
         flex: 0 0 82%;
-
         max-width: 360px;
-
         scroll-snap-align: start;
-
+        border-radius: 20px;
     }
-
-
-    .featured-event-item:hover {
-
-        transform: none;
-
-    }
-
+    .featured-event-item:hover { transform: none; }
 
     .no-featured-events {
-
         flex: 0 0 82%;
-
         padding: 42px 20px;
-
         scroll-snap-align: start;
-
+        border-radius: 20px;
     }
-
 }
-
-
-/* ============================================================
-   SMALL PHONES
-   ============================================================ */
 
 @media (max-width: 480px) {
-
-    .featured-events {
-
-        padding: 48px 16px 55px;
-
-    }
-
-
-    .section-header-row {
-
-        gap: 15px;
-
-        margin-bottom: 25px;
-
-    }
-
-
-    .featured-badge {
-
-        font-size: 12px;
-
-        padding: 7px 11px;
-
-    }
-
-
-    .section-header h2 {
-
-        font-size: 1.6rem;
-
-    }
-
-
-    .section-header p {
-
-        font-size: 0.92rem;
-
-    }
-
+    .featured-events { padding: 48px 16px 55px; }
+    .section-header-row { gap: 15px; margin-bottom: 25px; }
+    .featured-badge { font-size: 12px; padding: 6px 12px; }
+    .section-header h2 { font-size: 1.6rem; }
+    .section-header p { font-size: 0.92rem; }
 
     .featured-grid {
-
         margin-left: -16px;
-
         margin-right: -16px;
-
         padding-left: 16px;
-
         padding-right: 16px;
-
         gap: 14px;
-
     }
-
-
-    .featured-event-item {
-
-        flex: 0 0 88%;
-
-    }
-
-
-    .no-featured-events {
-
-        flex-basis: 88%;
-
-        padding: 38px 18px;
-
-    }
-
-
-    .no-featured-events h3 {
-
-        font-size: 1.15rem;
-
-    }
-
-
-    .no-featured-events p {
-
-        font-size: 0.9rem;
-
-    }
-
+    .featured-event-item { flex: 0 0 88%; border-radius: 20px; }
+    .no-featured-events { flex-basis: 88%; padding: 38px 18px; }
 }
 
-
-/* ============================================================
-   VERY SMALL PHONES
-   ============================================================ */
-
 @media (max-width: 360px) {
-
-    .featured-events {
-
-        padding-left: 14px;
-
-        padding-right: 14px;
-
-    }
-
-
+    .featured-events { padding-left: 14px; padding-right: 14px; }
     .featured-grid {
-
         margin-left: -14px;
-
         margin-right: -14px;
-
         padding-left: 14px;
-
         padding-right: 14px;
-
     }
-
-
-    .section-header h2 {
-
-        font-size: 1.5rem;
-
-    }
-
-
-    .featured-event-item {
-
-        flex-basis: 91%;
-
-    }
-
+    .section-header h2 { font-size: 1.5rem; }
+    .featured-event-item { flex-basis: 91%; }
 }

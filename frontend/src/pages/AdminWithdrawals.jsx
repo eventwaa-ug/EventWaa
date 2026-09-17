@@ -1,11 +1,23 @@
 import { useEffect, useState } from "react";
 import "./AdminWithdrawals.css";
 import { adminFetch } from "../utils/adminAPI";
-    /* =========================================================
-       BACKEND
-    ========================================================= */
+import { 
+  FiRefreshCw, 
+  FiClock, 
+  FiAlertTriangle, 
+  FiCheckCircle,
+  FiDollarSign
+} from "react-icons/fi";
+import { 
+  MdOutlinePayments,
+  MdPayment
+} from "react-icons/md";
 
-    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+/* =========================================================
+   BACKEND
+========================================================= */
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+
 function AdminWithdrawals() {
     const [withdrawals, setWithdrawals] = useState([]);
     const [filter, setFilter] = useState("all");
@@ -17,51 +29,38 @@ function AdminWithdrawals() {
     // ============================================================
 
     const loadWithdrawals = async () => {
-
         try {
-
             const adminToken = localStorage.getItem(
                 "eventwaa_admin_token"
             );
 
-
             if (!adminToken) {
-
                 throw new Error(
                     "Admin session not found."
                 );
-
             }
-
 
             const response = await fetch(
             `${BACKEND_URL}/admin/host-withdrawals`,
                 {
                     method: "GET",
-
                     headers: {
                         "Authorization":
                             `Bearer ${adminToken}`,
-
                         "Content-Type":
                             "application/json"
                     }
                 }
             );
 
-
             const data = await response.json();
 
-
             if (!response.ok) {
-
                 throw new Error(
                     data.message ||
                     "Unable to load withdrawals."
                 );
-
             }
-
 
             setWithdrawals(
                 Array.isArray(data)
@@ -69,20 +68,14 @@ function AdminWithdrawals() {
                     : []
             );
 
-
         } catch (error) {
-
             console.error(
                 "LOAD WITHDRAWALS ERROR:",
                 error
             );
-
         } finally {
-
             setLoading(false);
-
         }
-
     };
 
     useEffect(() => {
@@ -130,17 +123,14 @@ function AdminWithdrawals() {
             await loadWithdrawals();
 
         } catch (error) {
-
             console.error(
                 "APPROVE WITHDRAWAL ERROR:",
                 error
             );
-
             alert(
                 error.message ||
                 "Unable to approve withdrawal."
             );
-
         } finally {
             setActionId(null);
         }
@@ -154,94 +144,66 @@ function AdminWithdrawals() {
         hostId,
         withdrawalId
     ) => {
-
         const actionKey =
             `${hostId}-${withdrawalId}`;
 
-
         try {
-
             setActionId(actionKey);
-
 
             const adminToken = localStorage.getItem(
                 "eventwaa_admin_token"
             );
 
-
             if (!adminToken) {
-
                 throw new Error(
                     "Admin session not found."
                 );
-
             }
 
-
             const response = await fetch(
-
                 `${BACKEND_URL}/admin/host-withdrawals/transfer-status/${hostId}/${withdrawalId}`,
-
                 {
                     method: "GET",
-
                     headers: {
                         "Authorization":
                             `Bearer ${adminToken}`,
-
                         "Content-Type":
                             "application/json"
                     }
                 }
-
             );
 
-
             const data = await response.json();
-
 
             if (
                 !response.ok ||
                 !data.success
             ) {
-
                 throw new Error(
                     data.message ||
                     "Unable to check withdrawal status."
                 );
-
             }
-
 
             console.log(
                 "Withdrawal status:",
                 data.status
             );
 
-
             await loadWithdrawals();
 
-
         } catch (error) {
-
             console.error(
                 "CHECK WITHDRAWAL STATUS ERROR:",
                 error
             );
-
-
             alert(
                 error.message ||
                 "Unable to check withdrawal status."
             );
-
-
         } finally {
-
             setActionId(null);
-
         }
-
     };
 
     // ============================================================
@@ -251,13 +213,11 @@ function AdminWithdrawals() {
     const filteredWithdrawals =
         withdrawals.filter(
             (withdrawal) => {
-
                 if (
                     filter === "all"
                 ) {
                     return true;
                 }
-
                 return (
                     String(
                         withdrawal.status ||
@@ -276,26 +236,20 @@ function AdminWithdrawals() {
     const getStatusLabel = (
         status
     ) => {
-
         const normalized =
             String(
                 status || ""
             ).toLowerCase();
 
         switch (normalized) {
-
             case "pending":
                 return "Pending";
-
             case "processing":
                 return "Processing";
-
             case "completed":
                 return "Completed";
-
             case "failed":
                 return "Failed";
-
             default:
                 return status || "Unknown";
         }
@@ -306,14 +260,11 @@ function AdminWithdrawals() {
     // ============================================================
 
     if (loading) {
-
         return (
             <div className="admin-withdrawals-page">
-
                 <div className="withdrawals-loading">
                     Loading withdrawal requests...
                 </div>
-
             </div>
         );
     }
@@ -323,25 +274,18 @@ function AdminWithdrawals() {
     // ============================================================
 
     return (
-
         <div className="admin-withdrawals-page">
 
-            {/* ==================================================
-                HEADER
-            ================================================== */}
-
+            {/* HEADER */}
             <div className="withdrawals-page-header">
-
                 <div>
-
                     <h1>
-                        💰 Host Withdrawals
+                        <MdOutlinePayments style={{ verticalAlign: 'middle', marginRight: '8px' }} />
+                        Host Withdrawals
                     </h1>
-
                     <p>
                         Review and manage host payout requests.
                     </p>
-
                 </div>
 
                 <button
@@ -349,18 +293,13 @@ function AdminWithdrawals() {
                     onClick={loadWithdrawals}
                     disabled={actionId !== null}
                 >
-                    ↻ Refresh
+                    <FiRefreshCw style={{ marginRight: '6px' }} />
+                    Refresh
                 </button>
-
             </div>
 
-
-            {/* ==================================================
-                FILTERS
-            ================================================== */}
-
+            {/* FILTERS */}
             <div className="withdrawal-filters">
-
                 <button
                     className={
                         filter === "all"
@@ -376,7 +315,6 @@ function AdminWithdrawals() {
                         {withdrawals.length}
                     </span>
                 </button>
-
 
                 <button
                     className={
@@ -400,7 +338,6 @@ function AdminWithdrawals() {
                     </span>
                 </button>
 
-
                 <button
                     className={
                         filter === "processing"
@@ -422,7 +359,6 @@ function AdminWithdrawals() {
                         }
                     </span>
                 </button>
-
 
                 <button
                     className={
@@ -446,7 +382,6 @@ function AdminWithdrawals() {
                     </span>
                 </button>
 
-
                 <button
                     className={
                         filter === "failed"
@@ -468,39 +403,25 @@ function AdminWithdrawals() {
                         }
                     </span>
                 </button>
-
             </div>
 
-
-            {/* ==================================================
-                EMPTY STATE
-            ================================================== */}
-
+            {/* EMPTY STATE */}
             {filteredWithdrawals.length === 0 ? (
-
                 <div className="withdrawals-empty">
-
                     <div className="empty-icon">
-                        💸
+                        <FiDollarSign size={36} />
                     </div>
-
                     <h2>
                         No withdrawal requests
                     </h2>
-
                     <p>
                         There are no withdrawals in this category.
                     </p>
-
                 </div>
-
             ) : (
-
                 <div className="withdrawals-list">
-
                     {filteredWithdrawals.map(
                         (withdrawal) => {
-
                             const status =
                                 String(
                                     withdrawal.status ||
@@ -514,20 +435,12 @@ function AdminWithdrawals() {
                                 actionId === actionKey;
 
                             return (
-
                                 <div
                                     className="withdrawal-card"
                                     key={actionKey}
                                 >
-
-                                    {/* ============================
-                                        HEADER
-                                    ============================ */}
-
                                     <div className="withdrawal-header">
-
                                         <div className="host-info">
-
                                             <div className="host-avatar">
                                                 {
                                                     (
@@ -538,27 +451,21 @@ function AdminWithdrawals() {
                                                         .toUpperCase()
                                                 }
                                             </div>
-
                                             <div>
-
                                                 <h3>
                                                     {
                                                         withdrawal.hostName ||
                                                         "Unknown Host"
                                                     }
                                                 </h3>
-
                                                 <p>
                                                     {
                                                         withdrawal.hostEmail ||
                                                         ""
                                                     }
                                                 </p>
-
                                             </div>
-
                                         </div>
-
 
                                         <span
                                             className={
@@ -567,29 +474,19 @@ function AdminWithdrawals() {
                                         >
                                             <span className="status-dot">
                                             </span>
-
                                             {
                                                 getStatusLabel(
                                                     status
                                                 )
                                             }
                                         </span>
-
                                     </div>
 
-
-                                    {/* ============================
-                                        DETAILS
-                                    ============================ */}
-
                                     <div className="withdrawal-details">
-
                                         <div className="detail-item">
-
                                             <span>
                                                 Amount
                                             </span>
-
                                             <strong className="withdrawal-amount">
                                                 UGX{" "}
                                                 {Number(
@@ -597,124 +494,81 @@ function AdminWithdrawals() {
                                                     0
                                                 ).toLocaleString()}
                                             </strong>
-
                                         </div>
 
-
                                         <div className="detail-item">
-
                                             <span>
                                                 Method
                                             </span>
-
                                             <strong>
                                                 {
                                                     withdrawal.method ||
                                                     "—"
                                                 }
                                             </strong>
-
                                         </div>
 
-
                                         <div className="detail-item">
-
                                             <span>
                                                 Account
                                             </span>
-
                                             <strong>
                                                 {
                                                     withdrawal.account ||
                                                     "—"
                                                 }
                                             </strong>
-
                                         </div>
 
-
                                         <div className="detail-item">
-
                                             <span>
                                                 Requested
                                             </span>
-
                                             <strong>
                                                 {
                                                     withdrawal.date ||
                                                     "—"
                                                 }
                                             </strong>
-
                                         </div>
-
                                     </div>
 
-
-                                    {/* ============================
-                                        PROCESSING INFORMATION
-                                    ============================ */}
-
                                     {status === "processing" && (
-
                                         <div className="processing-box">
-
                                             <div className="processing-icon">
-                                                ⏳
+                                                <FiClock />
                                             </div>
-
                                             <div>
-
                                                 <strong>
                                                     Payment is processing
                                                 </strong>
-
                                                 <p>
                                                     Flutterwave is processing
                                                     this payout. You can check
                                                     the transfer status if the
                                                     webhook has not arrived.
                                                 </p>
-
                                             </div>
-
                                         </div>
-
                                     )}
 
-
-                                    {/* ============================
-                                        FAILED INFORMATION
-                                    ============================ */}
-
                                     {status === "failed" && (
-
                                         <div className="failed-box">
-
                                             <strong>
-                                                ⚠️ Payment failed
+                                                <FiAlertTriangle style={{ verticalAlign: 'middle', marginRight: '6px' }} />
+                                                Payment failed
                                             </strong>
-
                                             <p>
                                                 The payout could not be
                                                 completed. The host's funds
                                                 should have been returned
                                                 to their available balance.
                                             </p>
-
                                         </div>
-
                                     )}
 
-
-                                    {/* ============================
-                                        ACTIONS
-                                    ============================ */}
-
                                     <div className="withdrawal-actions">
-
                                         {status === "pending" && (
-
                                             <button
                                                 className="approve-btn"
                                                 disabled={
@@ -727,19 +581,14 @@ function AdminWithdrawals() {
                                                     )
                                                 }
                                             >
-
                                                 {isLoading
                                                     ? "Starting Payment..."
                                                     : "Approve Payment"
                                                 }
-
                                             </button>
-
                                         )}
 
-
                                         {status === "processing" && (
-
                                             <button
                                                 className="check-status-btn"
                                                 disabled={
@@ -752,46 +601,38 @@ function AdminWithdrawals() {
                                                     )
                                                 }
                                             >
-
                                                 {isLoading
                                                     ? "Checking..."
-                                                    : "↻ Check Payment Status"
+                                                    : (
+                                                        <>
+                                                            <FiRefreshCw style={{ marginRight: '6px' }} />
+                                                            Check Payment Status
+                                                        </>
+                                                    )
                                                 }
-
                                             </button>
-
                                         )}
-
 
                                         {status === "completed" && (
-
                                             <div className="completed-message">
-                                                ✓ Payment completed
+                                                <FiCheckCircle style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                                                Payment completed
                                             </div>
-
                                         )}
-
 
                                         {status === "failed" && (
-
                                             <div className="failed-message">
+                                                <FiAlertTriangle style={{ marginRight: '6px', verticalAlign: 'middle' }} />
                                                 Payment failed
                                             </div>
-
                                         )}
-
                                     </div>
-
                                 </div>
-
                             );
                         }
                     )}
-
                 </div>
-
             )}
-
         </div>
     );
 }

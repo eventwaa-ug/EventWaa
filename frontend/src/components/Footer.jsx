@@ -25,8 +25,8 @@ function Footer() {
               />
             )}
             <span className="footer-brand-name">
-              {platformName}
-            </span>
+            <span className="event-part">Event</span><span className="waa-part">Waa</span>
+          </span>
           </Link>
           <p>
             Discover, create, and manage events

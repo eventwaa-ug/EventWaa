@@ -54,6 +54,34 @@ CORS(
     allow_headers=["Content-Type", "Authorization"]
 )
 
+# ============================================================
+# CORS RESPONSE HEADERS
+# ============================================================
+
+@app.after_request
+def add_cors_headers(response):
+
+    origin = request.headers.get("Origin")
+
+    allowed_origins = {
+        "https://event-waa-e7jm.vercel.app",
+        "https://event-waa-zhnd.vercel.app",
+        "https://event-waa-zhnd-git-main-event-waa.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000",
+    }
+
+    if origin in allowed_origins:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Vary"] = "Origin"
+        response.headers["Access-Control-Allow-Methods"] = (
+            "GET, POST, PUT, DELETE, OPTIONS"
+        )
+        response.headers["Access-Control-Allow-Headers"] = (
+            "Content-Type, Authorization"
+        )
+
+    return response
 
 # ============================================================
 # EMAIL CONFIGURATION
@@ -13664,59 +13692,6 @@ def hash_otp(otp):
 def generate_reset_token():
     return secrets.token_urlsafe(32)
 
-# ============================================================
-# MAINTENANCE MODE
-# ============================================================
-
-@app.before_request
-def check_maintenance_mode():
-    # ---------------------------------------------------------
-    # ALWAYS ALLOW CORS PREFLIGHT
-    # ---------------------------------------------------------
-    if request.method == "OPTIONS":
-        return None
-    # ---------------------------------------------------------
-    # ROUTES THAT MUST WORK DURING MAINTENANCE
-    # ---------------------------------------------------------
-    allowed_routes = {
-        "/",
-        "/login",
-        "/google-login",
-        "/register",
-        # Admin settings
-        "/admin/settings",
-        # Admin data
-        "/events",
-        "/users",
-        # Host applications
-        "/host-applications",
-    }
-    # ---------------------------------------------------------
-    # ADMIN ROUTES
-    #
-    # Admin must ALWAYS be able to access the dashboard
-    # and turn maintenance mode OFF.
-    # ---------------------------------------------------------
-    if request.path.startswith("/admin"):
-        return None
-    # ---------------------------------------------------------
-    # ALLOW SPECIFIC API ROUTES
-    # ---------------------------------------------------------
-    if request.path in allowed_routes:
-        return None
-    # ---------------------------------------------------------
-    # CHECK MAINTENANCE MODE
-    # ---------------------------------------------------------
-    settings = load_admin_settings()
-    if settings.get("maintenanceMode", False):
-        return jsonify({
-            "success": False,
-            "maintenance": True,
-            "message":
-                "EventWaa is currently under maintenance. "
-                "Please try again later."
-        }), 503
-    return None
 
 def save_admin_settings(settings):
 
