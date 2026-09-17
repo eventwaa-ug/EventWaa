@@ -54,7 +54,7 @@
     z-index: 5;
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
-};
+}
 
 .event-type.free {
     background: #ECFDF5;
