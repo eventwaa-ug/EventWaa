@@ -101,59 +101,39 @@
     text-shadow: 0 2px 12px rgba(0,0,0,0.35);
 }
 
+/* keep everything same, just replace bottom part */
+
 .hero-button {
-    width: 100%;
-    max-width: 420px;
+    width: auto;
     display: flex;
-    align-items: center;
-    justify-content: center;
     gap: 12px;
-    flex-wrap: wrap;
 }
 
 .hero .primary-btn,
 .hero .secondary-btn {
     min-height: 52px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    box-sizing: border-box;
-    padding: 0 25px;
-    border-radius: 10px;
-    font-family: inherit;
+    padding: 0 28px;
+    border-radius: 999px; /* <-- fix */
     font-size: 15px;
-    line-height: 1;
-    font-weight: 750;
-    cursor: pointer;
-    transition: transform 0.22s ease, background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, color 0.22s ease;
+    font-weight: 800;
 }
 
-/* PRIMARY - NOW ORANGE CTA */
 .hero .primary-btn {
-    border: 1px solid #FF6B00;
+    border: 1.5px solid #FF6B00;
     background: #FF6B00;
-    color: #ffffff;
-    box-shadow: 0 8px 25px rgba(255,107,0,0.35);
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(255,107,0,0.28);
 }
-.hero .primary-btn:hover {
-    background: #E55F00;
-    border-color: #E55F00;
-    transform: translateY(-3px);
-    box-shadow: 0 13px 30px rgba(255,107,0,0.45);
-}
-.hero .primary-btn:active { transform: translateY(-1px); }
 
 .hero .secondary-btn {
-    border: 1px solid rgba(255,255,255,0.8);
-    background: rgba(0,0,0,0.18);
-    color: #ffffff;
+    border: 1.5px solid rgba(255,255,255,0.7);
+    background: transparent;
+    color: #fff;
 }
 .hero .secondary-btn:hover {
-    background: rgba(255,255,255,0.14);
-    border-color: #ffffff;
-    transform: translateY(-3px);
-    box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+    background: #fff;
+    color: #111827;
+    border-color: #fff;
 }
 .hero .secondary-btn:active { transform: translateY(-1px); }
 

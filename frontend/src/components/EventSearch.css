@@ -68,8 +68,6 @@
   font-size: 16px !important; /* MUST BE 16px FOR IOS */
   line-height: 1.4;
   font-weight: 500;
-  appearance: none;
-  -webkit-appearance: none;
 }
 
 .search-box input::placeholder {
