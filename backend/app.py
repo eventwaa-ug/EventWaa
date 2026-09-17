@@ -84,6 +84,14 @@ def add_cors_headers(response):
     return response
 
 # ============================================================
+# CORS PREFLIGHT HANDLER
+# ============================================================
+
+@app.route("/<path:path>", methods=["OPTIONS"])
+def handle_options(path):
+    return "", 204
+
+# ============================================================
 # EMAIL CONFIGURATION
 # ============================================================
 
