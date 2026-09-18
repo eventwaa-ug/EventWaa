@@ -1,1055 +1,215 @@
 /* =========================================================
-   SETTINGS PAGE
+   SETTINGS PAGE - ORANGE THEME + REACT-ICONS
 ========================================================= */
-
 .settings-page {
-    width: 100%;
-    max-width: 1050px;
-    margin: 0 auto;
-    padding: 40px 25px 80px;
-    min-height: 100vh;
-    box-sizing: border-box;
+    width: 100%; max-width: 1050px; margin: 0 auto;
+    padding: 40px 25px 80px; min-height: 100vh;
+    box-sizing: border-box; background: #FFFBF7;
 }
 
-
-/* =========================================================
-   TOP HEADER
-========================================================= */
-
-.settings-top {
-    display: flex;
-    align-items: flex-start;
-    gap: 20px;
-    margin-bottom: 28px;
-}
-
+/* TOP HEADER */
+.settings-top { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 28px; }
 .settings-back-button {
-    border: 1px solid #e5e7eb;
-    background: white;
-    color: #374151;
-    padding: 12px 17px;
-    border-radius: 9px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: 0.2s ease;
+    display: inline-flex; align-items: center; gap: 7px;
+    border: 1px solid #FFE5D0; background: white; color: #FF6B00;
+    padding: 12px 17px; border-radius: 9px; font-size: 15px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; transition: 0.2s ease;
 }
+.settings-back-button:hover { background: #FFF4ED; border-color: #FF6B00; transform: translateX(-2px); }
+.settings-back-button svg { stroke-width: 2.5; }
+.settings-eyebrow { display: block; color: #FF6B00; font-size: 13px; font-weight: 800; letter-spacing: 1.2px; margin-bottom: 6px; }
+.settings-top h1 { margin: 0; color: #111827; font-size: 34px; line-height: 1.2; }
+.settings-top p { margin: 8px 0 0; color: #6b7280; font-size: 16px; line-height: 1.55; }
 
-.settings-back-button:hover {
-    background: #f9fafb;
-    transform: translateX(-2px);
-}
-
-.settings-eyebrow {
-    display: block;
-    color: #2563eb;
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 1.2px;
-    margin-bottom: 6px;
-}
-
-.settings-top h1 {
-    margin: 0;
-    color: #111827;
-    font-size: 34px;
-    line-height: 1.2;
-}
-
-.settings-top p {
-    margin: 8px 0 0;
-    color: #6b7280;
-    font-size: 16px;
-    line-height: 1.55;
-}
-
-
-/* =========================================================
-   PROFILE HEADER
-========================================================= */
-
+/* PROFILE HEADER */
 .settings-profile {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 22px;
-    margin-bottom: 25px;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+    display: flex; align-items: center; gap: 20px;
+    background: white; border: 1px solid #FFE5D0; border-radius: 16px;
+    padding: 22px; margin-bottom: 25px; box-shadow: 0 3px 12px rgba(255,107,0,0.05);
 }
+.settings-profile-image-wrapper { width: 86px; height: 86px; flex-shrink: 0; }
+.settings-profile-image { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; border: 3px solid #FFF4ED; }
+.settings-profile-info { min-width: 0; }
+.settings-profile-info h2 { margin: 0 0 6px; color: #111827; font-size: 23px; line-height: 1.3; }
+.settings-profile-info p { margin: 0 0 11px; color: #6b7280; font-size: 15px; line-height: 1.5; overflow-wrap: anywhere; }
+.settings-host-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 20px; background: #FFF4ED; color: #FF6B00; font-size: 13px; font-weight: 800; }
+.settings-host-badge.verified { background: #f0fdf4; color: #15803d; }
 
-.settings-profile-image-wrapper {
-    width: 86px;
-    height: 86px;
-    flex-shrink: 0;
-}
-
-.settings-profile-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-    display: block;
-    border: 3px solid #eff6ff;
-}
-
-.settings-profile-info {
-    min-width: 0;
-}
-
-.settings-profile-info h2 {
-    margin: 0 0 6px;
-    color: #111827;
-    font-size: 23px;
-    line-height: 1.3;
-}
-
-.settings-profile-info p {
-    margin: 0 0 11px;
-    color: #6b7280;
-    font-size: 15px;
-    line-height: 1.5;
-    overflow-wrap: anywhere;
-}
-
-.settings-host-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 11px;
-    border-radius: 20px;
-    background: #f3f4f6;
-    color: #4b5563;
-    font-size: 13px;
-    font-weight: 800;
-}
-
-.settings-host-badge.verified {
-    background: #f0fdf4;
-    color: #15803d;
-}
-
-
-/* =========================================================
-   TABS
-========================================================= */
-
-.settings-tabs {
-    display: flex;
-    gap: 9px;
-    margin-bottom: 25px;
-    overflow-x: auto;
-    padding-bottom: 3px;
-}
-
-.settings-tabs::-webkit-scrollbar {
-    display: none;
-}
-
+/* TABS */
+.settings-tabs { display: flex; gap: 9px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 3px; }
+.settings-tabs::-webkit-scrollbar { display: none; }
 .settings-tab {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 13px 17px;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    background: white;
-    color: #4b5563;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-
-.settings-tab:hover {
-    border-color: #bfdbfe;
-    color: #2563eb;
-}
-
-.settings-tab.active {
-    background: #111827;
-    border-color: #111827;
-    color: white;
-}
-
-.settings-tab-icon {
-    font-size: 17px;
-}
-
-
-/* =========================================================
-   CONTENT
-========================================================= */
-
-.settings-content {
-    width: 100%;
-}
-
-.settings-card {
-    width: 100%;
-    box-sizing: border-box;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 30px;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
-}
-
-
-/* =========================================================
-   CARD HEADING
-========================================================= */
-
-.settings-card-heading {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    margin-bottom: 30px;
-}
-
-.settings-section-icon {
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #eff6ff;
-    border-radius: 11px;
-    font-size: 21px;
-    flex-shrink: 0;
-}
-
-.settings-card-heading h2 {
-    margin: 0;
-    color: #111827;
-    font-size: 23px;
-    line-height: 1.35;
-}
-
-.settings-card-heading p {
-    margin: 6px 0 0;
-    color: #6b7280;
-    font-size: 15px;
-    line-height: 1.55;
-}
-
-
-/* =========================================================
-   FORM FIELDS
-========================================================= */
-
-.settings-fields {
-    width: 100%;
-}
-
-.settings-field {
-    margin-bottom: 21px;
-}
-
-.settings-field label {
-    display: block;
-    margin-bottom: 8px;
-    color: #374151;
-    font-size: 15px;
-    font-weight: 700;
-}
-
-.settings-field input,
-.settings-field textarea,
-.settings-field select {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 14px 15px;
-    border: 1px solid #d1d5db;
-    border-radius: 9px;
-    background: #f9fafb;
-    color: #111827;
-    font-size: 16px;
-    line-height: 1.4;
-    outline: none;
-}
-
-.settings-field textarea {
-    min-height: 110px;
-    resize: vertical;
-}
-
-.settings-field input:focus,
-.settings-field textarea:focus,
-.settings-field select:focus {
-    border-color: #2563eb;
-    background: white;
-}
-
-.settings-field input[readonly] {
-    color: #4b5563;
-    cursor: default;
-}
-
-
-/* =========================================================
-   INFO BOX
-========================================================= */
-
-.settings-info-box {
-    display: flex;
-    align-items: flex-start;
-    gap: 11px;
-    padding: 15px;
-    background: #eff6ff;
-    border-radius: 10px;
-    margin-top: 5px;
-}
-
-.settings-info-box span {
-    flex-shrink: 0;
-    font-size: 16px;
-}
-
-.settings-info-box p {
-    margin: 0;
-    color: #374151;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-
-/* =========================================================
-   HOST SECTION
-========================================================= */
-
-.host-settings-content {
-    width: 100%;
-}
-
-.host-status-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 17px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-}
-
-.verified-host {
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
-}
-
-.pending-host {
-    background: #fffbeb;
-    border: 1px solid #fde68a;
-}
-
-.host-status-icon {
-    width: 38px;
-    height: 38px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: white;
-    font-size: 17px;
-    font-weight: 800;
-}
-
-.host-status-info {
-    min-width: 0;
-}
-
-.host-status-info strong {
-    display: block;
-    color: #111827;
-    font-size: 16px;
-    line-height: 1.4;
-}
-
-.host-status-info p {
-    margin: 6px 0 0;
-    color: #6b7280;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-
-/* =========================================================
-   HOST PROFILE PREVIEW
-========================================================= */
-
-.host-profile-preview {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 18px;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    margin-bottom: 14px;
-}
-
-.host-preview-image {
-    width: 66px;
-    height: 66px;
-    flex-shrink: 0;
-}
-
-.host-preview-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    border-radius: 50%;
-}
-
-.host-preview-info {
-    min-width: 0;
-}
-
-.host-preview-info > span {
-    display: block;
-    color: #2563eb;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    margin-bottom: 5px;
-}
-
-.host-preview-info h3 {
-    margin: 0;
-    color: #111827;
-    font-size: 18px;
-    line-height: 1.4;
-    overflow-wrap: anywhere;
-}
-
-.host-preview-info p {
-    margin: 6px 0 0;
-    color: #6b7280;
-    font-size: 14px;
-    line-height: 1.55;
-}
-
-
-/* =========================================================
-   HOST APPLY
-========================================================= */
-
-.host-apply-card {
-    text-align: center;
-    padding: 32px 22px;
-    background: #f9fafb;
-    border-radius: 13px;
-    border: 1px solid #e5e7eb;
-}
-
-.host-apply-icon {
-    width: 58px;
-    height: 58px;
-    margin: 0 auto 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: #eff6ff;
-    font-size: 26px;
-}
-
-.host-apply-card h3 {
-    margin: 0 0 8px;
-    color: #111827;
-    font-size: 20px;
-}
-
-.host-apply-card p {
-    max-width: 500px;
-    margin: 0 auto 21px;
-    color: #6b7280;
-    font-size: 15px;
-    line-height: 1.6;
-}
-
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-.settings-primary-button,
-.settings-secondary-button,
-.settings-logout-button,
-.delete-account-button {
-    border: none;
-    border-radius: 9px;
-    padding: 13px 17px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-
-.settings-primary-button {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    width: 100%;
-    background: #2563eb;
-    color: white;
-}
-
-.settings-primary-button:hover {
-    background: #1d4ed8;
-}
-
-.settings-primary-button span {
-    font-size: 19px;
-}
-
-.settings-secondary-button {
-    background: white;
-    color: #374151;
-    border: 1px solid #d1d5db;
-}
-
-.settings-secondary-button:hover {
-    background: #f9fafb;
-}
-
-.host-profile-button {
-    margin-bottom: 10px;
-}
-
-
-/* =========================================================
-   NOTIFICATION / PRIVACY OPTIONS
-========================================================= */
-
-.settings-options {
-    width: 100%;
-}
-
-.settings-option {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 22px;
-    padding: 19px 0;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-.settings-option:first-child {
-    padding-top: 0;
-}
-
-.settings-option:last-child {
-    border-bottom: none;
-}
-
-.settings-option > div {
-    min-width: 0;
-}
-
-.settings-option strong {
-    display: block;
-    color: #111827;
-    font-size: 16px;
-    line-height: 1.4;
-}
-
-.settings-option p {
-    margin: 6px 0 0;
-    color: #6b7280;
-    font-size: 14px;
-    line-height: 1.55;
-}
-
-
-/* =========================================================
-   CHECKBOX
-========================================================= */
-
-.settings-option input[type="checkbox"] {
-    width: 21px;
-    height: 21px;
-    flex-shrink: 0;
-    accent-color: #2563eb;
-    cursor: pointer;
-}
-
-
-/* =========================================================
-   SECURITY
-========================================================= */
-
-.security-actions {
-    margin-top: 28px;
-    padding-top: 24px;
-    border-top: 1px solid #f1f5f9;
-}
-
-.security-actions h3 {
-    margin: 0 0 13px;
-    color: #111827;
-    font-size: 17px;
-}
-
-
-/* =========================================================
-   DANGER ZONE
-========================================================= */
-
-.danger-zone {
-    margin-top: 30px;
-    padding: 20px;
-    border-radius: 12px;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-}
-
-.danger-zone h3 {
-    margin: 0 0 6px;
-    color: #991b1b;
-    font-size: 17px;
-}
-
-.danger-zone p {
-    margin: 0 0 14px;
-    color: #7f1d1d;
-    font-size: 14px;
-    line-height: 1.55;
-}
-
-.delete-account-button {
-    background: #dc2626;
-    color: white;
-}
-
-.delete-account-button:hover {
-    background: #b91c1c;
-}
-
-
-/* =========================================================
-   ACCOUNT ACTIONS
-========================================================= */
-
-.settings-account-actions {
-    margin-top: 22px;
-}
-
-.settings-logout-button {
-    width: 100%;
-    background: white;
-    color: #dc2626;
-    border: 1px solid #fecaca;
-}
-
-.settings-logout-button:hover {
-    background: #fef2f2;
-}
-
-
-/* =========================================================
-   TABLET
-========================================================= */
-
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 13px 17px; border: 1px solid #FFE5D0; border-radius: 10px;
+    background: white; color: #6b7280; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s ease;
+}
+.settings-tab:hover { border-color: #FF6B00; color: #FF6B00; background: #FFF8F3; }
+.settings-tab.active { background: #FF6B00; border-color: #FF6B00; color: white; }
+.settings-tab-icon { font-size: 17px; display: flex; align-items: center; }
+.settings-tab.active.settings-tab-icon { color: white; }
+
+/* CONTENT */
+.settings-content { width: 100%; }
+.settings-card { width: 100%; box-sizing: border-box; background: white; border: 1px solid #FFE5D0; border-radius: 16px; padding: 30px; box-shadow: 0 3px 12px rgba(255,107,0,0.05); }
+
+/* CARD HEADING */
+.settings-card-heading { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 30px; }
+.settings-section-icon { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: #FFF4ED; color: #FF6B00; border-radius: 11px; font-size: 21px; flex-shrink: 0; }
+.settings-card-heading h2 { margin: 0; color: #111827; font-size: 23px; line-height: 1.35; }
+.settings-card-heading p { margin: 6px 0 0; color: #6b7280; font-size: 15px; line-height: 1.55; }
+
+/* FORM */
+.settings-fields { width: 100%; }
+.settings-field { margin-bottom: 21px; }
+.settings-field label { display: block; margin-bottom: 8px; color: #374151; font-size: 15px; font-weight: 700; }
+.settings-field input,.settings-field textarea,.settings-field select {
+    width: 100%; box-sizing: border-box; padding: 14px 15px; border: 1px solid #FFE5D0;
+    border-radius: 9px; background: #FFFBF7; color: #111827; font-size: 16px; line-height: 1.4; outline: none; transition: 0.2s ease;
+}
+.settings-field textarea { min-height: 110px; resize: vertical; }
+.settings-field input:focus,.settings-field textarea:focus,.settings-field select:focus { border-color: #FF6B00; background: white; box-shadow: 0 0 0 3px rgba(255,107,0,0.12); }
+.settings-field input[readonly] { color: #4b5563; cursor: default; background: #FFF8F3; }
+
+/* INFO BOX */
+.settings-info-box { display: flex; align-items: flex-start; gap: 11px; padding: 15px; background: #FFF8F3; border: 1px solid #FFE5D0; border-radius: 10px; margin-top: 5px; }
+.settings-info-box span { flex-shrink: 0; font-size: 16px; color: #FF6B00; display: flex; margin-top: 2px; }
+.settings-info-box p { margin: 0; color: #7a4a2a; font-size: 14px; line-height: 1.6; }
+
+/* HOST SECTION */
+.host-settings-content { width: 100%; }
+.host-status-card { display: flex; align-items: flex-start; gap: 14px; padding: 17px; border-radius: 12px; margin-bottom: 20px; }
+.verified-host { background: #f0fdf4; border: 1px solid #bbf7d0; }
+.pending-host { background: #fffbeb; border: 1px solid #fde68a; }
+.host-status-icon { width: 38px; height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: white; font-size: 17px; font-weight: 800; color: #15803d; }
+.pending-host.host-status-icon { color: #d97706; }
+.host-status-info { min-width: 0; }
+.host-status-info strong { display: block; color: #111827; font-size: 16px; line-height: 1.4; }
+.host-status-info p { margin: 6px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6; }
+
+.host-profile-preview { display: flex; align-items: center; gap: 16px; padding: 18px; border: 1px solid #FFE5D0; border-radius: 12px; margin-bottom: 14px; background: #FFFBF7; }
+.host-preview-image { width: 66px; height: 66px; flex-shrink: 0; }
+.host-preview-image img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
+.host-preview-info { min-width: 0; }
+.host-preview-info > span { display: block; color: #FF6B00; font-size: 12px; font-weight: 800; letter-spacing: 1px; margin-bottom: 5px; }
+.host-preview-info h3 { margin: 0; color: #111827; font-size: 18px; line-height: 1.4; overflow-wrap: anywhere; }
+.host-preview-info p { margin: 6px 0 0; color: #6b7280; font-size: 14px; line-height: 1.55; }
+
+.host-apply-card { text-align: center; padding: 32px 22px; background: #FFFBF7; border-radius: 13px; border: 1px solid #FFE5D0; }
+.host-apply-icon { width: 58px; height: 58px; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #FFF4ED; color: #FF6B00; font-size: 26px; }
+.host-apply-card h3 { margin: 0 0 8px; color: #111827; font-size: 20px; }
+.host-apply-card p { max-width: 500px; margin: 0 auto 21px; color: #6b7280; font-size: 15px; line-height: 1.6; }
+
+/* BUTTONS */
+.settings-primary-button,.settings-secondary-button,.settings-logout-button,.delete-account-button {
+    border: none; border-radius: 9px; padding: 13px 17px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s ease; display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+}
+.settings-primary-button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; background: #FF6B00; color: white; }
+.settings-primary-button:hover { background: #E55F00; transform: translateY(-1px); box-shadow: 0 6px 14px rgba(255,107,0,0.25); }
+.settings-secondary-button { background: white; color: #374151; border: 1px solid #FFE5D0; }
+.settings-secondary-button:hover { background: #FFF8F3; border-color: #FF6B00; color: #FF6B00; }
+.host-profile-button { margin-bottom: 10px; }
+
+/* OPTIONS */
+.settings-options { width: 100%; }
+.settings-option { display: flex; align-items: center; justify-content: space-between; gap: 22px; padding: 19px 0; border-bottom: 1px solid #FFF4ED; }
+.settings-option:first-child { padding-top: 0; }
+.settings-option:last-child { border-bottom: none; }
+.settings-option > div { min-width: 0; }
+.settings-option strong { display: block; color: #111827; font-size: 16px; line-height: 1.4; }
+.settings-option p { margin: 6px 0 0; color: #6b7280; font-size: 14px; line-height: 1.55; }
+.settings-option input[type="checkbox"] { width: 21px; height: 21px; flex-shrink: 0; accent-color: #FF6B00; cursor: pointer; }
+
+/* SECURITY */
+.security-actions { margin-top: 28px; padding-top: 24px; border-top: 1px solid #FFF4ED; }
+.security-actions h3 { margin: 0 0 13px; color: #111827; font-size: 17px; }
+
+/* DANGER */
+.danger-zone { margin-top: 30px; padding: 20px; border-radius: 12px; background: #FFF8F3; border: 1px solid #FFD8B5; }
+.danger-zone h3 { margin: 0 0 6px; color: #991b1b; font-size: 17px; }
+.danger-zone p { margin: 0 0 14px; color: #7f1d1d; font-size: 14px; line-height: 1.55; }
+.delete-account-button { background: #dc2626; color: white; }
+.delete-account-button:hover { background: #b91c1c; }
+.settings-account-actions { margin-top: 22px; }
+.settings-logout-button { width: 100%; background: white; color: #FF6B00; border: 1px solid #FFE5D0; }
+.settings-logout-button:hover { background: #FFF4ED; border-color: #FF6B00; }
+
+/* RESPONSIVE KEEP SAME */
 @media (max-width: 768px) {
-
-    .settings-page {
-        padding: 30px 17px 60px;
-    }
-
-    .settings-top {
-        gap: 13px;
-    }
-
-    .settings-top h1 {
-        font-size: 30px;
-    }
-
-    .settings-top p {
-        font-size: 15px;
-    }
-
-    .settings-profile {
-        padding: 19px;
-    }
-
-    .settings-profile-image-wrapper {
-        width: 74px;
-        height: 74px;
-    }
-
-    .settings-profile-info h2 {
-        font-size: 21px;
-    }
-
-    .settings-profile-info p {
-        font-size: 14px;
-    }
-
-    .settings-card {
-        padding: 24px;
-    }
-
-    .settings-card-heading h2 {
-        font-size: 21px;
-    }
-
+   .settings-page { padding: 30px 17px 60px; }
+   .settings-top { gap: 13px; }
+   .settings-top h1 { font-size: 30px; }
+   .settings-top p { font-size: 15px; }
+   .settings-profile { padding: 19px; }
+   .settings-profile-image-wrapper { width: 74px; height: 74px; }
+   .settings-profile-info h2 { font-size: 21px; }
+   .settings-profile-info p { font-size: 14px; }
+   .settings-card { padding: 24px; }
+   .settings-card-heading h2 { font-size: 21px; }
 }
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
 @media (max-width: 600px) {
-
-    .settings-page {
-        padding: 22px 13px 50px;
-    }
-
-    .settings-top {
-        flex-direction: column;
-        gap: 13px;
-    }
-
-    .settings-back-button {
-        align-self: flex-start;
-        font-size: 14px;
-        padding: 11px 15px;
-    }
-
-    .settings-eyebrow {
-        font-size: 12px;
-    }
-
-    .settings-top h1 {
-        font-size: 27px;
-        line-height: 1.25;
-    }
-
-    .settings-top p {
-        font-size: 14px;
-        line-height: 1.6;
-    }
-
-
-    /* PROFILE */
-
-    .settings-profile {
-        align-items: flex-start;
-        padding: 16px;
-        gap: 14px;
-    }
-
-    .settings-profile-image-wrapper {
-        width: 65px;
-        height: 65px;
-    }
-
-    .settings-profile-info h2 {
-        font-size: 19px;
-        line-height: 1.35;
-    }
-
-    .settings-profile-info p {
-        font-size: 13px;
-        line-height: 1.5;
-    }
-
-    .settings-host-badge {
-        font-size: 12px;
-        padding: 6px 10px;
-    }
-
-
-    /* TABS */
-
-    .settings-tabs {
-        gap: 7px;
-        margin-bottom: 17px;
-    }
-
-    .settings-tab {
-        padding: 11px 13px;
-        font-size: 13px;
-    }
-
-    .settings-tab-icon {
-        font-size: 15px;
-    }
-
-
-    /* CARD */
-
-    .settings-card {
-        padding: 20px 16px;
-        border-radius: 13px;
-    }
-
-    .settings-card-heading {
-        gap: 10px;
-        margin-bottom: 22px;
-    }
-
-    .settings-section-icon {
-        width: 39px;
-        height: 39px;
-        font-size: 18px;
-    }
-
-    .settings-card-heading h2 {
-        font-size: 20px;
-        line-height: 1.35;
-    }
-
-    .settings-card-heading p {
-        font-size: 13px;
-        line-height: 1.6;
-    }
-
-
-    /* FORM */
-
-    .settings-field {
-        margin-bottom: 19px;
-    }
-
-    .settings-field label {
-        font-size: 14px;
-    }
-
-    .settings-field input,
-    .settings-field textarea,
-    .settings-field select {
-        font-size: 15px;
-        padding: 13px;
-    }
-
-
-    /* HOST PROFILE */
-
-    .host-profile-preview {
-        align-items: flex-start;
-        padding: 15px;
-        gap: 12px;
-    }
-
-    .host-preview-image {
-        width: 54px;
-        height: 54px;
-    }
-
-    .host-preview-info > span {
-        font-size: 11px;
-    }
-
-    .host-preview-info h3 {
-        font-size: 16px;
-        line-height: 1.4;
-    }
-
-    .host-preview-info p {
-        font-size: 13px;
-        line-height: 1.55;
-    }
-
-
-    /* STATUS */
-
-    .host-status-card {
-        padding: 14px;
-        gap: 11px;
-    }
-
-    .host-status-icon {
-        width: 35px;
-        height: 35px;
-    }
-
-    .host-status-info strong {
-        font-size: 14px;
-    }
-
-    .host-status-info p {
-        font-size: 13px;
-        line-height: 1.55;
-    }
-
-
-    /* OPTIONS */
-
-    .settings-option {
-        align-items: flex-start;
-        gap: 13px;
-        padding: 17px 0;
-    }
-
-    .settings-option strong {
-        font-size: 14px;
-        line-height: 1.45;
-    }
-
-    .settings-option p {
-        font-size: 13px;
-        line-height: 1.55;
-    }
-
-    .settings-option input[type="checkbox"] {
-        margin-top: 2px;
-        width: 20px;
-        height: 20px;
-    }
-
-
-    /* BUTTONS */
-
-    .settings-primary-button,
-    .settings-secondary-button,
-    .settings-logout-button,
-    .delete-account-button {
-        font-size: 14px;
-        padding: 12px 14px;
-    }
-
-
-    /* HOST APPLY */
-
-    .host-apply-card {
-        padding: 27px 16px;
-    }
-
-    .host-apply-card h3 {
-        font-size: 19px;
-    }
-
-    .host-apply-card p {
-        font-size: 14px;
-        line-height: 1.6;
-    }
-
-
-    /* INFO BOX */
-
-    .settings-info-box p {
-        font-size: 13px;
-        line-height: 1.6;
-    }
-
-
-    /* DANGER */
-
-    .danger-zone {
-        padding: 17px;
-    }
-
-    .danger-zone h3 {
-        font-size: 16px;
-    }
-
-    .danger-zone p {
-        font-size: 13px;
-        line-height: 1.55;
-    }
-
+   .settings-page { padding: 22px 13px 50px; }
+   .settings-top { flex-direction: column; gap: 13px; }
+   .settings-back-button { align-self: flex-start; font-size: 14px; padding: 11px 15px; }
+   .settings-eyebrow { font-size: 12px; }
+   .settings-top h1 { font-size: 27px; line-height: 1.25; }
+   .settings-top p { font-size: 14px; line-height: 1.6; }
+   .settings-profile { align-items: flex-start; padding: 16px; gap: 14px; }
+   .settings-profile-image-wrapper { width: 65px; height: 65px; }
+   .settings-profile-info h2 { font-size: 19px; line-height: 1.35; }
+   .settings-profile-info p { font-size: 13px; line-height: 1.5; }
+   .settings-host-badge { font-size: 12px; padding: 6px 10px; }
+   .settings-tabs { gap: 7px; margin-bottom: 17px; }
+   .settings-tab { padding: 11px 13px; font-size: 13px; }
+   .settings-tab-icon { font-size: 15px; }
+   .settings-card { padding: 20px 16px; border-radius: 13px; }
+   .settings-card-heading { gap: 10px; margin-bottom: 22px; }
+   .settings-section-icon { width: 39px; height: 39px; font-size: 18px; }
+   .settings-card-heading h2 { font-size: 20px; line-height: 1.35; }
+   .settings-card-heading p { font-size: 13px; line-height: 1.6; }
+   .settings-field { margin-bottom: 19px; }
+   .settings-field label { font-size: 14px; }
+   .settings-field input,.settings-field textarea,.settings-field select { font-size: 15px; padding: 13px; }
+   .host-profile-preview { align-items: flex-start; padding: 15px; gap: 12px; }
+   .host-preview-image { width: 54px; height: 54px; }
+   .host-preview-info > span { font-size: 11px; }
+   .host-preview-info h3 { font-size: 16px; line-height: 1.4; }
+   .host-preview-info p { font-size: 13px; line-height: 1.55; }
+   .host-status-card { padding: 14px; gap: 11px; }
+   .host-status-icon { width: 35px; height: 35px; }
+   .host-status-info strong { font-size: 14px; }
+   .host-status-info p { font-size: 13px; line-height: 1.55; }
+   .settings-option { align-items: flex-start; gap: 13px; padding: 17px 0; }
+   .settings-option strong { font-size: 14px; line-height: 1.45; }
+   .settings-option p { font-size: 13px; line-height: 1.55; }
+   .settings-option input[type="checkbox"] { margin-top: 2px; width: 20px; height: 20px; }
+   .settings-primary-button,.settings-secondary-button,.settings-logout-button,.delete-account-button { font-size: 14px; padding: 12px 14px; }
+   .host-apply-card { padding: 27px 16px; }
+   .host-apply-card h3 { font-size: 19px; }
+   .host-apply-card p { font-size: 14px; line-height: 1.6; }
+   .settings-info-box p { font-size: 13px; line-height: 1.6; }
+   .danger-zone { padding: 17px; }
+   .danger-zone h3 { font-size: 16px; }
+   .danger-zone p { font-size: 13px; line-height: 1.55; }
 }
-
-
-/* =========================================================
-   SMALL PHONES
-========================================================= */
-
 @media (max-width: 400px) {
-
-    .settings-page {
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-
-    .settings-top h1 {
-        font-size: 25px;
-    }
-
-    .settings-top p {
-        font-size: 14px;
-    }
-
-    .settings-profile {
-        padding: 14px;
-        gap: 12px;
-    }
-
-    .settings-profile-image-wrapper {
-        width: 58px;
-        height: 58px;
-    }
-
-    .settings-profile-info h2 {
-        font-size: 18px;
-    }
-
-    .settings-profile-info p {
-        font-size: 12.5px;
-    }
-
-    .settings-tab {
-        padding: 10px 11px;
-        font-size: 12.5px;
-    }
-
-    .settings-tab-icon {
-        display: none;
-    }
-
-    .settings-card {
-        padding: 17px 13px;
-    }
-
-    .settings-card-heading h2 {
-        font-size: 18px;
-    }
-
-    .settings-card-heading p {
-        font-size: 12.5px;
-    }
-
-    .settings-field label {
-        font-size: 13.5px;
-    }
-
-    .settings-field input,
-    .settings-field textarea,
-    .settings-field select {
-        font-size: 14px;
-    }
-
-    .host-profile-preview {
-        gap: 10px;
-    }
-
-    .host-preview-image {
-        width: 48px;
-        height: 48px;
-    }
-
-    .host-preview-info h3 {
-        font-size: 15px;
-    }
-
-    .host-preview-info p {
-        font-size: 12px;
-    }
-
-    .settings-option strong {
-        font-size: 13.5px;
-    }
-
-    .settings-option p {
-        font-size: 12px;
-    }
-
+   .settings-page { padding-left: 10px; padding-right: 10px; }
+   .settings-top h1 { font-size: 25px; }
+   .settings-top p { font-size: 14px; }
+   .settings-profile { padding: 14px; gap: 12px; }
+   .settings-profile-image-wrapper { width: 58px; height: 58px; }
+   .settings-profile-info h2 { font-size: 18px; }
+   .settings-profile-info p { font-size: 12.5px; }
+   .settings-tab { padding: 10px 11px; font-size: 12.5px; }
+   .settings-tab-icon { display: none; }
+   .settings-card { padding: 17px 13px; }
+   .settings-card-heading h2 { font-size: 18px; }
+   .settings-card-heading p { font-size: 12.5px; }
+   .settings-field label { font-size: 13.5px; }
+   .settings-field input,.settings-field textarea,.settings-field select { font-size: 14px; }
+   .host-profile-preview { gap: 10px; }
+   .host-preview-image { width: 48px; height: 48px; }
+   .host-preview-info h3 { font-size: 15px; }
+   .host-preview-info p { font-size: 12px; }
+   .settings-option strong { font-size: 13.5px; }
+   .settings-option p { font-size: 12px; }
 }

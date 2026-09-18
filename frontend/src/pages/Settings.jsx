@@ -1,6 +1,23 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import {
+  FiUser,
+  FiMic,
+  FiBell,
+  FiLock,
+  FiArrowLeft,
+  FiCheck,
+  FiClock,
+  FiArrowRight,
+  FiInfo,
+  FiMessageCircle,
+  FiSmartphone,
+  FiMail,
+  FiShield,
+  FiTrash2,
+  FiLogOut,
+} from "react-icons/fi";
 import "../styles/Settings.css";
 
 function Settings() {
@@ -62,22 +79,22 @@ function Settings() {
     {
       id: "account",
       label: "Account",
-      icon: "👤",
+      icon: <FiUser />,
     },
     {
       id: "host",
       label: "Host",
-      icon: "🎤",
+      icon: <FiMic />,
     },
     {
       id: "notifications",
       label: "Notifications",
-      icon: "🔔",
+      icon: <FiBell />,
     },
     {
       id: "privacy",
       label: "Privacy",
-      icon: "🔒",
+      icon: <FiLock />,
     },
   ];
 
@@ -95,7 +112,8 @@ function Settings() {
           className="settings-back-button"
           onClick={() => navigate(-1)}
         >
-          ← Back
+          <FiArrowLeft />
+          <span>Back</span>
         </button>
 
         <div>
@@ -149,9 +167,14 @@ function Settings() {
                 : "settings-host-badge"
             }
           >
-            {user?.verifiedHost
-              ? "✓ Verified Host"
-              : "EventWaa User"}
+            {user?.verifiedHost ? (
+              <>
+                <FiCheck />
+                Verified Host
+              </>
+            ) : (
+              "EventWaa User"
+            )}
           </span>
 
         </div>
@@ -214,7 +237,7 @@ function Settings() {
 
               <div>
                 <span className="settings-section-icon">
-                  👤
+                  <FiUser />
                 </span>
               </div>
 
@@ -263,7 +286,9 @@ function Settings() {
 
               <div className="settings-info-box">
 
-                <span>ℹ️</span>
+                <span>
+                  <FiInfo />
+                </span>
 
                 <p>
                   Your name and email are connected to your
@@ -292,7 +317,7 @@ function Settings() {
 
               <div>
                 <span className="settings-section-icon">
-                  🎤
+                  <FiMic />
                 </span>
               </div>
 
@@ -302,6 +327,7 @@ function Settings() {
                 <p>
                   Manage your EventWaa hosting status.
                 </p>
+
               </div>
 
             </div>
@@ -314,7 +340,7 @@ function Settings() {
                 <div className="host-status-card verified-host">
 
                   <div className="host-status-icon">
-                    ✓
+                    <FiCheck />
                   </div>
 
                   <div className="host-status-info">
@@ -380,8 +406,11 @@ function Settings() {
                     navigate(`/host/${user.id}`)
                   }
                 >
-                  View My Host Profile
-                  <span>→</span>
+                  <span>
+                    View My Host Profile
+                  </span>
+
+                  <FiArrowRight />
                 </button>
 
                 <button
@@ -401,7 +430,7 @@ function Settings() {
               <div className="host-status-card pending-host">
 
                 <div className="host-status-icon">
-                  ⏳
+                  <FiClock />
                 </div>
 
                 <div className="host-status-info">
@@ -424,7 +453,7 @@ function Settings() {
               <div className="host-apply-card">
 
                 <div className="host-apply-icon">
-                  🎤
+                  <FiMic />
                 </div>
 
                 <h3>
@@ -443,8 +472,11 @@ function Settings() {
                     navigate("/host-application")
                   }
                 >
-                  Apply to Become a Host
-                  <span>→</span>
+                  <span>
+                    Apply to Become a Host
+                  </span>
+
+                  <FiArrowRight />
                 </button>
 
               </div>
@@ -468,7 +500,7 @@ function Settings() {
 
               <div>
                 <span className="settings-section-icon">
-                  🔔
+                  <FiBell />
                 </span>
               </div>
 
@@ -642,7 +674,7 @@ function Settings() {
 
               <div>
                 <span className="settings-section-icon">
-                  🔒
+                  <FiLock />
                 </span>
               </div>
 
@@ -760,7 +792,8 @@ function Settings() {
                   navigate("/forgot-password")
                 }
               >
-                Change Password
+                <FiShield />
+                <span>Change Password</span>
               </button>
 
             </div>
@@ -781,7 +814,8 @@ function Settings() {
                 type="button"
                 className="delete-account-button"
               >
-                Delete Account
+                <FiTrash2 />
+                <span>Delete Account</span>
               </button>
 
             </div>
@@ -804,7 +838,8 @@ function Settings() {
           onClick={handleLogout}
           className="settings-logout-button"
         >
-          🚪 Logout
+          <FiLogOut />
+          <span>Logout</span>
         </button>
 
       </div>
