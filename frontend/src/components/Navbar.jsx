@@ -70,19 +70,24 @@ function Navbar() {
             BRAND
         ==================================================== */}
 
-        <Link to="/" className="navbar-brand" onClick={closeMenu}>
-          {platformLogo ? (
+        <Link
+          to="/"
+          className="navbar-brand"
+          onClick={closeMenu}
+        >
+          {platformLogo && (
             <img
               src={platformLogo}
               alt={`${platformName} logo`}
               className="navbar-logo"
             />
-          ) : (
-            <span className="logo-text">
-              Event<span style={{color: "#FF6B00"}}>Waa</span>
-            </span>
           )}
+
+          <span className="logo-text">
+            Event<span style={{color: "#FF6B00"}}>Waa</span>
+          </span>
         </Link>
+
 
         {/* ====================================================
             DESKTOP NAVIGATION
