@@ -70,24 +70,19 @@ function Navbar() {
             BRAND
         ==================================================== */}
 
-        <Link
-          to="/"
-          className="navbar-brand"
-          onClick={closeMenu}
-        >
-          {platformLogo && (
+        <Link to="/" className="navbar-brand" onClick={closeMenu}>
+          {platformLogo ? (
             <img
               src={platformLogo}
               alt={`${platformName} logo`}
               className="navbar-logo"
             />
+          ) : (
+            <span className="logo-text">
+              Event<span style={{color: "#FF6B00"}}>Waa</span>
+            </span>
           )}
-
-          <span className="logo-text">
-            Event<span style={{color: "#FF6B00"}}>Waa</span>
-          </span>
         </Link>
-
 
         {/* ====================================================
             DESKTOP NAVIGATION
@@ -301,25 +296,18 @@ function Navbar() {
 
         <div className="mobile-menu-header">
 
-          <Link
-            to="/"
-            className="mobile-menu-brand"
-            onClick={closeMenu}
-          >
-
-            {platformLogo && (
+          <Link to="/" className="mobile-menu-brand" onClick={closeMenu}>
+            {platformLogo ? (
               <img
                 src={platformLogo}
                 alt={`${platformName} logo`}
                 className="mobile-menu-logo"
               />
+            ) : (
+              <span style={{fontWeight: 800, letterSpacing: '-0.5px'}}>
+                <span style={{color: '#111'}}>Event</span><span style={{color: '#FF6B00'}}>Waa</span>
+              </span>
             )}
-
-            <span style={{fontWeight: 800, letterSpacing: '-0.5px'}}>
-            <span style={{color: '#111'}}>Event</span><span
-            style={{color: '#FF6B00'}}>Waa</span>
-          </span>
-
           </Link>
 
 
