@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 export const EventContext = createContext();
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 export function EventProvider({ children }) {
     const [events, setEvents] = useState([]);
     // ============================================================
@@ -12,7 +12,7 @@ export function EventProvider({ children }) {
     const fetchEvents = async () => {
         try {
             const response = await fetch(
-                `${API_URL}/events`
+                `${BACKEND_URL}/events`
             );
             const data = await response.json();
             // ====================================================
@@ -66,7 +66,7 @@ export function EventProvider({ children }) {
     const deleteEvent = async (id) => {
         try {
             const response = await fetch(
-                `${API_URL}/events/${id}`,
+                `${BACKEND_URL}/events/${id}`,
                 {
                     method: "DELETE"
                 }

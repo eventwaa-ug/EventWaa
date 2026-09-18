@@ -26990,16 +26990,78 @@ def cancel_event(event_id):
             free_bookings_cancelled += 1
 
             try:
-                create_notification(
-                    booking.get("buyer"),
-                    "Event cancelled",
-                    (
-                        f"{event.get('title', 'Your event')} "
-                        f"has been cancelled. "
-                        f"Your free ticket is no longer valid."
-                    ),
-                    "refund"
+                buyer = booking.get(
+                    "buyer",
+                    {}
                 )
+
+                if isinstance(buyer, dict):
+
+                    buyer_email = str(
+                        buyer.get("email", "")
+                    ).strip()
+
+                    buyer_name = str(
+                        buyer.get("name", "")
+                    ).strip()
+
+                else:
+
+                    buyer_email = ""
+                    buyer_name = ""
+
+                try:
+
+                    create_notification(
+
+                        buyer_email,
+
+                        "Event cancelled",
+
+                        (
+                            f"{event.get('title', 'Your event')} "
+                            f"has been cancelled. "
+                            f"Your free ticket is no longer valid."
+                        ),
+
+                        "refund",
+
+                        f"/events/{event.get('id')}"
+
+                    )
+
+                except Exception as e:
+
+                    print(
+                        "FREE CANCELLATION NOTIFICATION ERROR:",
+                        repr(e)
+                    )
+
+
+                try:
+
+                    send_event_cancellation_email(
+
+                        buyer_email,
+
+                        buyer_name,
+
+                        event,
+
+                        refund_amount=0,
+
+                        is_free=True,
+
+                        cancellation_reason=cancellation_reason
+
+                    )
+
+                except Exception as e:
+
+                    print(
+                        "FREE CANCELLATION EMAIL ERROR:",
+                        repr(e)
+                    )
             except Exception:
                 pass
 
@@ -27149,6 +27211,69 @@ def cancel_event(event_id):
         "events.json",
         events
     )
+
+    # ============================================================
+    # ADMIN CANCELLATION NOTIFICATION
+    # ============================================================
+
+    try:
+
+        create_notification(
+
+            "admin",
+
+            "Event cancelled",
+
+            (
+                f"{event.get('title', 'An event')} "
+                f"was cancelled by the host. "
+                f"{processed_refunds} paid refund(s) processed "
+                f"and "
+                f"{free_bookings_cancelled} free pass(es) "
+                f"cancelled."
+            ),
+
+            "event_cancellation",
+
+            "/admin/events"
+
+        )
+
+    except Exception as e:
+
+        print(
+            "ADMIN CANCELLATION NOTIFICATION ERROR:",
+            repr(e)
+        )
+
+    # ============================================================
+    # ADMIN CANCELLATION EMAIL
+    # ============================================================
+
+    try:
+
+        send_admin_event_cancellation_email(
+
+            event,
+
+            host_email,
+
+            cancellation_reason,
+
+            processed_refunds,
+
+            free_bookings_cancelled,
+
+            total_refunded
+
+        )
+
+    except Exception as e:
+
+        print(
+            "ADMIN CANCELLATION EMAIL ERROR:",
+            repr(e)
+        )
 
     # ========================================================
     # RESPONSE
@@ -28855,6 +28980,8 @@ def process_eventwaa_refund(
 
     buyer_email = ""
 
+    buyer_name = ""
+
     if isinstance(
         buyer,
         dict
@@ -28867,19 +28994,17 @@ def process_eventwaa_refund(
             )
         ).strip()
 
-    buyer_name = ""
-
-    if isinstance(
-        buyer,
-        dict
-    ):
-
         buyer_name = str(
             buyer.get(
                 "name",
                 ""
             )
         ).strip()
+
+
+    # ========================================================
+    # BUYER PLATFORM NOTIFICATION
+    # ========================================================
 
     try:
 
@@ -28896,15 +29021,51 @@ def process_eventwaa_refund(
                 f"has been processed."
             ),
 
-            "refund"
+            "refund",
+
+            f"/events/{event.get('id')}"
 
         )
 
-    except Exception:
+    except Exception as e:
 
-        # Notification failure must not undo the
-        # completed financial/accounting operation.
-        pass
+        print(
+            "REFUND NOTIFICATION ERROR:",
+            repr(e)
+        )
+
+
+    # ========================================================
+    # BUYER REFUND EMAIL
+    # ========================================================
+
+    try:
+
+        send_event_cancellation_email(
+
+            buyer_email,
+
+            buyer_name,
+
+            event,
+
+            refund_amount=refund_amount,
+
+            is_free=False,
+
+            cancellation_reason=refund.get(
+                "reason",
+                "Event cancelled by host"
+            )
+
+        )
+
+    except Exception as e:
+
+        print(
+            "REFUND EMAIL ERROR:",
+            repr(e)
+        )
 
     # ========================================================
     # SUCCESS
@@ -36539,7 +36700,7 @@ def create_notification(
     title,
     message,
     notification_type,
-    link
+    link=""
 ):
 
     notifications = load_notifications()
@@ -42388,7 +42549,9 @@ def send_event_reminder_email(
 
         "EventWaa Event Reminder",
 
-        sender="YOUR_EMAIL@gmail.com",
+        sender=app.config.get(
+            "MAIL_USERNAME"
+        ),
 
         recipients=[email]
 
@@ -42429,6 +42592,201 @@ Thank you for using EventWaa.
             repr(e)
         )
 
+# ============================================================
+# EVENT CANCELLATION EMAIL
+# ============================================================
+
+def send_event_cancellation_email(
+    email,
+    name,
+    event,
+    refund_amount=0,
+    is_free=False,
+    cancellation_reason=""
+):
+
+    settings = load_admin_settings()
+
+    if not settings.get(
+        "emailNotifications",
+        True
+    ):
+        return
+
+    if not email:
+        return
+
+    event_title = event.get(
+        "title",
+        "EventWaa event"
+    )
+
+    reason = cancellation_reason or (
+        "The event was cancelled by the host."
+    )
+
+    if is_free:
+        refund_message = (
+            "Because your ticket was free, "
+            "there is no monetary refund. "
+            "Your free ticket/pass has been "
+            "invalidated and can no longer be used."
+        )
+    else:
+        refund_message = (
+            f"Your refund of "
+            f"{int(refund_amount):,} UGX "
+            f"has been processed."
+        )
+
+    msg = Message(
+
+        "EventWaa Event Cancelled",
+
+        sender=app.config.get(
+            "MAIL_DEFAULT_SENDER"
+        ),
+
+        recipients=[email]
+
+    )
+
+    msg.body = f"""
+
+Hello {name or "there"},
+
+We are writing to let you know that the following EventWaa event has been cancelled.
+
+Event:
+{event_title}
+
+Date:
+{event.get('date', 'N/A')}
+
+Time:
+{event.get('startTime', 'N/A')}
+
+Venue:
+{event.get('venue', 'N/A')}
+
+Reason:
+{reason}
+
+{refund_message}
+
+If you had a ticket for this event, it is no longer valid and cannot be used for entry.
+
+Thank you for using EventWaa.
+
+EventWaa
+"""
+
+    try:
+
+        mail.send(msg)
+
+    except Exception as e:
+
+        print(
+            "EVENT CANCELLATION EMAIL ERROR:",
+            repr(e)
+        )
+
+
+# ============================================================
+# ADMIN EVENT CANCELLATION EMAIL
+# ============================================================
+
+def send_admin_event_cancellation_email(
+    event,
+    host_email,
+    cancellation_reason,
+    processed_refunds,
+    free_bookings_cancelled,
+    total_refunded
+):
+
+    settings = load_admin_settings()
+
+    if not settings.get(
+        "emailNotifications",
+        True
+    ):
+        return
+
+    admin_email = app.config.get(
+        "MAIL_USERNAME"
+    )
+
+    if not admin_email:
+        print(
+            "ADMIN CANCELLATION EMAIL ERROR: "
+            "MAIL_USERNAME is not configured."
+        )
+        return
+
+    msg = Message(
+
+        "EventWaa Event Cancellation",
+
+        sender=app.config.get(
+            "MAIL_DEFAULT_SENDER"
+        ),
+
+        recipients=[admin_email]
+
+    )
+
+    msg.body = f"""
+
+Hello EventWaa Admin,
+
+A host has cancelled an event.
+
+Event:
+{event.get('title', 'N/A')}
+
+Event ID:
+{event.get('id', 'N/A')}
+
+Host:
+{event.get('hostName', 'N/A')}
+
+Host Email:
+{host_email}
+
+Event Date:
+{event.get('date', 'N/A')}
+
+Event Time:
+{event.get('startTime', 'N/A')}
+
+Venue:
+{event.get('venue', 'N/A')}
+
+Cancellation Reason:
+{cancellation_reason}
+
+Cancellation Summary:
+Paid refunds processed: {processed_refunds}
+Free passes cancelled: {free_bookings_cancelled}
+Total refunded: {int(total_refunded):,} UGX
+
+All affected tickets/passes have been invalidated.
+
+EventWaa
+"""
+
+    try:
+
+        mail.send(msg)
+
+    except Exception as e:
+
+        print(
+            "ADMIN CANCELLATION EMAIL ERROR:",
+            repr(e)
+        )
 
 # ============================================================
 # ERROR HANDLERS
