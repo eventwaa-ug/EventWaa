@@ -296,18 +296,25 @@ function Navbar() {
 
         <div className="mobile-menu-header">
 
-          <Link to="/" className="mobile-menu-brand" onClick={closeMenu}>
-            {platformLogo ? (
+          <Link
+            to="/"
+            className="mobile-menu-brand"
+            onClick={closeMenu}
+          >
+
+            {platformLogo && (
               <img
                 src={platformLogo}
                 alt={`${platformName} logo`}
                 className="mobile-menu-logo"
               />
-            ) : (
-              <span style={{fontWeight: 800, letterSpacing: '-0.5px'}}>
-                <span style={{color: '#111'}}>Event</span><span style={{color: '#FF6B00'}}>Waa</span>
-              </span>
             )}
+
+            <span style={{fontWeight: 800, letterSpacing: '-0.5px'}}>
+            <span style={{color: '#111'}}>Event</span><span
+            style={{color: '#FF6B00'}}>Waa</span>
+          </span>
+
           </Link>
 
 
