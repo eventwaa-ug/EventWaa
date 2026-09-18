@@ -199,3 +199,27 @@
 @media (max-width: 768px) { .navbar { min-height: 64px; padding: 9px 17px; } .logo-text { font-size: 1.55rem; } .desktop-nav-links { display: none; } .mobile-menu-button { display: flex; } }
 @media (max-width: 400px) { .navbar { padding-left: 13px; padding-right: 13px; } .navbar-brand { gap: 8px; } .logo-text { font-size: 1.45rem; } .mobile-side-menu { width: 91vw; } .mobile-menu-header { padding-left: 15px; padding-right: 15px; } .mobile-user-card { margin-left: 15px; margin-right: 15px; } }
 .mobile-menu-button:focus-visible, .mobile-close-button:focus-visible, .mobile-nav-links a:focus-visible, .mobile-logout-button:focus-visible, .desktop-nav-link:focus-visible, .desktop-register-button:focus-visible, .desktop-login-button:focus-visible { outline: 2px solid #FF6B00; outline-offset: 2px; }
+
+/* RESTORE TEXT LOGO */
+.navbar-brand,
+.mobile-menu-brand,
+.logo-text {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.logo-text {
+  display: block !important;
+  color: #111 !important;
+  font-size: 1.65rem !important;
+  font-weight: 800 !important;
+}
+
+/* ONLY hide the image square */
+.navbar-logo {
+  display: none !important;
+}
+.mobile-menu-logo {
+  display: none !important;
+}
