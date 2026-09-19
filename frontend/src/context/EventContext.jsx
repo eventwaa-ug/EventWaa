@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 export const EventContext = createContext();
+
 const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 export function EventProvider({ children }) {
     const [events, setEvents] = useState([]);

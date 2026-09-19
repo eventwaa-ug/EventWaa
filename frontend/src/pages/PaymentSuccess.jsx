@@ -12,7 +12,7 @@ import {
 } from "react-router-dom";
 import "../styles/PaymentSuccess.css";
 
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 function PaymentSuccess() {
   const navigate = useNavigate();
@@ -209,7 +209,7 @@ function PaymentSuccess() {
     // ========================================================
 
     const verificationUrl =
-      `${API_URL}/payments/verify/` +
+      `${BACKEND_URL}/payments/verify/` +
       `${encodeURIComponent(transactionId)}` +
       `?tx_ref=${encodeURIComponent(txRef)}`;
 
@@ -375,7 +375,7 @@ function PaymentSuccess() {
     // ========================================================
 
     const verificationUrl =
-      `${API_URL}/payments/pesapal/verify/` +
+      `${BACKEND_URL}/payments/pesapal/verify/` +
       `${encodeURIComponent(orderTrackingId)}`;
 
     console.log(

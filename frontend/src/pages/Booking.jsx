@@ -16,7 +16,7 @@ import {
   FiLock,
 } from "react-icons/fi";
 import "../styles/Booking.css";
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function Booking() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -97,9 +97,9 @@ function Booking() {
       return imagePath;
     }
     if (imagePath.startsWith("/")) {
-      return API_URL + imagePath;
+      return BACKEND_URL + imagePath;
     }
-    return API_URL + "/" + imagePath;
+    return BACKEND_URL + "/" + imagePath;
   };
   const eventImage = getPosterUrl(event);
   // ==========================================================
@@ -188,7 +188,7 @@ function Booking() {
   // ==========================================================
   const initializeFlutterwave = async () => {
     const response = await fetch(
-      `${API_URL}/payments/initialize`,
+      `${BACKEND_URL}/payments/initialize`,
       {
         method: "POST",
         headers: {
@@ -248,7 +248,7 @@ function Booking() {
   // ==========================================================
   const initializePesapal = async () => {
     const response = await fetch(
-      `${API_URL}/payments/pesapal/initialize`,
+      `${BACKEND_URL}/payments/pesapal/initialize`,
       {
         method: "POST",
         headers: {

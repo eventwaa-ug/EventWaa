@@ -1,538 +1,512 @@
 /* ============================================================
    EVENTWAA — EVENTS PAGE
-   Modern / Premium / Warm Accent
-============================================================ */
-/* ============================================================
-   COLOR SYSTEM
-============================================================ */
-:root {
-    --ew-background: #f7f7f5;
-    --ew-surface: #ffffff;
-    --ew-text: #171717;
-    --ew-text-secondary: #6b6863;
-    --ew-border: #e5e2dc;
-    /* EVENTWAA SIGNATURE ACCENT */
-    --ew-accent: #f05a28;
-    --ew-accent-dark: #d94718;
-    --ew-accent-light: #fff1eb;
-    /* SUPPORTING COLORS */
-    --ew-success: #16803d;
-    --ew-warning: #f59e0b;
-}
-/* ============================================================
-   PAGE
-============================================================ */
+   ============================================================ */
 .events-page {
-    width: 100%;
-    min-height: 100vh;
-    padding: 60px 8% 90px;
-    box-sizing: border-box;
-    background:
-        linear-gradient(
-            180deg,
-            #fafaf9 0%,
-            var(--ew-background) 100%
-        );
+  --ew-background: #f7f7f5;
+  --ew-surface: #ffffff;
+  --ew-text: #171717;
+  --ew-text-secondary: #6b6863;
+  --ew-border: #e5e2dc;
+  --ew-accent: #f05a28;
+  --ew-accent-dark: #d94718;
+  --ew-accent-light: #fff1eb;
+  --ew-success: #16803d;
+  --ew-warning: #f59e0b;
+  width: 100%;
+  min-height: 100vh;
+  padding: 60px 8% 90px;
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      var(--ew-background) 100%
+    );
+  color: var(--ew-text);
 }
 /* ============================================================
-   HEADER
-============================================================ */
+   PAGE HEADER
+   ============================================================ */
 .events-header {
-    max-width: 1200px;
-    margin: 0 auto 28px;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto 28px;
 }
 .events-header h1 {
-    margin: 0 0 8px;
-    color: var(--ew-text);
-    font-size: 2.45rem;
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -0.7px;
+  margin: 0 0 8px;
+  font-size: 2.45rem;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.035em;
 }
 .events-header p {
-    margin: 0;
-    color: var(--ew-text-secondary);
-    font-size: 15px;
-    font-weight: 500;
+  margin: 0;
+  color: var(--ew-text-secondary);
+  font-size: 15px;
+  line-height: 1.5;
 }
 /* ============================================================
    SEARCH
-============================================================ */
+   ============================================================ */
 .events-search {
-    position: relative;
-    max-width: 1200px;
-    margin: 0 auto 25px;
-}
-.events-search-icon {
-    position: absolute;
-    top: 50%;
-    left: 18px;
-    transform: translateY(-50%);
-    color: #85817b;
-    pointer-events: none;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto 24px;
+  position: relative;
 }
 .events-search input {
-    width: 100%;
-    height: 54px;
-    box-sizing: border-box;
-    padding:
-        0
-        18px
-        0
-        50px;
-    border:
-        1px solid
-        var(--ew-border);
-    border-radius: 12px;
-    background:
-        var(--ew-surface);
-    color:
-        var(--ew-text);
-    font-family: inherit;
-    font-size: 15px;
-    outline: none;
-    box-shadow:
-        0 3px 12px
-        rgba(0, 0, 0, 0.035);
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
+  width: 100%;
+  height: 54px;
+  padding: 0 18px;
+  box-sizing: border-box;
+  border: 1px solid var(--ew-border);
+  border-radius: 14px;
+  background: var(--ew-surface);
+  color: var(--ew-text);
+  font-size: 15px;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 .events-search input::placeholder {
-    color: #9a9690;
+  color: #9a9690;
 }
 .events-search input:focus {
-    border-color:
-        var(--ew-accent);
-    box-shadow:
-        0 0 0 4px
-        rgba(240, 90, 40, 0.12);
-}
-.events-search:focus-within
-.events-search-icon {
-    color:
-        var(--ew-accent);
+  border-color: var(--ew-accent);
+  box-shadow:
+    0 0 0 4px rgba(240, 90, 40, 0.1);
 }
 /* ============================================================
    CITY CHIPS
-   CityChips.css controls the city chip design.
-============================================================ */
-.events-page
-.city-chips-section {
-    padding-left: 0;
-    padding-right: 0;
-    background:
-        transparent;
-}
-.events-page
-.city-chips-header {
-    display: none;
+   ============================================================ */
+.events-page .city-chips {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  background: transparent;
 }
 /* ============================================================
    STICKY FILTERS
-============================================================ */
+   ============================================================ */
 .sticky-filters {
-    position: sticky;
-    top: 68px;
-    z-index: 50;
-    width: 100%;
-    max-width: 1200px;
-    margin:
-        25px auto
-        30px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    overflow-x: auto;
-    padding:
-        13px 0;
-    background:
-        rgba(247, 247, 245, 0.94);
-    border-bottom:
-        1px solid
-        rgba(225, 222, 216, 0.7);
-    -ms-overflow-style:
-        none;
-
+  position: sticky;
+  top: 68px;
+  z-index: 50;
+  width: 100%;
+  max-width: 1280px;
+  margin: 25px auto 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 0;
+  background: rgba(247, 247, 245, 0.94);
+  border-bottom: 1px solid var(--ew-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .sticky-filters::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 /* ============================================================
-   FILTER CHIP
-============================================================ */
+   FILTER CHIPS
+   ============================================================ */
 .filter-chip {
-    flex:
-        0 0 auto;
-    display:
-        inline-flex;
-    align-items:
-        center;
-    justify-content:
-        center;
-    min-height:
-        42px;
-    padding:
-        0 18px;
-    border:
-        1px solid
-        var(--ew-border);
-    border-radius:
-        999px;
-    background:
-        var(--ew-surface);
-    color:
-        #4a4742;
-    text-decoration:
-        none;
-    font-size:
-        14px;
-    font-weight:
-        650;
-    white-space:
-        nowrap;
-    box-sizing:
-        border-box;
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        border-color 0.2s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 0 17px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ew-border);
+  border-radius: 999px;
+  background: var(--ew-surface);
+  color: var(--ew-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
-/* HOVER */
 .filter-chip:hover {
-    transform:
-        translateY(-2px);
-    background:
-        var(--ew-accent-light);
-    border-color:
-        rgba(240, 90, 40, 0.35);
-    color:
-        var(--ew-accent-dark);
+  background: var(--ew-accent-light);
+  border-color: var(--ew-accent);
+  color: var(--ew-accent);
+  transform: translateY(-1px);
 }
-/* ACTIVE */
 .filter-chip.active {
-    background:
-        var(--ew-accent);
-    border-color:
-        var(--ew-accent);
-    color:
-        #ffffff;
-    box-shadow:
-        0 6px 16px
-        rgba(240, 90, 40, 0.22);
-}
-.filter-chip.active:hover {
-    background:
-        var(--ew-accent-dark);
-    border-color:
-        var(--ew-accent-dark);
-    color:
-        #ffffff;
+  background: var(--ew-accent);
+  border-color: var(--ew-accent);
+  color: #ffffff;
 }
 /* ============================================================
    EVENTS GRID
-============================================================ */
+   ============================================================ */
 .events-grid {
-    width: 100%;
-    max-width: 1200px;
-    margin:
-        0 auto;
-    display:
-        grid;
-    grid-template-columns:
-        repeat(
-            auto-fit,
-            minmax(280px, 1fr)
-        );
-    gap:
-        25px;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  /*
+     Large desktop:
+     4 event cards per row.
+  */
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 20px;
 }
 /* ============================================================
-   EMPTY STATE
-============================================================ */
+   NO EVENTS
+   ============================================================ */
 .no-events-found {
-    width:
-        100%;
-    max-width:
-        1200px;
-    min-height:
-        320px;
-    margin:
-        0 auto;
-    padding:
-        50px 25px;
-    box-sizing:
-        border-box;
-    display:
-        flex;
-    flex-direction:
-        column;
-    align-items:
-        center;
-    justify-content:
-        center;
-    text-align:
-        center;
-    background:
-        var(--ew-surface);
-    border:
-        1px solid
-        var(--ew-border);
-    border-radius:
-        18px;
-    box-shadow:
-        0 8px 25px
-        rgba(0, 0, 0, 0.04);
-}
-.no-events-icon {
-    width:
-        64px;
-    height:
-        64px;
-    margin-bottom:
-        18px;
-    display:
-        flex;
-    align-items:
-        center;
-    justify-content:
-        center;
-    border-radius:
-        50%;
-    background:
-        var(--ew-accent-light);
-    font-size:
-        27px;
+  width: 100%;
+  min-height: 320px;
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  box-sizing: border-box;
+  text-align: center;
+  background: var(--ew-surface);
+  border: 1px solid var(--ew-border);
+  border-radius: 20px;
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.04);
 }
 .no-events-found h2 {
-    margin:
-        0 0 10px;
-    color:
-        var(--ew-text);
-    font-size:
-        1.4rem;
-    font-weight:
-        750;
+  margin: 0 0 10px;
+  font-size: 1.5rem;
+  font-weight: 750;
 }
 .no-events-found p {
-    max-width:
-        420px;
-    margin:
-        0 0 24px;
-    color:
-        var(--ew-text-secondary);
-    font-size:
-        15px;
-    line-height:
-        1.65;
+  max-width: 460px;
+  margin: 0 0 22px;
+  color: var(--ew-text-secondary);
+  font-size: 15px;
+  line-height: 1.6;
 }
-/* CLEAR FILTERS */
 .clear-events-filters {
-    display:
-        inline-flex;
-    align-items:
-        center;
-    justify-content:
-        center;
-    min-height:
-        44px;
-    padding:
-        0 20px;
-    border-radius:
-        9px;
-    background:
-        var(--ew-accent);
-    color:
-        #ffffff;
-    text-decoration:
-        none;
-    font-size:
-        14px;
-    font-weight:
-        700;
-    box-shadow:
-        0 5px 14px
-        rgba(240, 90, 40, 0.2);
-    transition:
-        background 0.2s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 10px;
+  background: var(--ew-accent);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 .clear-events-filters:hover {
-    background:
-        var(--ew-accent-dark);
-    transform:
-        translateY(-2px);
-    box-shadow:
-        0 8px 18px
-        rgba(240, 90, 40, 0.28);
+  background: var(--ew-accent-dark);
+  transform: translateY(-1px);
+}
+/* ============================================================
+   PAGINATION
+   ============================================================ */
+.events-pagination {
+  width: 100%;
+  max-width: 1280px;
+  margin: 42px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+/* ============================================================
+   PAGINATION PAGE NUMBERS
+   ============================================================ */
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+/* ============================================================
+   PAGINATION BUTTON
+   ============================================================ */
+.pagination-btn {
+  min-width: 42px;
+  height: 42px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--ew-border);
+  border-radius: 10px;
+  background: var(--ew-surface);
+  color: var(--ew-text);
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.pagination-btn:hover:not(:disabled) {
+  background: var(--ew-accent-light);
+  border-color: var(--ew-accent);
+  color: var(--ew-accent);
+  transform: translateY(-1px);
+}
+.pagination-btn.active {
+  background: var(--ew-accent);
+  border-color: var(--ew-accent);
+  color: #ffffff;
+  box-shadow:
+    0 4px 12px rgba(240, 90, 40, 0.18);
+}
+.pagination-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+/* ============================================================
+   PREVIOUS / NEXT
+   ============================================================ */
+.pagination-prev,
+.pagination-next {
+  min-width: 100px;
+}
+.pagination-prev span:first-child,
+.pagination-next span:last-child {
+  font-size: 17px;
+  line-height: 1;
+}
+/* ============================================================
+   ELLIPSIS
+   ============================================================ */
+.pagination-ellipsis {
+  min-width: 24px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ew-text-secondary);
+  font-size: 16px;
+  font-weight: 700;
+}
+/* ============================================================
+   PAGINATION INFO
+   ============================================================ */
+.pagination-info {
+  width: 100%;
+  margin-top: 8px;
+  text-align: center;
+  color: var(--ew-text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+/* ============================================================
+   EXTRA LARGE DESKTOP
+   ============================================================ */
+@media (min-width: 1500px) {
+  .events-page {
+    padding-left: 6%;
+    padding-right: 6%;
+  }
+  .events-header,
+  .events-search,
+  .events-page .city-chips,
+  .sticky-filters,
+  .events-grid,
+  .events-pagination {
+    max-width: 1400px;
+  }
+  .events-grid {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr));
+    gap: 22px;
+  }
+}
+/* ============================================================
+   DESKTOP
+   ============================================================ */
+@media (max-width: 1200px) {
+  .events-page {
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+  .events-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
 }
 /* ============================================================
    TABLET
-============================================================ */
+   ============================================================ */
 @media (max-width: 900px) {
-    .events-page {
-        padding:
-            50px 25px 75px;
-    }
-    .events-header h1 {
-        font-size:
-            2.1rem;
-    }
-    .events-grid {
-        grid-template-columns:
-            repeat(
-                2,
-                minmax(0, 1fr)
-            );
-        gap:
-            20px;
-    }
-    .sticky-filters {
-        top:
-            64px;
-    }
+  .events-page {
+    padding: 50px 25px 75px;
+  }
+  .events-header h1 {
+    font-size: 2.1rem;
+  }
+  .events-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .sticky-filters {
+    top: 64px;
+  }
+  .events-pagination {
+    margin-top: 35px;
+  }
+  .pagination-prev,
+  .pagination-next {
+    min-width: 90px;
+  }
 }
 /* ============================================================
    MOBILE
-============================================================ */
+   ============================================================ */
+
 @media (max-width: 600px) {
-    .events-page {
-        padding:
-            35px 16px 65px;
-    }
-    /* HEADER */
-    .events-header {
-        margin-bottom:
-            22px;
-    }
-    .events-header h1 {
-        font-size:
-            1.85rem;
-        letter-spacing:
-            -0.4px;
-    }
-    .events-header p {
-        font-size:
-            14px;
-    }
-    /* SEARCH */
-    .events-search {
-        margin-bottom:
-            15px;
-    }
-    .events-search input {
-        height:
-            50px;
-        padding-left:
-            46px;
-        font-size:
-            14px;
-        border-radius:
-            11px;
-    }
-    .events-search-icon {
-        left:
-            16px;
-        width:
-            18px;
-        height:
-            18px;
-    }
-    /* CITY SECTION */
-    .events-page
-    .city-chips-section {
-        padding-top:
-            15px;
-        padding-bottom:
-            5px;
-    }
-    /* FILTERS */
-    .sticky-filters {
-        top:
-            63px;
-        margin-top:
-            15px;
-        margin-bottom:
-            24px;
-        gap:
-            8px;
-        padding:
-            10px 0;
-    }
-    .filter-chip {
-        min-height:
-            38px;
-        padding:
-            0 15px;
-        font-size:
-            13px;
-    }
-    /* GRID */
-    .events-grid {
-        grid-template-columns:
-            1fr;
-        gap:
-            18px;
-    }
-    /* EMPTY */
-    .no-events-found {
-        min-height:
-            280px;
-        padding:
-            40px 20px;
-        border-radius:
-            16px;
-    }
-    .no-events-icon {
-        width:
-            56px;
-        height:
-            56px;
-        font-size:
-            23px;
-    }
-    .no-events-found h2 {
-        font-size:
-            1.2rem;
-    }
-    .no-events-found p {
-        font-size:
-            14px;
-    }
+  .events-page {
+    padding: 28px 12px 55px;
+  }
+
+  .events-header {
+    margin-bottom: 18px;
+  }
+
+  .events-header h1 {
+    font-size: 1.65rem;
+  }
+
+  .events-header p {
+    font-size: 13px;
+  }
+
+  .events-search {
+    margin-bottom: 16px;
+  }
+
+  .events-search input {
+    height: 46px;
+    padding: 0 13px;
+    border-radius: 11px;
+    font-size: 13px;
+  }
+
+  .sticky-filters {
+    top: 60px;
+    margin-top: 16px;
+    margin-bottom: 20px;
+    padding: 9px 0;
+    gap: 7px;
+  }
+
+  .filter-chip {
+    min-height: 36px;
+    padding: 0 13px;
+    font-size: 12px;
+  }
+
+  .events-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .events-pagination {
+    margin-top: 28px;
+    gap: 6px;
+  }
+
+  .pagination-pages {
+    gap: 4px;
+  }
+
+  .pagination-btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 8px;
+    border-radius: 8px;
+    font-size: 12px;
+  }
+
+  .pagination-prev,
+  .pagination-next {
+    min-width: 36px;
+    width: 36px;
+    padding: 0;
+  }
+
+  .pagination-prev span:nth-child(2),
+  .pagination-next span:first-child {
+    display: none;
+  }
+
+  .pagination-prev span:first-child,
+  .pagination-next span:last-child {
+    font-size: 15px;
+  }
+
+  .pagination-ellipsis {
+    min-width: 17px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .pagination-info {
+    margin-top: 7px;
+    font-size: 11px;
+  }
 }
-/* ============================================================
-   SMALL PHONES
-============================================================ */
+
 @media (max-width: 380px) {
-    .events-page {
-        padding-left:
-            14px;
-        padding-right:
-            14px;
-    }
-    .events-header h1 {
-        font-size:
-            1.65rem;
-    }
-    .filter-chip {
-        padding:
-            0 13px;
-        font-size:
-            12.5px;
-    }
-}
-/* ============================================================
-   ACCESSIBILITY
-============================================================ */
-.events-search input:focus-visible,
-.filter-chip:focus-visible,
-.clear-events-filters:focus-visible {
-    outline:
-        2px solid
-        var(--ew-accent);
-    outline-offset:
-        3px;
+  .events-page {
+    padding: 25px 10px 50px;
+  }
+
+  .events-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .events-search input {
+    height: 44px;
+    font-size: 12px;
+  }
+
+  .sticky-filters {
+    top: 57px;
+    margin-top: 14px;
+    margin-bottom: 17px;
+    padding: 8px 0;
+  }
+
+  .filter-chip {
+    min-height: 34px;
+    padding: 0 11px;
+    font-size: 11px;
+  }
+
+  .events-grid {
+    gap: 12px;
+  }
+
+  .pagination-btn {
+    min-width: 34px;
+    height: 34px;
+    font-size: 11px;
+  }
 }

@@ -6,7 +6,7 @@ import "../styles/ForgotPassword.css";
    BACKEND API URL
 ============================================================ */
 
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 /* ============================================================
    FORGOT PASSWORD
@@ -35,7 +35,7 @@ function ForgotPassword() {
     }
 
     try {
-      if (!API_URL) {
+      if (!BACKEND_URL) {
         setError(
           "Login service is not configured. Please try again later."
         );
@@ -43,7 +43,7 @@ function ForgotPassword() {
       }
 
       const response = await fetch(
-        `${API_URL}/forgot-password`,
+        `${BACKEND_URL}/forgot-password`,
         {
           method: "POST",
           headers: {

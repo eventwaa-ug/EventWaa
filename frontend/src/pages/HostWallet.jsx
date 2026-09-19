@@ -8,7 +8,7 @@ import {
 } from "react-icons/fi";
 import "./../styles/HostWallet.css";
 import { useAuth } from "../context/AuthContext";
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function HostWallet() {
     const { user } = useAuth();
     const [wallet, setWallet] = useState({
@@ -37,7 +37,7 @@ function HostWallet() {
         if (!user?.id) return;
         try {
             const response = await fetch(
-                `${API_URL}/host/wallet/${user.id}`
+                `${BACKEND_URL}/host/wallet/${user.id}`
             );
             const data = await response.json();
             if (!response.ok) {
@@ -114,7 +114,7 @@ function HostWallet() {
         const loadEarnings = async () => {
             try {
                 const response = await fetch(
-                    `${API_URL}/host/earnings/${user.id}`
+                    `${BACKEND_URL}/host/earnings/${user.id}`
                 );
                 const data = await response.json();
                 if (!response.ok) {
@@ -163,7 +163,7 @@ function HostWallet() {
         }
         try {
             const response = await fetch(
-                `${API_URL}/host/wallet/withdraw/${user.id}`,
+                `${BACKEND_URL}/host/wallet/withdraw/${user.id}`,
                 {
                     method: "POST",
                     headers: {

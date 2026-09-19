@@ -8,7 +8,7 @@ import {
 
 import "./PlatformStats.css";
 
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 function PlatformStats() {
 
@@ -36,7 +36,7 @@ function PlatformStats() {
         // ==========================================
 
         const eventsResponse =
-          await fetch(`${API_URL}/events`);
+          await fetch(`${BACKEND_URL}/events`);
 
         const eventsData =
           await eventsResponse.json();
@@ -47,7 +47,7 @@ function PlatformStats() {
         // ==========================================
 
         const usersResponse =
-          await fetch(`${API_URL}/users`);
+          await fetch(`${BACKEND_URL}/users`);
 
         const usersData =
           await usersResponse.json();
@@ -58,7 +58,7 @@ function PlatformStats() {
         // ==========================================
 
         const bookingsResponse =
-          await fetch(`${API_URL}/bookings`);
+          await fetch(`${BACKEND_URL}/bookings`);
 
         const bookingsData =
           await bookingsResponse.json();
@@ -69,7 +69,7 @@ function PlatformStats() {
         // ==========================================
 
         const reviewsResponse =
-          await fetch(`${API_URL}/reviews`);
+          await fetch(`${BACKEND_URL}/reviews`);
 
         const reviewsData =
           await reviewsResponse.json();

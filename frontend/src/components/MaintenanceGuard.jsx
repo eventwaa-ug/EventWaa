@@ -6,7 +6,7 @@ import Maintenance from "../pages/Maintenance";
    BACKEND API URL
 ============================================================ */
 
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 /* ============================================================
    MAINTENANCE GUARD
@@ -63,7 +63,7 @@ function MaintenanceGuard({ children }) {
         const checkMaintenance =
             async () => {
                 try {
-                    if (!API_URL) {
+                    if (!BACKEND_URL) {
                         console.error(
                             "VITE_API_BASE_URL is not configured."
                         );
@@ -80,7 +80,7 @@ function MaintenanceGuard({ children }) {
 
                     const response =
                         await fetch(
-                            `${API_URL}/admin/settings`
+                            `${BACKEND_URL}/admin/settings`
                         );
 
                     /*

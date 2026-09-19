@@ -13,7 +13,7 @@ import {
 } from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
 import "../styles/HostRefunds.css";
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 function HostRefunds() {
   const { user } = useAuth();
   const [refunds, setRefunds] = useState([]);
@@ -36,7 +36,7 @@ function HostRefunds() {
       setLoading(true);
       setError("");
       const response = await fetch(
-        `${API_URL}/refunds/host?email=${encodeURIComponent(
+        `${BACKEND_URL}/refunds/host?email=${encodeURIComponent(
           user.email
         )}`
       );
@@ -125,7 +125,7 @@ function HostRefunds() {
       setProcessingId(refund.id);
       setError("");
       const response = await fetch(
-        `${API_URL}/refunds/${refund.id}/host-review`,
+        `${BACKEND_URL}/refunds/${refund.id}/host-review`,
         {
           method: "PUT",
           headers: {

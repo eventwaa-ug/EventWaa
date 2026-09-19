@@ -1613,6 +1613,59 @@ def get_admin_token_serializer():
     )
 
 # ============================================================
+# VERIFY ADMIN AUTH TOKEN
+# ============================================================
+
+def verify_admin_token():
+
+    auth_header = request.headers.get(
+        "Authorization",
+        ""
+    ).strip()
+
+    # --------------------------------------------------------
+    # Expected format:
+    #
+    # Authorization: Bearer <admin_token>
+    # --------------------------------------------------------
+
+    if not auth_header.startswith(
+        "Bearer "
+    ):
+
+        return False
+
+    token = auth_header[
+        len("Bearer "):
+    ].strip()
+
+    if not token:
+
+        return False
+
+    try:
+
+        serializer = (
+            get_admin_token_serializer()
+        )
+
+        serializer.loads(
+            token,
+            max_age=60 * 60 * 24
+        )
+
+        return True
+
+    except Exception as e:
+
+        print(
+            "ADMIN TOKEN VERIFICATION ERROR:",
+            repr(e)
+        )
+
+        return False
+
+# ============================================================
 # ADMIN TEAM TOKEN AUTHENTICATION
 #
 # IMPORTANT:
@@ -26614,47 +26667,63 @@ def update_event_booking(event_id):
 
 
 # ============================================================
-# CANCEL EVENT
+# EVENT CANCELLATION ENGINE
 #
-# Host cancellation:
-# - Cancels the event without deleting it
-# - Ignores the normal refund window
-# - Gives full ticket-subtotal refunds
-# - Charges NO refund fee
-# - Reverses host earnings
-# - Reverses EventWaa commission/service-fee accounting
-# - Invalidates all affected tickets
-# - Preserves cancellation/refund history
+# Shared by:
+# - Host event cancellation
+# - Admin event cancellation
+#
+# Host:
+#   Must own the event.
+#
+# Admin:
+#   Must have a valid admin authentication token.
+#
+# Important:
+# - Event is cancelled, never deleted.
+# - Paid tickets are refunded.
+# - Free passes are invalidated.
+# - Tickets become unusable.
+# - Normal host earnings are reversed.
+# - EventWaa accounting is reversed.
+# - Official EventWaa events do not require a host wallet.
 # ============================================================
 
-@app.route("/events/<int:event_id>/cancel", methods=["POST"])
-def cancel_event(event_id):
-
-    data = request.get_json() or {}
-
-    host_email = str(
-        data.get("hostEmail", "")
-    ).strip().lower()
-
-    cancellation_reason = str(
-        data.get(
-            "reason",
-            "Event cancelled by host"
-        )
-    ).strip()
-
-    if not cancellation_reason:
-        cancellation_reason = "Event cancelled by host"
+def process_event_cancellation(
+    event_id,
+    cancellation_reason,
+    cancelled_by,
+    is_admin=False
+):
 
     # ========================================================
     # LOAD DATA
     # ========================================================
 
-    events = load_json_file("events.json", [])
-    bookings = load_json_file("bookings.json", [])
-    refunds = load_json_file("refunds.json", [])
-    host_wallets = load_json_file("host_wallets.json", [])
-    users = load_json_file("users.json", [])
+    events = load_json_file(
+        "events.json",
+        []
+    )
+
+    bookings = load_json_file(
+        "bookings.json",
+        []
+    )
+
+    refunds = load_json_file(
+        "refunds.json",
+        []
+    )
+
+    host_wallets = load_json_file(
+        "host_wallets.json",
+        []
+    )
+
+    users = load_json_file(
+        "users.json",
+        []
+    )
 
     admin_wallet = load_json_file(
         "wallet.json",
@@ -26674,42 +26743,94 @@ def cancel_event(event_id):
     event = next(
         (
             e for e in events
-            if str(e.get("id")) == str(event_id)
+            if str(e.get("id"))
+            == str(event_id)
         ),
         None
     )
 
     if not event:
+
         return {
             "success": False,
             "message": "Event not found."
         }, 404
 
     # ========================================================
-    # HOST AUTHORIZATION
+    # EVENT OWNER
     # ========================================================
 
     event_host_email = str(
-        event.get("hostEmail", "")
+        event.get(
+            "hostEmail",
+            ""
+        )
     ).strip().lower()
 
-    if not host_email:
-        return {
-            "success": False,
-            "message": "Host email is required."
-        }, 400
+    # ========================================================
+    # OFFICIAL EVENTWAA EVENT
+    #
+    # These events have:
+    # hostId = 0
+    # adminEvent = true
+    # hostEmail = admin@eventwaa.com
+    #
+    # They do NOT require a host wallet.
+    # ========================================================
 
-    if host_email != event_host_email:
-        return {
-            "success": False,
-            "message": "You are not authorized to cancel this event."
-        }, 403
+    is_official_event = (
+        str(
+            event.get(
+                "adminEvent",
+                False
+            )
+        ).lower()
+        == "true"
+    )
+
+    # ========================================================
+    # AUTHORIZATION
+    # ========================================================
+
+    if not is_admin:
+
+        # ----------------------------------------------------
+        # HOST CANCELLATION
+        # ----------------------------------------------------
+
+        host_email = (
+            str(cancelled_by)
+            if isinstance(cancelled_by, str)
+            else ""
+        ).strip().lower()
+
+        if not host_email:
+
+            return {
+                "success": False,
+                "message": "Host email is required."
+            }, 400
+
+        if host_email != event_host_email:
+
+            return {
+                "success": False,
+                "message": (
+                    "You are not authorized to "
+                    "cancel this event."
+                )
+            }, 403
 
     # ========================================================
     # ALREADY CANCELLED
     # ========================================================
 
-    if str(event.get("status", "")).lower() == "cancelled":
+    if str(
+        event.get(
+            "status",
+            ""
+        )
+    ).lower() == "cancelled":
 
         return {
             "success": True,
@@ -26718,17 +26839,21 @@ def cancel_event(event_id):
         }, 200
 
     # ========================================================
-    # FIND BOOKINGS FOR THIS EVENT
+    # FIND EVENT BOOKINGS
     # ========================================================
 
     event_bookings = [
         booking
         for booking in bookings
-        if str(booking.get("eventId")) == str(event_id)
+        if str(
+            booking.get(
+                "eventId"
+            )
+        ) == str(event_id)
     ]
 
     # ========================================================
-    # IDENTIFY BOOKINGS THAT STILL NEED REFUNDING
+    # IDENTIFY BOOKINGS THAT STILL NEED PROCESSING
     # ========================================================
 
     refundable_bookings = []
@@ -26738,35 +26863,62 @@ def cancel_event(event_id):
     for booking in event_bookings:
 
         refund_status = str(
-            booking.get("refundStatus", "")
+            booking.get(
+                "refundStatus",
+                ""
+            )
         ).lower()
 
         if refund_status == "refunded":
+
             already_refunded += 1
+
             continue
 
-        refundable_bookings.append(booking)
+        refundable_bookings.append(
+            booking
+        )
 
     # ========================================================
-    # PRE-CHECK WALLET FUNDS
-    #
-    # We do this BEFORE changing the event status.
-    # This protects against cancelling an event halfway through
-    # because the host wallet cannot cover the refunds.
+    # SETTINGS
     # ========================================================
 
     settings = load_admin_settings()
 
     commission_percent = float(
-        settings.get("commission", 10) or 0
+        settings.get(
+            "commission",
+            10
+        )
+        or 0
     )
 
     commission_percent = max(
         0,
-        min(100, commission_percent)
+        min(
+            100,
+            commission_percent
+        )
     )
 
+    # ========================================================
+    # PRE-CHECK FINANCIAL REQUIREMENTS
+    #
+    # IMPORTANT:
+    #
+    # Normal host event:
+    # - Host pays its original net share.
+    # - EventWaa reverses commission + service fee.
+    #
+    # Official EventWaa event:
+    # - No host wallet.
+    # - EventWaa funded the entire ticket subtotal.
+    # - EventWaa reverses the entire ticket subtotal
+    #   + service fee.
+    # ========================================================
+
     total_host_refund_required = 0
+
     total_platform_reversal_required = 0
 
     for booking in refundable_bookings:
@@ -26775,25 +26927,18 @@ def cancel_event(event_id):
             float(
                 booking.get(
                     "subtotal",
-                    booking.get("ticketPrice", 0)
-                ) or 0
+                    booking.get(
+                        "ticketPrice",
+                        0
+                    )
+                )
+                or 0
             )
         )
 
         if original_amount <= 0:
-            continue
 
-        host_original_amount = int(
-            round(
-                original_amount
-                -
-                (
-                    original_amount
-                    * commission_percent
-                    / 100
-                )
-            )
-        )
+            continue
 
         service_fee = int(
             round(
@@ -26801,84 +26946,143 @@ def cancel_event(event_id):
                     booking.get(
                         "serviceFee",
                         0
-                    ) or 0
+                    )
+                    or 0
                 )
             )
         )
 
-        total_host_refund_required += host_original_amount
+        if is_official_event:
+
+            # EventWaa is the owner/funder.
+            host_original_amount = 0
+
+            platform_reversal = (
+                original_amount
+                + service_fee
+            )
+
+        else:
+
+            host_original_amount = int(
+                round(
+                    original_amount
+                    -
+                    (
+                        original_amount
+                        *
+                        commission_percent
+                        /
+                        100
+                    )
+                )
+            )
+
+            platform_reversal = (
+                original_amount
+                -
+                host_original_amount
+                +
+                service_fee
+            )
+
+        total_host_refund_required += (
+            host_original_amount
+        )
 
         total_platform_reversal_required += (
-            original_amount
-            - host_original_amount
-            + service_fee
+            platform_reversal
         )
 
     # ========================================================
     # FIND HOST WALLET
+    #
+    # Official EventWaa events intentionally skip this.
     # ========================================================
 
-    host_id = event.get("hostId")
-
-    host_wallet = next(
-        (
-            wallet for wallet in host_wallets
-            if str(wallet.get("hostId")) == str(host_id)
-        ),
-        None
+    host_id = event.get(
+        "hostId"
     )
 
-    # If the event has paid bookings, the host wallet must exist.
-    if total_host_refund_required > 0 and not host_wallet:
+    host_wallet = None
 
-        return {
-            "success": False,
-            "message": (
-                "The host wallet could not be found. "
-                "The event was not cancelled."
-            )
-        }, 400
+    if not is_official_event:
 
-    # ========================================================
-    # CHECK HOST WALLET TOTAL FUNDS
-    # ========================================================
-
-    if host_wallet:
-
-        available_balance = float(
-            host_wallet.get(
-                "availableBalance",
-                0
-            ) or 0
-        )
-
-        pending_payouts = float(
-            host_wallet.get(
-                "pendingPayouts",
-                0
-            ) or 0
-        )
-
-        host_total_available = (
-            available_balance
-            + pending_payouts
+        host_wallet = next(
+            (
+                wallet
+                for wallet in host_wallets
+                if str(
+                    wallet.get(
+                        "hostId"
+                    )
+                )
+                == str(
+                    host_id
+                )
+            ),
+            None
         )
 
         if (
-            total_host_refund_required
-            > host_total_available
+            total_host_refund_required > 0
+            and not host_wallet
         ):
 
             return {
                 "success": False,
                 "message": (
-                    "The host wallet does not have enough "
-                    "funds to process all event cancellation "
-                    "refunds. The event was not cancelled."
-                ),
-                "required": total_host_refund_required,
-                "available": host_total_available
+                    "The host wallet could not be found. "
+                    "The event was not cancelled."
+                )
             }, 400
+
+        # ----------------------------------------------------
+        # CHECK HOST WALLET
+        # ----------------------------------------------------
+
+        if host_wallet:
+
+            available_balance = float(
+                host_wallet.get(
+                    "availableBalance",
+                    0
+                )
+                or 0
+            )
+
+            pending_payouts = float(
+                host_wallet.get(
+                    "pendingPayouts",
+                    0
+                )
+                or 0
+            )
+
+            host_total_available = (
+                available_balance
+                +
+                pending_payouts
+            )
+
+            if (
+                total_host_refund_required
+                > host_total_available
+            ):
+
+                return {
+                    "success": False,
+                    "message": (
+                        "The host wallet does not have "
+                        "enough funds to process all "
+                        "event cancellation refunds. "
+                        "The event was not cancelled."
+                    ),
+                    "required":
+                        total_host_refund_required,
+                    "available":
+                        host_total_available
+                }, 400
 
     # ========================================================
     # CHECK EVENTWAA WALLET
@@ -26888,7 +27092,8 @@ def cancel_event(event_id):
         admin_wallet.get(
             "availableBalance",
             0
-        ) or 0
+        )
+        or 0
     )
 
     if (
@@ -26899,12 +27104,15 @@ def cancel_event(event_id):
         return {
             "success": False,
             "message": (
-                "EventWaa does not currently have enough "
-                "platform balance to reverse the fees for "
-                "this cancellation. The event was not cancelled."
+                "EventWaa does not currently have "
+                "enough platform balance to reverse "
+                "the fees for this cancellation. "
+                "The event was not cancelled."
             ),
-            "required": total_platform_reversal_required,
-            "available": platform_available
+            "required":
+                total_platform_reversal_required,
+            "available":
+                platform_available
         }, 400
 
     # ========================================================
@@ -26912,8 +27120,14 @@ def cancel_event(event_id):
     # ========================================================
 
     processed_refunds = 0
+
     total_refunded = 0
+
     free_bookings_cancelled = 0
+
+    # ========================================================
+    # PROCESS EACH BOOKING
+    # ========================================================
 
     for booking in refundable_bookings:
 
@@ -26921,24 +27135,32 @@ def cancel_event(event_id):
             float(
                 booking.get(
                     "subtotal",
-                    booking.get("ticketPrice", 0)
-                ) or 0
+                    booking.get(
+                        "ticketPrice",
+                        0
+                    )
+                )
+                or 0
             )
         )
 
         # ====================================================
         # FREE BOOKING
-        #
-        # No money needs to move, but the ticket must become
-        # invalid because the event has been cancelled.
         # ====================================================
 
         if original_amount <= 0:
 
             refund_ids = [
-                int(r.get("id"))
+                int(
+                    r.get("id")
+                )
                 for r in refunds
-                if str(r.get("id", "")).isdigit()
+                if str(
+                    r.get(
+                        "id",
+                        ""
+                    )
+                ).isdigit()
             ]
 
             next_refund_id = (
@@ -26948,66 +27170,155 @@ def cancel_event(event_id):
             )
 
             zero_refund = {
-                "id": next_refund_id,
-                "bookingId": booking.get("id"),
-                "eventId": event.get("id"),
-                "eventTitle": event.get("title"),
-                "buyer": booking.get("buyer"),
-                "quantity": booking.get("quantity", 0),
-                "originalAmount": 0,
-                "refundFeePercent": 0,
-                "refundFee": 0,
-                "amount": 0,
-                "refundAmount": 0,
-                "hostRefundAmount": 0,
-                "hostId": host_id,
-                "hostEmail": event_host_email,
-                "source": "event_cancellation",
-                "status": "refunded",
-                "reason": cancellation_reason,
-                "requestedAt": datetime.now().isoformat(),
-                "processedAt": datetime.now().isoformat(),
-                "reviewedAt": datetime.now().isoformat(),
-                "processedBy": host_email,
-                "reviewedBy": host_email,
-                "cancellation": True
+
+                "id":
+                    next_refund_id,
+
+                "bookingId":
+                    booking.get("id"),
+
+                "eventId":
+                    event.get("id"),
+
+                "eventTitle":
+                    event.get("title"),
+
+                "buyer":
+                    booking.get("buyer"),
+
+                "quantity":
+                    booking.get(
+                        "quantity",
+                        0
+                    ),
+
+                "originalAmount":
+                    0,
+
+                "refundFeePercent":
+                    0,
+
+                "refundFee":
+                    0,
+
+                "amount":
+                    0,
+
+                "refundAmount":
+                    0,
+
+                "hostRefundAmount":
+                    0,
+
+                "hostId":
+                    host_id,
+
+                "hostEmail":
+                    event_host_email,
+
+                "source":
+                    "event_cancellation",
+
+                "status":
+                    "refunded",
+
+                "reason":
+                    cancellation_reason,
+
+                "requestedAt":
+                    datetime.now().isoformat(),
+
+                "processedAt":
+                    datetime.now().isoformat(),
+
+                "reviewedAt":
+                    datetime.now().isoformat(),
+
+                "processedBy":
+                    cancelled_by,
+
+                "reviewedBy":
+                    cancelled_by,
+
+                "cancellation":
+                    True
             }
 
-            refunds.append(zero_refund)
+            refunds.append(
+                zero_refund
+            )
 
-            booking["refundStatus"] = "refunded"
-            booking["refundId"] = next_refund_id
+            booking["refundStatus"] = (
+                "refunded"
+            )
+
+            booking["refundId"] = (
+                next_refund_id
+            )
+
             booking["refundAmount"] = 0
+
             booking["refundFee"] = 0
+
             booking["refundFeePercent"] = 0
-            booking["refundedAt"] = datetime.now().isoformat()
 
-            for ticket in booking.get("tickets", []):
+            booking["refundedAt"] = (
+                datetime.now().isoformat()
+            )
 
-                ticket["refundStatus"] = "refunded"
-                ticket["refundedAt"] = datetime.now().isoformat()
+            # ----------------------------------------------
+            # INVALIDATE FREE TICKETS
+            # ----------------------------------------------
+
+            for ticket in booking.get(
+                "tickets",
+                []
+            ):
+
+                ticket["refundStatus"] = (
+                    "refunded"
+                )
+
+                ticket["refundedAt"] = (
+                    datetime.now().isoformat()
+                )
 
             free_bookings_cancelled += 1
 
+            # ----------------------------------------------
+            # BUYER NOTIFICATION
+            # ----------------------------------------------
+
             try:
+
                 buyer = booking.get(
                     "buyer",
                     {}
                 )
 
-                if isinstance(buyer, dict):
+                if isinstance(
+                    buyer,
+                    dict
+                ):
 
                     buyer_email = str(
-                        buyer.get("email", "")
+                        buyer.get(
+                            "email",
+                            ""
+                        )
                     ).strip()
 
                     buyer_name = str(
-                        buyer.get("name", "")
+                        buyer.get(
+                            "name",
+                            ""
+                        )
                     ).strip()
 
                 else:
 
                     buyer_email = ""
+
                     buyer_name = ""
 
                 try:
@@ -27033,10 +27344,10 @@ def cancel_event(event_id):
                 except Exception as e:
 
                     print(
-                        "FREE CANCELLATION NOTIFICATION ERROR:",
+                        "FREE CANCELLATION "
+                        "NOTIFICATION ERROR:",
                         repr(e)
                     )
-
 
                 try:
 
@@ -27052,35 +27363,54 @@ def cancel_event(event_id):
 
                         is_free=True,
 
-                        cancellation_reason=cancellation_reason
+                        cancellation_reason=(
+                            cancellation_reason
+                        )
 
                     )
 
                 except Exception as e:
 
                     print(
-                        "FREE CANCELLATION EMAIL ERROR:",
+                        "FREE CANCELLATION "
+                        "EMAIL ERROR:",
                         repr(e)
                     )
-            except Exception:
-                pass
+
+            except Exception as e:
+
+                print(
+                    "FREE BOOKING "
+                    "NOTIFICATION ERROR:",
+                    repr(e)
+                )
 
             continue
 
         # ====================================================
         # FIND EXISTING PENDING REFUND
-        #
-        # If the customer already requested a refund, we reuse
-        # that refund record and convert it into a cancellation
-        # refund.
         # ====================================================
 
         existing_refund = next(
             (
-                r for r in refunds
-                if str(r.get("bookingId"))
-                == str(booking.get("id"))
-                and str(r.get("status", "")).lower()
+                r
+                for r in refunds
+                if str(
+                    r.get(
+                        "bookingId"
+                    )
+                )
+                == str(
+                    booking.get(
+                        "id"
+                    )
+                )
+                and str(
+                    r.get(
+                        "status",
+                        ""
+                    )
+                ).lower()
                 == "pending"
             ),
             None
@@ -27090,13 +27420,28 @@ def cancel_event(event_id):
 
             refund = existing_refund
 
-            refund["source"] = "event_cancellation"
-            refund["reason"] = cancellation_reason
+            refund["source"] = (
+                "event_cancellation"
+            )
+
+            refund["reason"] = (
+                cancellation_reason
+            )
+
             refund["refundFeePercent"] = 0
+
             refund["refundFee"] = 0
-            refund["amount"] = original_amount
-            refund["refundAmount"] = original_amount
+
+            refund["amount"] = (
+                original_amount
+            )
+
+            refund["refundAmount"] = (
+                original_amount
+            )
+
             refund["cancellation"] = True
+
             refund["requestedAt"] = (
                 refund.get(
                     "requestedAt",
@@ -27107,9 +27452,16 @@ def cancel_event(event_id):
         else:
 
             refund_ids = [
-                int(r.get("id"))
+                int(
+                    r.get("id")
+                )
                 for r in refunds
-                if str(r.get("id", "")).isdigit()
+                if str(
+                    r.get(
+                        "id",
+                        ""
+                    )
+                ).isdigit()
             ]
 
             next_refund_id = (
@@ -27119,50 +27471,96 @@ def cancel_event(event_id):
             )
 
             refund = {
-                "id": next_refund_id,
-                "bookingId": booking.get("id"),
-                "eventId": event.get("id"),
-                "eventTitle": event.get("title"),
-                "buyer": booking.get("buyer"),
-                "quantity": booking.get("quantity", 0),
-                "originalAmount": original_amount,
-                "refundFeePercent": 0,
-                "refundFee": 0,
-                "amount": original_amount,
-                "refundAmount": original_amount,
-                "hostId": host_id,
-                "hostEmail": event_host_email,
-                "source": "event_cancellation",
-                "status": "pending",
-                "reason": cancellation_reason,
-                "requestedAt": datetime.now().isoformat(),
-                "cancellation": True
+
+                "id":
+                    next_refund_id,
+
+                "bookingId":
+                    booking.get("id"),
+
+                "eventId":
+                    event.get("id"),
+
+                "eventTitle":
+                    event.get("title"),
+
+                "buyer":
+                    booking.get("buyer"),
+
+                "quantity":
+                    booking.get(
+                        "quantity",
+                        0
+                    ),
+
+                "originalAmount":
+                    original_amount,
+
+                "refundFeePercent":
+                    0,
+
+                "refundFee":
+                    0,
+
+                "amount":
+                    original_amount,
+
+                "refundAmount":
+                    original_amount,
+
+                "hostId":
+                    host_id,
+
+                "hostEmail":
+                    event_host_email,
+
+                "source":
+                    "event_cancellation",
+
+                "status":
+                    "pending",
+
+                "reason":
+                    cancellation_reason,
+
+                "requestedAt":
+                    datetime.now().isoformat(),
+
+                "cancellation":
+                    True
             }
 
-            refunds.append(refund)
+            refunds.append(
+                refund
+            )
 
-        # Save the refund before the processor loads refunds.json.
+        # ====================================================
+        # SAVE REFUND BEFORE PROCESSOR
+        # ====================================================
+
         save_json_file(
             "refunds.json",
             refunds
         )
 
         # ====================================================
-        # PROCESS USING THE SAME SHARED REFUND ENGINE
+        # SHARED REFUND ENGINE
         # ====================================================
 
-        result, status_code = process_eventwaa_refund(
+        result, status_code = (
+            process_eventwaa_refund(
 
-            refund=refund,
+                refund=refund,
 
-            booking=booking,
+                booking=booking,
 
-            event=event,
+                event=event,
 
-            cancellation=True,
+                cancellation=True,
 
-            processed_by=host_email
+                processed_by=cancelled_by
 
+            )
         )
 
         if status_code >= 400:
@@ -27170,16 +27568,19 @@ def cancel_event(event_id):
             return {
                 "success": False,
                 "message": (
-                    "A cancellation refund could not be "
-                    "processed. The event was not marked "
-                    "as cancelled."
+                    "A cancellation refund could "
+                    "not be processed. The event "
+                    "was not marked as cancelled."
                 ),
-                "refundError": result
+                "refundError":
+                    result
             }, status_code
 
         processed_refunds += 1
 
-        total_refunded += original_amount
+        total_refunded += (
+            original_amount
+        )
 
     # ========================================================
     # MARK EVENT CANCELLED
@@ -27188,13 +27589,31 @@ def cancel_event(event_id):
     now = datetime.now().isoformat()
 
     event["status"] = "cancelled"
+
     event["cancelled"] = True
+
     event["cancelledAt"] = now
-    event["cancelledBy"] = host_email
-    event["cancellationReason"] = cancellation_reason
+
+    # IMPORTANT:
+    # Record the actual actor.
+    #
+    # Host:
+    #   their email
+    #
+    # Admin:
+    #   "admin"
+    event["cancelledBy"] = (
+        "admin"
+        if is_admin
+        else cancelled_by
+    )
+
+    event["cancellationReason"] = (
+        cancellation_reason
+    )
 
     # ========================================================
-    # SAVE ALL DATA
+    # SAVE DATA
     # ========================================================
 
     save_json_file(
@@ -27212,11 +27631,17 @@ def cancel_event(event_id):
         events
     )
 
-    # ============================================================
-    # ADMIN CANCELLATION NOTIFICATION
-    # ============================================================
+    # ========================================================
+    # ADMIN PLATFORM NOTIFICATION
+    # ========================================================
 
     try:
+
+        actor_text = (
+            "by an administrator"
+            if is_admin
+            else "by the host"
+        )
 
         create_notification(
 
@@ -27226,11 +27651,11 @@ def cancel_event(event_id):
 
             (
                 f"{event.get('title', 'An event')} "
-                f"was cancelled by the host. "
-                f"{processed_refunds} paid refund(s) processed "
-                f"and "
-                f"{free_bookings_cancelled} free pass(es) "
-                f"cancelled."
+                f"was cancelled {actor_text}. "
+                f"{processed_refunds} paid refund(s) "
+                f"processed and "
+                f"{free_bookings_cancelled} free "
+                f"pass(es) cancelled."
             ),
 
             "event_cancellation",
@@ -27242,13 +27667,14 @@ def cancel_event(event_id):
     except Exception as e:
 
         print(
-            "ADMIN CANCELLATION NOTIFICATION ERROR:",
+            "ADMIN CANCELLATION "
+            "NOTIFICATION ERROR:",
             repr(e)
         )
 
-    # ============================================================
+    # ========================================================
     # ADMIN CANCELLATION EMAIL
-    # ============================================================
+    # ========================================================
 
     try:
 
@@ -27256,7 +27682,7 @@ def cancel_event(event_id):
 
             event,
 
-            host_email,
+            event_host_email,
 
             cancellation_reason,
 
@@ -27271,7 +27697,8 @@ def cancel_event(event_id):
     except Exception as e:
 
         print(
-            "ADMIN CANCELLATION EMAIL ERROR:",
+            "ADMIN CANCELLATION "
+            "EMAIL ERROR:",
             repr(e)
         )
 
@@ -27280,21 +27707,156 @@ def cancel_event(event_id):
     # ========================================================
 
     return {
-        "success": True,
-        "message": "Event cancelled successfully.",
-        "eventId": event_id,
-        "eventStatus": "cancelled",
-        "processedRefunds": processed_refunds,
-        "freeBookingsCancelled": free_bookings_cancelled,
-        "alreadyRefunded": already_refunded,
-        "totalRefunded": total_refunded,
-        "refundFee": 0,
-        "cancellation": True
+
+        "success":
+            True,
+
+        "message":
+            "Event cancelled successfully.",
+
+        "eventId":
+            event_id,
+
+        "eventStatus":
+            "cancelled",
+
+        "cancelledBy":
+            (
+                "admin"
+                if is_admin
+                else cancelled_by
+            ),
+
+        "processedRefunds":
+            processed_refunds,
+
+        "freeBookingsCancelled":
+            free_bookings_cancelled,
+
+        "alreadyRefunded":
+            already_refunded,
+
+        "totalRefunded":
+            total_refunded,
+
+        "refundFee":
+            0,
+
+        "cancellation":
+            True
+
     }, 200
+
+
+# ============================================================
+# HOST CANCEL EVENT
+# ============================================================
+
+@app.route(
+    "/events/<int:event_id>/cancel",
+    methods=["POST"]
+)
+def cancel_event(event_id):
+
+    data = request.get_json() or {}
+
+    host_email = str(
+        data.get(
+            "hostEmail",
+            ""
+        )
+    ).strip().lower()
+
+    cancellation_reason = str(
+        data.get(
+            "reason",
+            "Event cancelled by host"
+        )
+    ).strip()
+
+    if not cancellation_reason:
+
+        cancellation_reason = (
+            "Event cancelled by host"
+        )
+
+    return process_event_cancellation(
+
+        event_id=event_id,
+
+        cancellation_reason=(
+            cancellation_reason
+        ),
+
+        cancelled_by=host_email,
+
+        is_admin=False
+
+    )
+
+
+# ============================================================
+# ADMIN CANCEL EVENT
+#
+# Admin can cancel ANY event on the platform.
+#
+# This includes:
+# - Normal host events
+# - Verified host events
+# - Community events
+# - Official EventWaa events
+# ============================================================
+
+@app.route(
+    "/admin/events/<int:event_id>/cancel",
+    methods=["POST"]
+)
+def admin_cancel_event(event_id):
+
+    # ========================================================
+    # ADMIN AUTHENTICATION
+    # ========================================================
+
+    if not verify_admin_token():
+
+        return {
+            "success": False,
+            "message": "Unauthorized."
+        }, 401
+
+    data = request.get_json() or {}
+
+    cancellation_reason = str(
+        data.get(
+            "reason",
+            "Event cancelled by EventWaa administrator"
+        )
+    ).strip()
+
+    if not cancellation_reason:
+
+        cancellation_reason = (
+            "Event cancelled by EventWaa administrator"
+        )
+
+    return process_event_cancellation(
+
+        event_id=event_id,
+
+        cancellation_reason=(
+            cancellation_reason
+        ),
+
+        cancelled_by="admin",
+
+        is_admin=True
+
+    )
 
 # ============================================================
 # REFUND SYSTEM
 # ============================================================
+
 
 # ------------------------------------------------------------
 # CREATE REFUND REQUEST
@@ -27304,9 +27866,13 @@ def cancel_event(event_id):
 @app.route("/refunds", methods=["POST"])
 def create_refund():
 
-    data = request.get_json(silent=True) or {}
+    data = request.get_json(
+        silent=True
+    ) or {}
 
-    booking_id = data.get("bookingId")
+    booking_id = data.get(
+        "bookingId"
+    )
 
     reason = data.get(
         "reason",
@@ -27339,10 +27905,15 @@ def create_refund():
     for current_booking in bookings:
 
         if str(
-            current_booking.get("id")
-        ) == str(booking_id):
+            current_booking.get(
+                "id"
+            )
+        ) == str(
+            booking_id
+        ):
 
             booking = current_booking
+
             break
 
     if not booking:
@@ -27356,11 +27927,18 @@ def create_refund():
     # PREVENT DUPLICATE REFUNDS
     # ========================================================
 
-    if booking.get("refundStatus") in [
+    current_refund_status = str(
+        booking.get(
+            "refundStatus",
+            ""
+        )
+    ).strip().lower()
+
+    if current_refund_status in (
         "pending",
         "refunded",
         "rejected"
-    ]:
+    ):
 
         return jsonify({
             "success": False,
@@ -27403,12 +27981,17 @@ def create_refund():
     for current_event in events:
 
         if str(
-            current_event.get("id")
+            current_event.get(
+                "id"
+            )
         ) == str(
-            booking.get("eventId")
+            booking.get(
+                "eventId"
+            )
         ):
 
             event = current_event
+
             break
 
     if not event:
@@ -27419,6 +28002,30 @@ def create_refund():
         }), 404
 
     # ========================================================
+    # DO NOT CREATE A CUSTOMER REFUND FOR A CANCELLED EVENT
+    #
+    # Event cancellation uses the dedicated cancellation flow.
+    # That flow uses cancellation=True and therefore gives the
+    # customer the full ticket subtotal without a refund fee.
+    # ========================================================
+
+    if str(
+        event.get(
+            "status",
+            ""
+        )
+    ).strip().lower() == "cancelled":
+
+        return jsonify({
+            "success": False,
+            "message": (
+                "This event has been cancelled. "
+                "Its refund must be processed through "
+                "the event cancellation process."
+            )
+        }), 400
+
+    # ========================================================
     # CHECK REFUND DEADLINE
     #
     # DEFAULT = 5 DAYS
@@ -27427,7 +28034,9 @@ def create_refund():
     # settings["refundWindow"]
     # ========================================================
 
-    event_date = event.get("date")
+    event_date = event.get(
+        "date"
+    )
 
     if not event_date:
 
@@ -27448,17 +28057,26 @@ def create_refund():
 
         days_until_event = (
             event_datetime.date()
-            - datetime.now().date()
+            -
+            datetime.now().date()
         ).days
 
-        refund_window = int(
-            settings.get(
-                "refundWindow",
-                5
-            )
-        )
+        try:
 
-        # Prevent an invalid negative setting.
+            refund_window = int(
+                settings.get(
+                    "refundWindow",
+                    5
+                )
+            )
+
+        except (
+            ValueError,
+            TypeError
+        ):
+
+            refund_window = 5
+
         if refund_window < 0:
             refund_window = 0
 
@@ -27511,7 +28129,8 @@ def create_refund():
             booking.get(
                 "quantity",
                 1
-            ) or 1
+            )
+            or 1
         )
 
     except (
@@ -27527,32 +28146,58 @@ def create_refund():
     # ========================================================
     # REFUND CALCULATION
     #
-    # IMPORTANT:
+    # Use the SAME helper used by:
     #
-    # booking["subtotal"] = ticket amount
-    # booking["serviceFee"] = EventWaa service fee
-    # booking["totalPrice"] = host/event accounting amount
+    # - automatic refunds
+    # - host-approved refunds
+    # - event cancellation refunds
     #
-    # Therefore the customer refund is based on SUBTOTAL.
+    # For a normal customer refund:
+    #
+    #     originalAmount = ticket subtotal
+    #     refund fee = configured percentage
+    #     refund amount = subtotal - refund fee
+    #
+    # Service fee is NOT included in the customer refund.
     # ========================================================
 
-    try:
+    money = refund_booking_money(
+        booking,
+        event,
+        cancellation=False
+    )
 
-        original_amount = int(
-            float(
-                booking.get(
-                    "subtotal",
-                    0
-                ) or 0
-            )
+    original_amount = int(
+        money.get(
+            "originalAmount",
+            0
         )
+        or 0
+    )
 
-    except (
-        ValueError,
-        TypeError
-    ):
+    refund_fee_percent = float(
+        money.get(
+            "refundFeePercent",
+            0
+        )
+        or 0
+    )
 
-        original_amount = 0
+    refund_fee = int(
+        money.get(
+            "refundFee",
+            0
+        )
+        or 0
+    )
+
+    refund_amount = int(
+        money.get(
+            "refundAmount",
+            0
+        )
+        or 0
+    )
 
     if original_amount <= 0:
 
@@ -27564,48 +28209,14 @@ def create_refund():
             )
         }), 400
 
-    # ========================================================
-    # REFUND FEE
-    #
-    # DEFAULT = 20%
-    # ADMIN CONTROLLED
-    # ========================================================
+    if refund_amount <= 0:
 
-    try:
-
-        refund_fee_percent = float(
-            settings.get(
-                "refundFeePercent",
-                20
+        return jsonify({
+            "success": False,
+            "message": (
+                "Calculated refund amount is invalid."
             )
-        )
-
-    except (
-        ValueError,
-        TypeError
-    ):
-
-        refund_fee_percent = 20
-
-    # Keep the setting within a safe range.
-    refund_fee_percent = max(
-        0,
-        min(
-            100,
-            refund_fee_percent
-        )
-    )
-
-    refund_fee = round(
-        original_amount
-        * refund_fee_percent
-        / 100
-    )
-
-    refund_amount = max(
-        0,
-        original_amount - refund_fee
-    )
+        }), 400
 
     # ========================================================
     # LOAD REFUNDS
@@ -27682,78 +28293,100 @@ def create_refund():
 
     refund = {
 
-        "id": refund_id,
+        "id":
+            refund_id,
 
-        "bookingId": booking.get(
-            "id"
-        ),
+        "bookingId":
+            booking.get(
+                "id"
+            ),
 
-        "ticketId": booking.get(
-            "ticketId"
-        ),
+        "ticketId":
+            booking.get(
+                "ticketId"
+            ),
 
-        "eventId": booking.get(
-            "eventId"
-        ),
+        "eventId":
+            booking.get(
+                "eventId"
+            ),
 
-        "eventTitle": booking.get(
-            "eventTitle",
-            event.get("title")
-        ),
+        "eventTitle":
+            booking.get(
+                "eventTitle",
+                event.get(
+                    "title"
+                )
+            ),
 
-        "hostId": host_id,
+        "hostId":
+            host_id,
 
-        "hostEmail": host_email,
+        "hostEmail":
+            host_email,
 
-        "hostName": host_name,
+        "hostName":
+            host_name,
 
-        "buyer": booking.get(
-            "buyer"
-        ),
+        "buyer":
+            booking.get(
+                "buyer"
+            ),
 
-        "ticketType": booking.get(
-            "ticketType"
-        ),
+        "ticketType":
+            booking.get(
+                "ticketType"
+            ),
 
-        "quantity": quantity,
+        "quantity":
+            quantity,
 
         # ====================================================
         # ORIGINAL REFUNDABLE TICKET AMOUNT
         # ====================================================
 
-        "originalAmount": original_amount,
+        "originalAmount":
+            original_amount,
 
         # ====================================================
         # REFUND POLICY
         # ====================================================
 
-        "refundFeePercent": refund_fee_percent,
+        "refundFeePercent":
+            refund_fee_percent,
 
-        "refundFee": refund_fee,
+        "refundFee":
+            refund_fee,
 
-        "amount": refund_amount,
+        "amount":
+            refund_amount,
 
         # ====================================================
         # SOURCE
         # ====================================================
 
-        "source": "customer_request",
+        "source":
+            "customer_request",
 
         # ====================================================
         # CUSTOMER REQUEST
         # ====================================================
 
-        "reason": reason,
+        "reason":
+            reason,
 
-        "details": details,
+        "details":
+            details,
 
         # ====================================================
         # HOST REVIEW
         # ====================================================
 
-        "status": "pending",
+        "status":
+            "pending",
 
-        "createdAt": created_at
+        "createdAt":
+            created_at
     }
 
     # ========================================================
@@ -27772,21 +28405,18 @@ def create_refund():
     # ========================================================
     # AUTOMATIC REFUND APPROVAL
     #
-    # If enabled in Admin Settings, the refund is processed
-    # immediately using the SAME processor used by host
-    # approval.
-    #
-    # This prevents separate accounting logic for:
-    # - automatic refunds
-    # - host-approved refunds
-    # - event-cancellation refunds
+    # If enabled in Admin Settings, process immediately using
+    # the SAME processor used by host approval.
     # ========================================================
 
-    auto_refund_approval = bool(
-        settings.get(
-            "autoRefundApproval",
-            False
-        )
+    auto_refund_approval = (
+        str(
+            settings.get(
+                "autoRefundApproval",
+                False
+            )
+        ).strip().lower()
+        == "true"
     )
 
     if auto_refund_approval:
@@ -27812,28 +28442,42 @@ def create_refund():
     # ========================================================
 
     create_notification(
+
         host_email,
+
         "New refund request",
+
         (
             f"A refund request has been submitted for "
             f"{event.get('title', 'your event')}."
         ),
+
         "refund"
+
     )
 
     return {
-        "success": True,
-        "message": (
-            "Refund request submitted and is "
-            "waiting for host approval."
-        ),
-        "autoApproved": False,
-        "refund": refund
+
+        "success":
+            True,
+
+        "message":
+            (
+                "Refund request submitted and is "
+                "waiting for host approval."
+            ),
+
+        "autoApproved":
+            False,
+
+        "refund":
+            refund
+
     }, 201
 
 
 # ============================================================
-# REFUND HELPERS
+# REFUND HELPER
 # ============================================================
 
 def refund_booking_money(
@@ -27884,7 +28528,7 @@ def refund_booking_money(
     # Normal customer-requested refund:
     #     Use Admin refundFeePercent.
     #
-    # Host cancellation:
+    # Host/event cancellation:
     #     No customer refund penalty.
     # ========================================================
 
@@ -27910,7 +28554,10 @@ def refund_booking_money(
 
             refund_fee_percent = 20
 
-    # Safety
+    # ========================================================
+    # SAFETY
+    # ========================================================
+
     refund_fee_percent = max(
         0,
         min(
@@ -27926,14 +28573,18 @@ def refund_booking_money(
     refund_fee = int(
         round(
             original_amount
-            * refund_fee_percent
-            / 100
+            *
+            refund_fee_percent
+            /
+            100
         )
     )
 
     refund_amount = max(
         0,
-        original_amount - refund_fee
+        original_amount
+        -
+        refund_fee
     )
 
     # ========================================================
@@ -27954,16 +28605,14 @@ def refund_booking_money(
         "refundAmount":
             refund_amount,
 
-        # Keep this temporarily for compatibility with
-        # existing code that may already read totalAmount.
+        # Compatibility with existing code that may already
+        # read totalAmount.
         "totalAmount":
             refund_amount,
 
         "cancellation":
             bool(cancellation)
     }
-
-
 
 
 # ============================================================
@@ -28049,8 +28698,8 @@ def process_eventwaa_refund(
     # DO NOT REFUND CHECKED-IN TICKETS
     #
     # Event cancellation is still allowed to refund them.
-    # The host cancelled the event, so the customer should
-    # not lose their money because they had already checked in.
+    # The event was cancelled, so the customer should not lose
+    # their money because they had already checked in.
     # ========================================================
 
     if (
@@ -28207,15 +28856,39 @@ def process_eventwaa_refund(
         }, 400
 
     # ========================================================
-    # HOST ACCOUNTING
+    # DETERMINE EVENT TYPE
     #
-    # Normal customer refund:
-    # Host refund is limited to the host's original net share.
+    # Official EventWaa events are created with:
     #
-    # Event cancellation:
-    # Customer receives the full ticket subtotal.
-    # The host contributes the original host earning.
-    # EventWaa's commission is also reversed below.
+    #     adminEvent = true
+    #     hostId = 0
+    #     hostName = EventWaa
+    #
+    # Do NOT use bool(...) here because the string
+    # "false" would also evaluate as True in Python.
+    # ========================================================
+
+    is_admin_event = (
+        str(
+            event.get(
+                "adminEvent",
+                False
+            )
+        ).strip().lower()
+        == "true"
+    )
+
+    # ========================================================
+    # HOST / EVENTWAA ACCOUNTING
+    #
+    # NORMAL HOST EVENT:
+    # - Host contributes its original net earnings.
+    # - EventWaa reverses its commission during cancellation.
+    #
+    # OFFICIAL EVENTWAA EVENT:
+    # - There is no host wallet.
+    # - EventWaa funds the full ticket-subtotal refund.
+    # - EventWaa reverses the full ticket amount.
     # ========================================================
 
     try:
@@ -28231,10 +28904,14 @@ def process_eventwaa_refund(
         ValueError
     ):
 
-        return {
-            "success": False,
-            "message": "Event host ID is invalid."
-        }, 400
+        if not is_admin_event:
+
+            return {
+                "success": False,
+                "message": "Event host ID is invalid."
+            }, 400
+
+        host_id = 0
 
     commission_percent = float(
         settings.get(
@@ -28264,13 +28941,28 @@ def process_eventwaa_refund(
         )
     )
 
-    if cancellation:
+    # ========================================================
+    # CALCULATE WHO FUNDS THE REFUND
+    # ========================================================
 
+    if is_admin_event:
+
+        # Official EventWaa event:
+        # No host receives event earnings.
+        host_refund_amount = 0
+
+        # EventWaa funded the original ticket amount,
+        # so the entire ticket subtotal is reversed.
+        platform_commission_reversal = original_amount
+
+    elif cancellation:
+
+        # Normal host event cancellation:
+        # Host gives back the net amount it originally earned.
         host_refund_amount = host_original_amount
 
-        # The platform's original commission must also be
-        # reversed because the customer receives the entire
-        # ticket subtotal.
+        # EventWaa gives back its original commission because
+        # the customer receives the full ticket subtotal.
         platform_commission_reversal = (
             original_amount
             -
@@ -28279,311 +28971,327 @@ def process_eventwaa_refund(
 
     else:
 
+        # Normal customer refund:
+        # Host contributes up to its original net earnings.
         host_refund_amount = min(
             host_original_amount,
             refund_amount
         )
 
-        # Normal refunds retain EventWaa's commission.
+        # EventWaa commission remains with EventWaa.
         platform_commission_reversal = 0
 
     # ========================================================
-    # FIND HOST WALLET
+    # DEFAULT WALLET VALUES
+    #
+    # These remain zero for official EventWaa events because
+    # there is intentionally no host wallet.
     # ========================================================
 
     host_wallet = None
 
-    for wallet in host_wallets:
+    available_balance = 0
 
-        try:
+    pending_balance = 0
 
-            wallet_host_id = int(
-                wallet.get(
-                    "hostId",
-                    0
+    available_used = 0
+
+    pending_used = 0
+
+    # ========================================================
+    # FIND HOST WALLET
+    #
+    # Official EventWaa events intentionally have no host
+    # wallet, so skip the entire host-wallet process.
+    # ========================================================
+
+    if not is_admin_event:
+
+        for wallet in host_wallets:
+
+            try:
+
+                wallet_host_id = int(
+                    wallet.get(
+                        "hostId",
+                        0
+                    )
                 )
-            )
 
-        except (
-            TypeError,
-            ValueError
-        ):
+            except (
+                TypeError,
+                ValueError
+            ):
 
-            wallet_host_id = 0
+                wallet_host_id = 0
 
-        if wallet_host_id == host_id:
+            if wallet_host_id == host_id:
 
-            host_wallet = wallet
+                host_wallet = wallet
 
-            break
-
-    if not host_wallet:
-
-        return {
-            "success": False,
-            "message": (
-                "Host wallet was not found."
-            )
-        }, 404
-
-    available_balance = int(
-        host_wallet.get(
-            "availableBalance",
-            0
-        )
-        or 0
-    )
-
-    pending_balance = int(
-        host_wallet.get(
-            "pendingPayouts",
-            0
-        )
-        or 0
-    )
-
-    host_total_funds = (
-        available_balance
-        +
-        pending_balance
-    )
-
-    if host_total_funds < host_refund_amount:
-
-        return {
-            "success": False,
-            "message": (
-                "The host does not have enough "
-                "funds to process this refund."
-            ),
-            "required":
-                host_refund_amount,
-            "available":
-                host_total_funds
-        }, 400
-
-    # ========================================================
-    # DEDUCT HOST FUNDS
-    #
-    # Available funds are used first.
-    # Remaining amount comes from pending payouts.
-    # ========================================================
-
-    available_used = min(
-        available_balance,
-        host_refund_amount
-    )
-
-    remaining_host_refund = (
-        host_refund_amount
-        -
-        available_used
-    )
-
-    pending_used = min(
-        pending_balance,
-        remaining_host_refund
-    )
-
-    remaining_host_refund -= pending_used
-
-    if remaining_host_refund > 0:
-
-        return {
-            "success": False,
-            "message": (
-                "Unable to reconcile the host "
-                "wallet for this refund."
-            )
-        }, 400
-
-    host_wallet["availableBalance"] = max(
-        0,
-        available_balance
-        -
-        available_used
-    )
-
-    host_wallet["pendingPayouts"] = max(
-        0,
-        pending_balance
-        -
-        pending_used
-    )
-
-    host_wallet["totalEarned"] = max(
-        0,
-        int(
-            host_wallet.get(
-                "totalEarned",
-                0
-            )
-            or 0
-        )
-        -
-        host_refund_amount
-    )
-
-    host_wallet["refunds"] = (
-        int(
-            host_wallet.get(
-                "refunds",
-                0
-            )
-            or 0
-        )
-        +
-        host_refund_amount
-    )
-
-    # ========================================================
-    # IMPORTANT:
-    # REDUCE SCHEDULED PAYOUTS TOO
-    #
-    # pendingPayouts is only the aggregate number.
-    # scheduledPayouts contains the actual future payout
-    # records, so the same refunded money must not become
-    # available later.
-    #
-    # Your current scheduled payout records do not contain
-    # booking IDs, so we reconcile by payout amount.
-    # ========================================================
-
-    if pending_used > 0:
-
-        amount_to_remove = pending_used
-
-        scheduled_payouts = host_wallet.setdefault(
-            "scheduledPayouts",
-            []
-        )
-
-        for payout in scheduled_payouts:
-
-            if amount_to_remove <= 0:
                 break
 
-            payout_amount = int(
-                payout.get(
-                    "amount",
-                    0
-                )
-                or 0
-            )
-
-            if payout_amount <= 0:
-                continue
-
-            deduction = min(
-                payout_amount,
-                amount_to_remove
-            )
-
-            payout["amount"] = (
-                payout_amount
-                -
-                deduction
-            )
-
-            amount_to_remove -= deduction
-
-        # Remove empty scheduled payouts.
-        host_wallet["scheduledPayouts"] = [
-            payout
-            for payout in scheduled_payouts
-            if int(
-                payout.get(
-                    "amount",
-                    0
-                )
-                or 0
-            ) > 0
-        ]
-
-        if amount_to_remove > 0:
+        if not host_wallet:
 
             return {
                 "success": False,
                 "message": (
-                    "Pending refund could not be fully "
-                    "matched against scheduled payouts."
+                    "Host wallet was not found."
+                )
+            }, 404
+
+        available_balance = int(
+            host_wallet.get(
+                "availableBalance",
+                0
+            )
+            or 0
+        )
+
+        pending_balance = int(
+            host_wallet.get(
+                "pendingPayouts",
+                0
+            )
+            or 0
+        )
+
+        host_total_funds = (
+            available_balance
+            +
+            pending_balance
+        )
+
+        if host_total_funds < host_refund_amount:
+
+            return {
+                "success": False,
+                "message": (
+                    "The host does not have enough "
+                    "funds to process this refund."
+                ),
+                "required":
+                    host_refund_amount,
+                "available":
+                    host_total_funds
+            }, 400
+
+        # ====================================================
+        # DEDUCT HOST FUNDS
+        #
+        # Available funds are used first.
+        # Remaining amount comes from pending payouts.
+        # ====================================================
+
+        available_used = min(
+            available_balance,
+            host_refund_amount
+        )
+
+        remaining_host_refund = (
+            host_refund_amount
+            -
+            available_used
+        )
+
+        pending_used = min(
+            pending_balance,
+            remaining_host_refund
+        )
+
+        remaining_host_refund -= pending_used
+
+        if remaining_host_refund > 0:
+
+            return {
+                "success": False,
+                "message": (
+                    "Unable to reconcile the host "
+                    "wallet for this refund."
                 )
             }, 400
 
-    # ========================================================
-    # HOST REFUND TRANSACTION
-    # ========================================================
+        host_wallet["availableBalance"] = max(
+            0,
+            available_balance
+            -
+            available_used
+        )
 
-    host_wallet.setdefault(
-        "transactions",
-        []
-    )
+        host_wallet["pendingPayouts"] = max(
+            0,
+            pending_balance
+            -
+            pending_used
+        )
 
-    host_wallet["transactions"].insert(
+        host_wallet["totalEarned"] = max(
+            0,
+            int(
+                host_wallet.get(
+                    "totalEarned",
+                    0
+                )
+                or 0
+            )
+            -
+            host_refund_amount
+        )
 
-        0,
+        host_wallet["refunds"] = (
+            int(
+                host_wallet.get(
+                    "refunds",
+                    0
+                )
+                or 0
+            )
+            +
+            host_refund_amount
+        )
 
-        {
+        # ====================================================
+        # REDUCE SCHEDULED PAYOUTS
+        #
+        # pendingPayouts is the aggregate number.
+        # scheduledPayouts contains the actual future payouts,
+        # so the same refunded money must not become available
+        # later.
+        #
+        # Current payout records do not contain booking IDs,
+        # so reconciliation is done by payout amount.
+        # ====================================================
 
-            "type":
-                "refund",
+        if pending_used > 0:
 
-            "eventId":
-                event.get(
-                    "id"
-                ),
+            amount_to_remove = pending_used
 
-            "eventTitle":
-                event.get(
-                    "title",
-                    ""
-                ),
+            scheduled_payouts = host_wallet.setdefault(
+                "scheduledPayouts",
+                []
+            )
 
-            "bookingId":
-                booking.get(
-                    "id"
-                ),
+            for payout in scheduled_payouts:
 
-            "amount":
-                -host_refund_amount,
+                if amount_to_remove <= 0:
+                    break
 
-            "originalAmount":
-                original_amount,
-
-            "refundAmount":
-                refund_amount,
-
-            "hostRefundAmount":
-                host_refund_amount,
-
-            "availableUsed":
-                available_used,
-
-            "pendingUsed":
-                pending_used,
-
-            "refundFeePercent":
-                refund_fee_percent,
-
-            "refundFee":
-                refund_fee,
-
-            "cancellation":
-                bool(cancellation),
-
-            "date":
-                now,
-
-            "description":
-                (
-                    "Event cancellation refund"
-                    if cancellation
-                    else
-                    "Customer refund"
+                payout_amount = int(
+                    payout.get(
+                        "amount",
+                        0
+                    )
+                    or 0
                 )
 
-        }
-    )
+                if payout_amount <= 0:
+                    continue
+
+                deduction = min(
+                    payout_amount,
+                    amount_to_remove
+                )
+
+                payout["amount"] = (
+                    payout_amount
+                    -
+                    deduction
+                )
+
+                amount_to_remove -= deduction
+
+            host_wallet["scheduledPayouts"] = [
+                payout
+                for payout in scheduled_payouts
+                if int(
+                    payout.get(
+                        "amount",
+                        0
+                    )
+                    or 0
+                ) > 0
+            ]
+
+            if amount_to_remove > 0:
+
+                return {
+                    "success": False,
+                    "message": (
+                        "Pending refund could not be fully "
+                        "matched against scheduled payouts."
+                    )
+                }, 400
+
+        # ====================================================
+        # HOST REFUND TRANSACTION
+        # ====================================================
+
+        host_wallet.setdefault(
+            "transactions",
+            []
+        )
+
+        host_wallet["transactions"].insert(
+            0,
+            {
+                "type":
+                    "refund",
+
+                "eventId":
+                    event.get(
+                        "id"
+                    ),
+
+                "eventTitle":
+                    event.get(
+                        "title",
+                        ""
+                    ),
+
+                "bookingId":
+                    booking.get(
+                        "id"
+                    ),
+
+                "amount":
+                    -host_refund_amount,
+
+                "originalAmount":
+                    original_amount,
+
+                "refundAmount":
+                    refund_amount,
+
+                "hostRefundAmount":
+                    host_refund_amount,
+
+                "availableUsed":
+                    available_used,
+
+                "pendingUsed":
+                    pending_used,
+
+                "refundFeePercent":
+                    refund_fee_percent,
+
+                "refundFee":
+                    refund_fee,
+
+                "cancellation":
+                    bool(cancellation),
+
+                "date":
+                    now,
+
+                "description":
+                    (
+                        "Event cancellation refund"
+                        if cancellation
+                        else
+                        "Customer refund"
+                    )
+            }
+        )
 
     # ========================================================
     # EVENTWAA PLATFORM WALLET
@@ -28593,13 +29301,12 @@ def process_eventwaa_refund(
     # - Refund fee remains with EventWaa.
     #
     # Cancellation:
-    # - Commission must be reversed.
-    # - Service fee must also be reversed because the
-    #   customer receives the full ticket subtotal, not
-    #   the original service fee.
+    # - Commission is reversed.
+    # - Original service fee is also reversed.
     #
-    # Therefore cancellation reverses the original
-    # EventWaa commission + service fee.
+    # Official EventWaa event:
+    # - Full ticket subtotal is reversed.
+    # - Original service fee is also reversed.
     # ========================================================
 
     if cancellation:
@@ -28692,11 +29399,8 @@ def process_eventwaa_refund(
         )
 
         admin_wallet["transactions"].insert(
-
             0,
-
             {
-
                 "type":
                     "event_cancellation_refund",
 
@@ -28727,7 +29431,6 @@ def process_eventwaa_refund(
 
                 "date":
                     now
-
             }
         )
 
@@ -28760,7 +29463,7 @@ def process_eventwaa_refund(
     # ========================================================
     # INVALIDATE INDIVIDUAL TICKETS
     #
-    # One refunded ticket must not remain usable.
+    # A refunded ticket must not remain usable.
     # ========================================================
 
     if isinstance(
@@ -28927,7 +29630,6 @@ def process_eventwaa_refund(
             ).strip().lower():
 
                 ticket_type["remaining"] = (
-
                     int(
                         ticket_type.get(
                             "remaining",
@@ -28937,7 +29639,6 @@ def process_eventwaa_refund(
                     )
                     +
                     quantity
-
                 )
 
                 break
@@ -28946,9 +29647,12 @@ def process_eventwaa_refund(
     # SAVE ALL ACCOUNTING CHANGES
     # ========================================================
 
-    save_host_wallets(
-        host_wallets
-    )
+    # Official EventWaa events do not have a host wallet.
+    if not is_admin_event:
+
+        save_host_wallets(
+            host_wallets
+        )
 
     save_wallet(
         admin_wallet
@@ -28970,7 +29674,7 @@ def process_eventwaa_refund(
     )
 
     # ========================================================
-    # CUSTOMER NOTIFICATION
+    # CUSTOMER INFORMATION
     # ========================================================
 
     buyer = booking.get(
@@ -29000,7 +29704,6 @@ def process_eventwaa_refund(
                 ""
             )
         ).strip()
-
 
     # ========================================================
     # BUYER PLATFORM NOTIFICATION
@@ -29033,7 +29736,6 @@ def process_eventwaa_refund(
             "REFUND NOTIFICATION ERROR:",
             repr(e)
         )
-
 
     # ========================================================
     # BUYER REFUND EMAIL
@@ -29129,15 +29831,23 @@ def process_eventwaa_refund(
             {
 
                 "hostAvailableBalance":
-                    host_wallet.get(
-                        "availableBalance",
-                        0
+                    (
+                        host_wallet.get(
+                            "availableBalance",
+                            0
+                        )
+                        if host_wallet
+                        else 0
                     ),
 
                 "hostPendingPayouts":
-                    host_wallet.get(
-                        "pendingPayouts",
-                        0
+                    (
+                        host_wallet.get(
+                            "pendingPayouts",
+                            0
+                        )
+                        if host_wallet
+                        else 0
                     )
 
             }

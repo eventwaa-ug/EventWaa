@@ -1,286 +1,521 @@
 /* ============================================================
-   EVENTWAA HOST SIDEBAR - Final Clean 24px + Orange
-============================================================ */
-* { box-sizing: border-box; }
+   EVENTWAA HOST SIDEBAR
+   Desktop + Mobile Drawer
+   ============================================================ */
+
+* {
+    box-sizing: border-box;
+}
+
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
 
 .host-sidebar {
     position: fixed;
-    top: 0; left: 0;
-    width: 270px;
+    top: 0;
+    left: 0;
+
+    width: 250px;
     height: 100vh;
+
     display: flex;
     flex-direction: column;
+
     background: #ffffff;
-    border-right: 1.5px solid #F3F4F6;
-    box-shadow: 4px 0 24px rgba(17,24,39,0.04);
+    border-right: 1px solid #e5e7eb;
+
+    box-shadow: 4px 0 24px rgba(17, 24, 39, 0.05);
+
     z-index: 2000;
+
     transform: translateX(0);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+
     overflow: hidden;
 }
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
 
 .host-sidebar-header {
     width: 100%;
     min-height: 76px;
-    padding: 0 20px;
+
+    padding: 0 18px;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1.5px solid #F9FAFB;
+
+    border-bottom: 1px solid #f3f4f6;
+
     flex-shrink: 0;
 }
 
 .host-sidebar-logo {
     min-width: 0;
     width: 100%;
+
     display: flex;
     align-items: center;
+
     cursor: pointer;
     outline: none;
 }
 
 .host-sidebar-logo:focus-visible {
     border-radius: 999px;
-    box-shadow: 0 0 0 4px rgba(255,107,0,0.18);
+    box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.18);
 }
 
 .host-platform-logo {
     display: block;
+
     width: auto;
     max-width: 155px;
     height: 42px;
+
     object-fit: contain;
     object-position: left center;
+
     flex-shrink: 0;
 }
 
 .host-logo-text {
     display: flex;
     align-items: center;
-    gap: 10px;
+
     max-width: 100%;
-    color: #111827;
+
+    color: #ffffff;
+    background: #111827;
+
+    padding: 8px 14px;
+
+    border-radius: 999px;
+
     font-size: 21px;
     font-weight: 900;
     line-height: 1.2;
     letter-spacing: -0.7px;
+
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    background: #111827;
-    color: #fff;
-    padding: 8px 14px;
-    border-radius: 999px;
 }
+
+
+/* ============================================================
+   CLOSE BUTTON
+   ============================================================ */
 
 .host-sidebar-close {
     display: none;
-    width: 40px; height: 40px;
-    align-items: center; justify-content: center;
+
+    width: 40px;
+    height: 40px;
+
+    align-items: center;
+    justify-content: center;
+
     border: none;
     border-radius: 999px;
+
     background: transparent;
-    color: #6B7280;
+    color: #6b7280;
+
     cursor: pointer;
+
     flex-shrink: 0;
-    transition: all 0.2s ease;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
 }
 
-.host-sidebar-close:hover { background: #F3F4F6; color: #111827; }
+.host-sidebar-close:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+
+/* ============================================================
+   HOST PROFILE
+   ============================================================ */
 
 .host-profile {
     width: 100%;
+
     padding: 18px;
+
     display: flex;
     align-items: center;
+
     gap: 12px;
-    border-bottom: 1.5px solid #F9FAFB;
+
+    border-bottom: 1px solid #f3f4f6;
+
     flex-shrink: 0;
 }
 
 .host-avatar {
-    width: 44px; height: 44px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 999px;
-    background: #FFF1E6;
-    color: #FF6B00;
-    font-size: 17px; font-weight: 800;
-    border: 1px solid #FFD7B8;
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #fff1e6;
+    color: #ff6b00;
+
+    font-size: 17px;
+    font-weight: 800;
+
+    border: 1px solid #ffd7b8;
+
     flex-shrink: 0;
 }
 
-.host-profile-info { min-width: 0; flex: 1; }
+.host-profile-info {
+    min-width: 0;
+    flex: 1;
+}
+
 .host-profile-info strong {
     display: block;
+
     color: #111827;
-    font-size: 14px; font-weight: 800;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
 .host-profile-info span {
     display: block;
+
     margin-top: 3px;
-    color: #6B7280;
+
+    color: #6b7280;
+
     font-size: 12px;
 }
+
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
 
 .host-navigation {
     flex: 1;
     min-height: 0;
+
     padding: 18px 10px;
+
     overflow-y: auto;
     overflow-x: hidden;
 }
 
-.host-navigation::-webkit-scrollbar { width: 5px; }
-.host-navigation::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 999px; }
+.host-navigation::-webkit-scrollbar {
+    width: 5px;
+}
+
+.host-navigation::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 999px;
+}
 
 .host-menu-title {
     margin: 0 12px 10px;
-    color: #9CA3AF;
+
+    color: #9ca3af;
+
     font-size: 10.5px;
     font-weight: 800;
+
     letter-spacing: 1.2px;
     text-transform: uppercase;
 }
 
+
+/* ============================================================
+   NAVIGATION ITEMS
+   ============================================================ */
+
 .host-nav-item {
     position: relative;
+
     width: 100%;
     min-height: 46px;
+
     margin: 0 0 4px;
     padding: 11px 14px;
+
     display: flex;
     align-items: center;
+
     gap: 12px;
+
     border: 1.5px solid transparent;
     border-radius: 999px;
+
     background: transparent;
-    color: #6B7280;
+    color: #6b7280;
+
     font-family: inherit;
     font-size: 14px;
     font-weight: 650;
+
     text-align: left;
+
     cursor: pointer;
-    transition: all 0.2s ease;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
 }
 
 .host-nav-icon {
-    width: 24px; min-width: 24px;
-    display: flex; align-items: center; justify-content: center;
-    color: #9CA3AF;
+    width: 24px;
+    min-width: 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #9ca3af;
+
     flex-shrink: 0;
-    transition: all 0.2s ease;
+
+    transition: color 0.2s ease;
 }
 
-.host-nav-label { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.host-nav-label {
+    min-width: 0;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 .host-nav-item:hover {
-    background: #FFFBF5;
-    border-color: #FFD7B8;
+    background: #fffbf5;
+    border-color: #ffd7b8;
     color: #111827;
+
     transform: translateX(2px);
 }
-.host-nav-item:hover .host-nav-icon { color: #FF6B00; }
+
+.host-nav-item:hover .host-nav-icon {
+    color: #ff6b00;
+}
 
 .host-nav-item.active {
     background: #111827;
     border-color: #111827;
+
     color: #ffffff;
-    box-shadow: 0 6px 16px rgba(17,24,39,0.14);
+
+    box-shadow: 0 6px 16px rgba(17, 24, 39, 0.14);
 }
-.host-nav-item.active .host-nav-icon { color: #FF6B00; }
-.host-nav-item.active::before { display: none; }
+
+.host-nav-item.active .host-nav-icon {
+    color: #ff6b00;
+}
+
+
+/* ============================================================
+   LOGOUT
+   ============================================================ */
 
 .host-sidebar-bottom {
     width: 100%;
+
     padding: 12px 10px;
-    border-top: 1.5px solid #F9FAFB;
+
+    border-top: 1px solid #f3f4f6;
+
     flex-shrink: 0;
 }
 
-.logout-item { color: #DC2626; }
-.logout-item .host-nav-icon { color: #DC2626; }
-.logout-item:hover {
-    background: #FEF2F2;
-    border-color: #FECACA;
-    color: #B91C1C;
+.logout-item {
+    color: #dc2626;
 }
-.logout-item:hover .host-nav-icon { color: #B91C1C; }
+
+.logout-item .host-nav-icon {
+    color: #dc2626;
+}
+
+.logout-item:hover {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+.logout-item:hover .host-nav-icon {
+    color: #b91c1c;
+}
+
+
+/* ============================================================
+   MOBILE MENU BUTTON
+   ============================================================ */
 
 .host-menu-button {
     display: none;
+
     position: fixed;
-    top: 16px; left: 16px;
-    width: 44px; height: 44px;
-    align-items: center; justify-content: center;
-    border: 1.5px solid #F3F4F6;
-    border-radius: 999px;
+
+    top: 16px;
+    left: 16px;
+
+    width: 44px;
+    height: 44px;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 50%;
+
     background: #ffffff;
     color: #111827;
+
     cursor: pointer;
-    z-index: 2100;
-    box-shadow: 0 6px 18px rgba(17,24,39,0.08);
-    transition: all 0.2s ease;
+
+    z-index: 99999;
+
+    box-shadow:
+        0 6px 18px rgba(17, 24, 39, 0.10);
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
 }
 
 .host-menu-button:hover {
     background: #111827;
     border-color: #111827;
-    color: #fff;
+    color: #ffffff;
 }
+
+.host-menu-button:active {
+    transform: scale(0.96);
+}
+
+
+/* ============================================================
+   MOBILE OVERLAY
+   ============================================================ */
 
 .host-sidebar-overlay {
-    position: fixed; inset: 0;
-    background: rgba(17,24,39,0.42);
-    z-index: 1999;
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(17, 24, 39, 0.42);
+
+    z-index: 9998;
+
     animation: hostOverlayFade 0.2s ease;
 }
-@keyframes hostOverlayFade { from { opacity: 0; } to { opacity: 1; } }
 
-/* LAYOUT SHELL - FIXED */
-.host-dashboard-shell {
-    display: flex;
-    width: 100%;
-    min-height: 100vh;
-    background: #FFFBF5;
+@keyframes hostOverlayFade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
-.host-dashboard-main {
-    flex: 1;
-    min-width: 0;
-    width: 100%;
-    margin-left: 270px;
-    padding: 0;
-    background: transparent;
-    transition: margin-left 0.3s ease;
-}
 
-@media (min-width: 1800px) {
-    .host-sidebar { width: 285px; }
-    .host-dashboard-main { margin-left: 285px; }
-}
-
-@media (max-width: 1000px) {
-    .host-sidebar { width: 250px; }
-    .host-dashboard-main { margin-left: 250px; }
-}
+/* ============================================================
+   MOBILE SIDEBAR
+   ============================================================ */
 
 @media (max-width: 768px) {
-    .host-menu-button { display: flex; }
+
+    .host-menu-button {
+        display: flex !important;
+    }
+
     .host-sidebar {
         width: 285px;
         max-width: 86vw;
+
         transform: translateX(-110%);
+
         box-shadow: none;
     }
+
     .host-sidebar.host-sidebar-open {
         transform: translateX(0);
-        box-shadow: 12px 0 40px rgba(17,24,39,0.18);
+
+        box-shadow:
+            12px 0 40px rgba(17, 24, 39, 0.18);
     }
-    .host-sidebar-close { display: flex; }
-    .host-dashboard-main { margin-left: 0; width: 100%; }
+
+    .host-sidebar-close {
+        display: flex;
+    }
 }
 
+
+/* ============================================================
+   SMALL PHONES
+   ============================================================ */
+
 @media (max-width: 480px) {
-    .host-sidebar { width: 290px; max-width: 88vw; }
+
+    .host-menu-button {
+        top: 14px;
+        left: 14px;
+
+        width: 42px;
+        height: 42px;
+    }
+
+    .host-sidebar {
+        width: 290px;
+        max-width: 88vw;
+    }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .host-sidebar,
+    .host-menu-button,
+    .host-nav-item {
+        transition: none;
+    }
+
+    .host-sidebar-overlay {
+        animation: none;
+    }
 }

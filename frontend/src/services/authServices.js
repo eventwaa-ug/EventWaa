@@ -1,9 +1,9 @@
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 
 export async function registerUser(userData){
 
-const response = await fetch(`${API_URL}/register`, {   
+const response = await fetch(`${BACKEND_URL}/register`, {   
     method: "POST",
 
     headers:{
@@ -16,7 +16,7 @@ return data;
 }
 
 export async function loginUser(userData) {
-    const response = await fetch(`${API_URL}/login`, {
+    const response = await fetch(`${BACKEND_URL}/login`, {
       method: "POST",
 
       headers: {

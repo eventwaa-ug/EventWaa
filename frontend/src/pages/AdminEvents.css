@@ -1,777 +1,196 @@
 /* ============================================================
-   EVENTWAA — ADMIN EVENTS
-   ============================================================ */
-
-.admin-events-page {
-  min-height: 100vh;
-  width: 100%;
-  box-sizing: border-box;
-
-  padding: 40px;
-
-  background: #f4f7f6;
-  color: #17201e;
+   EVENTWAA — ADMIN EVENTS - ORANGE THEME
+   Matches AdminEvents.jsx
+============================================================ */
+.admin-events {
+  width: 100%; min-height: 100vh; box-sizing: border-box;
+  padding: 34px 40px 60px; background: #FFFBF7; color: #1a1a1a;
 }
+.admin-events *, .admin-events *::before, .admin-events *::after { box-sizing: border-box; }
 
+/* HEADER */
+.admin-events-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 30px; margin-bottom: 30px; }
+.admin-events-header h1 { margin: 0; color: #111827; font-size: clamp(1.8rem, 3.5vw, 2.5rem); line-height: 1.15; font-weight: 800; letter-spacing: -0.6px; }
+.admin-events-header p { margin: 9px 0 0; color: #6b7280; font-size: 15px; line-height: 1.6; }
 
-/* ============================================================
-   HEADER
-   ============================================================ */
-
-.events-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-
-  gap: 30px;
-  margin-bottom: 36px;
+/* CREATE BUTTON - ORANGE */
+.admin-events-create-btn {
+  min-height: 50px; padding: 0 22px; border: 1px solid #FF6B00; border-radius: 12px;
+  background: #FF6B00; color: #ffffff; font-size: 14px; font-weight: 750; cursor: pointer;
+  white-space: nowrap; box-shadow: 0 6px 18px rgba(255,107,0,0.22);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
+.admin-events-create-btn:hover { transform: translateY(-2px); background: #E55F00; box-shadow: 0 10px 25px rgba(255,107,0,0.28); }
+.admin-events-create-btn:active { transform: translateY(0); }
 
-.admin-events-eyebrow {
-  display: inline-block;
+/* ERROR */
+.admin-events-error { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding: 14px 16px; border: 1px solid #FFE5D0; border-radius: 12px; background: #FFF8F3; color: #7f1d1d; font-size: 14px; font-weight: 650; }
+.admin-events-error svg { flex-shrink: 0; font-size: 19px; }
 
-  margin-bottom: 10px;
+/* TOOLBAR */
+.admin-events-toolbar { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
 
-  color: #6b7280;
-
-  font-size: 13px;
-  font-weight: 800;
-
-  letter-spacing: 1.8px;
+/* SEARCH */
+.admin-events-search { position: relative; flex: 1; min-width: 0; }
+.admin-events-search svg { position: absolute; left: 17px; top: 50%; transform: translateY(-50%); color: #FF8A3D; font-size: 18px; pointer-events: none; }
+.admin-events-search input {
+  width: 100%; height: 54px; padding: 0 18px 0 49px; border: 1px solid #FFE5D0; border-radius: 14px;
+  outline: none; background: #ffffff; color: #111827; font-size: 15px; box-shadow: 0 2px 10px rgba(255,107,0,0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+.admin-events-search input::placeholder { color: #a0a8a5; }
+.admin-events-search input:focus { border-color: #FF6B00; box-shadow: 0 0 0 3px rgba(255,107,0,0.12); }
 
-.events-header h1 {
-  margin: 0;
-
-  color: #17201e;
-
-  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
-  line-height: 1.15;
-  font-weight: 800;
+/* FILTERS - ORANGE CHIP */
+.admin-events-filters {
+  display: flex; align-items: center; gap: 6px; padding: 5px; border: 1px solid #FFE5D0;
+  border-radius: 14px; background: #FFF4ED; flex-wrap: nowrap;
 }
-
-.events-header p {
-  max-width: 700px;
-
-  margin: 10px 0 0;
-
-  color: #52615d;
-
-  font-size: clamp(0.9rem, 1.4vw, 1.06rem);
-  line-height: 1.6;
+.admin-events-filters button {
+  min-height: 38px; padding: 0 13px; border: 1px solid transparent; border-radius: 10px;
+  background: transparent; color: #7a5a44; font-size: 12.5px; font-weight: 700; white-space: nowrap;
+  cursor: pointer; transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
+.admin-events-filters button:hover { background: #FFF8F3; color: #FF6B00; }
+.admin-events-filters button.active { background: #FF6B00; color: #ffffff; box-shadow: 0 2px 8px rgba(255,107,0,0.25); }
+.admin-events-filters button:active { transform: scale(0.98); }
 
+/* RESULT COUNT */
+.admin-events-count { margin-bottom: 22px; color: #8a6d5a; font-size: 14px; font-weight: 600; }
 
-/* ============================================================
-   CREATE EVENT BUTTON
-   ============================================================ */
+/* GRID */
+.admin-events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 26px; }
 
-.create-event-btn {
-  min-height: 52px;
-
-  padding: 0 24px;
-
-  border: none;
-  border-radius: 12px;
-
-  background: #17201e;
-  color: #ffffff;
-
-  font-size: 15px;
-  font-weight: 700;
-
-  cursor: pointer;
-
-  white-space: nowrap;
-
-  box-shadow:
-    0 6px 18px rgba(17, 24, 39, 0.15);
-
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    opacity 0.2s ease;
+/* EVENT CARD */
+.admin-event-card {
+  min-width: 0; overflow: hidden; background: #ffffff; border: 1px solid #FFE5D0; border-radius: 18px;
+  box-shadow: 0 5px 20px rgba(255,107,0,0.05); transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
+.admin-event-card:hover { transform: translateY(-4px); border-color: #FFD8B5; box-shadow: 0 14px 35px rgba(255,107,0,0.12); }
+.admin-event-card.cancelled { border-color: #FFE5D0; }
+.admin-event-card.cancelled:hover { transform: none; box-shadow: 0 5px 20px rgba(255,107,0,0.05); }
 
-.create-event-btn:hover {
-  transform: translateY(-2px);
+/* POSTER */
+.admin-poster-wrapper { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 300px; overflow: hidden; background: #FFF8F3; }
+.admin-event-poster { display: block; width: 100%; height: auto; max-height: 520px; object-fit: contain; object-position: center; background: #FFF8F3; }
+.admin-event-poster-placeholder { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 300px; background: #FFF8F3; color: #FF8A3D; }
+.admin-event-poster-placeholder svg { font-size: 54px; }
 
-  box-shadow:
-    0 10px 25px rgba(17, 24, 39, 0.2);
+/* OVERLAYS */
+.event-type-overlay { position: absolute; top: 14px; right: 14px; z-index: 3; padding: 7px 12px; border: 1px solid rgba(255,255,255,0.35); border-radius: 999px; background: rgba(26,26,26,0.78); color: #ffffff; font-size: 12px; font-weight: 800; letter-spacing: 0.4px; backdrop-filter: blur(8px); }
+.featured-overlay { position: absolute; top: 14px; left: 14px; z-index: 3; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border: 1px solid rgba(255,255,255,0.25); border-radius: 999px; background: #FF6B00; color: #ffffff; font-size: 12px; font-weight: 750; backdrop-filter: blur(8px); }
+.featured-overlay svg { font-size: 14px; }
+.cancelled-overlay { position: absolute; inset: 0; z-index: 4; display: flex; align-items: center; justify-content: center; background: rgba(60,60,60,0.38); color: #ffffff; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; letter-spacing: 2px; text-shadow: 0 2px 8px rgba(0,0,0,0.25); pointer-events: none; }
+
+/* CARD CONTENT */
+.admin-event-card-content { padding: 24px; }
+.admin-event-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 22px; }
+.admin-event-title-row > div:first-child { min-width: 0; }
+.admin-event-title-row h2 { margin: 0; color: #111827; font-size: clamp(1.12rem, 2vw, 1.42rem); line-height: 1.3; font-weight: 800; overflow-wrap: anywhere; }
+.admin-event-id { display: block; margin-top: 7px; color: #9ca3af; font-size: 12px; font-weight: 600; }
+.admin-official-badge { flex-shrink: 0; padding: 6px 10px; border: 1px solid #FFE5D0; border-radius: 999px; background: #FFF4ED; color: #FF6B00; font-size: 11px; font-weight: 800; white-space: nowrap; }
+
+/* DETAILS */
+.admin-event-details { display: grid; grid-template-columns: 1fr 1fr; gap: 13px 18px; margin-bottom: 24px; }
+.admin-event-details > div { min-width: 0; }
+.admin-event-details strong { display: block; margin-bottom: 4px; color: #a67c5b; font-size: 11px; font-weight: 750; letter-spacing: 0.35px; text-transform: uppercase; }
+.admin-event-details span { display: block; color: #293330; font-size: 14px; font-weight: 650; line-height: 1.45; overflow-wrap: anywhere; }
+
+/* ACTIONS */
+.admin-event-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; padding-top: 20px; border-top: 1px solid #FFF4ED; }
+.admin-event-actions button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-width: 0; min-height: 43px;
+  padding: 8px 10px; border: none; border-radius: 10px; font-size: 12px; font-weight: 750; cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
+.admin-event-actions button:hover:not(:disabled) { transform: translateY(-2px); opacity: 0.92; }
+.admin-event-actions button:active:not(:disabled) { transform: translateY(0); }
+.admin-event-actions button:disabled { cursor: not-allowed; }
 
-.create-event-btn,
-.edit-event-btn,
-.feature-event-btn,
-.delete-event-btn,
-.search-icon,
-.poster-fallback {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+/* ACTION BUTTONS ORANGE THEME */
+.edit-btn { background: #FFF4ED; color: #FF6B00; }
+.edit-btn:hover:not(:disabled) { background: #FFE5D0; box-shadow: 0 5px 12px rgba(255,107,0,0.12); }
+.feature-btn { background: #FFF8F3; color: #7a5a44; }
+.feature-btn.featured { background: #FF6B00; color: #ffffff; }
+.feature-btn:disabled { opacity: 0.5; }
+.cancel-btn { background: #f4f4f3; color: #5f6361; }
+.cancel-btn:hover:not(:disabled) { background: #FFF4ED; color: #FF6B00; box-shadow: 0 5px 12px rgba(255,107,0,0.08); }
+.cancel-btn:disabled { opacity: 0.65; }
+.cancelled-btn { background: #FFF4ED; color: #a67c5b; border: 1px solid #FFD8B5 !important; opacity: 1; }
+.delete-btn { background: #fef2f2; color: #dc2626; }
+.delete-btn:hover:not(:disabled) { background: #fee2e2; box-shadow: 0 5px 12px rgba(220,38,38,0.1); }
+
+/* EMPTY */
+.admin-events-empty { min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; background: #ffffff; border: 1px dashed #FFD8B5; border-radius: 18px; }
+.admin-events-empty > svg { margin-bottom: 15px; color: #FF8A3D; font-size: 52px; }
+.admin-events-empty h3 { margin: 0 0 9px; color: #111827; font-size: 23px; font-weight: 800; }
+.admin-events-empty p { max-width: 520px; margin: 0; color: #7b8581; font-size: 15px; line-height: 1.6; }
+
+/* LOADING */
+.admin-events-loading { min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #8a6d5a; }
+.admin-events-loading p { margin: 16px 0 0; font-size: 15px; font-weight: 600; }
+.admin-events-spinner { width: 42px; height: 42px; border: 4px solid #FFE5D0; border-top-color: #FF6B00; border-radius: 50%; animation: adminEventsSpin 0.8s linear infinite; }
+@keyframes adminEventsSpin { to { transform: rotate(360deg); } }
+
+/* FOCUS */
+.admin-events button:focus-visible, .admin-events input:focus-visible { outline: 3px solid rgba(255,107,0,0.18); outline-offset: 2px; }
+
+@media (max-width: 1100px) {
+  .admin-events { padding: 30px 26px 50px; }
+  .admin-events-toolbar { align-items: stretch; flex-direction: column; }
+  .admin-events-filters { width: 100%; }
+  .admin-events-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
 }
-
-.state-icon,
-.poster-fallback {
-  justify-content: center;
+@media (max-width: 800px) {
+  .admin-events-header { align-items: flex-start; flex-direction: column; gap: 18px; }
+  .admin-events-create-btn { width: 100%; }
+  .admin-events-grid { grid-template-columns: 1fr; }
 }
-
-.create-event-btn svg,
-.edit-event-btn svg,
-.feature-event-btn svg,
-.delete-event-btn svg {
-  flex-shrink: 0;
+@media (max-width: 600px) {
+  .admin-events { min-height: 100vh; padding: 22px 14px 40px; background: #FFFBF7; }
+  .admin-events-header { margin-bottom: 24px; gap: 16px; }
+  .admin-events-header h1 { font-size: 1.85rem; letter-spacing: -0.5px; }
+  .admin-events-header p { margin-top: 7px; font-size: 13px; }
+  .admin-events-create-btn { width: 100%; min-height: 48px; }
+  .admin-events-toolbar { gap: 12px; margin-bottom: 15px; }
+  .admin-events-search { width: 100%; }
+  .admin-events-search input { height: 50px; font-size: 14px; border-radius: 13px; }
+  .admin-events-filters { width: calc(100vw - 28px); max-width: none; margin-left: 50%; transform: translateX(-50%); display: flex; flex-wrap: nowrap; align-items: center; gap: 4px; padding: 4px; overflow-x: auto; overflow-y: hidden; border: 1px solid #FFE5D0; border-radius: 13px; background: #FFF4ED; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .admin-events-filters::-webkit-scrollbar { display: none; }
+  .admin-events-filters button { flex: 0 0 auto; min-height: 39px; padding: 0 13px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: #7a5a44; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .admin-events-filters button:hover { background: transparent; color: #7a5a44; }
+  .admin-events-filters button.active { background: #FF6B00; color: #ffffff; box-shadow: 0 1px 3px rgba(255,107,0,0.2); }
+  .admin-events-count { margin-bottom: 16px; font-size: 13px; }
+  .admin-events-grid { gap: 18px; }
+  .admin-event-card { border-radius: 16px; }
+  .admin-event-card:hover { transform: none; box-shadow: 0 5px 20px rgba(255,107,0,0.05); }
+  .admin-poster-wrapper { min-height: 235px; }
+  .admin-event-poster-placeholder { min-height: 235px; }
+  .admin-event-poster-placeholder svg { font-size: 46px; }
+  .admin-event-card-content { padding: 19px; }
+  .admin-event-title-row { gap: 10px; margin-bottom: 19px; }
+  .admin-event-title-row h2 { font-size: 1.12rem; }
+  .admin-official-badge { padding: 5px 8px; font-size: 10px; }
+  .admin-event-details { grid-template-columns: 1fr 1fr; gap: 12px 14px; margin-bottom: 20px; }
+  .admin-event-details strong { font-size: 10px; }
+  .admin-event-details span { font-size: 13px; }
+  .admin-event-actions { grid-template-columns: 1fr 1fr; gap: 8px; padding-top: 17px; }
+  .admin-event-actions button { min-height: 42px; font-size: 11.5px; }
+  .admin-events-empty { min-height: 330px; padding: 30px 20px; }
 }
-
-
-/* ============================================================
-   SEARCH + FILTER
-   ============================================================ */
-
-.event-controls {
-  display: flex;
-
-  gap: 16px;
-
-  margin-bottom: 20px;
+@media (max-width: 390px) {
+  .admin-events { padding: 18px 11px 34px; }
+  .admin-events-header h1 { font-size: 1.7rem; }
+  .admin-event-card-content { padding: 17px; }
+  .admin-poster-wrapper, .admin-event-poster-placeholder { min-height: 215px; }
+  .admin-event-title-row { flex-direction: column; align-items: flex-start; }
+  .admin-event-details { grid-template-columns: 1fr; gap: 11px; }
+  .admin-event-actions { grid-template-columns: 1fr; }
+  .admin-events-filters { width: calc(100vw - 22px); }
 }
-
-.event-search-wrapper {
-  position: relative;
-
-  flex: 1;
+@media (hover: none) {
+  .admin-events-create-btn:hover, .admin-events-filters button:hover, .admin-event-card:hover, .admin-event-actions button:hover:not(:disabled) { transform: none; }
 }
-
-.search-icon {
-  position: absolute;
-
-  left: 17px;
-  top: 50%;
-
-  transform: translateY(-50%);
-
-  font-size: 18px;
-
-  pointer-events: none;
-}
-
-.event-search {
-  width: 100%;
-  height: 56px;
-
-  box-sizing: border-box;
-
-  padding:
-    0
-    18px
-    0
-    50px;
-
-  border: 1px solid #d2dfdb;
-  border-radius: 13px;
-
-  outline: none;
-
-  background: #ffffff;
-
-  color: #17201e;
-
-  font-size: 16px;
-
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.03);
-
-  transition: 0.2s ease;
-}
-
-.event-search::placeholder {
-  color: #9ca3af;
-}
-
-.event-search:focus {
-  border-color: #0f766e;
-
-  box-shadow:
-    0 0 0 3px rgba(15, 118, 110, 0.12);
-}
-
-
-.event-filter {
-  width: 220px;
-  height: 56px;
-
-  padding: 0 17px;
-
-  border: 1px solid #e1e5eb;
-  border-radius: 13px;
-
-  outline: none;
-
-  background: #ffffff;
-
-  color: #17201e;
-
-  font-size: 15px;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.03);
-}
-
-
-/* ============================================================
-   RESULTS BAR
-   ============================================================ */
-
-.events-results-bar {
-  margin-bottom: 24px;
-
-  color: #6b7280;
-
-  font-size: 15px;
-}
-
-.events-results-bar strong {
-  color: #111827;
-}
-
-
-/* ============================================================
-   EVENTS GRID
-   ============================================================ */
-
-.admin-events-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(
-      auto-fill,
-      minmax(390px, 1fr)
-    );
-
-  gap: 28px;
-}
-
-
-/* ============================================================
-   EVENT CARD
-   ============================================================ */
-
-.event-admin-card {
-  overflow: hidden;
-
-  background: #ffffff;
-
-  border:
-    1px solid
-    #e5e7eb;
-
-  border-radius: 18px;
-
-  box-shadow:
-    0 5px 20px
-    rgba(0, 0, 0, 0.05);
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
-}
-
-.event-admin-card:hover {
-  transform: translateY(-5px);
-
-  box-shadow:
-    0 14px 35px
-    rgba(23, 32, 30, 0.12);
-}
-
-/* ============================================================
-   ADMIN EVENT POSTER
-   ============================================================ */
-
-.admin-poster-wrapper {
-  width: 100%;
-  height: auto;
-  min-height: 320px;
-
-  background: #f3f4f6;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  overflow: hidden;
-
-  position: relative;
-}
-
-/* ============================================================
-   FULL POSTER
-   ============================================================ */
-
-.admin-event-poster {
-  width: 100%;
-  height: auto;
-
-  max-height: 520px;
-
-  display: block;
-
-  object-fit: contain;
-
-  object-position: center center;
-
-  background: #f3f4f6;
-}
-
-/* ============================================================
-   POSTER FALLBACK
-   ============================================================ */
-
-.poster-fallback {
-  width: 100%;
-  min-height: 320px;
-
-  display: flex;
-  flex-direction: column;
-
-  align-items: center;
-  justify-content: center;
-
-  text-align: center;
-
-  background: #f3f4f6;
-
-  color: #6b7280;
-}
-
-.poster-fallback span {
-  font-size: 48px;
-  margin-bottom: 10px;
-}
-
-.poster-fallback strong {
-  font-size: 20px;
-  color: #111827;
-}
-
-.poster-fallback small {
-  margin-top: 5px;
-  font-size: 14px;
-  color: #6b7280;
-}
-
-/* ============================================================
-   FEATURED BADGE
-   ============================================================ */
-
-.featured-overlay-badge {
-  position: absolute;
-
-  top: 15px;
-  left: 15px;
-
-  padding: 8px 13px;
-
-  border-radius: 20px;
-
-  background: rgba(17, 24, 39, 0.9);
-
-  color: white;
-
-  font-size: 13px;
-  font-weight: 700;
-
-  z-index: 2;
-}
-
-
-/* ============================================================
-   CONTENT
-   ============================================================ */
-
-.event-admin-content {
-  padding: 26px;
-}
-
-
-/* ============================================================
-   TITLE
-   ============================================================ */
-
-.event-title-row {
-  margin-bottom: 22px;
-}
-
-.event-title-row h2 {
-  margin: 0;
-
-  color: #111827;
-
-  font-size: clamp(1.15rem, 2vw, 1.5rem);
-  line-height: 1.3;
-
-  font-weight: 800;
-}
-
-.event-id {
-  display: block;
-
-  margin-top: 7px;
-
-  color: #9ca3af;
-
-  font-size: 12px;
-}
-
-
-/* ============================================================
-   INFORMATION
-   ============================================================ */
-
-.event-info-list {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 14px;
-
-  margin-bottom: 25px;
-}
-
-.event-info-list p {
-  display: flex;
-
-  align-items: flex-start;
-
-  justify-content: space-between;
-
-  gap: 20px;
-
-  margin: 0;
-
-  font-size: clamp(0.82rem, 1.2vw, 0.95rem);
-
-  line-height: 1.45;
-}
-
-.event-info-list strong {
-  min-width: 105px;
-
-  color: #6b7280;
-
-  font-size: clamp(0.76rem, 1vw, 0.88rem);
-
-  font-weight: 600;
-}
-
-.event-info-list span {
-  flex: 1;
-
-  text-align: right;
-
-  color: #1f2937;
-
-  font-size: 15px;
-
-  font-weight: 650;
-}
-
-
-/* ============================================================
-   ACTION BUTTONS
-   ============================================================ */
-
-.event-admin-actions {
-  display: grid;
-
-  grid-template-columns:
-    repeat(3, 1fr);
-
-  gap: 10px;
-
-  padding-top: 20px;
-
-  border-top:
-    1px solid
-    #edf0f3;
-}
-
-.event-admin-actions button {
-  min-height: 44px;
-
-  padding:
-    9px
-    10px;
-
-  border: none;
-
-  border-radius: 10px;
-
-  font-size: 13px;
-
-  font-weight: 750;
-
-  cursor: pointer;
-
-  transition:
-    transform 0.2s ease,
-    opacity 0.2s ease;
-}
-
-.event-admin-actions button:hover {
-  transform: translateY(-2px);
-
-  opacity: 0.9;
-}
-
-
-/* ============================================================
-   EDIT
-   ============================================================ */
-
-.edit-event-btn {
-  background: #e7f1ef;
-  color: #11665f;
-}
-
-
-/* ============================================================
-   FEATURE
-   ============================================================ */
-
-.feature-event-btn {
-  background: #fff3df;
-  color: #a45b09;
-}
-
-
-/* ============================================================
-   DELETE
-   ============================================================ */
-
-.delete-event-btn {
-  background: #fff0ed;
-  color: #b04432;
-}
-
-
-/* ============================================================
-   EMPTY / ERROR
-   ============================================================ */
-
-.admin-events-state {
-  min-height: 400px;
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-  justify-content: center;
-
-  padding: 40px;
-
-  box-sizing: border-box;
-
-  text-align: center;
-
-  background: #ffffff;
-
-  border:
-    1px dashed
-    #d1d5db;
-
-  border-radius: 18px;
-}
-
-.state-icon {
-  margin-bottom: 15px;
-
-  font-size: 52px;
-}
-
-.admin-events-state h2 {
-  margin: 0 0 10px;
-
-  color: #111827;
-
-  font-size: 24px;
-
-  font-weight: 800;
-}
-
-.admin-events-state p {
-  max-width: 520px;
-
-  margin: 0 0 24px;
-
-  color: #6b7280;
-
-  font-size: 16px;
-
-  line-height: 1.6;
-}
-
-
-/* ============================================================
-   LOADING
-   ============================================================ */
-
-.admin-loading-spinner {
-  width: 42px;
-  height: 42px;
-
-  margin-bottom: 20px;
-
-  border:
-    4px solid
-    #e5e7eb;
-
-  border-top-color:
-    #0f766e;
-
-  border-radius: 50%;
-
-  animation:
-    adminSpin
-    0.8s
-    linear
-    infinite;
-}
-
-@keyframes adminSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-
-/* ============================================================
-   RETRY
-   ============================================================ */
-
-.retry-events-btn {
-  min-height: 46px;
-
-  padding:
-    0
-    20px;
-
-  border: none;
-
-  border-radius: 10px;
-
-  background: #111827;
-
-  color: #ffffff;
-
-  font-size: 14px;
-
-  font-weight: 700;
-
-  cursor: pointer;
-}
-
-
-/* ============================================================
-   TABLET
-   ============================================================ */
-
-@media (max-width: 900px) {
-
-  .admin-events-page {
-    padding: 28px 22px;
-  }
-
-  .events-header {
-    align-items: flex-start;
-
-    flex-direction: column;
-  }
-
-  .create-event-btn {
-    width: auto;
-  }
-
-  .admin-events-grid {
-    grid-template-columns:
-      repeat(
-        auto-fill,
-        minmax(320px, 1fr)
-      );
-  }
-
-}
-
-
-
-
-/* ============================================================
-   SMALL PHONES
-   ============================================================ */
-
-@media (max-width: 400px) {
-
-  .admin-events-page {
-    padding:
-      18px
-      11px;
-  }
-
-  .events-header h1 {
-    font-size: 27px;
-  }
-
-  .admin-poster-wrapper {
-    height: 220px;
-  }
-
-  .event-admin-content {
-    padding: 18px;
-  }
-
-}
-/* ============================================================
-   EVENT TYPE BADGE
-   ============================================================ */
-
-.event-type-overlay {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  padding: 7px 12px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 700;
-  z-index: 3;
-}
-
-.event-type-overlay.free {
-  background: rgba(22, 163, 74, 0.92);
-  color: white;
-}
-
-.event-type-overlay.paid {
-  background: rgba(37, 99, 235, 0.92);
-  color: white;
-}
-@media (max-width: 768px) {
-
-  .admin-poster-wrapper {
-    min-height: 240px;
-  }
-
-  .admin-event-poster {
-    width: 100%;
-    height: auto;
-    max-height: 500px;
-  }
-
-  .poster-fallback {
-    min-height: 240px;
-  }
-
+@media (prefers-reduced-motion: reduce) {
+  .admin-events *, .admin-events *::before, .admin-events *::after { scroll-behavior: auto !important; transition: none !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }

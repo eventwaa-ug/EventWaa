@@ -9,7 +9,7 @@ import { usePlatformSettings } from "../context/PlatformSettingsContext.jsx";
 /* ============================================================
    BACKEND API URL
 ============================================================ */
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 /* ============================================================
    LOGIN PAGE
 ============================================================ */
@@ -88,7 +88,7 @@ function Login() {
         async (credentialResponse) => {
             try {
                 setError("");
-                if (!API_URL) {
+                if (!BACKEND_URL) {
                     console.error(
                         "VITE_API_BASE_URL is not configured."
                     );
@@ -99,7 +99,7 @@ function Login() {
                 }
                 const response =
                     await fetch(
-                        `${API_URL}/google-login`,
+                        `${BACKEND_URL}/google-login`,
                         {
                             method: "POST",
                             headers: {

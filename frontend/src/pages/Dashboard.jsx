@@ -3,6 +3,7 @@ import "../styles/Dashboard.css";
 import { useContext, useEffect, useState } from "react";
 import { EventContext } from "../context/EventContext";
 import { useAuth } from "../context/AuthContext";
+import HostSidebar from "../components/HostSidebar";
 
 import {
   CalendarDays,
@@ -28,7 +29,9 @@ import {
 function Dashboard() {
   const navigate = useNavigate();
 
-  const { events, deleteEvent } = useContext(EventContext);
+  const { events, deleteEvent } =
+    useContext(EventContext);
+
   const { user } = useAuth();
 
   /* =========================================================
@@ -76,6 +79,167 @@ function Dashboard() {
       : null;
 
   /* =========================================================
+     EVENT DATE
+  ========================================================= */
+
+  const getEventDate = (event) => {
+    if (!event) return null;
+
+    const rawDate =
+      event.date ||
+      event.eventDate ||
+      event.startDate;
+
+    if (!rawDate) {
+      return null;
+    }
+
+    /*
+     * If the backend already provides a full
+     * date/time value, use it directly.
+     */
+    if (
+      typeof rawDate === "string" &&
+      rawDate.includes("T")
+    ) {
+      const directDate = new Date(rawDate);
+
+      if (!Number.isNaN(directDate.getTime())) {
+        return directDate;
+      }
+    }
+
+    let dateString =
+      String(rawDate).trim();
+
+    /*
+     * Support DD/MM/YYYY if returned.
+     */
+    const slashMatch =
+      dateString.match(
+        /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
+      );
+
+    if (slashMatch) {
+      const [, day, month, year] =
+        slashMatch;
+
+      dateString =
+        `${year}-${month.padStart(
+          2,
+          "0"
+        )}-${day.padStart(
+          2,
+          "0"
+        )}`;
+    }
+
+    /*
+     * Use event start time where available.
+     */
+    const rawTime =
+      event.startTime ||
+      event.time ||
+      "00:00";
+
+    let timeString =
+      String(rawTime).trim();
+
+    /*
+     * Convert 12-hour time to 24-hour time.
+     */
+    const twelveHourMatch =
+      timeString.match(
+        /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i
+      );
+
+    if (twelveHourMatch) {
+      let hour =
+        Number(twelveHourMatch[1]);
+
+      const minute =
+        twelveHourMatch[2];
+
+      const period =
+        twelveHourMatch[3].toUpperCase();
+
+      if (
+        period === "PM" &&
+        hour !== 12
+      ) {
+        hour += 12;
+      }
+
+      if (
+        period === "AM" &&
+        hour === 12
+      ) {
+        hour = 0;
+      }
+
+      timeString =
+        `${String(hour).padStart(
+          2,
+          "0"
+        )}:${minute}`;
+    }
+
+    const combinedDate =
+      new Date(
+        `${dateString}T${timeString}`
+      );
+
+    if (
+      !Number.isNaN(
+        combinedDate.getTime()
+      )
+    ) {
+      return combinedDate;
+    }
+
+    /*
+     * Final fallback.
+     */
+    const fallbackDate =
+      new Date(rawDate);
+
+    if (
+      !Number.isNaN(
+        fallbackDate.getTime()
+      )
+    ) {
+      return fallbackDate;
+    }
+
+    return null;
+  };
+
+  /* =========================================================
+     EVENT STATUS
+  ========================================================= */
+
+  const isCancelled =
+    String(
+      currentEvent?.status || ""
+    ).toLowerCase() ===
+    "cancelled";
+
+  const isPastEvent = (() => {
+    if (!currentEvent) {
+      return false;
+    }
+
+    const eventDate =
+      getEventDate(currentEvent);
+
+    if (!eventDate) {
+      return false;
+    }
+
+    return eventDate < new Date();
+  })();
+
+  /* =========================================================
      EVENT IMAGE
   ========================================================= */
 
@@ -107,63 +271,74 @@ function Dashboard() {
   ========================================================= */
 
   useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        const bookingsResponse = await fetch(
-          `${BACKEND_URL}/bookings`
-        );
+    const loadDashboardData =
+      async () => {
+        try {
+          const bookingsResponse =
+            await fetch(
+              `${BACKEND_URL}/bookings`
+            );
 
-        if (!bookingsResponse.ok) {
-          throw new Error(
-            `Bookings request failed: ${bookingsResponse.status}`
+          if (
+            !bookingsResponse.ok
+          ) {
+            throw new Error(
+              `Bookings request failed: ${bookingsResponse.status}`
+            );
+          }
+
+          const bookingsData =
+            await bookingsResponse.json();
+
+          setBookings(
+            Array.isArray(
+              bookingsData
+            )
+              ? bookingsData
+              : []
           );
+        } catch (error) {
+          console.error(
+            "BOOKINGS LOAD ERROR:",
+            error
+          );
+
+          setBookings([]);
         }
 
-        const bookingsData =
-          await bookingsResponse.json();
+        try {
+          const checkedInResponse =
+            await fetch(
+              `${BACKEND_URL}/bookings/checked-in`
+            );
 
-        setBookings(
-          Array.isArray(bookingsData)
-            ? bookingsData
-            : []
-        );
-      } catch (error) {
-        console.error(
-          "BOOKINGS LOAD ERROR:",
-          error
-        );
+          if (
+            !checkedInResponse.ok
+          ) {
+            throw new Error(
+              `Checked-in request failed: ${checkedInResponse.status}`
+            );
+          }
 
-        setBookings([]);
-      }
+          const checkedInData =
+            await checkedInResponse.json();
 
-      try {
-        const checkedInResponse = await fetch(
-          `${BACKEND_URL}/bookings/checked-in`
-        );
-
-        if (!checkedInResponse.ok) {
-          throw new Error(
-            `Checked-in request failed: ${checkedInResponse.status}`
+          setCheckedInTickets(
+            Array.isArray(
+              checkedInData
+            )
+              ? checkedInData
+              : []
           );
+        } catch (error) {
+          console.error(
+            "CHECKED-IN LOAD ERROR:",
+            error
+          );
+
+          setCheckedInTickets([]);
         }
-
-        const checkedInData =
-          await checkedInResponse.json();
-
-        setCheckedInTickets(
-          Array.isArray(checkedInData)
-            ? checkedInData
-            : []
-        );
-      } catch (error) {
-        console.error(
-          "CHECKED-IN LOAD ERROR:",
-          error
-        );
-
-        setCheckedInTickets([]);
-      }
-    };
+      };
 
     loadDashboardData();
   }, [BACKEND_URL]);
@@ -173,35 +348,45 @@ function Dashboard() {
   ========================================================= */
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      return;
+    }
 
-    const loadUnread = async () => {
-      try {
-        const response = await fetch(
-          `${BACKEND_URL}/messages/unread/${user.id}`
-        );
+    const loadUnread =
+      async () => {
+        try {
+          const response =
+            await fetch(
+              `${BACKEND_URL}/messages/unread/${user.id}`
+            );
 
-        if (!response.ok) return;
+          if (!response.ok) {
+            return;
+          }
 
-        const data = await response.json();
+          const data =
+            await response.json();
 
-        setUnreadCount(
-          Number(data?.unread || 0)
-        );
-      } catch (error) {
-        console.error(
-          "UNREAD MESSAGE ERROR:",
-          error
-        );
-      }
-    };
+          setUnreadCount(
+            Number(
+              data?.unread || 0
+            )
+          );
+        } catch (error) {
+          console.error(
+            "UNREAD MESSAGE ERROR:",
+            error
+          );
+        }
+      };
 
     loadUnread();
 
-    const interval = setInterval(
-      loadUnread,
-      3000
-    );
+    const interval =
+      setInterval(
+        loadUnread,
+        3000
+      );
 
     return () =>
       clearInterval(interval);
@@ -211,120 +396,149 @@ function Dashboard() {
      ACTIVE BOOKING
   ========================================================= */
 
-  const isActiveBooking = (booking) =>
-    booking?.refundStatus !== "refunded";
+  const isActiveBooking =
+    (booking) =>
+      booking?.refundStatus !==
+      "refunded";
 
   /* =========================================================
      CANCEL EVENT
   ========================================================= */
 
-  const handleCancelEvent = async () => {
-    if (!currentEvent) return;
-
-    if (
-      String(currentEvent.status || "").toLowerCase() ===
-      "cancelled"
-    ) {
-      return;
-    }
-
-    const confirmed = window.confirm(
-      `Are you sure you want to cancel "${currentEvent.title}"?\n\n` +
-        `This will cancel the event and process eligible ` +
-        `refunds for customers.\n\n` +
-        `Cancelled tickets will no longer be valid.\n\n` +
-        `This action cannot be undone.`
-    );
-
-    if (!confirmed) return;
-
-    if (!user?.email) {
-      window.alert(
-        "Your account email could not be found. Please log in again and try again."
-      );
-      return;
-    }
-
-    setCancellingEvent(true);
-
-    try {
-      const response = await fetch(
-        `${BACKEND_URL}/events/${currentEvent.id}/cancel`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            hostEmail: user.email,
-            reason: "Event cancelled by host",
-          }),
-        }
-      );
-
-      let data = {};
-
-      try {
-        data = await response.json();
-      } catch (error) {
-        console.error(
-          "CANCEL EVENT RESPONSE ERROR:",
-          error
-        );
+  const handleCancelEvent =
+    async () => {
+      if (!currentEvent) {
+        return;
       }
-
-      if (!response.ok) {
-        throw new Error(
-          data?.message ||
-            "Unable to cancel the event."
-        );
-      }
-
-      window.alert(
-        data?.message ||
-          "Event cancelled successfully."
-      );
 
       /*
-       * EventContext already handles loading events.
-       * Reloading ensures the dashboard receives the
-       * updated cancelled status from the backend.
+       * Already cancelled.
        */
-      window.location.reload();
+      if (isCancelled) {
+        return;
+      }
 
-    } catch (error) {
-      console.error(
-        "EVENT CANCELLATION ERROR:",
-        error
-      );
+      /*
+       * Past events cannot be cancelled.
+       */
+      if (isPastEvent) {
+        window.alert(
+          "Past events cannot be cancelled."
+        );
+        return;
+      }
 
-      window.alert(
-        error?.message ||
-          "Something went wrong while cancelling the event."
-      );
+      const confirmed =
+        window.confirm(
+          `Are you sure you want to cancel "${currentEvent.title}"?\n\n` +
+            `This will cancel the event and process eligible ` +
+            `refunds for customers.\n\n` +
+            `Cancelled tickets will no longer be valid.\n\n` +
+            `This action cannot be undone.`
+        );
 
-      setCancellingEvent(false);
-    }
-  };
+      if (!confirmed) {
+        return;
+      }
+
+      if (!user?.email) {
+        window.alert(
+          "Your account email could not be found. Please log in again and try again."
+        );
+
+        return;
+      }
+
+      setCancellingEvent(true);
+
+      try {
+        const response =
+          await fetch(
+            `${BACKEND_URL}/events/${currentEvent.id}/cancel`,
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+
+              body: JSON.stringify({
+                hostEmail:
+                  user.email,
+
+                reason:
+                  "Event cancelled by host",
+              }),
+            }
+          );
+
+        let data = {};
+
+        try {
+          data =
+            await response.json();
+        } catch (error) {
+          console.error(
+            "CANCEL EVENT RESPONSE ERROR:",
+            error
+          );
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            data?.message ||
+              "Unable to cancel the event."
+          );
+        }
+
+        window.alert(
+          data?.message ||
+            "Event cancelled successfully."
+        );
+
+        /*
+         * Reload so EventContext receives
+         * the updated cancelled status.
+         */
+        window.location.reload();
+      } catch (error) {
+        console.error(
+          "EVENT CANCELLATION ERROR:",
+          error
+        );
+
+        window.alert(
+          error?.message ||
+            "Something went wrong while cancelling the event."
+        );
+
+        setCancellingEvent(false);
+      }
+    };
 
   /* =========================================================
      HOST BOOKINGS
   ========================================================= */
 
-  const hostBookings = bookings.filter(
-    (booking) => {
-      const belongsToHost = myEvents.some(
-        (event) =>
-          String(event.id) ===
-          String(booking.eventId)
-      );
+  const hostBookings =
+    bookings.filter(
+      (booking) => {
+        const belongsToHost =
+          myEvents.some(
+            (event) =>
+              String(event.id) ===
+              String(
+                booking.eventId
+              )
+          );
 
-      return (
-        belongsToHost &&
-        isActiveBooking(booking)
-      );
-    }
-  );
+        return (
+          belongsToHost &&
+          isActiveBooking(booking)
+        );
+      }
+    );
 
   /* =========================================================
      GENERAL STATISTICS
@@ -340,7 +554,9 @@ function Dashboard() {
     myEvents.reduce(
       (total, event) =>
         total +
-        Number(event.revenue || 0),
+        Number(
+          event.revenue || 0
+        ),
       0
     );
 
@@ -348,7 +564,9 @@ function Dashboard() {
     myEvents.reduce(
       (total, event) =>
         total +
-        Number(event.capacity || 0),
+        Number(
+          event.capacity || 0
+        ),
       0
     );
 
@@ -358,7 +576,9 @@ function Dashboard() {
         myEvents.some(
           (event) =>
             String(event.id) ===
-            String(ticket.eventId)
+            String(
+              ticket.eventId
+            )
         )
     ).length;
 
@@ -374,8 +594,12 @@ function Dashboard() {
     const currentEventBookings =
       bookings.filter(
         (booking) =>
-          String(booking.eventId) ===
-            String(currentEvent.id) &&
+          String(
+            booking.eventId
+          ) ===
+            String(
+              currentEvent.id
+            ) &&
           isActiveBooking(booking)
       );
 
@@ -385,34 +609,48 @@ function Dashboard() {
     checkedIn =
       checkedInTickets.filter(
         (ticket) =>
-          String(ticket.eventId) ===
-          String(currentEvent.id)
+          String(
+            ticket.eventId
+          ) ===
+          String(
+            currentEvent.id
+          )
       ).length;
 
     ticketStats =
-      (currentEvent.tickets || []).map(
+      (
+        currentEvent.tickets ||
+        []
+      ).map(
         (ticket) => {
           const sold =
             currentEventBookings.filter(
               (booking) =>
                 String(
-                  booking.ticketType || ""
+                  booking.ticketType ||
+                    ""
                 ).toLowerCase() ===
                 String(
-                  ticket.name || ""
+                  ticket.name ||
+                    ""
                 ).toLowerCase()
             ).length;
 
           const quantity =
-            Number(ticket.quantity || 0);
+            Number(
+              ticket.quantity || 0
+            );
 
           return {
             ...ticket,
+
             sold,
-            remaining: Math.max(
-              0,
-              quantity - sold
-            ),
+
+            remaining:
+              Math.max(
+                0,
+                quantity - sold
+              ),
           };
         }
       );
@@ -427,7 +665,8 @@ function Dashboard() {
       ? Math.max(
           0,
           Number(
-            currentEvent.capacity || 0
+            currentEvent.capacity ||
+              0
           ) - soldTickets
         )
       : 0;
@@ -437,9 +676,14 @@ function Dashboard() {
   ========================================================= */
 
   const ticketPrices =
-    (currentEvent?.tickets || [])
+    (
+      currentEvent?.tickets ||
+      []
+    )
       .map((ticket) =>
-        Number(ticket.price || 0)
+        Number(
+          ticket.price || 0
+        )
       )
       .filter(
         (price) => price > 0
@@ -447,19 +691,13 @@ function Dashboard() {
 
   const startingPrice =
     ticketPrices.length > 0
-      ? Math.min(...ticketPrices)
+      ? Math.min(
+          ...ticketPrices
+        )
       : Number(
-          currentEvent?.price || 0
+          currentEvent?.price ||
+            0
         );
-
-  /* =========================================================
-     CANCELLED EVENT CHECK
-  ========================================================= */
-
-  const isCancelled =
-    String(
-      currentEvent?.status || ""
-    ).toLowerCase() === "cancelled";
 
   /* =========================================================
      RENDER
@@ -467,6 +705,8 @@ function Dashboard() {
 
   return (
     <div className="host-dashboard-layout">
+
+      <HostSidebar />
 
       <main className="host-dashboard-content">
 
@@ -479,11 +719,16 @@ function Dashboard() {
           <div className="dashboard-welcome">
 
             <div className="welcome-heading">
-              <span>Welcome back,</span>
+
+              <span>
+                Welcome back,
+              </span>
 
               <strong>
-                {user?.name || "Organizer"}
+                {user?.name ||
+                  "Organizer"}
               </strong>
+
             </div>
 
             <p>
@@ -498,7 +743,9 @@ function Dashboard() {
             <button
               className="create-event-btn"
               onClick={() =>
-                navigate("/create-event")
+                navigate(
+                  "/create-event"
+                )
               }
             >
               <Plus
@@ -514,10 +761,14 @@ function Dashboard() {
             <button
               className="inbox-btn"
               onClick={() =>
-                navigate("/host-messages")
+                navigate(
+                  "/host-messages"
+                )
               }
             >
-              <MessageCircle size={19} />
+              <MessageCircle
+                size={19}
+              />
 
               <span>
                 Inbox
@@ -545,69 +796,108 @@ function Dashboard() {
           <div className="stats-grid">
 
             <div className="stat-card events-stat">
+
               <div className="stat-icon">
                 <CalendarDays />
               </div>
 
               <div className="stat-content">
-                <h2>{totalEvents}</h2>
-                <p>Total Events</p>
+
+                <h2>
+                  {totalEvents}
+                </h2>
+
+                <p>
+                  Total Events
+                </p>
+
               </div>
+
             </div>
 
 
             <div className="stat-card tickets-stat">
+
               <div className="stat-icon">
                 <Ticket />
               </div>
 
               <div className="stat-content">
-                <h2>{totalTicketsSold}</h2>
-                <p>Tickets Sold</p>
+
+                <h2>
+                  {totalTicketsSold}
+                </h2>
+
+                <p>
+                  Tickets Sold
+                </p>
+
               </div>
+
             </div>
 
 
             <div className="stat-card checked-stat">
+
               <div className="stat-icon">
                 <CheckCircle2 />
               </div>
 
               <div className="stat-content">
-                <h2>{checkedInCount}</h2>
-                <p>Checked In</p>
+
+                <h2>
+                  {checkedInCount}
+                </h2>
+
+                <p>
+                  Checked In
+                </p>
+
               </div>
+
             </div>
 
 
             <div className="stat-card capacity-stat">
+
               <div className="stat-icon">
                 <Users />
               </div>
 
               <div className="stat-content">
+
                 <h2>
                   {totalCapacity.toLocaleString()}
                 </h2>
 
-                <p>Total Capacity</p>
+                <p>
+                  Total Capacity
+                </p>
+
               </div>
+
             </div>
 
 
             <div className="stat-card revenue-stat">
+
               <div className="stat-icon">
                 <Wallet />
               </div>
 
               <div className="stat-content">
+
                 <h2>
                   UGX{" "}
                   {totalRevenue.toLocaleString()}
                 </h2>
 
-                <p>Revenue</p>
+                <p>
+                  Revenue
+                </p>
+
               </div>
+
             </div>
 
           </div>
@@ -624,21 +914,33 @@ function Dashboard() {
           <div className="section-title">
 
             <div>
-              <h2>Current Event</h2>
+
+              <h2>
+                Current Event
+              </h2>
 
               <p>
                 Your most recently created event.
               </p>
+
             </div>
 
             <button
               className="view-all-events-btn"
               onClick={() =>
-                navigate("/host-events")
+                navigate(
+                  "/host-events"
+                )
               }
             >
-              <span>View All Events</span>
-              <ArrowRight size={17} />
+              <span>
+                View All Events
+              </span>
+
+              <ArrowRight
+                size={17}
+              />
+
             </button>
 
           </div>
@@ -668,11 +970,17 @@ function Dashboard() {
               <button
                 className="create-event-btn"
                 onClick={() =>
-                  navigate("/create-event")
+                  navigate(
+                    "/create-event"
+                  )
                 }
               >
                 <Plus size={19} />
-                <span>Create Event</span>
+
+                <span>
+                  Create Event
+                </span>
+
               </button>
 
             </div>
@@ -702,20 +1010,27 @@ function Dashboard() {
 
                 <span
                   className={`event-type ${
-                    currentEvent.eventType === "Free"
+                    currentEvent.eventType ===
+                    "Free"
                       ? "free"
                       : "paid"
                   }`}
                 >
-                  {currentEvent.eventType === "Free"
+                  {currentEvent.eventType ===
+                  "Free"
                     ? "FREE"
                     : "PAID"}
                 </span>
 
                 {currentEvent.verifiedHost && (
                   <span className="verified-host">
-                    <BadgeCheck size={15} />
+
+                    <BadgeCheck
+                      size={15}
+                    />
+
                     Verified
+
                   </span>
                 )}
 
@@ -763,9 +1078,11 @@ function Dashboard() {
                 <div className="event-details">
 
                   <p>
+
                     <MapPin />
 
                     <span>
+
                       {currentEvent.venue
                         ? `${currentEvent.venue}, `
                         : ""}
@@ -773,24 +1090,30 @@ function Dashboard() {
                       {currentEvent.city ||
                         currentEvent.location ||
                         "Location not specified"}
+
                     </span>
+
                   </p>
 
 
                   <p>
+
                     <CalendarDays />
 
                     <span>
                       {currentEvent.date ||
                         "Date not specified"}
                     </span>
+
                   </p>
 
 
                   <p>
+
                     <Clock3 />
 
                     <span>
+
                       {currentEvent.startTime ||
                         currentEvent.time ||
                         "Time not specified"}
@@ -798,21 +1121,26 @@ function Dashboard() {
                       {currentEvent.endTime
                         ? ` - ${currentEvent.endTime}`
                         : ""}
+
                     </span>
+
                   </p>
 
 
                   <p>
+
                     <Tag />
 
                     <span>
                       {currentEvent.category ||
                         "Uncategorized"}
                     </span>
+
                   </p>
 
 
                   <p>
+
                     {currentEvent.eventType ===
                     "Free" ? (
                       <Gift />
@@ -821,23 +1149,31 @@ function Dashboard() {
                     )}
 
                     <span>
+
                       {currentEvent.eventType ===
                       "Free"
                         ? "Free Event"
                         : `Starting Price: UGX ${startingPrice.toLocaleString()}`}
+
                     </span>
+
                   </p>
 
 
                   <p>
+
                     <Users />
 
                     <span>
+
                       Capacity:{" "}
                       {Number(
-                        currentEvent.capacity || 0
+                        currentEvent.capacity ||
+                          0
                       ).toLocaleString()}
+
                     </span>
+
                   </p>
 
                 </div>
@@ -854,11 +1190,15 @@ function Dashboard() {
                     </div>
 
                     <div>
-                      <span>Tickets Sold</span>
+
+                      <span>
+                        Tickets Sold
+                      </span>
 
                       <strong>
                         {soldTickets}
                       </strong>
+
                     </div>
 
                   </div>
@@ -871,11 +1211,15 @@ function Dashboard() {
                     </div>
 
                     <div>
-                      <span>Checked In</span>
+
+                      <span>
+                        Checked In
+                      </span>
 
                       <strong>
                         {checkedIn}
                       </strong>
+
                     </div>
 
                   </div>
@@ -888,11 +1232,15 @@ function Dashboard() {
                     </div>
 
                     <div>
-                      <span>Remaining</span>
+
+                      <span>
+                        Remaining
+                      </span>
 
                       <strong>
                         {currentEventRemaining}
                       </strong>
+
                     </div>
 
                   </div>
@@ -909,14 +1257,21 @@ function Dashboard() {
                     <div className="ticket-breakdown-header">
 
                       <div>
+
                         <h4>
-                          <Ticket size={19} />
+
+                          <Ticket
+                            size={19}
+                          />
+
                           Ticket Types
+
                         </h4>
 
                         <p>
                           Ticket sales breakdown
                         </p>
+
                       </div>
 
                     </div>
@@ -925,7 +1280,10 @@ function Dashboard() {
                     <div className="ticket-breakdown-grid">
 
                       {ticketStats.map(
-                        (ticket, index) => (
+                        (
+                          ticket,
+                          index
+                        ) => (
 
                           <div
                             className="ticket-breakdown-item"
@@ -948,20 +1306,28 @@ function Dashboard() {
                             <div className="ticket-type-numbers">
 
                               <div>
-                                <span>Sold</span>
+
+                                <span>
+                                  Sold
+                                </span>
 
                                 <strong>
                                   {ticket.sold}
                                 </strong>
+
                               </div>
 
 
                               <div>
-                                <span>Remaining</span>
+
+                                <span>
+                                  Remaining
+                                </span>
 
                                 <strong>
                                   {ticket.remaining}
                                 </strong>
+
                               </div>
 
                             </div>
@@ -995,8 +1361,9 @@ function Dashboard() {
                       "/create-event",
                       {
                         state: {
-                          event: currentEvent
-                        }
+                          event:
+                            currentEvent,
+                        },
                       }
                     )
                   }
@@ -1007,8 +1374,15 @@ function Dashboard() {
                       : "Edit event"
                   }
                 >
-                  <Pencil size={17} />
-                  <span>Edit</span>
+
+                  <Pencil
+                    size={17}
+                  />
+
+                  <span>
+                    Edit
+                  </span>
+
                 </button>
 
 
@@ -1022,8 +1396,8 @@ function Dashboard() {
                       {
                         state: {
                           duplicateEvent:
-                            currentEvent
-                        }
+                            currentEvent,
+                        },
                       }
                     )
                   }
@@ -1034,8 +1408,15 @@ function Dashboard() {
                       : "Duplicate event"
                   }
                 >
-                  <Copy size={17} />
-                  <span>Duplicate</span>
+
+                  <Copy
+                    size={17}
+                  />
+
+                  <span>
+                    Duplicate
+                  </span>
+
                 </button>
 
 
@@ -1055,8 +1436,15 @@ function Dashboard() {
                       : "Scan tickets"
                   }
                 >
-                  <ScanLine size={17} />
-                  <span>Scan Tickets</span>
+
+                  <ScanLine
+                    size={17}
+                  />
+
+                  <span>
+                    Scan Tickets
+                  </span>
+
                 </button>
 
 
@@ -1076,38 +1464,55 @@ function Dashboard() {
                       : "View attendees"
                   }
                 >
-                  <Users size={17} />
-                  <span>View Attendees</span>
-                </button>
 
-
-                {/* CANCEL EVENT */}
-
-                <button
-                  className="cancel-event-btn"
-                  onClick={
-                    handleCancelEvent
-                  }
-                  disabled={
-                    cancellingEvent ||
-                    isCancelled
-                  }
-                  title={
-                    isCancelled
-                      ? "Event is already cancelled."
-                      : "Cancel event"
-                  }
-                >
-                  <Trash2 size={17} />
+                  <Users
+                    size={17}
+                  />
 
                   <span>
-                    {cancellingEvent
-                      ? "Cancelling..."
-                      : isCancelled
-                      ? "Event Cancelled"
-                      : "Cancel Event"}
+                    View Attendees
                   </span>
+
                 </button>
+
+
+                {/* =================================================
+                    CANCEL EVENT
+
+                    IMPORTANT:
+                    Only show Cancel Event when:
+                    1. There is an event
+                    2. The event is NOT cancelled
+                    3. The event has NOT passed
+                ================================================= */}
+
+                {!isCancelled &&
+                  !isPastEvent && (
+
+                    <button
+                      className="cancel-event-btn"
+                      onClick={
+                        handleCancelEvent
+                      }
+                      disabled={
+                        cancellingEvent
+                      }
+                      title="Cancel event"
+                    >
+
+                      <Trash2
+                        size={17}
+                      />
+
+                      <span>
+                        {cancellingEvent
+                          ? "Cancelling..."
+                          : "Cancel Event"}
+                      </span>
+
+                    </button>
+
+                  )}
 
 
                 {/* DELETE */}
@@ -1120,8 +1525,15 @@ function Dashboard() {
                     )
                   }
                 >
-                  <Trash2 size={17} />
-                  <span>Delete</span>
+
+                  <Trash2
+                    size={17}
+                  />
+
+                  <span>
+                    Delete
+                  </span>
+
                 </button>
 
               </div>

@@ -11,7 +11,7 @@ import "../styles/ResetPassword.css";
    BACKEND API URL
 ============================================================ */
 
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 /* ============================================================
    RESET PASSWORD
@@ -69,7 +69,7 @@ function ResetPassword() {
       return;
     }
 
-    if (!API_URL) {
+    if (!BACKEND_URL) {
       setError(
         "Password recovery service is not configured. Please try again later."
       );
@@ -99,7 +99,7 @@ function ResetPassword() {
         setLoading(true);
 
         const response = await fetch(
-          `${API_URL}/verify-otp`,
+          `${BACKEND_URL}/verify-otp`,
           {
             method: "POST",
             headers: {
@@ -198,7 +198,7 @@ function ResetPassword() {
       setLoading(true);
 
       const response = await fetch(
-        `${API_URL}/reset-password`,
+        `${BACKEND_URL}/reset-password`,
         {
           method: "POST",
           headers: {
@@ -262,7 +262,7 @@ function ResetPassword() {
       return;
     }
 
-    if (!API_URL) {
+    if (!BACKEND_URL) {
       setError(
         "Password recovery service is not configured. Please try again later."
       );
@@ -273,7 +273,7 @@ function ResetPassword() {
       setLoading(true);
 
       const response = await fetch(
-        `${API_URL}/forgot-password`,
+        `${BACKEND_URL}/forgot-password`,
         {
           method: "POST",
           headers: {

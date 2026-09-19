@@ -1,946 +1,903 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+    FiCalendar,
+    FiCheck,
+    FiEdit,
+    FiSearch,
+    FiStar,
+    FiTrash2,
+    FiXCircle,
+} from "react-icons/fi";
 import "./AdminEvents.css";
-
-//BACKEND URL
 const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
-
 function AdminEvents() {
-  const [events, setEvents] = useState([]);
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const navigate = useNavigate();
-
-  // ============================================================
-  // LOAD EVENTS
-  // ============================================================
-
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  async function fetchEvents() {
-    try {
-      setLoading(true);
-      setError("");
-
-      const response = await fetch(
-        `${BACKEND_URL}/admin/events`
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to load events (${response.status})`
-        );
-      }
-
-      const data = await response.json();
-
-      let loadedEvents = [];
-
-      if (Array.isArray(data)) {
-        loadedEvents = data;
-      } else if (Array.isArray(data.events)) {
-        loadedEvents = data.events;
-      }
-
-      // ========================================================
-      // NEWEST EVENTS FIRST
-      //
-      // createdAt is preferred.
-      // If an older event does not have createdAt,
-      // its ID is used as a fallback.
-      // ========================================================
-
-      loadedEvents.sort((a, b) => {
-        const dateA = a?.createdAt
-          ? new Date(a.createdAt).getTime()
-          : 0;
-
-        const dateB = b?.createdAt
-          ? new Date(b.createdAt).getTime()
-          : 0;
-
+    const navigate = useNavigate();
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [search, setSearch] = useState("");
+    const [filter, setFilter] = useState("all");
+    const [cancellingId, setCancellingId] = useState(null);
+    const fetchEvents = async () => {
+        try {
+            setLoading(true);
+            setError("");
+            const response = await fetch(
+                `${BACKEND_URL}/admin/events`
+            );
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(
+                    data.message || "Failed to load events."
+                );
+            }
+            setEvents(
+                Array.isArray(data)
+                    ? data
+                    : []
+            );
+        } catch (err) {
+            console.error(
+                "ADMIN EVENTS LOAD ERROR:",
+                err
+            );
+            setError(
+                err.message ||
+                "Failed to load events."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+    useEffect(() => {
+        fetchEvents();
+    }, []);
+    // ========================================================
+    // SORT EVENTS
+    // ========================================================
+    const sortedEvents = useMemo(() => {
+        return [...events].sort((a, b) => {
+            const dateA = new Date(
+                a.createdAt || 0
+            ).getTime();
+            const dateB = new Date(
+                b.createdAt || 0
+            ).getTime();
+            if (
+                !Number.isNaN(dateA) &&
+                !Number.isNaN(dateB) &&
+                dateA !== dateB
+            ) {
+                return dateB - dateA;
+            }
+            return (
+                Number(b.id || 0) -
+                Number(a.id || 0)
+            );
+        });
+    }, [events]);
+    // ========================================================
+    // FILTER EVENTS
+    // ========================================================
+    const filteredEvents = useMemo(() => {
+        const query = search
+            .trim()
+            .toLowerCase();
+        return sortedEvents.filter((event) => {
+            const title = String(
+                event.title || ""
+            ).toLowerCase();
+            const venue = String(
+                event.venue || ""
+            ).toLowerCase();
+            const city = String(
+                event.city || ""
+            ).toLowerCase();
+            const hostName = String(
+                event.hostName ||
+                event.organizerName ||
+                ""
+            ).toLowerCase();
+            const matchesSearch =
+                !query ||
+                title.includes(query) ||
+                venue.includes(query) ||
+                city.includes(query) ||
+                hostName.includes(query);
+            if (!matchesSearch) {
+                return false;
+            }
+            const status = String(
+                event.status || ""
+            ).toLowerCase();
+            const isCancelled =
+                status === "cancelled";
+            const isFeatured =
+                Boolean(event.featured);
+            const isFree =
+                String(
+                    event.eventType || ""
+                ).toLowerCase() === "free" ||
+                (
+                    Array.isArray(event.tickets) &&
+                    event.tickets.length > 0 &&
+                    event.tickets.every(
+                        (ticket) =>
+                            Number(
+                                ticket.price || 0
+                            ) === 0
+                    )
+                );
+            const isPaid = !isFree;
+            if (filter === "featured") {
+                return isFeatured;
+            }
+            if (filter === "free") {
+                return isFree;
+            }
+            if (filter === "paid") {
+                return isPaid;
+            }
+            if (filter === "cancelled") {
+                return isCancelled;
+            }
+            if (filter === "active") {
+                return !isCancelled;
+            }
+            return true;
+        });
+    }, [
+        sortedEvents,
+        search,
+        filter,
+    ]);
+    // ========================================================
+    // EVENT PRICE
+    // ========================================================
+    const getEventPrice = (event) => {
         if (
-          dateA &&
-          dateB &&
-          dateA !== dateB
+            String(
+                event.eventType || ""
+            ).toLowerCase() === "free"
         ) {
-          return dateB - dateA;
+            return "Free";
         }
-
-        return (
-          Number(b?.id || 0) -
-          Number(a?.id || 0)
-        );
-      });
-
-      setEvents(loadedEvents);
-    } catch (error) {
-      console.error(
-        "Failed to load admin events:",
-        error
-      );
-
-      setError(
-        "Unable to load events. Please try again."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // ============================================================
-  // CHECK WHETHER EVENT IS FREE
-  // ============================================================
-
-  const isFreeEvent = (event) => {
-    return (
-      String(
-        event?.eventType || ""
-      ).toLowerCase() === "free"
-    );
-  };
-
-  // ============================================================
-  // GET TICKET TYPES
-  // ============================================================
-
-  const getTickets = (event) => {
-    return Array.isArray(event?.tickets)
-      ? event.tickets
-      : [];
-  };
-
-  // ============================================================
-  // GET LOWEST TICKET PRICE
-  //
-  // Used for displaying:
-  // "From UGX 20,000"
-  //
-  // For multiple ticket types we show the cheapest one.
-  // ============================================================
-
-  const getLowestTicketPrice = (event) => {
-    const tickets = getTickets(event);
-
-    const prices = tickets
-      .map((ticket) =>
-        Number(
-          ticket?.price || 0
-        )
-      )
-      .filter(
-        (price) =>
-          !Number.isNaN(price) &&
-          price >= 0
-      );
-
-    if (prices.length === 0) {
-      return null;
-    }
-
-    return Math.min(...prices);
-  };
-
-  // ============================================================
-  // GET PRICE DISPLAY
-  // ============================================================
-
-  const getPriceDisplay = (event) => {
-    // ----------------------------------------------------------
-    // FREE EVENT
-    // ----------------------------------------------------------
-
-    if (isFreeEvent(event)) {
-      return "Free";
-    }
-
-    // ----------------------------------------------------------
-    // PAID EVENT
-    // ----------------------------------------------------------
-
-    const lowestPrice =
-      getLowestTicketPrice(event);
-
-    if (
-      lowestPrice !== null
-    ) {
-      if (getTickets(event).length > 1) {
-        return `From UGX ${lowestPrice.toLocaleString()}`;
-      }
-
-      return `UGX ${lowestPrice.toLocaleString()}`;
-    }
-
-    // ----------------------------------------------------------
-    // OLD EVENTS COMPATIBILITY
-    //
-    // If an older event still has event.price,
-    // display it rather than incorrectly calling it Free.
-    // ----------------------------------------------------------
-
-    const oldPrice =
-      event?.price;
-
-    if (
-      oldPrice !== undefined &&
-      oldPrice !== null &&
-      String(oldPrice).trim() !== "" &&
-      Number(oldPrice) >= 0
-    ) {
-      return `UGX ${Number(
-        oldPrice
-      ).toLocaleString()}`;
-    }
-
-    return "Paid";
-  };
-
-  // ============================================================
-  // GET EVENT TYPE
-  // ============================================================
-
-  const getEventTypeDisplay = (event) => {
-    if (isFreeEvent(event)) {
-      return "Free Event";
-    }
-
-    return "Paid Event";
-  };
-
-  // ============================================================
-  // IMAGE URL
-  // ============================================================
-
-  const getPosterUrl = (event) => {
-    const poster =
-      event?.eventPoster ||
-      event?.image ||
-      event?.poster ||
-      "";
-
-    if (!poster) {
-      return null;
-    }
-
-    const imagePath =
-      String(poster).trim();
-
-    if (!imagePath) {
-      return null;
-    }
-
-    if (
-      imagePath.startsWith("http://") ||
-      imagePath.startsWith("https://")
-    ) {
-      return imagePath;
-    }
-
-    if (
-      imagePath.startsWith("/")
-    ) {
-      return `${BACKEND_URL}${imagePath}`;
-    }
-
-    return `${BACKEND_URL}/${imagePath}`;
-  };
-
-  // ============================================================
-  // IMAGE FALLBACK
-  // ============================================================
-
-  const handleImageError = (event) => {
-    event.currentTarget.style.display =
-      "none";
-
-    const fallback =
-      event.currentTarget.parentElement?.querySelector(
-        ".poster-fallback"
-      );
-
-    if (fallback) {
-      fallback.style.display = "flex";
-    }
-  };
-
-  // ============================================================
-  // FEATURE / UNFEATURE
-  // ============================================================
-
-  async function toggleFeatured(id) {
-    try {
-      const response = await fetch(
-        `${BACKEND_URL}/admin/events/${id}/feature`,
-        {
-          method: "PUT",
-        }
-      );
-
-      const result =
-        await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(
-          result.message ||
-            "Unable to update featured status."
-        );
-      }
-
-      await fetchEvents();
-    } catch (error) {
-      console.error(
-        "Feature event error:",
-        error
-      );
-
-      alert(
-        error.message ||
-          "Unable to update the featured status."
-      );
-    }
-  }
-
-  // ============================================================
-  // DELETE EVENT
-  // ============================================================
-
-  async function deleteEvent(id) {
-    const confirmDelete =
-      window.confirm(
-        "Are you sure you want to delete this event?"
-      );
-
-    if (!confirmDelete) {
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `${BACKEND_URL}/events/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      const result =
-        await response.json();
-
-      if (
-        !response.ok ||
-        !result.success
-      ) {
-        throw new Error(
-          result.message ||
-            "Unable to delete event."
-        );
-      }
-
-      await fetchEvents();
-    } catch (error) {
-      console.error(
-        "Delete event error:",
-        error
-      );
-
-      alert(
-        error.message ||
-          "Unable to delete this event."
-      );
-    }
-  }
-
-  // ============================================================
-  // FILTER EVENTS
-  // ============================================================
-
-  const filteredEvents = useMemo(() => {
-    const searchValue =
-      search.trim().toLowerCase();
-
-    return events.filter((event) => {
-      const matchesSearch =
-        !searchValue ||
-        String(
-          event?.title || ""
-        )
-          .toLowerCase()
-          .includes(searchValue) ||
-        String(
-          event?.venue || ""
-        )
-          .toLowerCase()
-          .includes(searchValue) ||
-        String(
-          event?.city || ""
-        )
-          .toLowerCase()
-          .includes(searchValue) ||
-        String(
-          event?.category || ""
-        )
-          .toLowerCase()
-          .includes(searchValue) ||
-        String(
-          event?.hostName || ""
-        )
-          .toLowerCase()
-          .includes(searchValue) ||
-        String(
-          event?.organizerName || ""
-        )
-          .toLowerCase()
-          .includes(searchValue);
-
-      if (!matchesSearch) {
-        return false;
-      }
-
-      // --------------------------------------------------------
-      // FEATURED
-      // --------------------------------------------------------
-
-      if (
-        filter === "featured"
-      ) {
-        return (
-          event?.featured === true
-        );
-      }
-
-      // --------------------------------------------------------
-      // FREE
-      // --------------------------------------------------------
-
-      if (
-        filter === "free"
-      ) {
-        return isFreeEvent(event);
-      }
-
-      // --------------------------------------------------------
-      // PAID
-      // --------------------------------------------------------
-
-      if (
-        filter === "paid"
-      ) {
-        return !isFreeEvent(event);
-      }
-
-      return true;
-    });
-  }, [
-    events,
-    search,
-    filter,
-  ]);
-
-  // ============================================================
-  // LOADING
-  // ============================================================
-
-  if (loading) {
-    return (
-      <div className="admin-events-page">
-        <div className="admin-events-state">
-
-          <div className="admin-loading-spinner"></div>
-
-          <h2>
-            Loading events...
-          </h2>
-
-          <p>
-            Please wait while EventWaa
-            loads the events.
-          </p>
-
-        </div>
-      </div>
-    );
-  }
-
-  // ============================================================
-  // ERROR
-  // ============================================================
-
-  if (error) {
-    return (
-      <div className="admin-events-page">
-        <div className="admin-events-state error-state">
-
-          <div className="state-icon">
-            ⚠️
-          </div>
-
-          <h2>
-            Unable to Load Events
-          </h2>
-
-          <p>
-            {error}
-          </p>
-
-          <button
-            className="retry-events-btn"
-            onClick={fetchEvents}
-          >
-            Try Again
-          </button>
-
-        </div>
-      </div>
-    );
-  }
-
-  // ============================================================
-  // RENDER
-  // ============================================================
-
-  return (
-    <div className="admin-events-page">
-
-      {/* ======================================================
-          HEADER
-      ====================================================== */}
-
-      <div className="events-header">
-
-        <div>
-          <span className="admin-events-eyebrow">
-            EVENTWAA ADMIN
-          </span>
-
-          <h1>
-            Event Management
-          </h1>
-
-          <p>
-            Monitor, search, filter, create,
-            feature and manage all events
-            on EventWaa.
-          </p>
-        </div>
-
-        <button
-          className="create-event-btn"
-          onClick={() =>
-            navigate(
-              "/admin/create-event"
-            )
-          }
-        >
-          + Create Event
-        </button>
-
-      </div>
-
-      {/* ======================================================
-          CONTROLS
-      ====================================================== */}
-
-      <div className="event-controls">
-
-        <div className="event-search-wrapper">
-
-          <span className="search-icon">
-            🔍
-          </span>
-
-          <input
-            type="text"
-            placeholder="Search events, venue, city, host..."
-            value={search}
-            onChange={(e) =>
-              setSearch(
-                e.target.value
-              )
-            }
-            className="event-search"
-          />
-
-        </div>
-
-        <select
-          value={filter}
-          onChange={(e) =>
-            setFilter(
-              e.target.value
-            )
-          }
-          className="event-filter"
-        >
-          <option value="all">
-            All Events
-          </option>
-
-          <option value="featured">
-            Featured Events
-          </option>
-
-          <option value="free">
-            Free Events
-          </option>
-
-          <option value="paid">
-            Paid Events
-          </option>
-        </select>
-
-      </div>
-
-      {/* ======================================================
-          RESULTS COUNT
-      ====================================================== */}
-
-      <div className="events-results-bar">
-
-        <span>
-          Showing{" "}
-          <strong>
-            {filteredEvents.length}
-          </strong>{" "}
-          of{" "}
-          <strong>
-            {events.length}
-          </strong>{" "}
-          events
-        </span>
-
-      </div>
-
-      {/* ======================================================
-          EMPTY STATE
-      ====================================================== */}
-
-      {filteredEvents.length === 0 ? (
-
-        <div className="admin-events-state">
-
-          <div className="state-icon">
-            📅
-          </div>
-
-          <h2>
-            No Events Found
-          </h2>
-
-          <p>
-            No events match your current
-            search or filter.
-          </p>
-
-          {events.length === 0 && (
-            <button
-              className="create-event-btn"
-              onClick={() =>
-                navigate(
-                  "/admin/create-event"
+        if (
+            Array.isArray(event.tickets) &&
+            event.tickets.length > 0
+        ) {
+            const prices = event.tickets
+                .map((ticket) =>
+                    Number(
+                        ticket.price || 0
+                    )
                 )
-              }
-            >
-              + Create Event
-            </button>
-          )}
-
-        </div>
-
-      ) : (
-
-        <div className="admin-events-grid">
-
-          {filteredEvents.map(
-            (event) => {
-
-              const posterUrl =
-                getPosterUrl(event);
-
-              const eventType =
-                getEventTypeDisplay(
-                  event
+                .filter(
+                    (price) =>
+                        price >= 0
                 );
-
-              const priceDisplay =
-                getPriceDisplay(
-                  event
+            if (prices.length > 0) {
+                const minimum = Math.min(
+                    ...prices
                 );
-
-              const tickets =
-                getTickets(event);
-
-              return (
-                <div
-                  className="event-admin-card"
-                  key={event.id}
-                >
-
-                  {/* ==========================================
-                      POSTER
-                      ========================================== */}
-
-                  <div className="admin-poster-wrapper">
-
-                    {posterUrl ? (
-                      <img
-                        src={posterUrl}
-                        alt={
-                          event.title ||
-                          "Event poster"
-                        }
-                        className="admin-event-poster"
-                        onError={
-                          handleImageError
-                        }
-                      />
-                    ) : null}
-
-                    <div
-                      className="poster-fallback"
-                      style={{
-                        display:
-                          posterUrl
-                            ? "none"
-                            : "flex",
-                      }}
-                    >
-                      <span>
-                        📅
-                      </span>
-
-                      <strong>
-                        EventWaa
-                      </strong>
-
-                      <small>
-                        No poster available
-                      </small>
-                    </div>
-
-                    {/* EVENT TYPE */}
-
-                    <span
-                      className={`event-type-overlay ${
-                        isFreeEvent(event)
-                          ? "free"
-                          : "paid"
-                      }`}
-                    >
-                      {eventType}
-                    </span>
-
-                    {/* FEATURED */}
-
-                    {event.featured && (
-                      <span className="featured-overlay-badge">
-                        ★ Featured
-                      </span>
-                    )}
-
-                  </div>
-
-                  {/* ==========================================
-                      CONTENT
-                      ========================================== */}
-
-                  <div className="event-admin-content">
-
-                    <div className="event-title-row">
-
-                      <div>
-
-                        <h2>
-                          {event.title ||
-                            "Untitled Event"}
-                        </h2>
-
-                        <span className="event-id">
-                          Event #{event.id}
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                    {/* ========================================
-                        EVENT INFO
-                        ======================================== */}
-
-                    <div className="event-info-list">
-
-                      <p>
-                        <strong>
-                          Host
-                        </strong>
-
-                        <span>
-                          {event.hostName ||
-                            event.organizerName ||
-                            "EventWaa"}
-                        </span>
-                      </p>
-
-                      <p>
-                        <strong>
-                          Venue
-                        </strong>
-
-                        <span>
-                          {event.venue ||
-                            "Not specified"}
-                        </span>
-                      </p>
-
-                      <p>
-                        <strong>
-                          City
-                        </strong>
-
-                        <span>
-                          {event.city ||
-                            "Not specified"}
-                        </span>
-                      </p>
-
-                      <p>
-                        <strong>
-                          Date
-                        </strong>
-
-                        <span>
-                          {event.date ||
-                            "Not specified"}
-                        </span>
-                      </p>
-
-                      <p>
-                        <strong>
-                          Category
-                        </strong>
-
-                        <span>
-                          {event.category ||
-                            "General"}
-                        </span>
-                      </p>
-
-                      <p>
-                        <strong>
-                          Type
-                        </strong>
-
-                        <span>
-                          {eventType}
-                        </span>
-                      </p>
-
-                      <p>
-                        <strong>
-                          Price
-                        </strong>
-
-                        <span>
-                          {priceDisplay}
-                        </span>
-                      </p>
-
-                      {/* ======================================
-                          TICKET TYPES
-                          ====================================== */}
-
-                      {!isFreeEvent(event) &&
-                        tickets.length > 0 && (
-                          <p>
-                            <strong>
-                              Tickets
-                            </strong>
-
-                            <span>
-                              {tickets.length}{" "}
-                              type
-                              {tickets.length !==
-                              1
-                                ? "s"
-                                : ""}
-                            </span>
-                          </p>
-                        )}
-
-                      <p>
-                        <strong>
-                          Tickets Sold
-                        </strong>
-
-                        <span>
-                          {Number(
-                            event.ticketsSold ||
-                              0
-                          ).toLocaleString()}
-                        </span>
-                      </p>
-
-                    </div>
-
-                    {/* ========================================
-                        ACTIONS
-                        ======================================== */}
-
-                    <div className="event-admin-actions">
-
-                      <button
-                        className="edit-event-btn"
-                        onClick={() =>
-                          navigate(
-                            `/admin/events/edit/${event.id}`
-                          )
-                        }
-                      >
-                        ✏️ Edit
-                      </button>
-
-                      <button
-                        className="feature-event-btn"
-                        onClick={() =>
-                          toggleFeatured(
-                            event.id
-                          )
-                        }
-                      >
-                        {event.featured
-                          ? "★ Featured"
-                          : "☆ Feature"}
-                      </button>
-
-                      <button
-                        className="delete-event-btn"
-                        onClick={() =>
-                          deleteEvent(
-                            event.id
-                          )
-                        }
-                      >
-                        🗑️ Delete
-                      </button>
-
-                    </div>
-
-                  </div>
-
-                </div>
-              );
+                if (minimum === 0) {
+                    return "Free";
+                }
+                return `UGX ${minimum.toLocaleString()}`;
             }
-          )}
-
+        }
+        if (
+            event.price !== undefined &&
+            event.price !== null
+        ) {
+            const price = Number(
+                event.price || 0
+            );
+            if (price === 0) {
+                return "Free";
+            }
+            return `UGX ${price.toLocaleString()}`;
+        }
+        return "N/A";
+    };
+    // ========================================================
+    // POSTER
+    // ========================================================
+    const getPoster = (event) => {
+        return (
+            event.eventPoster ||
+            event.image ||
+            event.poster ||
+            ""
+        );
+    };
+    // ========================================================
+    // FEATURE EVENT
+    // ========================================================
+    const handleFeature = async (event) => {
+        try {
+            setError("");
+            const response = await fetch(
+                `${BACKEND_URL}/admin/events/${event.id}/feature`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                    },
+                }
+            );
+            const data =
+                await response.json();
+            if (!response.ok) {
+                throw new Error(
+                    data.message ||
+                    "Failed to update featured status."
+                );
+            }
+            setEvents((currentEvents) =>
+                currentEvents.map(
+                    (currentEvent) =>
+                        String(
+                            currentEvent.id
+                        ) ===
+                        String(event.id)
+                            ? {
+                                  ...currentEvent,
+                                  featured:
+                                      data.featured ??
+                                      !currentEvent.featured,
+                              }
+                            : currentEvent
+                )
+            );
+        } catch (err) {
+            console.error(
+                "FEATURE EVENT ERROR:",
+                err
+            );
+            alert(
+                err.message ||
+                "Failed to update featured status."
+            );
+        }
+    };
+    // ========================================================
+    // DELETE EVENT
+    // ========================================================
+    const handleDelete = async (event) => {
+        const confirmed = window.confirm(
+            `Are you sure you want to delete "${event.title}"?\n\nThis action is different from cancellation.`
+        );
+        if (!confirmed) {
+            return;
+        }
+        try {
+            setError("");
+            const response = await fetch(
+                `${BACKEND_URL}/events/${event.id}`,
+                {
+                    method: "DELETE",
+                }
+            );
+            const data =
+                await response.json();
+            if (!response.ok) {
+                throw new Error(
+                    data.message ||
+                    "Failed to delete event."
+                );
+            }
+            setEvents((currentEvents) =>
+                currentEvents.filter(
+                    (currentEvent) =>
+                        String(
+                            currentEvent.id
+                        ) !==
+                        String(event.id)
+                )
+            );
+        } catch (err) {
+            console.error(
+                "DELETE EVENT ERROR:",
+                err
+            );
+            alert(
+                err.message ||
+                "Failed to delete event."
+            );
+        }
+    };
+    // ========================================================
+    // CANCEL EVENT
+    // ========================================================
+    const handleCancel = async (event) => {
+        const firstConfirmation =
+            window.confirm(
+                `Cancel "${event.title}"?\n\nThis will cancel the event, invalidate its tickets/passes, and process eligible refunds.`
+            );
+        if (!firstConfirmation) {
+            return;
+        }
+        const reasonInput =
+            window.prompt(
+                "Enter the reason for cancelling this event:",
+                "Event cancelled by EventWaa administration."
+            );
+        if (reasonInput === null) {
+            return;
+        }
+        const reason =
+            reasonInput.trim();
+        if (!reason) {
+            alert(
+                "A cancellation reason is required."
+            );
+            return;
+        }
+        const adminToken =
+            localStorage.getItem(
+                "eventwaa_admin_token"
+            );
+        if (!adminToken) {
+            alert(
+                "Your admin session has expired. Please log in again."
+            );
+            navigate("/admin/login");
+            return;
+        }
+        try {
+            setCancellingId(
+                event.id
+            );
+            setError("");
+            const response = await fetch(
+                `${BACKEND_URL}/admin/events/${event.id}/cancel`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                        Authorization:
+                            `Bearer ${adminToken}`,
+                    },
+                    body: JSON.stringify({
+                        cancellationReason:
+                            reason,
+                    }),
+                }
+            );
+            const data =
+                await response.json();
+            if (!response.ok) {
+                throw new Error(
+                    data.message ||
+                    data.refundError?.message ||
+                    "Failed to cancel event."
+                );
+            }
+            setEvents((currentEvents) =>
+                currentEvents.map(
+                    (currentEvent) =>
+                        String(
+                            currentEvent.id
+                        ) ===
+                        String(event.id)
+                            ? {
+                                  ...currentEvent,
+                                  status:
+                                      "cancelled",
+                                  cancelled:
+                                      true,
+                                  cancelledAt:
+                                      new Date().toISOString(),
+                                  cancelledBy:
+                                      "admin",
+                                  cancellationReason:
+                                      reason,
+                              }
+                            : currentEvent
+                )
+            );
+            alert(
+                `Event cancelled successfully.\n\nPaid refunds processed: ${
+                    data.processedRefunds || 0
+                }\nFree passes cancelled: ${
+                    data.freeBookingsCancelled || 0
+                }`
+            );
+        } catch (err) {
+            console.error(
+                "CANCEL EVENT ERROR:",
+                err
+            );
+            alert(
+                err.message ||
+                "Failed to cancel event."
+            );
+        } finally {
+            setCancellingId(null);
+        }
+    };
+    // ========================================================
+    // LOADING
+    // ========================================================
+    if (loading) {
+        return (
+            <div className="admin-events">
+                <div className="admin-events-loading">
+                    <div className="admin-events-spinner" />
+                    <p>
+                        Loading events...
+                    </p>
+                </div>
+            </div>
+        );
+    }
+    // ========================================================
+    // PAGE
+    // ========================================================
+    return (
+        <div className="admin-events">
+            {/* ==================================================
+                HEADER
+            ================================================== */}
+            <div className="admin-events-header">
+                <div>
+                    <h1>
+                        Events
+                    </h1>
+                    <p>
+                        Manage all EventWaa
+                        events.
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    className="admin-events-create-btn"
+                    onClick={() =>
+                        navigate(
+                            "/admin/events/create"
+                        )
+                    }
+                >
+                    + Create Event
+                </button>
+            </div>
+            {/* ==================================================
+                ERROR
+            ================================================== */}
+            {error && (
+                <div className="admin-events-error">
+                    <FiXCircle />
+                    <span>
+                        {error}
+                    </span>
+                </div>
+            )}
+            {/* ==================================================
+                FILTER BAR
+            ================================================== */}
+            <div className="admin-events-toolbar">
+                <div className="admin-events-search">
+                    <FiSearch />
+                    <input
+                        type="text"
+                        placeholder="Search events..."
+                        value={search}
+                        onChange={(e) =>
+                            setSearch(
+                                e.target.value
+                            )
+                        }
+                    />
+                </div>
+                <div className="admin-events-filters">
+                    <button
+                        type="button"
+                        className={
+                            filter === "all"
+                                ? "active"
+                                : ""
+                        }
+                        onClick={() =>
+                            setFilter("all")
+                        }
+                    >
+                        All
+                    </button>
+                    <button
+                        type="button"
+                        className={
+                            filter === "active"
+                                ? "active"
+                                : ""
+                        }
+                        onClick={() =>
+                            setFilter("active")
+                        }
+                    >
+                        Active
+                    </button>
+                    <button
+                        type="button"
+                        className={
+                            filter === "featured"
+                                ? "active"
+                                : ""
+                        }
+                        onClick={() =>
+                            setFilter("featured")
+                        }
+                    >
+                        Featured
+                    </button>
+                    <button
+                        type="button"
+                        className={
+                            filter === "free"
+                                ? "active"
+                                : ""
+                        }
+                        onClick={() =>
+                            setFilter("free")
+                        }
+                    >
+                        Free
+                    </button>
+                    <button
+                        type="button"
+                        className={
+                            filter === "paid"
+                                ? "active"
+                                : ""
+                        }
+                        onClick={() =>
+                            setFilter("paid")
+                        }
+                    >
+                        Paid
+                    </button>
+                    <button
+                        type="button"
+                        className={
+                            filter === "cancelled"
+                                ? "active"
+                                : ""
+                        }
+                        onClick={() =>
+                            setFilter("cancelled")
+                        }
+                    >
+                        Cancelled
+                    </button>
+                </div>
+            </div>
+            {/* ==================================================
+                RESULT COUNT
+            ================================================== */}
+            <div className="admin-events-count">
+                {filteredEvents.length}{" "}
+                event
+                {filteredEvents.length !== 1
+                    ? "s"
+                    : ""}
+            </div>
+            {/* ==================================================
+                EMPTY STATE
+            ================================================== */}
+            {filteredEvents.length === 0 ? (
+                <div className="admin-events-empty">
+                    <FiCalendar />
+                    <h3>
+                        No events found
+                    </h3>
+                    <p>
+                        {search
+                            ? "Try a different search."
+                            : "There are no events matching this filter."}
+                    </p>
+                </div>
+            ) : (
+                /* =================================================
+                   EVENT GRID
+                ================================================= */
+                <div className="admin-events-grid">
+                    {filteredEvents.map(
+                        (event) => {
+                            const poster =
+                                getPoster(
+                                    event
+                                );
+                            const isCancelled =
+                                String(
+                                    event.status ||
+                                    ""
+                                ).toLowerCase() ===
+                                "cancelled";
+                            const isCancelling =
+                                String(
+                                    cancellingId
+                                ) ===
+                                String(
+                                    event.id
+                                );
+                            const hostName =
+                                event.hostName ||
+                                event.organizerName ||
+                                "EventWaa";
+                            return (
+                                <div
+                                    className={
+                                        `admin-event-card ${
+                                            isCancelled
+                                                ? "cancelled"
+                                                : ""
+                                        }`
+                                    }
+                                    key={
+                                        event.id
+                                    }
+                                >
+                                    {/* =================================
+                                        POSTER
+                                    ================================= */}
+                                    <div className="admin-poster-wrapper">
+                                        {poster ? (
+                                            <img
+                                                src={
+                                                    poster
+                                                }
+                                                alt={
+                                                    event.title ||
+                                                    "Event poster"
+                                                }
+                                                className="admin-event-poster"
+                                            />
+                                        ) : (
+                                            <div className="admin-event-poster-placeholder">
+                                                <FiCalendar />
+                                            </div>
+                                        )}
+                                        {/* EVENT TYPE */}
+                                        <div className="event-type-overlay">
+                                            {String(
+                                                event.eventType ||
+                                                ""
+                                            ).toLowerCase() ===
+                                            "free"
+                                                ? "FREE"
+                                                : "PAID"}
+                                        </div>
+                                        {/* FEATURED */}
+                                        {event.featured && (
+                                            <div className="featured-overlay">
+                                                <FiStar />
+                                                Featured
+                                            </div>
+                                        )}
+                                        {/* CANCELLED */}
+                                        {isCancelled && (
+                                            <div className="cancelled-overlay">
+                                                CANCELLED
+                                            </div>
+                                        )}
+                                    </div>
+                                    {/* =================================
+                                        CONTENT
+                                    ================================= */}
+                                    <div className="admin-event-card-content">
+                                        <div className="admin-event-title-row">
+                                            <div>
+                                                <h2>
+                                                    {
+                                                        event.title ||
+                                                        "Untitled Event"
+                                                    }
+                                                </h2>
+                                                <span className="admin-event-id">
+                                                    ID:{" "}
+                                                    {
+                                                        event.id
+                                                    }
+                                                </span>
+                                            </div>
+                                            {event.adminEvent && (
+                                                <span className="admin-official-badge">
+                                                    EventWaa
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="admin-event-details">
+                                            <div>
+                                                <strong>
+                                                    Host
+                                                </strong>
+                                                <span>
+                                                    {
+                                                        hostName
+                                                    }
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <strong>
+                                                    Venue
+                                                </strong>
+                                                <span>
+                                                    {
+                                                        event.venue ||
+                                                        "N/A"
+                                                    }
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <strong>
+                                                    City
+                                                </strong>
+                                                <span>
+                                                    {
+                                                        event.city ||
+                                                        "N/A"
+                                                    }
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <strong>
+                                                    Date
+                                                </strong>
+                                                <span>
+                                                    {
+                                                        event.date ||
+                                                        "N/A"
+                                                    }
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <strong>
+                                                    Category
+                                                </strong>
+                                                <span>
+                                                    {
+                                                        event.category ||
+                                                        "N/A"
+                                                    }
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <strong>
+                                                    Price
+                                                </strong>
+                                                <span>
+                                                    {
+                                                        getEventPrice(
+                                                            event
+                                                        )
+                                                    }
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <strong>
+                                                    Tickets
+                                                </strong>
+                                                <span>
+                                                    {Array.isArray(
+                                                        event.tickets
+                                                    )
+                                                        ? event.tickets.reduce(
+                                                              (
+                                                                  total,
+                                                                  ticket
+                                                              ) =>
+                                                                  total +
+                                                                  Number(
+                                                                      ticket.quantity ||
+                                                                      ticket.capacity ||
+                                                                      0
+                                                                  ),
+                                                              0
+                                                          ) || "N/A"
+                                                        : "N/A"}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <strong>
+                                                    Sold
+                                                </strong>
+                                                <span>
+                                                    {
+                                                        event.ticketsSold ??
+                                                        0
+                                                    }
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {/* =================================
+                                            ACTIONS
+                                        ================================= */}
+                                        <div className="admin-event-actions">
+                                            <button
+                                                type="button"
+                                                className="edit-btn"
+                                                onClick={() =>
+                                                    navigate(
+                                                        `/admin/events/edit/${event.id}`
+                                                    )
+                                                }
+                                            >
+                                                <FiEdit />
+                                                Edit
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={
+                                                    event.featured
+                                                        ? "feature-btn featured"
+                                                        : "feature-btn"
+                                                }
+                                                onClick={() =>
+                                                    handleFeature(
+                                                        event
+                                                    )
+                                                }
+                                                disabled={
+                                                    isCancelled
+                                                }
+                                            >
+                                                <FiStar />
+                                                {event.featured
+                                                    ? "Featured"
+                                                    : "Feature"}
+                                            </button>
+                                            {!isCancelled ? (
+                                                <button
+                                                    type="button"
+                                                    className="cancel-btn"
+                                                    onClick={() =>
+                                                        handleCancel(
+                                                            event
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        isCancelling
+                                                    }
+                                                >
+                                                    <FiXCircle />
+                                                    {isCancelling
+                                                        ? "Cancelling..."
+                                                        : "Cancel"}
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    className="cancelled-btn"
+                                                    disabled
+                                                >
+                                                    <FiCheck />
+                                                    Cancelled
+                                                </button>
+                                            )}
+                                            <button
+                                                type="button"
+                                                className="delete-btn"
+                                                onClick={() =>
+                                                    handleDelete(
+                                                        event
+                                                    )
+                                                }
+                                            >
+                                                <FiTrash2 />
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        }
+                    )}
+                </div>
+            )}
         </div>
-
-      )}
-
-    </div>
-  );
+    );
 }
-
 export default AdminEvents;
