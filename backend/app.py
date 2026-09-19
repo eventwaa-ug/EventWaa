@@ -28476,6 +28476,98 @@ def create_refund():
     }, 201
 
 
+
+# ============================================================
+# GET HOST REFUNDS
+#
+# HOST -> LOAD REFUND REQUESTS
+#
+# Returns only refund requests belonging to the logged-in host.
+# The frontend uses:
+#
+#     GET /refunds/host?email=host@example.com
+#
+# This endpoint is READ-ONLY.
+# Approval/rejection is handled separately by:
+#
+#     PUT /refunds/<refund_id>/host-review
+# ============================================================
+@app.route("/refunds/host", methods=["GET"])
+def get_host_refunds():
+    # ========================================================
+    # GET HOST EMAIL
+    # ========================================================
+    host_email = str(
+        request.args.get(
+            "email",
+            ""
+        )
+    ).strip().lower()
+    if not host_email:
+        return jsonify({
+            "success": False,
+            "message": "Host email is required."
+        }), 400
+    # ========================================================
+    # LOAD REFUNDS
+    # ========================================================
+    refunds = load_json_file(
+        "refunds.json",
+        []
+    )
+    # ========================================================
+    # FILTER REFUNDS FOR THIS HOST
+    #
+    # Refund records created by create_refund() already store:
+    #
+    #     hostEmail
+    #
+    # So we use that as the source for this lookup.
+    # ========================================================
+    host_refunds = []
+    for refund in refunds:
+        refund_host_email = str(
+            refund.get(
+                "hostEmail",
+                ""
+            )
+        ).strip().lower()
+        if refund_host_email == host_email:
+            host_refunds.append(
+                refund
+            )
+    # ========================================================
+    # NEWEST REFUNDS FIRST
+    # ========================================================
+    def refund_sort_key(refund):
+        try:
+            return int(
+                refund.get(
+                    "id",
+                    0
+                )
+            )
+        except (
+            TypeError,
+            ValueError
+        ):
+            return 0
+    host_refunds.sort(
+        key=refund_sort_key,
+        reverse=True
+    )
+    # ========================================================
+    # RETURN
+    # ========================================================
+    return jsonify({
+        "success":
+            True,
+        "refunds":
+            host_refunds,
+        "count":
+            len(host_refunds)
+    }), 200
+
 # ============================================================
 # REFUND HELPER
 # ============================================================
