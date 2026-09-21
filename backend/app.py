@@ -11,7 +11,7 @@ import secrets
 #print(secrets.token_urlsafe(32))
 import qrcode
 from io import BytesIO
-
+from contextlib import contextmanager
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from datetime import datetime, timedelta, timezone
@@ -18954,6 +18954,583 @@ def save_team_sessions(sessions):
     )
 
 
+
+# ============================================================
+# EVENTWAA IDEMPOTENCY + FILE LOCKING
+#
+# JSON storage does not provide database transactions.
+#
+# These helpers provide:
+#
+# - persisted idempotency keys
+# - duplicate-request detection
+# - request-body fingerprinting
+# - cross-process file locking
+# - stored response replay
+#
+# IMPORTANT:
+# This protects requests running on the same Railway instance.
+# It is not a replacement for PostgreSQL transactions.
+# ============================================================
+
+IDEMPOTENCY_FILE = "idempotency_keys.json"
+
+IDEMPOTENCY_TTL_SECONDS = (
+    48 * 60 * 60
+)
+
+LOCK_TIMEOUT_SECONDS = 30
+
+LOCK_RETRY_SECONDS = 0.05
+
+
+# ============================================================
+# IDEMPOTENCY FILE PATH
+# ============================================================
+
+def get_idempotency_file_path():
+
+    return os.path.join(
+        os.path.dirname(
+            os.path.abspath(__file__)
+        ),
+        IDEMPOTENCY_FILE
+    )
+
+
+# ============================================================
+# LOAD IDEMPOTENCY RECORDS
+# ============================================================
+
+def load_idempotency_records():
+
+    return load_json_file(
+        IDEMPOTENCY_FILE,
+        []
+    )
+
+
+# ============================================================
+# SAVE IDEMPOTENCY RECORDS
+# ============================================================
+
+def save_idempotency_records(
+    records
+):
+
+    save_json_file(
+        IDEMPOTENCY_FILE,
+        records
+    )
+
+
+# ============================================================
+# CLEAN EXPIRED IDEMPOTENCY RECORDS
+# ============================================================
+
+def cleanup_expired_idempotency_records():
+
+    records = load_idempotency_records()
+
+    now = time.time()
+
+    cleaned = []
+
+    for record in records:
+
+        try:
+
+            created_at = float(
+                record.get(
+                    "createdAtTimestamp",
+                    0
+                )
+            )
+
+        except (
+            ValueError,
+            TypeError
+        ):
+
+            created_at = 0
+
+        # Keep records that have no valid timestamp.
+        # We do not want to accidentally delete an active
+        # idempotency record because of malformed metadata.
+        if created_at <= 0:
+
+            cleaned.append(
+                record
+            )
+
+            continue
+
+        if (
+            now - created_at
+            <= IDEMPOTENCY_TTL_SECONDS
+        ):
+
+            cleaned.append(
+                record
+            )
+
+    if len(cleaned) != len(records):
+
+        save_idempotency_records(
+            cleaned
+        )
+
+    return cleaned
+
+
+# ============================================================
+# REQUEST HASH
+#
+# Used to make sure the SAME idempotency key is not reused
+# for a DIFFERENT request.
+# ============================================================
+
+def make_request_hash(
+    data
+):
+
+    try:
+
+        normalized = json.dumps(
+            data or {},
+            sort_keys=True,
+            separators=(
+                ",",
+                ":"
+            ),
+            default=str
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        normalized = str(
+            data or {}
+        )
+
+    return hashlib.sha256(
+        normalized.encode(
+            "utf-8"
+        )
+    ).hexdigest()
+
+
+# ============================================================
+# FIND IDEMPOTENCY RECORD
+# ============================================================
+
+def find_idempotency_record(
+    key,
+    scope
+):
+
+    if not key:
+
+        return None
+
+    records = (
+        cleanup_expired_idempotency_records()
+    )
+
+    for record in records:
+
+        if (
+            str(
+                record.get(
+                    "key",
+                    ""
+                )
+            )
+            ==
+            str(key)
+            and
+            str(
+                record.get(
+                    "scope",
+                    ""
+                )
+            )
+            ==
+            str(scope)
+        ):
+
+            return record
+
+    return None
+
+
+# ============================================================
+# CREATE IDEMPOTENCY RECORD
+# ============================================================
+
+def create_idempotency_record(
+    key,
+    scope,
+    request_hash,
+    status="processing",
+    resource_id=None
+):
+
+    records = (
+        cleanup_expired_idempotency_records()
+    )
+
+    for record in records:
+
+        if (
+            str(
+                record.get(
+                    "key",
+                    ""
+                )
+            )
+            ==
+            str(key)
+            and
+            str(
+                record.get(
+                    "scope",
+                    ""
+                )
+            )
+            ==
+            str(scope)
+        ):
+
+            return record
+
+    now = datetime.now()
+
+    record = {
+
+        "key":
+            str(key),
+
+        "scope":
+            str(scope),
+
+        "requestHash":
+            request_hash,
+
+        "status":
+            status,
+
+        "resourceId":
+            resource_id,
+
+        "responseStatus":
+            None,
+
+        "responseBody":
+            None,
+
+        "createdAt":
+            now.strftime(
+                "%Y-%m-%d %H:%M:%S"
+            ),
+
+        "createdAtTimestamp":
+            time.time(),
+
+        "updatedAt":
+            now.strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+    }
+
+    records.append(
+        record
+    )
+
+    save_idempotency_records(
+        records
+    )
+
+    return record
+
+
+# ============================================================
+# UPDATE IDEMPOTENCY RECORD
+# ============================================================
+
+def update_idempotency_record(
+    key,
+    scope,
+    status=None,
+    response_status=None,
+    response_body=None,
+    resource_id=None
+):
+
+    records = load_idempotency_records()
+
+    updated_record = None
+
+    now = datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
+
+    for record in records:
+
+        if (
+            str(
+                record.get(
+                    "key",
+                    ""
+                )
+            )
+            ==
+            str(key)
+            and
+            str(
+                record.get(
+                    "scope",
+                    ""
+                )
+            )
+            ==
+            str(scope)
+        ):
+
+            if status is not None:
+
+                record["status"] = (
+                    status
+                )
+
+            if response_status is not None:
+
+                record["responseStatus"] = (
+                    response_status
+                )
+
+            if response_body is not None:
+
+                record["responseBody"] = (
+                    response_body
+                )
+
+            if resource_id is not None:
+
+                record["resourceId"] = (
+                    resource_id
+                )
+
+            record["updatedAt"] = (
+                now
+            )
+
+            updated_record = record
+
+            break
+
+    save_idempotency_records(
+        records
+    )
+
+    return updated_record
+
+
+# ============================================================
+# REPLAY IDEMPOTENT RESPONSE
+# ============================================================
+
+def idempotency_response(
+    record
+):
+
+    response_body = (
+        record.get(
+            "responseBody"
+        )
+    )
+
+    response_status = (
+        record.get(
+            "responseStatus"
+        )
+    )
+
+    # Another request is currently processing the same key.
+    if response_body is None:
+
+        return jsonify({
+
+            "success":
+                False,
+
+            "message":
+                "This request is still being processed.",
+
+            "processing":
+                True,
+
+            "idempotent":
+                True
+
+        }), 202
+
+    if response_status is None:
+
+        response_status = 200
+
+    return jsonify(
+        response_body
+    ), int(
+        response_status
+    )
+
+
+# ============================================================
+# FILE LOCK
+#
+# os.O_EXCL guarantees that only one process can create the
+# lock file at a time.
+# ============================================================
+
+@contextmanager
+def eventwaa_file_lock(
+    lock_name,
+    timeout=LOCK_TIMEOUT_SECONDS
+):
+
+    lock_path = os.path.join(
+
+        os.path.dirname(
+            os.path.abspath(__file__)
+        ),
+
+        f".eventwaa_{lock_name}.lock"
+    )
+
+    start_time = time.time()
+
+    file_descriptor = None
+
+    while True:
+
+        try:
+
+            file_descriptor = os.open(
+
+                lock_path,
+
+                os.O_CREAT
+                |
+                os.O_EXCL
+                |
+                os.O_WRONLY
+
+            )
+
+            os.write(
+
+                file_descriptor,
+
+                (
+                    f"pid={os.getpid()}\n"
+                    f"time={time.time()}\n"
+                ).encode(
+                    "utf-8"
+                )
+
+            )
+
+            break
+
+        except FileExistsError:
+
+            if (
+                time.time()
+                -
+                start_time
+                >= timeout
+            ):
+
+                try:
+
+                    lock_age = (
+                        time.time()
+                        -
+                        os.path.getmtime(
+                            lock_path
+                        )
+                    )
+
+                except (
+                    OSError,
+                    FileNotFoundError
+                ):
+
+                    lock_age = 0
+
+                # Recover a stale lock.
+                if lock_age >= timeout:
+
+                    try:
+
+                        os.remove(
+                            lock_path
+                        )
+
+                    except (
+                        OSError,
+                        FileNotFoundError
+                    ):
+
+                        pass
+
+                    continue
+
+                raise TimeoutError(
+                    (
+                        "EventWaa could not acquire "
+                        f"the {lock_name} lock."
+                    )
+                )
+
+            time.sleep(
+                LOCK_RETRY_SECONDS
+            )
+
+    try:
+
+        yield
+
+    finally:
+
+        if file_descriptor is not None:
+
+            try:
+
+                os.close(
+                    file_descriptor
+                )
+
+            except OSError:
+
+                pass
+
+        try:
+
+            os.remove(
+                lock_path
+            )
+
+        except (
+            OSError,
+            FileNotFoundError
+        ):
+
+            pass
+
 # ============================================================
 # FIND USER
 # ============================================================
@@ -22918,6 +23495,56 @@ def verify_pesapal_payment(
             )
         )
 
+
+        # ====================================================
+        # STORE PESAPAL REFUND IDENTIFIER
+        #
+        # PesaPal uses confirmation_code to identify the
+        # original payment when requesting a refund.
+        # ====================================================
+
+        pesapal_confirmation_code = str(
+            pesapal_payment.get(
+                "confirmation_code",
+                ""
+            ) or ""
+        ).strip()
+
+
+        if not pesapal_confirmation_code:
+
+            print(
+                "PESAPAL WARNING: "
+                "confirmation_code was not returned."
+            )
+
+        else:
+
+            payment[
+                "pesapalConfirmationCode"
+            ] = pesapal_confirmation_code
+
+            print(
+                "PESAPAL CONFIRMATION CODE STORED:",
+                pesapal_confirmation_code
+            )
+
+
+        payment[
+            "pesapalOrderTrackingId"
+        ] = str(
+            order_tracking_id
+        )
+
+        payment[
+            "provider"
+        ] = "pesapal"
+
+
+        save_payments(
+            payments
+        )
+
         return jsonify(
             result
         ), fulfillment_status
@@ -26685,46 +27312,46 @@ def update_event_booking(event_id):
 # - Free passes are invalidated.
 # - Tickets become unusable.
 # - Normal host earnings are reversed.
-# - EventWaa accounting is reversed.
+# - EventWaa commission is reversed where applicable.
+# - EventWaa service fee is RETAINED on cancellation.
 # - Official EventWaa events do not require a host wallet.
+#
+# CUSTOMER CANCELLATION REFUND RULE:
+# - Customer receives 100% of the ticket subtotal.
+# - Refund fee = 0%.
+# - EventWaa service fee is NOT reversed.
+# - Flutterwave/PesaPal provider fees are handled separately
+#   by the actual payment-provider refund/settlement process.
 # ============================================================
-
 def process_event_cancellation(
     event_id,
     cancellation_reason,
     cancelled_by,
     is_admin=False
 ):
-
     # ========================================================
     # LOAD DATA
     # ========================================================
-
     events = load_json_file(
         "events.json",
         []
     )
-
     bookings = load_json_file(
         "bookings.json",
         []
     )
-
     refunds = load_json_file(
         "refunds.json",
         []
     )
-
     host_wallets = load_json_file(
         "host_wallets.json",
         []
     )
-
     users = load_json_file(
         "users.json",
         []
     )
-
     admin_wallet = load_json_file(
         "wallet.json",
         {
@@ -26735,11 +27362,9 @@ def process_event_cancellation(
             "transactions": []
         }
     )
-
     # ========================================================
     # FIND EVENT
     # ========================================================
-
     event = next(
         (
             e for e in events
@@ -26748,25 +27373,20 @@ def process_event_cancellation(
         ),
         None
     )
-
     if not event:
-
         return {
             "success": False,
             "message": "Event not found."
         }, 404
-
     # ========================================================
     # EVENT OWNER
     # ========================================================
-
     event_host_email = str(
         event.get(
             "hostEmail",
             ""
         )
     ).strip().lower()
-
     # ========================================================
     # OFFICIAL EVENTWAA EVENT
     #
@@ -26777,7 +27397,6 @@ def process_event_cancellation(
     #
     # They do NOT require a host wallet.
     # ========================================================
-
     is_official_event = (
         str(
             event.get(
@@ -26787,32 +27406,24 @@ def process_event_cancellation(
         ).lower()
         == "true"
     )
-
     # ========================================================
     # AUTHORIZATION
     # ========================================================
-
     if not is_admin:
-
         # ----------------------------------------------------
         # HOST CANCELLATION
         # ----------------------------------------------------
-
         host_email = (
             str(cancelled_by)
             if isinstance(cancelled_by, str)
             else ""
         ).strip().lower()
-
         if not host_email:
-
             return {
                 "success": False,
                 "message": "Host email is required."
             }, 400
-
         if host_email != event_host_email:
-
             return {
                 "success": False,
                 "message": (
@@ -26820,28 +27431,23 @@ def process_event_cancellation(
                     "cancel this event."
                 )
             }, 403
-
     # ========================================================
     # ALREADY CANCELLED
     # ========================================================
-
     if str(
         event.get(
             "status",
             ""
         )
     ).lower() == "cancelled":
-
         return {
             "success": True,
             "message": "Event is already cancelled.",
             "event": event
         }, 200
-
     # ========================================================
     # FIND EVENT BOOKINGS
     # ========================================================
-
     event_bookings = [
         booking
         for booking in bookings
@@ -26851,40 +27457,28 @@ def process_event_cancellation(
             )
         ) == str(event_id)
     ]
-
     # ========================================================
     # IDENTIFY BOOKINGS THAT STILL NEED PROCESSING
     # ========================================================
-
     refundable_bookings = []
-
     already_refunded = 0
-
     for booking in event_bookings:
-
         refund_status = str(
             booking.get(
                 "refundStatus",
                 ""
             )
         ).lower()
-
         if refund_status == "refunded":
-
             already_refunded += 1
-
             continue
-
         refundable_bookings.append(
             booking
         )
-
     # ========================================================
     # SETTINGS
     # ========================================================
-
     settings = load_admin_settings()
-
     commission_percent = float(
         settings.get(
             "commission",
@@ -26892,7 +27486,6 @@ def process_event_cancellation(
         )
         or 0
     )
-
     commission_percent = max(
         0,
         min(
@@ -26900,7 +27493,6 @@ def process_event_cancellation(
             commission_percent
         )
     )
-
     # ========================================================
     # PRE-CHECK FINANCIAL REQUIREMENTS
     #
@@ -26908,21 +27500,20 @@ def process_event_cancellation(
     #
     # Normal host event:
     # - Host pays its original net share.
-    # - EventWaa reverses commission + service fee.
+    # - EventWaa reverses its original commission.
+    # - EventWaa RETAINS the original service fee.
     #
     # Official EventWaa event:
     # - No host wallet.
     # - EventWaa funded the entire ticket subtotal.
-    # - EventWaa reverses the entire ticket subtotal
-    #   + service fee.
+    # - EventWaa reverses the entire ticket subtotal.
+    # - EventWaa RETAINS the original service fee.
+    #
+    # The customer still receives the full ticket subtotal.
     # ========================================================
-
     total_host_refund_required = 0
-
     total_platform_reversal_required = 0
-
     for booking in refundable_bookings:
-
         original_amount = int(
             float(
                 booking.get(
@@ -26935,35 +27526,19 @@ def process_event_cancellation(
                 or 0
             )
         )
-
         if original_amount <= 0:
-
             continue
-
-        service_fee = int(
-            round(
-                float(
-                    booking.get(
-                        "serviceFee",
-                        0
-                    )
-                    or 0
-                )
-            )
-        )
-
         if is_official_event:
-
             # EventWaa is the owner/funder.
             host_original_amount = 0
-
+            # EventWaa reverses the full ticket subtotal.
+            #
+            # IMPORTANT:
+            # serviceFee is intentionally NOT included.
             platform_reversal = (
                 original_amount
-                + service_fee
             )
-
         else:
-
             host_original_amount = int(
                 round(
                     original_amount
@@ -26977,37 +27552,30 @@ def process_event_cancellation(
                     )
                 )
             )
-
+            # EventWaa reverses only its original commission.
+            #
+            # The service fee remains with EventWaa.
             platform_reversal = (
                 original_amount
                 -
                 host_original_amount
-                +
-                service_fee
             )
-
         total_host_refund_required += (
             host_original_amount
         )
-
         total_platform_reversal_required += (
             platform_reversal
         )
-
     # ========================================================
     # FIND HOST WALLET
     #
     # Official EventWaa events intentionally skip this.
     # ========================================================
-
     host_id = event.get(
         "hostId"
     )
-
     host_wallet = None
-
     if not is_official_event:
-
         host_wallet = next(
             (
                 wallet
@@ -27023,12 +27591,10 @@ def process_event_cancellation(
             ),
             None
         )
-
         if (
             total_host_refund_required > 0
             and not host_wallet
         ):
-
             return {
                 "success": False,
                 "message": (
@@ -27036,13 +27602,10 @@ def process_event_cancellation(
                     "The event was not cancelled."
                 )
             }, 400
-
         # ----------------------------------------------------
         # CHECK HOST WALLET
         # ----------------------------------------------------
-
         if host_wallet:
-
             available_balance = float(
                 host_wallet.get(
                     "availableBalance",
@@ -27050,7 +27613,6 @@ def process_event_cancellation(
                 )
                 or 0
             )
-
             pending_payouts = float(
                 host_wallet.get(
                     "pendingPayouts",
@@ -27058,18 +27620,15 @@ def process_event_cancellation(
                 )
                 or 0
             )
-
             host_total_available = (
                 available_balance
                 +
                 pending_payouts
             )
-
             if (
                 total_host_refund_required
                 > host_total_available
             ):
-
                 return {
                     "success": False,
                     "message": (
@@ -27083,11 +27642,21 @@ def process_event_cancellation(
                     "available":
                         host_total_available
                 }, 400
-
     # ========================================================
     # CHECK EVENTWAA WALLET
+    #
+    # IMPORTANT:
+    #
+    # The service fee is retained.
+    #
+    # Therefore the platform only needs enough available
+    # balance to reverse:
+    #
+    # - Normal host event: EventWaa commission
+    # - Official EventWaa event: ticket subtotal
+    #
+    # The service fee is NOT included in this requirement.
     # ========================================================
-
     platform_available = float(
         admin_wallet.get(
             "availableBalance",
@@ -27095,42 +27664,33 @@ def process_event_cancellation(
         )
         or 0
     )
-
     if (
         total_platform_reversal_required
         > platform_available
     ):
-
         return {
             "success": False,
             "message": (
                 "EventWaa does not currently have "
-                "enough platform balance to reverse "
-                "the fees for this cancellation. "
-                "The event was not cancelled."
+                "enough platform balance to process "
+                "the accounting reversal for this "
+                "cancellation. The event was not cancelled."
             ),
             "required":
                 total_platform_reversal_required,
             "available":
                 platform_available
         }, 400
-
     # ========================================================
     # PROCESS REFUNDS
     # ========================================================
-
     processed_refunds = 0
-
     total_refunded = 0
-
     free_bookings_cancelled = 0
-
     # ========================================================
     # PROCESS EACH BOOKING
     # ========================================================
-
     for booking in refundable_bookings:
-
         original_amount = int(
             float(
                 booking.get(
@@ -27143,13 +27703,10 @@ def process_event_cancellation(
                 or 0
             )
         )
-
         # ====================================================
         # FREE BOOKING
         # ====================================================
-
         if original_amount <= 0:
-
             refund_ids = [
                 int(
                     r.get("id")
@@ -27162,235 +27719,163 @@ def process_event_cancellation(
                     )
                 ).isdigit()
             ]
-
             next_refund_id = (
                 max(refund_ids) + 1
                 if refund_ids
                 else 1
             )
-
             zero_refund = {
-
                 "id":
                     next_refund_id,
-
                 "bookingId":
                     booking.get("id"),
-
                 "eventId":
                     event.get("id"),
-
                 "eventTitle":
                     event.get("title"),
-
                 "buyer":
                     booking.get("buyer"),
-
                 "quantity":
                     booking.get(
                         "quantity",
                         0
                     ),
-
                 "originalAmount":
                     0,
-
                 "refundFeePercent":
                     0,
-
                 "refundFee":
                     0,
-
                 "amount":
                     0,
-
                 "refundAmount":
                     0,
-
                 "hostRefundAmount":
                     0,
-
                 "hostId":
                     host_id,
-
                 "hostEmail":
                     event_host_email,
-
                 "source":
                     "event_cancellation",
-
                 "status":
                     "refunded",
-
                 "reason":
                     cancellation_reason,
-
                 "requestedAt":
                     datetime.now().isoformat(),
-
                 "processedAt":
                     datetime.now().isoformat(),
-
                 "reviewedAt":
                     datetime.now().isoformat(),
-
                 "processedBy":
                     cancelled_by,
-
                 "reviewedBy":
                     cancelled_by,
-
                 "cancellation":
                     True
             }
-
             refunds.append(
                 zero_refund
             )
-
             booking["refundStatus"] = (
                 "refunded"
             )
-
             booking["refundId"] = (
                 next_refund_id
             )
-
             booking["refundAmount"] = 0
-
             booking["refundFee"] = 0
-
             booking["refundFeePercent"] = 0
-
             booking["refundedAt"] = (
                 datetime.now().isoformat()
             )
-
             # ----------------------------------------------
             # INVALIDATE FREE TICKETS
             # ----------------------------------------------
-
             for ticket in booking.get(
                 "tickets",
                 []
             ):
-
                 ticket["refundStatus"] = (
                     "refunded"
                 )
-
                 ticket["refundedAt"] = (
                     datetime.now().isoformat()
                 )
-
             free_bookings_cancelled += 1
-
             # ----------------------------------------------
             # BUYER NOTIFICATION
             # ----------------------------------------------
-
             try:
-
                 buyer = booking.get(
                     "buyer",
                     {}
                 )
-
                 if isinstance(
                     buyer,
                     dict
                 ):
-
                     buyer_email = str(
                         buyer.get(
                             "email",
                             ""
                         )
                     ).strip()
-
                     buyer_name = str(
                         buyer.get(
                             "name",
                             ""
                         )
                     ).strip()
-
                 else:
-
                     buyer_email = ""
-
                     buyer_name = ""
-
                 try:
-
                     create_notification(
-
                         buyer_email,
-
                         "Event cancelled",
-
                         (
                             f"{event.get('title', 'Your event')} "
                             f"has been cancelled. "
                             f"Your free ticket is no longer valid."
                         ),
-
                         "refund",
-
                         f"/events/{event.get('id')}"
-
                     )
-
                 except Exception as e:
-
                     print(
                         "FREE CANCELLATION "
                         "NOTIFICATION ERROR:",
                         repr(e)
                     )
-
                 try:
-
                     send_event_cancellation_email(
-
                         buyer_email,
-
                         buyer_name,
-
                         event,
-
                         refund_amount=0,
-
                         is_free=True,
-
                         cancellation_reason=(
                             cancellation_reason
                         )
-
                     )
-
                 except Exception as e:
-
                     print(
                         "FREE CANCELLATION "
                         "EMAIL ERROR:",
                         repr(e)
                     )
-
             except Exception as e:
-
                 print(
                     "FREE BOOKING "
                     "NOTIFICATION ERROR:",
                     repr(e)
                 )
-
             continue
-
         # ====================================================
         # FIND EXISTING PENDING REFUND
         # ====================================================
-
         existing_refund = next(
             (
                 r
@@ -27415,42 +27900,30 @@ def process_event_cancellation(
             ),
             None
         )
-
         if existing_refund:
-
             refund = existing_refund
-
             refund["source"] = (
                 "event_cancellation"
             )
-
             refund["reason"] = (
                 cancellation_reason
             )
-
             refund["refundFeePercent"] = 0
-
             refund["refundFee"] = 0
-
             refund["amount"] = (
                 original_amount
             )
-
             refund["refundAmount"] = (
                 original_amount
             )
-
             refund["cancellation"] = True
-
             refund["requestedAt"] = (
                 refund.get(
                     "requestedAt",
                     datetime.now().isoformat()
                 )
             )
-
         else:
-
             refund_ids = [
                 int(
                     r.get("id")
@@ -27463,108 +27936,75 @@ def process_event_cancellation(
                     )
                 ).isdigit()
             ]
-
             next_refund_id = (
                 max(refund_ids) + 1
                 if refund_ids
                 else 1
             )
-
             refund = {
-
                 "id":
                     next_refund_id,
-
                 "bookingId":
                     booking.get("id"),
-
                 "eventId":
                     event.get("id"),
-
                 "eventTitle":
                     event.get("title"),
-
                 "buyer":
                     booking.get("buyer"),
-
                 "quantity":
                     booking.get(
                         "quantity",
                         0
                     ),
-
                 "originalAmount":
                     original_amount,
-
                 "refundFeePercent":
                     0,
-
                 "refundFee":
                     0,
-
                 "amount":
                     original_amount,
-
                 "refundAmount":
                     original_amount,
-
                 "hostId":
                     host_id,
-
                 "hostEmail":
                     event_host_email,
-
                 "source":
                     "event_cancellation",
-
                 "status":
                     "pending",
-
                 "reason":
                     cancellation_reason,
-
                 "requestedAt":
                     datetime.now().isoformat(),
-
                 "cancellation":
                     True
             }
-
             refunds.append(
                 refund
             )
-
         # ====================================================
         # SAVE REFUND BEFORE PROCESSOR
         # ====================================================
-
         save_json_file(
             "refunds.json",
             refunds
         )
-
         # ====================================================
         # SHARED REFUND ENGINE
         # ====================================================
-
         result, status_code = (
             process_eventwaa_refund(
-
                 refund=refund,
-
                 booking=booking,
-
                 event=event,
-
                 cancellation=True,
-
                 processed_by=cancelled_by
-
             )
         )
-
         if status_code >= 400:
-
             return {
                 "success": False,
                 "message": (
@@ -27575,25 +28015,17 @@ def process_event_cancellation(
                 "refundError":
                     result
             }, status_code
-
         processed_refunds += 1
-
         total_refunded += (
             original_amount
         )
-
     # ========================================================
     # MARK EVENT CANCELLED
     # ========================================================
-
     now = datetime.now().isoformat()
-
     event["status"] = "cancelled"
-
     event["cancelled"] = True
-
     event["cancelledAt"] = now
-
     # IMPORTANT:
     # Record the actual actor.
     #
@@ -27607,48 +28039,36 @@ def process_event_cancellation(
         if is_admin
         else cancelled_by
     )
-
     event["cancellationReason"] = (
         cancellation_reason
     )
-
     # ========================================================
     # SAVE DATA
     # ========================================================
-
     save_json_file(
         "bookings.json",
         bookings
     )
-
     save_json_file(
         "refunds.json",
         refunds
     )
-
     save_json_file(
         "events.json",
         events
     )
-
     # ========================================================
     # ADMIN PLATFORM NOTIFICATION
     # ========================================================
-
     try:
-
         actor_text = (
             "by an administrator"
             if is_admin
             else "by the host"
         )
-
         create_notification(
-
             "admin",
-
             "Event cancelled",
-
             (
                 f"{event.get('title', 'An event')} "
                 f"was cancelled {actor_text}. "
@@ -27657,97 +28077,3852 @@ def process_event_cancellation(
                 f"{free_bookings_cancelled} free "
                 f"pass(es) cancelled."
             ),
-
             "event_cancellation",
-
             "/admin/events"
-
         )
-
     except Exception as e:
-
         print(
             "ADMIN CANCELLATION "
             "NOTIFICATION ERROR:",
             repr(e)
         )
-
     # ========================================================
     # ADMIN CANCELLATION EMAIL
     # ========================================================
-
     try:
-
         send_admin_event_cancellation_email(
-
             event,
-
             event_host_email,
-
             cancellation_reason,
-
             processed_refunds,
-
             free_bookings_cancelled,
-
             total_refunded
-
         )
-
     except Exception as e:
-
         print(
             "ADMIN CANCELLATION "
             "EMAIL ERROR:",
             repr(e)
         )
-
     # ========================================================
     # RESPONSE
     # ========================================================
-
     return {
-
         "success":
             True,
-
         "message":
             "Event cancelled successfully.",
-
         "eventId":
             event_id,
-
         "eventStatus":
             "cancelled",
-
         "cancelledBy":
             (
                 "admin"
                 if is_admin
                 else cancelled_by
             ),
-
         "processedRefunds":
             processed_refunds,
-
         "freeBookingsCancelled":
             free_bookings_cancelled,
-
         "alreadyRefunded":
             already_refunded,
-
         "totalRefunded":
             total_refunded,
-
         "refundFee":
             0,
-
+        "serviceFeeRetained":
+            True,
         "cancellation":
             True
-
     }, 200
 
+# ============================================================
+# FLUTTERWAVE CUSTOMER REFUND
+# ============================================================
 
+def refund_flutterwave_transaction(
+    transaction_id,
+    amount,
+    reason="EventWaa refund",
+    idempotency_key=""
+):
+    """
+    Initiates an actual Flutterwave customer refund.
+
+    Idempotency:
+    - Uses X-Idempotency-Key so the same refund request
+      can safely be retried without creating duplicates.
+
+    Status:
+    - Returns the provider's actual refund status.
+    - A provider response does not necessarily mean the
+      customer's money has already reached them.
+    """
+
+    if not FLW_SECRET_KEY:
+        return {
+            "success": False,
+            "message": (
+                "Flutterwave secret key is not configured."
+            )
+        }
+
+    transaction_id = str(
+        transaction_id or ""
+    ).strip()
+
+    if not transaction_id:
+        return {
+            "success": False,
+            "message": (
+                "Flutterwave transaction ID is missing."
+            )
+        }
+
+    try:
+        refund_amount = int(
+            round(
+                float(amount or 0)
+            )
+        )
+    except (
+        TypeError,
+        ValueError
+    ):
+        refund_amount = 0
+
+    if refund_amount <= 0:
+        return {
+            "success": False,
+            "message": (
+                "Flutterwave refund amount must be "
+                "greater than zero."
+            )
+        }
+
+    # --------------------------------------------------------
+    # IDEMPOTENCY KEY
+    #
+    # Use the EventWaa refund ID whenever possible.
+    # --------------------------------------------------------
+
+    if not idempotency_key:
+
+        idempotency_key = (
+            f"eventwaa-refund-{transaction_id}-"
+            f"{refund_amount}"
+        )
+
+    idempotency_key = str(
+        idempotency_key
+    ).strip()
+
+    headers = {
+        "Authorization":
+            f"Bearer {FLW_SECRET_KEY}",
+
+        "Content-Type":
+            "application/json",
+
+        "Accept":
+            "application/json",
+
+        "X-Idempotency-Key":
+            idempotency_key
+    }
+
+    payload = {
+        "amount":
+            refund_amount,
+
+        "comments":
+            str(reason)
+    }
+
+    try:
+
+        response = requests.post(
+            f"{FLW_API_URL}/transactions/"
+            f"{transaction_id}/refund",
+
+            headers=headers,
+
+            json=payload,
+
+            timeout=30
+        )
+
+        try:
+            data = response.json()
+        except Exception:
+            data = {}
+
+    except Exception as e:
+
+        print(
+            "FLUTTERWAVE REFUND ERROR:",
+            str(e)
+        )
+
+        return {
+            "success": False,
+            "retryable": True,
+            "message": (
+                "Unable to contact Flutterwave "
+                "for the refund."
+            )
+        }
+
+    print(
+        "FLUTTERWAVE REFUND STATUS:",
+        response.status_code
+    )
+
+    print(
+        "FLUTTERWAVE REFUND RESPONSE:",
+        data
+    )
+
+    if response.status_code >= 400:
+
+        return {
+            "success": False,
+            "retryable": (
+                response.status_code >= 500
+            ),
+            "message": (
+                data.get("message")
+                or
+                "Flutterwave refund failed."
+            ),
+            "providerResponse":
+                data
+        }
+
+    if data.get("status") != "success":
+
+        return {
+            "success": False,
+            "retryable": False,
+            "message": (
+                data.get("message")
+                or
+                "Flutterwave refund was not accepted."
+            ),
+            "providerResponse":
+                data
+        }
+
+    refund_data = (
+        data.get("data")
+        or {}
+    )
+
+    provider_status = str(
+        refund_data.get(
+            "status",
+            ""
+        )
+        or ""
+    ).strip().lower()
+
+    # --------------------------------------------------------
+    # NORMALIZE FLUTTERWAVE STATUS
+    # --------------------------------------------------------
+
+    if provider_status in (
+        "completed",
+        "completed-bank-transfer",
+        "completed-momo",
+        "completed-mpgs",
+        "completed-offline",
+        "completed-preauth"
+    ):
+
+        normalized_status = "completed"
+
+    elif provider_status in (
+        "processing",
+        "pending",
+        "pending-momo"
+    ):
+
+        normalized_status = "processing"
+
+    elif provider_status in (
+        "failed",
+        "declined",
+        "cancelled"
+    ):
+
+        normalized_status = "failed"
+
+    else:
+
+        normalized_status = (
+            provider_status
+            or
+            "processing"
+        )
+
+    return {
+        "success":
+            True,
+
+        "message":
+            "Flutterwave refund initiated.",
+
+        "provider":
+            "flutterwave",
+
+        "refundId":
+            refund_data.get("id"),
+
+        "refundReference":
+            refund_data.get("flw_ref"),
+
+        "refundStatus":
+            normalized_status,
+
+        "providerStatus":
+            provider_status,
+
+        "amount":
+            refund_data.get(
+                "amount_refunded",
+                refund_amount
+            ),
+
+        "idempotencyKey":
+            idempotency_key,
+
+        "providerResponse":
+            data
+    }
+
+# ============================================================
+# PESAPAL CUSTOMER REFUND
+# ============================================================
+
+def refund_pesapal_transaction(
+    confirmation_code,
+    amount,
+    username,
+    reason="EventWaa refund"
+):
+    """
+    Initiates an actual PesaPal customer refund.
+
+    IMPORTANT:
+    - PesaPal identifies the original payment using the
+      confirmation code.
+    - PesaPal allows only one refund request per payment.
+    - PesaPal mobile-money refunds must be full refunds.
+    - A successful HTTP response means the refund request
+      was received for processing, not necessarily completed.
+    """
+
+    if not confirmation_code:
+
+        return {
+            "success": False,
+            "message": (
+                "PesaPal confirmation code is missing."
+            )
+        }
+
+    if not username:
+
+        return {
+            "success": False,
+            "message": (
+                "PesaPal refund username is missing."
+            )
+        }
+
+    try:
+
+        refund_amount = float(
+            amount or 0
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        refund_amount = 0
+
+    if refund_amount <= 0:
+
+        return {
+            "success": False,
+            "message": (
+                "PesaPal refund amount must be "
+                "greater than zero."
+            )
+        }
+
+    try:
+
+        token = get_pesapal_token()
+
+    except Exception as e:
+
+        print(
+            "PESAPAL REFUND AUTH ERROR:",
+            str(e)
+        )
+
+        return {
+            "success": False,
+            "retryable": True,
+            "message": (
+                "Unable to authenticate with PesaPal "
+                "for the refund."
+            )
+        }
+
+    if not token:
+
+        return {
+            "success": False,
+            "retryable": True,
+            "message": (
+                "PesaPal authentication token is missing."
+            )
+        }
+
+    url = (
+        f"{PESAPAL_BASE_URL}"
+        "/api/Transactions/RefundRequest"
+    )
+
+    headers = {
+        "Accept":
+            "application/json",
+
+        "Content-Type":
+            "application/json",
+
+        "Authorization":
+            f"Bearer {token}"
+    }
+
+    payload = {
+        "confirmation_code":
+            str(confirmation_code),
+
+        "amount":
+            refund_amount,
+
+        "username":
+            str(username),
+
+        "remarks":
+            str(reason)
+    }
+
+    try:
+
+        response = requests.post(
+            url,
+
+            headers=headers,
+
+            json=payload,
+
+            timeout=30
+        )
+
+        try:
+            data = response.json()
+        except Exception:
+            data = {}
+
+    except Exception as e:
+
+        print(
+            "PESAPAL REFUND ERROR:",
+            str(e)
+        )
+
+        return {
+            "success": False,
+            "retryable": True,
+            "message": (
+                "Unable to contact PesaPal "
+                "for the refund."
+            )
+        }
+
+    print(
+        "PESAPAL REFUND STATUS:",
+        response.status_code
+    )
+
+    print(
+        "PESAPAL REFUND RESPONSE:",
+        data
+    )
+
+    if response.status_code >= 400:
+
+        return {
+            "success": False,
+            "retryable": (
+                response.status_code >= 500
+            ),
+            "message": (
+                data.get("message")
+                or
+                (
+                    data.get("error", {})
+                    .get("message")
+                    if isinstance(
+                        data.get("error"),
+                        dict
+                    )
+                    else None
+                )
+                or
+                "PesaPal refund failed."
+            ),
+            "providerResponse":
+                data
+        }
+
+    # --------------------------------------------------------
+    # PESAPAL ERROR INSIDE HTTP 200
+    # --------------------------------------------------------
+
+    if isinstance(
+        data.get("error"),
+        dict
+    ):
+
+        return {
+            "success": False,
+            "retryable": False,
+            "message":
+                data["error"].get(
+                    "message"
+                )
+                or
+                "PesaPal refund failed.",
+            "providerResponse":
+                data
+        }
+
+    # --------------------------------------------------------
+    # PESAPAL REFUND RESPONSE
+    #
+    # PesaPal documents:
+    # status 200 = refund request received/processing
+    # status 500 = refund request rejected
+    # --------------------------------------------------------
+
+    pesapal_status = str(
+        data.get(
+            "status",
+            data.get(
+                "error",
+                ""
+            )
+        )
+        or ""
+    ).strip().lower()
+
+    if pesapal_status in (
+        "500",
+        "failed",
+        "rejected",
+        "error"
+    ):
+
+        return {
+            "success": False,
+            "retryable": False,
+            "message":
+                data.get(
+                    "message"
+                )
+                or
+                "PesaPal refund was rejected.",
+            "providerResponse":
+                data
+        }
+
+    return {
+        "success":
+            True,
+
+        "message":
+            "PesaPal refund request submitted.",
+
+        "provider":
+            "pesapal",
+
+        "refundId":
+            data.get("id")
+            or
+            data.get("refundId"),
+
+        "refundStatus":
+            "processing",
+
+        "providerStatus":
+            pesapal_status
+            or
+            "200",
+
+        "amount":
+            refund_amount,
+
+        "providerResponse":
+            data
+    }
+
+
+# ============================================================
+# COMMON REFUND PROCESSOR
+#
+# SHARED BY:
+# - Host-approved customer refunds
+# - Automatically approved refunds
+# - Event cancellation refunds
+#
+# cancellation=False:
+#     Normal customer refund.
+#
+# cancellation=True:
+#     Event cancellation refund.
+#
+# IMPORTANT:
+# This function performs EventWaa's INTERNAL accounting
+# AND initiates the actual Flutterwave/PesaPal refund.
+#
+# IDEMPOTENCY:
+# - refund["idempotencyKey"] is the server-generated UUID
+#   for the actual refund operation.
+# - Flutterwave receives the same persistent UUID-derived key.
+# - PesaPal is never blindly retried.
+#
+# PROVIDER PENDING:
+# Once a provider accepts the refund, EventWaa commits its
+# internal accounting exactly once and records provider_pending.
+#
+# A separate provider reconciliation process must later move:
+#
+#     provider_pending -> refunded
+#
+# or perform a controlled reversal if the provider ultimately
+# rejects the refund.
+# ============================================================
+
+def process_eventwaa_refund(
+    refund,
+    booking,
+    event,
+    cancellation=False,
+    processed_by=""
+):
+
+    # ========================================================
+    # BASIC INPUT VALIDATION
+    # ========================================================
+
+    if not refund:
+
+        return {
+            "success":
+                False,
+
+            "message":
+                "Refund record not found."
+        }, 404
+
+    if not booking:
+
+        return {
+            "success":
+                False,
+
+            "message":
+                "Booking not found."
+        }, 404
+
+    if not event:
+
+        return {
+            "success":
+                False,
+
+            "message":
+                "Event not found."
+        }, 404
+
+    try:
+
+        # ====================================================
+        # REFUND LOCK
+        # ====================================================
+
+        with eventwaa_file_lock(
+            "refund"
+        ):
+
+            now = datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+
+            settings = load_admin_settings()
+
+            # ==================================================
+            # LOAD FRESH DATA
+            # ==================================================
+
+            bookings = load_json_file(
+                "bookings.json",
+                []
+            )
+
+            events = load_json_file(
+                "events.json",
+                []
+            )
+
+            refunds = load_json_file(
+                "refunds.json",
+                []
+            )
+
+            host_wallets = load_host_wallets()
+
+            admin_wallet = load_wallet()
+
+            # ==================================================
+            # FIND STORED REFUND
+            # ==================================================
+
+            refund_id = refund.get(
+                "id"
+            )
+
+            stored_refund = None
+
+            for current_refund in refunds:
+
+                if str(
+                    current_refund.get(
+                        "id"
+                    )
+                ) == str(
+                    refund_id
+                ):
+
+                    stored_refund = (
+                        current_refund
+                    )
+
+                    break
+
+            if not stored_refund:
+
+                return {
+                    "success":
+                        False,
+
+                    "message":
+                        "Refund record no longer exists."
+                }, 404
+
+            refund = stored_refund
+
+            # ==================================================
+            # ENSURE SERVER REFUND OPERATION KEY
+            # ==================================================
+
+            refund_operation_key = str(
+                refund.get(
+                    "idempotencyKey",
+                    ""
+                )
+                or ""
+            ).strip()
+
+            if not refund_operation_key:
+
+                refund_operation_key = str(
+                    uuid.uuid4()
+                )
+
+                refund["idempotencyKey"] = (
+                    refund_operation_key
+                )
+
+                save_json_file(
+                    "refunds.json",
+                    refunds
+                )
+
+            # ==================================================
+            # OPERATION REQUEST HASH
+            # ==================================================
+
+            operation_request_hash = (
+                make_request_hash({
+
+                    "refundId":
+                        refund_id,
+
+                    "bookingId":
+                        booking.get(
+                            "id"
+                        ),
+
+                    "eventId":
+                        event.get(
+                            "id"
+                        ),
+
+                    "cancellation":
+                        bool(cancellation)
+
+                })
+            )
+
+            # ==================================================
+            # FIND IDEMPOTENCY RECORD
+            # ==================================================
+
+            refund_idempotency_record = (
+                find_idempotency_record(
+                    refund_operation_key,
+                    "refund-operation"
+                )
+            )
+
+            if refund_idempotency_record:
+
+                stored_request_hash = str(
+                    refund_idempotency_record.get(
+                        "requestHash",
+                        ""
+                    )
+                )
+
+                if (
+                    stored_request_hash
+                    and
+                    stored_request_hash
+                    != operation_request_hash
+                ):
+
+                    return {
+
+                        "success":
+                            False,
+
+                        "message":
+                            "Refund idempotency conflict.",
+
+                        "idempotencyConflict":
+                            True
+
+                    }, 409
+
+                operation_status = str(
+                    refund_idempotency_record.get(
+                        "status",
+                        ""
+                    )
+                ).strip().lower()
+
+                # ----------------------------------------------
+                # TERMINAL STORED RESPONSE
+                #
+                # Only terminal/manual-review results should be
+                # replayed automatically.
+                #
+                # failed_retryable MUST NOT be replayed forever.
+                # ----------------------------------------------
+
+                if (
+                    refund_idempotency_record.get(
+                        "responseBody"
+                    )
+                    is not None
+                    and
+                    operation_status in (
+                        "succeeded",
+                        "failed",
+                        "failed_manual_review"
+                    )
+                ):
+
+                    return idempotency_response(
+                        refund_idempotency_record
+                    )
+
+                # ----------------------------------------------
+                # CURRENTLY PROCESSING
+                # ----------------------------------------------
+
+                if operation_status == "processing":
+
+                    return {
+
+                        "success":
+                            True,
+
+                        "message":
+                            (
+                                "Refund is already being "
+                                "processed."
+                            ),
+
+                        "processing":
+                            True,
+
+                        "alreadyProcessed":
+                            False,
+
+                        "refund":
+                            refund
+
+                    }, 202
+
+                # ----------------------------------------------
+                # PROVIDER PENDING
+                #
+                # Do not submit another provider refund.
+                # ----------------------------------------------
+
+                if operation_status == "provider_pending":
+
+                    response_body = {
+
+                        "success":
+                            True,
+
+                        "message":
+                            (
+                                "Refund has been accepted "
+                                "by the payment provider "
+                                "and is still being processed."
+                            ),
+
+                        "processing":
+                            True,
+
+                        "alreadyProcessed":
+                            False,
+
+                        "refund":
+                            refund
+
+                    }
+
+                    return jsonify(
+                        response_body
+                    ), 202
+
+                # ----------------------------------------------
+                # RETRYABLE FAILURE
+                #
+                # This is intentionally NOT replayed.
+                # We may safely retry the provider operation
+                # using the same persistent operation key.
+                # ----------------------------------------------
+
+                if operation_status == "failed_retryable":
+
+                    update_idempotency_record(
+
+                        refund_operation_key,
+
+                        "refund-operation",
+
+                        status="processing",
+
+                        response_status=None,
+
+                        response_body=None,
+
+                        resource_id=str(
+                            refund_id
+                        )
+                    )
+
+            else:
+
+                create_idempotency_record(
+
+                    key=refund_operation_key,
+
+                    scope="refund-operation",
+
+                    request_hash=(
+                        operation_request_hash
+                    ),
+
+                    status="processing",
+
+                    resource_id=str(
+                        refund_id
+                    )
+                )
+
+            # ==================================================
+            # BASIC REFUND STATUS
+            # ==================================================
+
+            current_refund_status = str(
+                refund.get(
+                    "status",
+                    ""
+                )
+            ).strip().lower()
+
+            # ==================================================
+            # ALREADY REFUNDED
+            # ==================================================
+
+            if current_refund_status == "refunded":
+
+                response_body = {
+
+                    "success":
+                        True,
+
+                    "message":
+                        "Refund has already been processed.",
+
+                    "alreadyProcessed":
+                        True,
+
+                    "refund":
+                        refund
+
+                }
+
+                update_idempotency_record(
+
+                    refund_operation_key,
+
+                    "refund-operation",
+
+                    status="succeeded",
+
+                    response_status=200,
+
+                    response_body=response_body,
+
+                    resource_id=str(
+                        refund_id
+                    )
+                )
+
+                return jsonify(
+                    response_body
+                ), 200
+
+            # ==================================================
+            # PROVIDER PENDING
+            # ==================================================
+
+            if current_refund_status == "provider_pending":
+
+                response_body = {
+
+                    "success":
+                        True,
+
+                    "message":
+                        (
+                            "Refund has already been accepted "
+                            "by the payment provider and is "
+                            "still being processed."
+                        ),
+
+                    "processing":
+                        True,
+
+                    "alreadyProcessed":
+                        False,
+
+                    "refund":
+                        refund
+
+                }
+
+                update_idempotency_record(
+
+                    refund_operation_key,
+
+                    "refund-operation",
+
+                    status="provider_pending",
+
+                    response_status=202,
+
+                    response_body=response_body,
+
+                    resource_id=str(
+                        refund_id
+                    )
+                )
+
+                return jsonify(
+                    response_body
+                ), 202
+
+            # ==================================================
+            # VALID STATUS
+            # ==================================================
+
+            if current_refund_status not in (
+                "pending",
+                "approved"
+            ):
+
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "message":
+                        (
+                            "This refund cannot be processed "
+                            "from its current status."
+                        ),
+
+                    "refund":
+                        refund
+
+                }
+
+                update_idempotency_record(
+
+                    refund_operation_key,
+
+                    "refund-operation",
+
+                    status="failed",
+
+                    response_status=400,
+
+                    response_body=response_body,
+
+                    resource_id=str(
+                        refund_id
+                    )
+                )
+
+                return jsonify(
+                    response_body
+                ), 400
+
+            # ==================================================
+            # FIND CURRENT BOOKING
+            # ==================================================
+
+            booking_id = booking.get(
+                "id"
+            )
+
+            stored_booking = None
+
+            for current_booking in bookings:
+
+                if str(
+                    current_booking.get(
+                        "id"
+                    )
+                ) == str(
+                    booking_id
+                ):
+
+                    stored_booking = (
+                        current_booking
+                    )
+
+                    break
+
+            if not stored_booking:
+
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "message":
+                        "Booking no longer exists."
+
+                }
+
+                update_idempotency_record(
+
+                    refund_operation_key,
+
+                    "refund-operation",
+
+                    status="failed",
+
+                    response_status=404,
+
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 404
+
+            booking = stored_booking
+
+            # ==================================================
+            # FINAL DUPLICATE CHECK
+            # ==================================================
+
+            if str(
+                booking.get(
+                    "refundStatus",
+                    ""
+                )
+            ).strip().lower() == "refunded":
+
+                refund["status"] = (
+                    "refunded"
+                )
+
+                response_body = {
+
+                    "success":
+                        True,
+
+                    "message":
+                        "Booking has already been refunded.",
+
+                    "alreadyProcessed":
+                        True,
+
+                    "refund":
+                        refund
+
+                }
+
+                update_idempotency_record(
+
+                    refund_operation_key,
+
+                    "refund-operation",
+
+                    status="succeeded",
+
+                    response_status=200,
+
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 200
+
+            # ==================================================
+            # CHECK-IN
+            # ==================================================
+
+            if (
+                not cancellation
+                and
+                booking.get(
+                    "checkedIn",
+                    False
+                )
+            ):
+
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "message":
+                        (
+                            "Checked-in tickets cannot "
+                            "be refunded."
+                        )
+
+                }
+
+                update_idempotency_record(
+
+                    refund_operation_key,
+
+                    "refund-operation",
+
+                    status="failed",
+
+                    response_status=400,
+
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 400
+
+            # ==================================================
+            # CALCULATE REFUND
+            # ==================================================
+
+            money = refund_booking_money(
+
+                booking,
+
+                event,
+
+                cancellation=cancellation
+
+            )
+
+            original_amount = int(
+                money.get(
+                    "originalAmount",
+                    0
+                )
+                or 0
+            )
+
+            refund_fee_percent = float(
+                money.get(
+                    "refundFeePercent",
+                    0
+                )
+                or 0
+            )
+
+            refund_fee = int(
+                money.get(
+                    "refundFee",
+                    0
+                )
+                or 0
+            )
+
+            refund_amount = int(
+                money.get(
+                    "refundAmount",
+                    money.get(
+                        "totalAmount",
+                        0
+                    )
+                )
+                or 0
+            )
+
+            if original_amount <= 0:
+
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "message":
+                        (
+                            "This booking does not contain "
+                            "a refundable ticket amount."
+                        )
+
+                }
+
+                update_idempotency_record(
+
+                    refund_operation_key,
+                    "refund-operation",
+
+                    status="failed",
+
+                    response_status=400,
+
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 400
+
+            if refund_amount <= 0:
+
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "message":
+                        "Calculated refund amount is invalid."
+
+                }
+
+                update_idempotency_record(
+
+                    refund_operation_key,
+                    "refund-operation",
+
+                    status="failed",
+
+                    response_status=400,
+
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 400
+
+            # ==================================================
+            # EVENT TYPE
+            # ==================================================
+
+            is_admin_event = (
+                str(
+                    event.get(
+                        "adminEvent",
+                        False
+                    )
+                ).strip().lower()
+                ==
+                "true"
+            )
+
+            # ==================================================
+            # ORIGINAL SALE ACCOUNTING
+            #
+            # Prefer values persisted on the booking.
+            #
+            # This prevents a later Admin Settings commission
+            # change from changing the historical refund split.
+            # ==================================================
+
+            stored_commission = booking.get(
+                "commissionAmount"
+            )
+
+            stored_host_amount = booking.get(
+                "hostAmount"
+            )
+
+            try:
+
+                if stored_commission is not None:
+
+                    original_commission = int(
+                        round(
+                            float(
+                                stored_commission
+                            )
+                        )
+                    )
+
+                else:
+
+                    original_commission = None
+
+            except (
+                ValueError,
+                TypeError
+            ):
+
+                original_commission = None
+
+            try:
+
+                if stored_host_amount is not None:
+
+                    original_host_amount = int(
+                        round(
+                            float(
+                                stored_host_amount
+                            )
+                        )
+                    )
+
+                else:
+
+                    original_host_amount = None
+
+            except (
+                ValueError,
+                TypeError
+            ):
+
+                original_host_amount = None
+
+            # ==================================================
+            # FALLBACK: HOST WALLET TRANSACTION
+            #
+            # Older bookings may not contain hostAmount.
+            # Recover the historical host amount from the
+            # original host-wallet transaction where possible.
+            # ==================================================
+
+            if (
+                not is_admin_event
+                and
+                original_host_amount is None
+            ):
+
+                try:
+
+                    host_id_for_lookup = int(
+                        event.get(
+                            "hostId"
+                        )
+                    )
+
+                except (
+                    ValueError,
+                    TypeError
+                ):
+
+                    host_id_for_lookup = None
+
+                if host_id_for_lookup is not None:
+
+                    for wallet in host_wallets:
+
+                        try:
+
+                            wallet_host_id = int(
+                                wallet.get(
+                                    "hostId",
+                                    0
+                                )
+                            )
+
+                        except (
+                            ValueError,
+                            TypeError
+                        ):
+
+                            wallet_host_id = 0
+
+                        if (
+                            wallet_host_id
+                            !=
+                            host_id_for_lookup
+                        ):
+
+                            continue
+
+                        transactions = (
+                            wallet.get(
+                                "transactions",
+                                []
+                            )
+                        )
+
+                        if not isinstance(
+                            transactions,
+                            list
+                        ):
+
+                            continue
+
+                        for transaction in transactions:
+
+                            if str(
+                                transaction.get(
+                                    "bookingId",
+                                    ""
+                                )
+                            ) != str(
+                                booking.get(
+                                    "id",
+                                    ""
+                                )
+                            ):
+
+                                continue
+
+                            transaction_type = str(
+                                transaction.get(
+                                    "type",
+                                    ""
+                                )
+                            ).strip().lower()
+
+                            if transaction_type in (
+                                "sale",
+                                "ticket_sale",
+                                "booking",
+                                "earning"
+                            ):
+
+                                try:
+
+                                    original_host_amount = int(
+                                        round(
+                                            float(
+                                                transaction.get(
+                                                    "amount",
+                                                    0
+                                                )
+                                                or 0
+                                            )
+                                        )
+                                    )
+
+                                except (
+                                    ValueError,
+                                    TypeError
+                                ):
+
+                                    original_host_amount = None
+
+                                if (
+                                    original_host_amount
+                                    is not None
+                                ):
+
+                                    break
+
+                        if (
+                            original_host_amount
+                            is not None
+                        ):
+
+                            break
+
+            # ==================================================
+            # FINAL FALLBACK FOR OLD RECORDS
+            # ==================================================
+
+            if is_admin_event:
+
+                original_commission = (
+                    original_amount
+                )
+
+                original_host_amount = 0
+
+            else:
+
+                if original_host_amount is None:
+
+                    try:
+
+                        commission_percent = float(
+                            settings.get(
+                                "commission",
+                                10
+                            )
+                            or 0
+                        )
+
+                    except (
+                        ValueError,
+                        TypeError
+                    ):
+
+                        commission_percent = 10
+
+                    commission_percent = max(
+                        0,
+                        min(
+                            100,
+                            commission_percent
+                        )
+                    )
+
+                    original_commission = int(
+                        round(
+                            original_amount
+                            *
+                            commission_percent
+                            /
+                            100
+                        )
+                    )
+
+                    original_host_amount = (
+                        original_amount
+                        -
+                        original_commission
+                    )
+
+                elif original_commission is None:
+
+                    original_commission = max(
+                        0,
+                        original_amount
+                        -
+                        original_host_amount
+                    )
+
+            original_commission = max(
+                0,
+                min(
+                    original_amount,
+                    int(
+                        original_commission
+                        or 0
+                    )
+                )
+            )
+
+            original_host_amount = max(
+                0,
+                min(
+                    original_amount,
+                    int(
+                        original_host_amount
+                        or 0
+                    )
+                )
+            )
+
+            # ==================================================
+            # HOST / EVENTWAA FUNDING
+            # ==================================================
+
+            if is_admin_event:
+
+                host_refund_amount = 0
+
+                platform_commission_reversal = (
+                    original_amount
+                )
+
+            elif cancellation:
+
+                host_refund_amount = (
+                    original_host_amount
+                )
+
+                platform_commission_reversal = (
+                    original_commission
+                )
+
+            else:
+
+                host_refund_amount = min(
+                    original_host_amount,
+                    refund_amount
+                )
+
+                platform_commission_reversal = 0
+
+            # ==================================================
+            # HOST WALLET
+            # ==================================================
+
+            host_wallet = None
+
+            available_balance = 0
+            pending_balance = 0
+            available_used = 0
+            pending_used = 0
+
+            if not is_admin_event:
+
+                try:
+
+                    host_id = int(
+                        event.get(
+                            "hostId"
+                        )
+                    )
+
+                except (
+                    ValueError,
+                    TypeError
+                ):
+
+                    response_body = {
+
+                        "success":
+                            False,
+
+                        "message":
+                            "Event host ID is invalid."
+
+                    }
+
+                    update_idempotency_record(
+
+                        refund_operation_key,
+                        "refund-operation",
+
+                        status="failed",
+
+                        response_status=400,
+
+                        response_body=response_body
+                    )
+
+                    return jsonify(
+                        response_body
+                    ), 400
+
+                for wallet in host_wallets:
+
+                    try:
+
+                        wallet_host_id = int(
+                            wallet.get(
+                                "hostId",
+                                0
+                            )
+                        )
+
+                    except (
+                        ValueError,
+                        TypeError
+                    ):
+
+                        wallet_host_id = 0
+
+                    if (
+                        wallet_host_id
+                        ==
+                        host_id
+                    ):
+
+                        host_wallet = wallet
+                        break
+
+                if not host_wallet:
+
+                    response_body = {
+
+                        "success":
+                            False,
+
+                        "message":
+                            "Host wallet was not found."
+
+                    }
+
+                    update_idempotency_record(
+
+                        refund_operation_key,
+                        "refund-operation",
+
+                        status="failed",
+
+                        response_status=404,
+
+                        response_body=response_body
+                    )
+
+                    return jsonify(
+                        response_body
+                    ), 404
+
+                available_balance = int(
+                    host_wallet.get(
+                        "availableBalance",
+                        0
+                    )
+                    or 0
+                )
+
+                pending_balance = int(
+                    host_wallet.get(
+                        "pendingPayouts",
+                        0
+                    )
+                    or 0
+                )
+
+                if (
+                    available_balance
+                    +
+                    pending_balance
+                    <
+                    host_refund_amount
+                ):
+
+                    response_body = {
+
+                        "success":
+                            False,
+
+                        "message":
+                            (
+                                "The host does not have "
+                                "enough funds to process "
+                                "this refund."
+                            ),
+
+                        "required":
+                            host_refund_amount,
+
+                        "available":
+                            (
+                                available_balance
+                                +
+                                pending_balance
+                            )
+
+                    }
+
+                    update_idempotency_record(
+
+                        refund_operation_key,
+                        "refund-operation",
+
+                        status="failed",
+
+                        response_status=400,
+
+                        response_body=response_body
+                    )
+
+                    return jsonify(
+                        response_body
+                    ), 400
+
+                available_used = min(
+                    available_balance,
+                    host_refund_amount
+                )
+
+                remaining_host_refund = (
+                    host_refund_amount
+                    -
+                    available_used
+                )
+
+                pending_used = min(
+                    pending_balance,
+                    remaining_host_refund
+                )
+
+                if (
+                    pending_used > 0
+                ):
+
+                    scheduled_payouts = (
+                        host_wallet.get(
+                            "scheduledPayouts",
+                            []
+                        )
+                    )
+
+                    scheduled_total = 0
+
+                    if isinstance(
+                        scheduled_payouts,
+                        list
+                    ):
+
+                        for payout in scheduled_payouts:
+
+                            scheduled_total += int(
+                                payout.get(
+                                    "amount",
+                                    0
+                                )
+                                or 0
+                            )
+
+                    if (
+                        scheduled_total
+                        <
+                        pending_used
+                    ):
+
+                        response_body = {
+
+                            "success":
+                                False,
+
+                            "message":
+                                (
+                                    "The host's scheduled "
+                                    "payouts cannot fully "
+                                    "reconcile this refund."
+                                ),
+
+                            "required":
+                                pending_used,
+
+                            "scheduledAvailable":
+                                scheduled_total
+
+                        }
+
+                        update_idempotency_record(
+
+                            refund_operation_key,
+                            "refund-operation",
+
+                            status="failed",
+
+                            response_status=400,
+
+                            response_body=response_body
+                        )
+
+                        return jsonify(
+                            response_body
+                        ), 400
+
+            # ==================================================
+            # SERVICE FEE
+            # ==================================================
+
+            original_service_fee = int(
+                booking.get(
+                    "serviceFee",
+                    refund.get(
+                        "serviceFee",
+                        0
+                    )
+                )
+                or 0
+            )
+
+            # ==================================================
+            # PLATFORM FUNDING
+            # ==================================================
+
+            platform_reversal = 0
+
+            normal_platform_funding = 0
+
+            if cancellation:
+
+                platform_reversal = (
+                    platform_commission_reversal
+                )
+
+                admin_available = int(
+                    admin_wallet.get(
+                        "availableBalance",
+                        0
+                    )
+                    or 0
+                )
+
+                if (
+                    admin_available
+                    <
+                    platform_reversal
+                ):
+
+                    response_body = {
+
+                        "success":
+                            False,
+
+                        "message":
+                            (
+                                "EventWaa does not have "
+                                "enough available balance "
+                                "to reverse the platform "
+                                "earnings."
+                            ),
+
+                        "required":
+                            platform_reversal,
+
+                        "available":
+                            admin_available
+
+                    }
+
+                    update_idempotency_record(
+
+                        refund_operation_key,
+                        "refund-operation",
+
+                        status="failed",
+
+                        response_status=400,
+
+                        response_body=response_body
+                    )
+
+                    return jsonify(
+                        response_body
+                    ), 400
+
+            else:
+
+                normal_platform_funding = max(
+                    0,
+                    refund_amount
+                    -
+                    host_refund_amount
+                )
+
+                if normal_platform_funding > 0:
+
+                    admin_available = int(
+                        admin_wallet.get(
+                            "availableBalance",
+                            0
+                        )
+                        or 0
+                    )
+
+                    if (
+                        admin_available
+                        <
+                        normal_platform_funding
+                    ):
+
+                        response_body = {
+
+                            "success":
+                                False,
+
+                            "message":
+                                (
+                                    "EventWaa does not have "
+                                    "enough available balance "
+                                    "to fund the remaining "
+                                    "refund amount."
+                                ),
+
+                            "required":
+                                normal_platform_funding,
+
+                            "available":
+                                admin_available
+
+                        }
+
+                        update_idempotency_record(
+
+                            refund_operation_key,
+                            "refund-operation",
+
+                            status="failed",
+
+                            response_status=400,
+
+                            response_body=response_body
+                        )
+
+                        return jsonify(
+                            response_body
+                        ), 400
+
+            # ==================================================
+            # PAYMENT PROVIDER
+            # ==================================================
+
+            payment_provider = str(
+                booking.get(
+                    "paymentProvider",
+                    ""
+                )
+                or ""
+            ).strip().lower()
+
+            provider_refund = {
+
+                "success":
+                    False,
+
+                "provider":
+                    payment_provider,
+
+                "message":
+                    (
+                        "Payment provider is missing "
+                        "or unsupported."
+                    )
+
+            }
+
+            # ==================================================
+            # FLUTTERWAVE
+            # ==================================================
+
+            if payment_provider == "flutterwave":
+
+                flutterwave_transaction_id = str(
+                    booking.get(
+                        "transactionId",
+                        ""
+                    )
+                    or ""
+                ).strip()
+
+                if not flutterwave_transaction_id:
+
+                    provider_refund = {
+
+                        "success":
+                            False,
+
+                        "provider":
+                            "flutterwave",
+
+                        "message":
+                            "Flutterwave transaction ID is missing.",
+
+                        "retryable":
+                            False
+
+                    }
+
+                else:
+
+                    flutterwave_idempotency_key = (
+                        f"eventwaa-refund-"
+                        f"{refund_operation_key}"
+                    )
+
+                    provider_refund = (
+                        refund_flutterwave_transaction(
+
+                            transaction_id=(
+                                flutterwave_transaction_id
+                            ),
+
+                            amount=
+                                refund_amount,
+
+                            reason=(
+                                "EventWaa event cancellation"
+                                if cancellation
+                                else
+                                "EventWaa customer refund"
+                            ),
+
+                            idempotency_key=(
+                                flutterwave_idempotency_key
+                            )
+
+                        )
+                    )
+
+            # ==================================================
+            # PESAPAL
+            # ==================================================
+
+            elif payment_provider == "pesapal":
+
+                payments = load_payments()
+
+                payment_record = next(
+
+                    (
+                        payment
+                        for payment in payments
+                        if str(
+                            payment.get(
+                                "bookingId",
+                                ""
+                            )
+                        )
+                        ==
+                        str(
+                            booking.get(
+                                "id",
+                                ""
+                            )
+                        )
+                    ),
+
+                    None
+                )
+
+                if not payment_record:
+
+                    provider_refund = {
+
+                        "success":
+                            False,
+
+                        "provider":
+                            "pesapal",
+
+                        "message":
+                            "PesaPal payment record could not be found.",
+
+                        "retryable":
+                            False
+
+                    }
+
+                else:
+
+                    confirmation_code = str(
+                        payment_record.get(
+                            "pesapalConfirmationCode",
+                            ""
+                        )
+                        or ""
+                    ).strip()
+
+                    payment_method = str(
+                        payment_record.get(
+                            "pesapalPaymentMethod",
+                            ""
+                        )
+                        or ""
+                    ).strip().lower()
+
+                    username = str(
+                        os.environ.get(
+                            "PESAPAL_REFUND_USERNAME",
+                            ""
+                        )
+                        or ""
+                    ).strip()
+
+                    pesapal_original_amount = int(
+                        round(
+                            float(
+                                payment_record.get(
+                                    "amount",
+                                    booking.get(
+                                        "customerTotal",
+                                        booking.get(
+                                            "amount",
+                                            0
+                                        )
+                                    )
+                                )
+                                or 0
+                            )
+                        )
+                    )
+
+                    requested_refund_amount = int(
+                        round(
+                            float(
+                                refund_amount
+                                or 0
+                            )
+                        )
+                    )
+
+                    is_mobile_money = (
+
+                        "mobile"
+                        in payment_method
+
+                        or
+                        "m-pesa"
+                        in payment_method
+
+                        or
+                        "mpesa"
+                        in payment_method
+
+                        or
+                        "airtel"
+                        in payment_method
+
+                        or
+                        "mtn"
+                        in payment_method
+
+                    )
+
+                    if (
+                        is_mobile_money
+                        and
+                        requested_refund_amount
+                        !=
+                        pesapal_original_amount
+                    ):
+
+                        provider_refund = {
+
+                            "success":
+                                False,
+
+                            "provider":
+                                "pesapal",
+
+                            "manualReviewRequired":
+                                True,
+
+                            "message":
+                                (
+                                    "This PesaPal mobile-money "
+                                    "payment requires a full "
+                                    "provider refund. The "
+                                    "EventWaa refund amount "
+                                    "differs from the original "
+                                    "provider payment amount."
+                                ),
+
+                            "retryable":
+                                False
+
+                        }
+
+                    elif not confirmation_code:
+
+                        provider_refund = {
+
+                            "success":
+                                False,
+
+                            "provider":
+                                "pesapal",
+
+                            "manualReviewRequired":
+                                True,
+
+                            "message":
+                                "PesaPal confirmation code is missing.",
+
+                            "retryable":
+                                False
+
+                        }
+
+                    elif not username:
+
+                        provider_refund = {
+
+                            "success":
+                                False,
+
+                            "provider":
+                                "pesapal",
+
+                            "manualReviewRequired":
+                                True,
+
+                            "message":
+                                (
+                                    "PESAPAL_REFUND_USERNAME "
+                                    "is not configured."
+                                ),
+
+                            "retryable":
+                                False
+
+                        }
+
+                    else:
+
+                        provider_refund = (
+                            refund_pesapal_transaction(
+
+                                confirmation_code=(
+                                    confirmation_code
+                                ),
+
+                                amount=
+                                    refund_amount,
+
+                                username=
+                                    username,
+
+                                reason=(
+                                    "EventWaa event cancellation"
+                                    if cancellation
+                                    else
+                                    "EventWaa customer refund"
+                                )
+
+                            )
+                        )
+
+            # ==================================================
+            # UNKNOWN PROVIDER
+            # ==================================================
+
+            else:
+
+                provider_refund = {
+
+                    "success":
+                        False,
+
+                    "provider":
+                        payment_provider,
+
+                    "message":
+                        (
+                            "Payment provider is missing "
+                            "or unsupported."
+                        ),
+
+                    "retryable":
+                        False
+
+                }
+
+            # ==================================================
+            # PROVIDER NOT ACCEPTED
+            # ==================================================
+
+            if not provider_refund.get(
+                "success",
+                False
+            ):
+
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "message":
+                        provider_refund.get(
+                            "message",
+                            "Payment provider refund failed."
+                        ),
+
+                    "provider":
+                        provider_refund.get(
+                            "provider",
+                            payment_provider
+                        ),
+
+                    "manualReviewRequired":
+                        provider_refund.get(
+                            "manualReviewRequired",
+                            False
+                        ),
+
+                    "retryable":
+                        provider_refund.get(
+                            "retryable",
+                            False
+                        ),
+
+                    "providerResponse":
+                        provider_refund.get(
+                            "providerResponse"
+                        )
+
+                }
+
+                # ----------------------------------------------
+                # RETRYABLE PROVIDER FAILURE
+                #
+                # Do NOT store the response as a terminal replay.
+                # The same refund operation key must be reusable.
+                # ----------------------------------------------
+
+                if provider_refund.get(
+                    "retryable",
+                    False
+                ):
+
+                    refund["status"] = (
+                        "pending"
+                    )
+
+                    refund["providerLastError"] = (
+                        response_body.get(
+                            "message"
+                        )
+                    )
+
+                    refund["providerLastErrorAt"] = (
+                        now
+                    )
+
+                    refund["retryable"] = (
+                        True
+                    )
+
+                    update_idempotency_record(
+
+                        refund_operation_key,
+                        "refund-operation",
+
+                        status="failed_retryable",
+
+                        response_status=503,
+
+                        response_body=response_body,
+
+                        resource_id=str(
+                            refund_id
+                        )
+                    )
+
+                    save_json_file(
+                        "refunds.json",
+                        refunds
+                    )
+
+                    return jsonify(
+                        response_body
+                    ), 503
+
+                # ----------------------------------------------
+                # MANUAL REVIEW
+                #
+                # Particularly important for ambiguous PesaPal
+                # situations.
+                # ----------------------------------------------
+
+                if provider_refund.get(
+                    "manualReviewRequired",
+                    False
+                ):
+
+                    refund["status"] = (
+                        "manual_review"
+                    )
+
+                    refund["manualReviewRequired"] = (
+                        True
+                    )
+
+                    refund["manualReviewReason"] = (
+                        response_body.get(
+                            "message"
+                        )
+                    )
+
+                    refund["manualReviewAt"] = (
+                        now
+                    )
+
+                    update_idempotency_record(
+
+                        refund_operation_key,
+                        "refund-operation",
+
+                        status="failed_manual_review",
+
+                        response_status=409,
+
+                        response_body=response_body,
+
+                        resource_id=str(
+                            refund_id
+                        )
+                    )
+
+                    save_json_file(
+                        "refunds.json",
+                        refunds
+                    )
+
+                    return jsonify(
+                        response_body
+                    ), 409
+
+                # ----------------------------------------------
+                # TERMINAL PROVIDER FAILURE
+                # ----------------------------------------------
+
+                refund["status"] = (
+                    "rejected"
+                )
+
+                refund["providerLastError"] = (
+                    response_body.get(
+                        "message"
+                    )
+                )
+
+                refund["providerLastErrorAt"] = (
+                    now
+                )
+
+                update_idempotency_record(
+
+                    refund_operation_key,
+                    "refund-operation",
+
+                    status="failed",
+
+                    response_status=400,
+
+                    response_body=response_body,
+
+                    resource_id=str(
+                        refund_id
+                    )
+                )
+
+                save_json_file(
+                    "refunds.json",
+                    refunds
+                )
+
+                return jsonify(
+                    response_body
+                ), 400
+
+            # ==================================================
+            # NORMALIZE PROVIDER STATUS
+            # ==================================================
+
+            provider_status = str(
+                provider_refund.get(
+                    "refundStatus",
+                    "processing"
+                )
+                or "processing"
+            ).strip().lower()
+
+            if provider_status == "completed":
+
+                internal_refund_status = (
+                    "refunded"
+                )
+
+            elif provider_status in (
+                "processing",
+                "pending",
+                "pending-momo"
+            ):
+
+                internal_refund_status = (
+                    "provider_pending"
+                )
+
+            else:
+
+                internal_refund_status = (
+                    "provider_pending"
+                )
+
+            # ==================================================
+            # STORE PROVIDER INFORMATION
+            # ==================================================
+
+            refund["provider"] = (
+                provider_refund.get(
+                    "provider",
+                    payment_provider
+                )
+            )
+
+            refund["providerRefundId"] = (
+                provider_refund.get(
+                    "refundId"
+                )
+            )
+
+            refund["providerRefundStatus"] = (
+                provider_status
+            )
+
+            refund["providerRefundRequestedAt"] = (
+                now
+            )
+
+            refund["providerRefundResponse"] = (
+                provider_refund.get(
+                    "providerResponse"
+                )
+            )
+
+            refund["providerRefundReference"] = (
+                provider_refund.get(
+                    "refundReference"
+                )
+            )
+
+            refund["providerIdempotencyKey"] = (
+                provider_refund.get(
+                    "idempotencyKey"
+                )
+            )
+
+            # ==================================================
+            # INTERNAL ACCOUNTING
+            #
+            # IMPORTANT:
+            # Provider acceptance is treated as the financial
+            # commitment. Accounting is therefore applied once,
+            # even when provider status is still processing.
+            #
+            # "accountingApplied" prevents reconciliation or a
+            # later retry from deducting the wallets twice.
+            # ==================================================
+
+            accounting_already_applied = (
+                str(
+                    refund.get(
+                        "accountingApplied",
+                        False
+                    )
+                ).strip().lower()
+                ==
+                "true"
+            )
+
+            if not accounting_already_applied:
+
+                # ==============================================
+                # HOST FUNDS
+                # ==============================================
+
+                if not is_admin_event:
+
+                    host_wallet["availableBalance"] = max(
+                        0,
+                        available_balance
+                        -
+                        available_used
+                    )
+
+                    host_wallet["pendingPayouts"] = max(
+                        0,
+                        pending_balance
+                        -
+                        pending_used
+                    )
+
+                    host_wallet["totalEarned"] = max(
+                        0,
+                        int(
+                            host_wallet.get(
+                                "totalEarned",
+                                0
+                            )
+                            or 0
+                        )
+                        -
+                        host_refund_amount
+                    )
+
+                    host_wallet["refunds"] = (
+                        int(
+                            host_wallet.get(
+                                "refunds",
+                                0
+                            )
+                            or 0
+                        )
+                        +
+                        host_refund_amount
+                    )
+
+                    # ------------------------------------------
+                    # SCHEDULED PAYOUTS
+                    # ------------------------------------------
+
+                    if pending_used > 0:
+
+                        amount_to_remove = (
+                            pending_used
+                        )
+
+                        scheduled_payouts = (
+                            host_wallet.setdefault(
+                                "scheduledPayouts",
+                                []
+                            )
+                        )
+
+                        for payout in scheduled_payouts:
+
+                            if amount_to_remove <= 0:
+
+                                break
+
+                            payout_amount = int(
+                                payout.get(
+                                    "amount",
+                                    0
+                                )
+                                or 0
+                            )
+
+                            if payout_amount <= 0:
+
+                                continue
+
+                            deduction = min(
+                                payout_amount,
+                                amount_to_remove
+                            )
+
+                            payout["amount"] = (
+                                payout_amount
+                                -
+                                deduction
+                            )
+
+                            amount_to_remove -= (
+                                deduction
+                            )
+
+                        host_wallet[
+                            "scheduledPayouts"
+                        ] = [
+
+                            payout
+
+                            for payout
+                            in scheduled_payouts
+
+                            if int(
+                                payout.get(
+                                    "amount",
+                                    0
+                                )
+                                or 0
+                            ) > 0
+
+                        ]
+
+                    # ------------------------------------------
+                    # HOST TRANSACTION
+                    # ------------------------------------------
+
+                    host_wallet.setdefault(
+                        "transactions",
+                        []
+                    )
+
+                    host_wallet["transactions"].insert(
+                        0,
+                        {
+
+                            "type":
+                                "refund",
+
+                            "eventId":
+                                event.get(
+                                    "id"
+                                ),
+
+                            "eventTitle":
+                                event.get(
+                                    "title",
+                                    ""
+                                ),
+
+                            "bookingId":
+                                booking.get(
+                                    "id"
+                                ),
+
+                            "amount":
+                                -host_refund_amount,
+
+                            "originalAmount":
+                                original_amount,
+
+                            "refundAmount":
+                                refund_amount,
+
+                            "hostRefundAmount":
+                                host_refund_amount,
+
+                            "availableUsed":
+                                available_used,
+
+                            "pendingUsed":
+                                pending_used,
+
+                            "refundFeePercent":
+                                refund_fee_percent,
+
+                            "refundFee":
+                                refund_fee,
+
+                            "cancellation":
+                                bool(cancellation),
+
+                            "date":
+                                now,
+
+                            "description":
+                                (
+                                    "Event cancellation refund"
+                                    if cancellation
+                                    else
+                                    "Customer refund"
+                                )
+
+                        }
+                    )
+
+                # ==============================================
+                # EVENTWAA PLATFORM WALLET
+                # ==============================================
+
+                if cancellation:
+
+                    admin_available = int(
+                        admin_wallet.get(
+                            "availableBalance",
+                            0
+                        )
+                        or 0
+                    )
+
+                    admin_wallet["availableBalance"] = max(
+                        0,
+                        admin_available
+                        -
+                        platform_reversal
+                    )
+
+                    # Commission is reversed.
+                    admin_wallet["totalCommission"] = max(
+                        0,
+                        int(
+                            admin_wallet.get(
+                                "totalCommission",
+                                0
+                            )
+                            or 0
+                        )
+                        -
+                        platform_commission_reversal
+                    )
+
+                    # Service fee remains retained.
+                    admin_wallet["totalServiceFees"] = int(
+                        admin_wallet.get(
+                            "totalServiceFees",
+                            0
+                        )
+                        or 0
+                    )
+
+                    admin_wallet["totalRevenue"] = max(
+                        0,
+                        int(
+                            admin_wallet.get(
+                                "totalRevenue",
+                                0
+                            )
+                            or 0
+                        )
+                        -
+                        platform_reversal
+                    )
+
+                    admin_wallet.setdefault(
+                        "transactions",
+                        []
+                    )
+
+                    admin_wallet["transactions"].insert(
+                        0,
+                        {
+
+                            "type":
+                                "event_cancellation_refund",
+
+                            "eventId":
+                                event.get(
+                                    "id"
+                                ),
+
+                            "eventTitle":
+                                event.get(
+                                    "title",
+                                    ""
+                                ),
+
+                            "bookingId":
+                                booking.get(
+                                    "id"
+                                ),
+
+                            "amount":
+                                -platform_reversal,
+
+                            "commissionReversed":
+                                platform_commission_reversal,
+
+                            "serviceFeeRetained":
+                                original_service_fee,
+
+                            "serviceFeeReversed":
+                                0,
+
+                            "date":
+                                now
+
+                        }
+                    )
+
+                elif normal_platform_funding > 0:
+
+                    admin_available = int(
+                        admin_wallet.get(
+                            "availableBalance",
+                            0
+                        )
+                        or 0
+                    )
+
+                    admin_wallet["availableBalance"] = max(
+                        0,
+                        admin_available
+                        -
+                        normal_platform_funding
+                    )
+
+                    admin_wallet.setdefault(
+                        "transactions",
+                        []
+                    )
+
+                    admin_wallet["transactions"].insert(
+                        0,
+                        {
+
+                            "type":
+                                "customer_refund_platform_funding",
+
+                            "eventId":
+                                event.get(
+                                    "id"
+                                ),
+
+                            "eventTitle":
+                                event.get(
+                                    "title",
+                                    ""
+                                ),
+
+                            "bookingId":
+                                booking.get(
+                                    "id"
+                                ),
+
+                            "amount":
+                                -normal_platform_funding,
+
+                            "refundAmount":
+                                refund_amount,
+
+                            "hostRefundAmount":
+                                host_refund_amount,
+
+                            "date":
+                                now,
+
+                            "description":
+                                "Platform funding for customer refund"
+
+                        }
+                    )
+
+                refund["accountingApplied"] = (
+                    True
+                )
+
+                refund["accountingAppliedAt"] = (
+                    now
+                )
+
+            # ==================================================
+            # UPDATE BOOKING
+            # ==================================================
+
+            booking["refundStatus"] = (
+                internal_refund_status
+            )
+
+            booking["refundId"] = (
+                refund.get(
+                    "id"
+                )
+            )
+
+            booking["refundedAt"] = (
+                now
+            )
+
+            booking["refundAmount"] = (
+                refund_amount
+            )
+
+            booking["refundFee"] = (
+                refund_fee
+            )
+
+            booking["refundFeePercent"] = (
+                refund_fee_percent
+            )
+
+            # ==================================================
+            # INVALIDATE THE ACTUAL BOOKING/TICKET
+            #
+            # Current EventWaa booking storage creates individual
+            # ticket records in bookings.json.
+            #
+            # Therefore we must invalidate the booking itself,
+            # not only a nested booking["tickets"] list.
+            # ==================================================
+
+            booking["valid"] = (
+                False
+            )
+
+            booking["cancelled"] = (
+                True
+            )
+
+            booking["ticketValid"] = (
+                False
+            )
+
+            # Preserve the nested-ticket behavior for any older
+            # parent-booking structures.
+            if isinstance(
+                booking.get(
+                    "tickets"
+                ),
+                list
+            ):
+
+                for ticket in booking["tickets"]:
+
+                    ticket["refundStatus"] = (
+                        internal_refund_status
+                    )
+
+                    ticket["refundedAt"] = (
+                        now
+                    )
+
+                    ticket["valid"] = (
+                        False
+                    )
+
+                    ticket["cancelled"] = (
+                        True
+                    )
+
+            # ==================================================
+            # UPDATE REFUND RECORD
+            # ==================================================
+
+            refund["status"] = (
+                internal_refund_status
+            )
+
+            refund["originalAmount"] = (
+                original_amount
+            )
+
+            refund["refundFeePercent"] = (
+                refund_fee_percent
+            )
+
+            refund["refundFee"] = (
+                refund_fee
+            )
+
+            refund["amount"] = (
+                refund_amount
+            )
+
+            refund["refundAmount"] = (
+                refund_amount
+            )
+
+            refund["originalCommission"] = (
+                original_commission
+            )
+
+            refund["originalHostAmount"] = (
+                original_host_amount
+            )
+
+            refund["hostRefundAmount"] = (
+                host_refund_amount
+            )
+
+            refund["platformReversal"] = (
+                platform_reversal
+            )
+
+            refund["normalPlatformFunding"] = (
+                normal_platform_funding
+            )
+
+            refund["availableUsed"] = (
+                available_used
+            )
+
+            refund["pendingUsed"] = (
+                pending_used
+            )
+
+            refund["cancellation"] = (
+                bool(cancellation)
+            )
+
+            refund["source"] = (
+
+                "event_cancellation"
+
+                if cancellation
+
+                else
+
+                refund.get(
+                    "source",
+                    "customer_request"
+                )
+
+            )
+
+            refund["processedAt"] = (
+                now
+            )
+
+            refund["reviewedAt"] = (
+                now
+            )
+
+            if processed_by:
+
+                refund["processedBy"] = (
+                    processed_by
+                )
+
+                refund["reviewedBy"] = (
+                    processed_by
+                )
+
+            # ==================================================
+            # UPDATE EVENT
+            # ==================================================
+
+            event_id = event.get(
+                "id"
+            )
+
+            stored_event = None
+
+            for current_event in events:
+
+                if str(
+                    current_event.get(
+                        "id"
+                    )
+                ) == str(
+                    event_id
+                ):
+
+                    stored_event = (
+                        current_event
+                    )
+
+                    break
+
+            if stored_event:
+
+                try:
+
+                    quantity = int(
+                        booking.get(
+                            "quantity",
+                            1
+                        )
+                        or 1
+                    )
+
+                except (
+                    ValueError,
+                    TypeError
+                ):
+
+                    quantity = 1
+
+                if quantity <= 0:
+
+                    quantity = 1
+
+                stored_event["ticketsSold"] = max(
+                    0,
+                    int(
+                        stored_event.get(
+                            "ticketsSold",
+                            0
+                        )
+                        or 0
+                    )
+                    -
+                    quantity
+                )
+
+                # IMPORTANT:
+                # Booking creation records host_amount as event
+                # revenue for host events.
+                #
+                # Official EventWaa events have no host share,
+                # so their event revenue is the original amount.
+                event_revenue_reversal = (
+
+                    original_amount
+
+                    if is_admin_event
+
+                    else
+
+                    min(
+                        original_host_amount,
+                        original_amount
+                    )
+
+                )
+
+                stored_event["revenue"] = max(
+                    0,
+                    int(
+                        stored_event.get(
+                            "revenue",
+                            0
+                        )
+                        or 0
+                    )
+                    -
+                    event_revenue_reversal
+                )
+
+                # ----------------------------------------------
+                # RETURN TICKETS TO INVENTORY
+                # ----------------------------------------------
+
+                for ticket_type in stored_event.get(
+                    "tickets",
+                    []
+                ):
+
+                    if str(
+                        ticket_type.get(
+                            "name",
+                            ""
+                        )
+                    ).strip().lower() == str(
+                        booking.get(
+                            "ticketType",
+                            ""
+                        )
+                    ).strip().lower():
+
+                        ticket_type["remaining"] = (
+
+                            int(
+                                ticket_type.get(
+                                    "remaining",
+                                    0
+                                )
+                                or 0
+                            )
+
+                            +
+
+                            quantity
+
+                        )
+
+                        break
+
+            # ==================================================
+            # SAVE ACCOUNTING
+            # ==================================================
+
+            if not is_admin_event:
+
+                save_host_wallets(
+                    host_wallets
+                )
+
+            save_wallet(
+                admin_wallet
+            )
+
+            save_json_file(
+                "bookings.json",
+                bookings
+            )
+
+            save_json_file(
+                "events.json",
+                events
+            )
+
+            save_json_file(
+                "refunds.json",
+                refunds
+            )
+
+            # ==================================================
+            # BUYER INFORMATION
+            # ==================================================
+
+            buyer = booking.get(
+                "buyer",
+                {}
+            )
+
+            buyer_email = ""
+            buyer_name = ""
+
+            if isinstance(
+                buyer,
+                dict
+            ):
+
+                buyer_email = str(
+                    buyer.get(
+                        "email",
+                        ""
+                    )
+                ).strip()
+
+                buyer_name = str(
+                    buyer.get(
+                        "name",
+                        ""
+                    )
+                ).strip()
+
+            # ==================================================
+            # BUYER PLATFORM NOTIFICATION
+            # ==================================================
+
+            try:
+
+                if (
+                    internal_refund_status
+                    ==
+                    "refunded"
+                ):
+
+                    notification_title = (
+                        "Refund completed"
+                    )
+
+                    notification_message = (
+
+                        f"Your refund of "
+                        f"{refund_amount:,} UGX for "
+                        f"{event.get('title', 'your event')} "
+                        f"has been completed."
+
+                    )
+
+                else:
+
+                    notification_title = (
+                        "Refund processing"
+                    )
+
+                    notification_message = (
+
+                        f"Your refund of "
+                        f"{refund_amount:,} UGX for "
+                        f"{event.get('title', 'your event')} "
+                        "has been accepted and is being "
+                        "processed by the payment provider."
+
+                    )
+
+                create_notification(
+
+                    buyer_email,
+
+                    notification_title,
+
+                    notification_message,
+
+                    "refund",
+
+                    f"/events/{event.get('id')}"
+
+                )
+
+            except Exception as e:
+
+                print(
+                    "REFUND NOTIFICATION ERROR:",
+                    repr(e)
+                )
+
+            # ==================================================
+            # BUYER CANCELLATION EMAIL
+            # ==================================================
+
+            if cancellation:
+
+                try:
+
+                    send_event_cancellation_email(
+
+                        buyer_email,
+
+                        buyer_name,
+
+                        event,
+
+                        refund_amount=(
+                            refund_amount
+                        ),
+
+                        is_free=False,
+
+                        cancellation_reason=(
+                            refund.get(
+                                "reason",
+                                "Event cancelled by host"
+                            )
+                        )
+
+                    )
+
+                except Exception as e:
+
+                    print(
+                        "REFUND EMAIL ERROR:",
+                        repr(e)
+                    )
+
+            # ==================================================
+            # FINAL RESPONSE
+            # ==================================================
+
+            if (
+                internal_refund_status
+                ==
+                "refunded"
+            ):
+
+                success_message = (
+
+                    "Event cancellation refund "
+                    "processed successfully."
+
+                    if cancellation
+
+                    else
+
+                    "Refund processed successfully."
+
+                )
+
+            else:
+
+                success_message = (
+
+                    "Event cancellation refund has "
+                    "been accepted and is being processed "
+                    "by the payment provider."
+
+                    if cancellation
+
+                    else
+
+                    "Refund has been accepted and is being "
+                    "processed by the payment provider."
+
+                )
+
+            response_body = {
+
+                "success":
+                    True,
+
+                "message":
+                    success_message,
+
+                "alreadyProcessed":
+                    False,
+
+                "processing":
+                    (
+                        internal_refund_status
+                        ==
+                        "provider_pending"
+                    ),
+
+                "refund":
+                    refund,
+
+                "money":
+                    {
+
+                        "originalAmount":
+                            original_amount,
+
+                        "refundFeePercent":
+                            refund_fee_percent,
+
+                        "refundFee":
+                            refund_fee,
+
+                        "refundAmount":
+                            refund_amount,
+
+                        "originalCommission":
+                            original_commission,
+
+                        "originalHostAmount":
+                            original_host_amount,
+
+                        "hostRefundAmount":
+                            host_refund_amount,
+
+                        "platformReversal":
+                            (
+                                platform_reversal
+                                if cancellation
+                                else
+                                normal_platform_funding
+                            ),
+
+                        "serviceFeeRetained":
+                            (
+                                original_service_fee
+                                if cancellation
+                                else
+                                0
+                            )
+
+                    },
+
+                "provider":
+                    {
+
+                        "name":
+                            payment_provider,
+
+                        "status":
+                            provider_status,
+
+                        "refundId":
+                            provider_refund.get(
+                                "refundId"
+                            ),
+
+                        "refundReference":
+                            provider_refund.get(
+                                "refundReference"
+                            )
+
+                    },
+
+                "wallet":
+                    {
+
+                        "hostAvailableBalance":
+                            (
+                                host_wallet.get(
+                                    "availableBalance",
+                                    0
+                                )
+                                if host_wallet
+                                else
+                                0
+                            ),
+
+                        "hostPendingPayouts":
+                            (
+                                host_wallet.get(
+                                    "pendingPayouts",
+                                    0
+                                )
+                                if host_wallet
+                                else
+                                0
+                            )
+
+                    }
+
+            }
+
+            # ==================================================
+            # FINAL IDEMPOTENCY STATE
+            # ==================================================
+
+            if internal_refund_status == "refunded":
+
+                final_status_code = 200
+
+                idempotency_status = (
+                    "succeeded"
+                )
+
+            else:
+
+                final_status_code = 202
+
+                idempotency_status = (
+                    "provider_pending"
+                )
+
+            update_idempotency_record(
+
+                refund_operation_key,
+
+                "refund-operation",
+
+                status=idempotency_status,
+
+                response_status=(
+                    final_status_code
+                ),
+
+                response_body=response_body,
+
+                resource_id=str(
+                    refund_id
+                )
+
+            )
+
+            return jsonify(
+                response_body
+            ), final_status_code
+
+    except TimeoutError as e:
+
+        return jsonify({
+
+            "success":
+                False,
+
+            "message":
+                str(e),
+
+            "processing":
+                False,
+
+            "retryable":
+                True
+
+        }), 503
+
+    except Exception as e:
+
+        print(
+            "PROCESS EVENTWAA REFUND ERROR:",
+            repr(e)
+        )
+
+        return jsonify({
+
+            "success":
+                False,
+
+            "message":
+                "Refund processing could not be completed.",
+
+            "retryable":
+                True
+
+        }), 503
+               
+ 
 # ============================================================
 # HOST CANCEL EVENT
 # ============================================================
@@ -27853,17 +32028,34 @@ def admin_cancel_event(event_id):
 
     )
 
-# ============================================================
-# REFUND SYSTEM
-# ============================================================
 
 
-# ------------------------------------------------------------
+# ============================================================
 # CREATE REFUND REQUEST
+#
 # USER -> HOST
-# ------------------------------------------------------------
+#
+# PROTECTION:
+# - client Idempotency-Key
+# - request hash
+# - refund creation lock
+# - booking refundStatus immediately becomes pending
+# - server-generated UUID refund operation key
+# - duplicate refund protection
+#
+# IMPORTANT:
+# The client Idempotency-Key protects the HTTP refund-request
+# operation.
+#
+# refund["idempotencyKey"] is a separate server-generated key
+# used by process_eventwaa_refund() for the actual provider
+# refund operation.
+# ============================================================
 
-@app.route("/refunds", methods=["POST"])
+@app.route(
+    "/refunds",
+    methods=["POST"]
+)
 def create_refund():
 
     data = request.get_json(
@@ -27887,595 +32079,1289 @@ def create_refund():
     if not booking_id:
 
         return jsonify({
-            "success": False,
-            "message": "Booking ID is required."
+
+            "success":
+                False,
+
+            "message":
+                "Booking ID is required."
+
         }), 400
 
     # ========================================================
-    # LOAD BOOKINGS
+    # CLIENT IDEMPOTENCY KEY
     # ========================================================
 
-    bookings = load_json_file(
-        "bookings.json",
-        []
-    )
-
-    booking = None
-
-    for current_booking in bookings:
-
-        if str(
-            current_booking.get(
-                "id"
-            )
-        ) == str(
-            booking_id
-        ):
-
-            booking = current_booking
-
-            break
-
-    if not booking:
-
-        return jsonify({
-            "success": False,
-            "message": "Booking not found."
-        }), 404
-
-    # ========================================================
-    # PREVENT DUPLICATE REFUNDS
-    # ========================================================
-
-    current_refund_status = str(
-        booking.get(
-            "refundStatus",
+    client_idempotency_key = str(
+        request.headers.get(
+            "Idempotency-Key",
             ""
         )
-    ).strip().lower()
+        or ""
+    ).strip()
 
-    if current_refund_status in (
-        "pending",
-        "refunded",
-        "rejected"
-    ):
-
-        return jsonify({
-            "success": False,
-            "message": (
-                "This booking already has a refund request "
-                "or has already been processed."
-            )
-        }), 400
-
-    # ========================================================
-    # ADMIN REFUND SETTINGS
-    # ========================================================
-
-    settings = load_admin_settings()
-
-    # Hosts must be allowed to issue/process refunds.
-    if not settings.get(
-        "hostRefunds",
-        True
-    ):
-
-        return jsonify({
-            "success": False,
-            "message": (
-                "Host refunds are currently disabled."
-            )
-        }), 403
-
-    # ========================================================
-    # FIND EVENT
-    # ========================================================
-
-    events = load_json_file(
-        "events.json",
-        []
-    )
-
-    event = None
-
-    for current_event in events:
-
-        if str(
-            current_event.get(
-                "id"
-            )
-        ) == str(
-            booking.get(
-                "eventId"
-            )
-        ):
-
-            event = current_event
-
-            break
-
-    if not event:
-
-        return jsonify({
-            "success": False,
-            "message": "Event not found."
-        }), 404
-
-    # ========================================================
-    # DO NOT CREATE A CUSTOMER REFUND FOR A CANCELLED EVENT
+    # If the client does not provide a key, generate one.
     #
-    # Event cancellation uses the dedicated cancellation flow.
-    # That flow uses cancellation=True and therefore gives the
-    # customer the full ticket subtotal without a refund fee.
-    # ========================================================
+    # The booking/refund lock and refundStatus field already
+    # protect against duplicate refund creation.
+    #
+    # We do NOT use bookingId as the fallback idempotency key
+    # because a temporary validation failure must not permanently
+    # block a later valid refund request for the same booking.
+    if not client_idempotency_key:
 
-    if str(
-        event.get(
-            "status",
-            ""
+        client_idempotency_key = str(
+            uuid.uuid4()
         )
-    ).strip().lower() == "cancelled":
 
-        return jsonify({
-            "success": False,
-            "message": (
-                "This event has been cancelled. "
-                "Its refund must be processed through "
-                "the event cancellation process."
-            )
-        }), 400
-
-    # ========================================================
-    # CHECK REFUND DEADLINE
-    #
-    # DEFAULT = 5 DAYS
-    #
-    # ADMIN CAN CHANGE THIS USING:
-    # settings["refundWindow"]
-    # ========================================================
-
-    event_date = event.get(
-        "date"
+    request_hash = make_request_hash(
+        data
     )
-
-    if not event_date:
-
-        return jsonify({
-            "success": False,
-            "message": (
-                "This event does not have a valid event date, "
-                "so a refund cannot be requested."
-            )
-        }), 400
 
     try:
 
-        event_datetime = datetime.strptime(
-            event_date,
-            "%Y-%m-%d"
-        )
+        # ====================================================
+        # REFUND CREATION LOCK
+        #
+        # Only the creation/checking phase is locked.
+        #
+        # The provider processor obtains its own lock later.
+        # ====================================================
 
-        days_until_event = (
-            event_datetime.date()
-            -
-            datetime.now().date()
-        ).days
-
-        try:
-
-            refund_window = int(
-                settings.get(
-                    "refundWindow",
-                    5
-                )
-            )
-
-        except (
-            ValueError,
-            TypeError
+        with eventwaa_file_lock(
+            "refund-create"
         ):
 
-            refund_window = 5
+            # ==================================================
+            # IDEMPOTENCY CHECK
+            # ==================================================
 
-        if refund_window < 0:
-            refund_window = 0
-
-        if days_until_event < refund_window:
-
-            return jsonify({
-                "success": False,
-                "message": (
-                    "Refund requests must be made "
-                    f"at least {refund_window} "
-                    "days before the event."
+            existing_idempotency = (
+                find_idempotency_record(
+                    client_idempotency_key,
+                    "refund-request"
                 )
-            }), 400
-
-    except (
-        ValueError,
-        TypeError
-    ):
-
-        return jsonify({
-            "success": False,
-            "message": (
-                "The event has an invalid date format."
             )
-        }), 400
 
-    # ========================================================
-    # DON'T ALLOW REFUND AFTER CHECK-IN
-    # ========================================================
+            if existing_idempotency:
 
-    if booking.get(
-        "checkedIn",
-        False
-    ):
-
-        return jsonify({
-            "success": False,
-            "message": (
-                "Checked-in tickets cannot be refunded."
-            )
-        }), 400
-
-    # ========================================================
-    # QUANTITY
-    # ========================================================
-
-    try:
-
-        quantity = int(
-            booking.get(
-                "quantity",
-                1
-            )
-            or 1
-        )
-
-    except (
-        ValueError,
-        TypeError
-    ):
-
-        quantity = 1
-
-    if quantity <= 0:
-        quantity = 1
-
-    # ========================================================
-    # REFUND CALCULATION
-    #
-    # Use the SAME helper used by:
-    #
-    # - automatic refunds
-    # - host-approved refunds
-    # - event cancellation refunds
-    #
-    # For a normal customer refund:
-    #
-    #     originalAmount = ticket subtotal
-    #     refund fee = configured percentage
-    #     refund amount = subtotal - refund fee
-    #
-    # Service fee is NOT included in the customer refund.
-    # ========================================================
-
-    money = refund_booking_money(
-        booking,
-        event,
-        cancellation=False
-    )
-
-    original_amount = int(
-        money.get(
-            "originalAmount",
-            0
-        )
-        or 0
-    )
-
-    refund_fee_percent = float(
-        money.get(
-            "refundFeePercent",
-            0
-        )
-        or 0
-    )
-
-    refund_fee = int(
-        money.get(
-            "refundFee",
-            0
-        )
-        or 0
-    )
-
-    refund_amount = int(
-        money.get(
-            "refundAmount",
-            0
-        )
-        or 0
-    )
-
-    if original_amount <= 0:
-
-        return jsonify({
-            "success": False,
-            "message": (
-                "This booking does not have a valid "
-                "refundable ticket amount."
-            )
-        }), 400
-
-    if refund_amount <= 0:
-
-        return jsonify({
-            "success": False,
-            "message": (
-                "Calculated refund amount is invalid."
-            )
-        }), 400
-
-    # ========================================================
-    # LOAD REFUNDS
-    # ========================================================
-
-    refunds = load_json_file(
-        "refunds.json",
-        []
-    )
-
-    # ========================================================
-    # SAFE REFUND ID
-    # ========================================================
-
-    existing_ids = []
-
-    for existing_refund in refunds:
-
-        try:
-
-            existing_ids.append(
-                int(
-                    existing_refund.get(
-                        "id",
-                        0
+                stored_hash = str(
+                    existing_idempotency.get(
+                        "requestHash",
+                        ""
                     )
                 )
-            )
 
-        except (
-            ValueError,
-            TypeError
-        ):
+                if (
+                    stored_hash
+                    and
+                    stored_hash
+                    != request_hash
+                ):
 
-            continue
+                    return jsonify({
 
-    refund_id = (
-        max(existing_ids)
-        + 1
-        if existing_ids
-        else 1
-    )
+                        "success":
+                            False,
 
-    # ========================================================
-    # HOST INFORMATION
-    #
-    # Store this now so the refund record remains
-    # self-contained.
-    # ========================================================
+                        "message":
+                            (
+                                "This Idempotency-Key "
+                                "has already been used "
+                                "for a different refund "
+                                "request."
+                            ),
 
-    host_id = event.get(
-        "hostId"
-    )
+                        "idempotencyConflict":
+                            True
 
-    host_email = event.get(
-        "hostEmail"
-    )
+                    }), 409
 
-    host_name = event.get(
-        "hostName",
-        event.get(
-            "host",
-            ""
-        )
-    )
-
-    # ========================================================
-    # CREATE REFUND RECORD
-    # ========================================================
-
-    created_at = datetime.now().strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-
-    refund = {
-
-        "id":
-            refund_id,
-
-        "bookingId":
-            booking.get(
-                "id"
-            ),
-
-        "ticketId":
-            booking.get(
-                "ticketId"
-            ),
-
-        "eventId":
-            booking.get(
-                "eventId"
-            ),
-
-        "eventTitle":
-            booking.get(
-                "eventTitle",
-                event.get(
-                    "title"
+                return idempotency_response(
+                    existing_idempotency
                 )
-            ),
 
-        "hostId":
-            host_id,
+            # ==================================================
+            # LOAD BOOKINGS
+            # ==================================================
 
-        "hostEmail":
-            host_email,
-
-        "hostName":
-            host_name,
-
-        "buyer":
-            booking.get(
-                "buyer"
-            ),
-
-        "ticketType":
-            booking.get(
-                "ticketType"
-            ),
-
-        "quantity":
-            quantity,
-
-        # ====================================================
-        # ORIGINAL REFUNDABLE TICKET AMOUNT
-        # ====================================================
-
-        "originalAmount":
-            original_amount,
-
-        # ====================================================
-        # REFUND POLICY
-        # ====================================================
-
-        "refundFeePercent":
-            refund_fee_percent,
-
-        "refundFee":
-            refund_fee,
-
-        "amount":
-            refund_amount,
-
-        # ====================================================
-        # SOURCE
-        # ====================================================
-
-        "source":
-            "customer_request",
-
-        # ====================================================
-        # CUSTOMER REQUEST
-        # ====================================================
-
-        "reason":
-            reason,
-
-        "details":
-            details,
-
-        # ====================================================
-        # HOST REVIEW
-        # ====================================================
-
-        "status":
-            "pending",
-
-        "createdAt":
-            created_at
-    }
-
-    # ========================================================
-    # SAVE NEW REFUND REQUEST
-    # ========================================================
-
-    refunds.append(
-        refund
-    )
-
-    save_json_file(
-        "refunds.json",
-        refunds
-    )
-
-    # ========================================================
-    # AUTOMATIC REFUND APPROVAL
-    #
-    # If enabled in Admin Settings, process immediately using
-    # the SAME processor used by host approval.
-    # ========================================================
-
-    auto_refund_approval = (
-        str(
-            settings.get(
-                "autoRefundApproval",
-                False
+            bookings = load_json_file(
+                "bookings.json",
+                []
             )
-        ).strip().lower()
-        == "true"
-    )
 
-    if auto_refund_approval:
+            booking = None
 
-        result, status_code = process_eventwaa_refund(
+            for current_booking in bookings:
 
-            refund=refund,
+                if str(
+                    current_booking.get(
+                        "id"
+                    )
+                ) == str(
+                    booking_id
+                ):
 
-            booking=booking,
+                    booking = current_booking
 
-            event=event,
+                    break
 
-            cancellation=False,
+            if not booking:
 
-            processed_by="system"
+                response_body = {
 
+                    "success":
+                        False,
+
+                    "message":
+                        "Booking not found."
+
+                }
+
+                create_idempotency_record(
+
+                    client_idempotency_key,
+
+                    "refund-request",
+
+                    request_hash,
+
+                    status="failed"
+                )
+
+                update_idempotency_record(
+
+                    client_idempotency_key,
+
+                    "refund-request",
+
+                    status="failed",
+
+                    response_status=404,
+
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 404
+
+            # ==================================================
+            # PREVENT DUPLICATE REFUNDS
+            # ==================================================
+
+            current_refund_status = str(
+                booking.get(
+                    "refundStatus",
+                    ""
+                )
+            ).strip().lower()
+
+            if current_refund_status in (
+                "pending",
+                "approved",
+                "provider_pending",
+                "refunded",
+                "rejected"
+            ):
+
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "duplicate":
+                        True,
+
+                    "message":
+                        (
+                            "This booking already has "
+                            "a refund request or has "
+                            "already been processed."
+                        ),
+
+                    "refundStatus":
+                        current_refund_status,
+
+                    "refundId":
+                        booking.get(
+                            "refundId"
+                        )
+
+                }
+
+                create_idempotency_record(
+
+                    client_idempotency_key,
+
+                    "refund-request",
+
+                    request_hash,
+
+                    status="succeeded"
+                )
+
+                update_idempotency_record(
+
+                    client_idempotency_key,
+
+                    "refund-request",
+
+                    status="succeeded",
+
+                    response_status=409,
+
+                    response_body=response_body,
+
+                    resource_id=str(
+                        booking.get(
+                            "refundId",
+                            ""
+                        )
+                    )
+                )
+
+                return jsonify(
+                    response_body
+                ), 409
+
+            # ==================================================
+            # CREATE IDEMPOTENCY RECORD
+            #
+            # The record is created before business mutation.
+            # ==================================================
+
+            create_idempotency_record(
+
+                client_idempotency_key,
+
+                "refund-request",
+
+                request_hash,
+
+                status="processing"
+            )
+
+            # ==================================================
+            # ADMIN REFUND SETTINGS
+            # ==================================================
+
+            settings = load_admin_settings()
+
+            if not settings.get(
+                "hostRefunds",
+                True
+            ):
+
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "message":
+                        (
+                            "Host refunds are currently "
+                            "disabled."
+                        )
+
+                }
+
+                update_idempotency_record(
+
+                    client_idempotency_key,
+
+                    "refund-request",
+
+                    status="failed",
+
+                    response_status=403,
+
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 403
+
+            # ==================================================
+            # FIND EVENT
+            # ==================================================
+
+            events = load_json_file(
+                "events.json",
+                []
+            )
+
+            event = None
+
+            for current_event in events:
+
+                if str(
+                    current_event.get(
+                        "id"
+                    )
+                ) == str(
+                    booking.get(
+                        "eventId"
+                    )
+                ):
+
+                    event = current_event
+
+                    break
+
+            if not event:
+
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "message":
+                        "Event not found."
+
+                }
+
+                update_idempotency_record(
+
+                    client_idempotency_key,
+
+                    "refund-request",
+
+                    status="failed",
+
+                    response_status=404,
+
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 404
+
+            # ==================================================
+            # CANCELLED EVENT
+            # ==================================================
+
+            if str(
+                event.get(
+                    "status",
+                    ""
+                )
+            ).strip().lower() == "cancelled":
+
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "message":
+                        (
+                            "This event has been cancelled. "
+                            "Its refund must be processed "
+                            "through the event cancellation "
+                            "process."
+                        )
+
+                }
+
+                update_idempotency_record(
+
+                    client_idempotency_key,
+
+                    "refund-request",
+
+                    status="failed",
+
+                    response_status=400,
+
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 400
+
+            # ==================================================
+            # REFUND DEADLINE
+            # ==================================================
+
+            event_date = event.get(
+                "date"
+            )
+
+            if not event_date:
+
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "message":
+                        (
+                            "This event does not have "
+                            "a valid event date, so a "
+                            "refund cannot be requested."
+                        )
+
+                }
+
+                update_idempotency_record(
+
+                    client_idempotency_key,
+
+                    "refund-request",
+
+                    status="failed",
+
+                    response_status=400,
+
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 400
+
+            try:
+
+                event_datetime = datetime.strptime(
+                    event_date,
+                    "%Y-%m-%d"
+                )
+
+                days_until_event = (
+                    event_datetime.date()
+                    -
+                    datetime.now().date()
+                ).days
+
+                try:
+
+                    refund_window = int(
+                        settings.get(
+                            "refundWindow",
+                            5
+                        )
+                    )
+
+                except (
+                    ValueError,
+                    TypeError
+                ):
+
+                    refund_window = 5
+
+                if refund_window < 0:
+
+                    refund_window = 0
+
+                if (
+                    days_until_event
+                    <
+                    refund_window
+                ):
+
+                    response_body = {
+
+                        "success":
+                            False,
+
+                        "message":
+                            (
+                                "Refund requests must be "
+                                f"made at least "
+                                f"{refund_window} days "
+                                "before the event."
+                            )
+
+                    }
+
+                    update_idempotency_record(
+
+                        client_idempotency_key,
+
+                        "refund-request",
+
+                        status="failed",
+
+                        response_status=400,
+
+                        response_body=response_body
+                    )
+
+                    return jsonify(
+                        response_body
+                    ), 400
+
+            except (
+                ValueError,
+                TypeError
+            ):
+
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "message":
+                        (
+                            "The event has an invalid "
+                            "date format."
+                        )
+
+                }
+
+                update_idempotency_record(
+
+                    client_idempotency_key,
+
+                    "refund-request",
+
+                    status="failed",
+
+                    response_status=400,
+
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 400
+
+            # ==================================================
+            # CHECK-IN
+            # ==================================================
+
+            if booking.get(
+                "checkedIn",
+                False
+            ):
+
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "message":
+                        (
+                            "Checked-in tickets cannot "
+                            "be refunded."
+                        )
+
+                }
+
+                update_idempotency_record(
+
+                    client_idempotency_key,
+
+                    "refund-request",
+
+                    status="failed",
+
+                    response_status=400,
+
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 400
+
+            # ==================================================
+            # QUANTITY
+            # ==================================================
+
+            try:
+
+                quantity = int(
+                    booking.get(
+                        "quantity",
+                        1
+                    )
+                    or 1
+                )
+
+            except (
+                ValueError,
+                TypeError
+            ):
+
+                quantity = 1
+
+            if quantity <= 0:
+
+                quantity = 1
+
+            # ==================================================
+            # CALCULATE REFUND
+            # ==================================================
+
+            money = refund_booking_money(
+                booking,
+                event,
+                cancellation=False
+            )
+
+            original_amount = int(
+                money.get(
+                    "originalAmount",
+                    0
+                )
+                or 0
+            )
+
+            refund_fee_percent = float(
+                money.get(
+                    "refundFeePercent",
+                    0
+                )
+                or 0
+            )
+
+            refund_fee = int(
+                money.get(
+                    "refundFee",
+                    0
+                )
+                or 0
+            )
+
+            refund_amount = int(
+                money.get(
+                    "refundAmount",
+                    0
+                )
+                or 0
+            )
+
+            if original_amount <= 0:
+
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "message":
+                        (
+                            "This booking does not have "
+                            "a valid refundable ticket "
+                            "amount."
+                        )
+
+                }
+
+                update_idempotency_record(
+
+                    client_idempotency_key,
+
+                    "refund-request",
+
+                    status="failed",
+
+                    response_status=400,
+
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 400
+
+            if refund_amount <= 0:
+
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "message":
+                        (
+                            "Calculated refund amount "
+                            "is invalid."
+                        )
+
+                }
+
+                update_idempotency_record(
+
+                    client_idempotency_key,
+
+                    "refund-request",
+
+                    status="failed",
+
+                    response_status=400,
+
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 400
+
+            # ==================================================
+            # LOAD REFUNDS
+            # ==================================================
+
+            refunds = load_json_file(
+                "refunds.json",
+                []
+            )
+
+            # ==================================================
+            # SAFE BUSINESS REFUND ID
+            # ==================================================
+
+            existing_ids = []
+
+            for existing_refund in refunds:
+
+                try:
+
+                    existing_ids.append(
+                        int(
+                            existing_refund.get(
+                                "id",
+                                0
+                            )
+                        )
+                    )
+
+                except (
+                    ValueError,
+                    TypeError
+                ):
+
+                    continue
+
+            refund_id = (
+                max(existing_ids)
+                +
+                1
+                if existing_ids
+                else 1
+            )
+
+            # ==================================================
+            # SERVER-GENERATED REFUND OPERATION KEY
+            #
+            # THIS IS NOT THE AUTO-INCREMENT REFUND ID.
+            #
+            # It is the durable key for the actual provider
+            # refund operation.
+            # ==================================================
+
+            refund_operation_key = str(
+                uuid.uuid4()
+            )
+
+            # ==================================================
+            # HOST INFORMATION
+            # ==================================================
+
+            host_id = event.get(
+                "hostId"
+            )
+
+            host_email = event.get(
+                "hostEmail"
+            )
+
+            host_name = event.get(
+                "hostName",
+                event.get(
+                    "host",
+                    ""
+                )
+            )
+
+            # ==================================================
+            # CREATE REFUND RECORD
+            # ==================================================
+
+            created_at = datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+
+            refund = {
+
+                "id":
+                    refund_id,
+
+                "idempotencyKey":
+                    refund_operation_key,
+
+                "bookingId":
+                    booking.get(
+                        "id"
+                    ),
+
+                "ticketId":
+                    booking.get(
+                        "ticketId"
+                    ),
+
+                "eventId":
+                    booking.get(
+                        "eventId"
+                    ),
+
+                "eventTitle":
+                    booking.get(
+                        "eventTitle",
+                        event.get(
+                            "title"
+                        )
+                    ),
+
+                "hostId":
+                    host_id,
+
+                "hostEmail":
+                    host_email,
+
+                "hostName":
+                    host_name,
+
+                "buyer":
+                    booking.get(
+                        "buyer"
+                    ),
+
+                "ticketType":
+                    booking.get(
+                        "ticketType"
+                    ),
+
+                "quantity":
+                    quantity,
+
+                "originalAmount":
+                    original_amount,
+
+                "refundFeePercent":
+                    refund_fee_percent,
+
+                "refundFee":
+                    refund_fee,
+
+                "amount":
+                    refund_amount,
+
+                "refundAmount":
+                    refund_amount,
+
+                "source":
+                    "customer_request",
+
+                "reason":
+                    reason,
+
+                "details":
+                    details,
+
+                "status":
+                    "pending",
+
+                "createdAt":
+                    created_at
+
+            }
+
+            # ==================================================
+            # SAVE REFUND
+            # ==================================================
+
+            refunds.append(
+                refund
+            )
+
+            # IMPORTANT:
+            # Mark the booking pending BEFORE leaving the lock.
+            #
+            # This prevents a second refund request from entering
+            # between creation and processing.
+            booking["refundStatus"] = (
+                "pending"
+            )
+
+            booking["refundId"] = (
+                refund_id
+            )
+
+            booking["refundRequestedAt"] = (
+                created_at
+            )
+
+            save_json_file(
+                "refunds.json",
+                refunds
+            )
+
+            save_json_file(
+                "bookings.json",
+                bookings
+            )
+
+            # ==================================================
+            # MANUAL REVIEW RESPONSE
+            # ==================================================
+
+            auto_refund_approval = (
+                str(
+                    settings.get(
+                        "autoRefundApproval",
+                        False
+                    )
+                ).strip().lower()
+                ==
+                "true"
+            )
+
+            if not auto_refund_approval:
+
+                create_notification(
+
+                    host_email,
+
+                    "New refund request",
+
+                    (
+                        f"A refund request has been "
+                        f"submitted for "
+                        f"{event.get('title', 'your event')}."
+                    ),
+
+                    "refund"
+
+                )
+
+                response_body = {
+
+                    "success":
+                        True,
+
+                    "message":
+                        (
+                            "Refund request submitted "
+                            "and is waiting for host "
+                            "approval."
+                        ),
+
+                    "autoApproved":
+                        False,
+
+                    "refund":
+                        refund
+
+                }
+
+                update_idempotency_record(
+
+                    client_idempotency_key,
+
+                    "refund-request",
+
+                    status="succeeded",
+
+                    response_status=201,
+
+                    response_body=response_body,
+
+                    resource_id=str(
+                        refund_id
+                    )
+                )
+
+                return jsonify(
+                    response_body
+                ), 201
+
+        # ====================================================
+        # AUTO APPROVAL
+        #
+        # We are OUTSIDE refund-create lock here.
+        #
+        # process_eventwaa_refund() obtains its own lock.
+        # ====================================================
+
+        if auto_refund_approval:
+
+            result, status_code = (
+                process_eventwaa_refund(
+
+                    refund=refund,
+
+                    booking=booking,
+
+                    event=event,
+
+                    cancellation=False,
+
+                    processed_by="system"
+
+                )
+            )
+
+            # ==================================================
+            # NORMALIZE PROCESSOR RESPONSE
+            #
+            # process_eventwaa_refund() normally returns:
+            #
+            #     (Flask Response, status_code)
+            #
+            # We must extract the JSON body so the original
+            # client idempotency record can be completed.
+            # ==================================================
+
+            response_body = None
+
+            if isinstance(
+                result,
+                dict
+            ):
+
+                response_body = result
+
+            elif hasattr(
+                result,
+                "get_json"
+            ):
+
+                try:
+
+                    response_body = (
+                        result.get_json(
+                            silent=True
+                        )
+                    )
+
+                except Exception:
+
+                    response_body = None
+
+            # ==================================================
+            # STORE AUTO-APPROVAL RESULT
+            # ==================================================
+
+            if isinstance(
+                response_body,
+                dict
+            ):
+
+                response_success = bool(
+                    response_body.get(
+                        "success",
+                        False
+                    )
+                )
+
+                processing = bool(
+                    response_body.get(
+                        "processing",
+                        False
+                    )
+                )
+
+                provider_pending = (
+                    str(
+                        response_body.get(
+                            "refundStatus",
+                            ""
+                        )
+                    ).strip().lower()
+                    ==
+                    "provider_pending"
+                )
+
+                # Provider-pending is not a terminal failure.
+                #
+                # The refund operation has been accepted and is
+                # being reconciled by the provider.
+                if (
+                    processing
+                    or
+                    provider_pending
+                    or
+                    status_code == 202
+                ):
+
+                    request_status = (
+                        "processing"
+                    )
+
+                elif response_success:
+
+                    request_status = (
+                        "succeeded"
+                    )
+
+                else:
+
+                    request_status = (
+                        "failed"
+                    )
+
+                update_idempotency_record(
+
+                    client_idempotency_key,
+
+                    "refund-request",
+
+                    status=request_status,
+
+                    response_status=status_code,
+
+                    response_body=response_body,
+
+                    resource_id=str(
+                        refund.get(
+                            "id"
+                        )
+                    )
+                )
+
+            else:
+
+                # Do not leave the client idempotency record
+                # permanently stuck in "processing".
+                #
+                # The actual refund processor has its own durable
+                # operation key, so the client can safely retry.
+                response_body = {
+
+                    "success":
+                        False,
+
+                    "message":
+                        (
+                            "Refund processing did not "
+                            "return a readable response. "
+                            "The refund operation can be "
+                            "checked or retried safely."
+                        ),
+
+                    "processing":
+                        True,
+
+                    "refundId":
+                        refund.get(
+                            "id"
+                        )
+
+                }
+
+                update_idempotency_record(
+
+                    client_idempotency_key,
+
+                    "refund-request",
+
+                    status="processing",
+
+                    response_status=202,
+
+                    response_body=response_body,
+
+                    resource_id=str(
+                        refund.get(
+                            "id"
+                        )
+                    )
+                )
+
+            return result, status_code
+
+    except TimeoutError as e:
+
+        # If a lock timeout happens before a refund was created,
+        # there is no need to store a completed idempotency response.
+        #
+        # The client can retry the same request safely.
+
+        return jsonify({
+
+            "success":
+                False,
+
+            "message":
+                str(e),
+
+            "retryable":
+                True
+
+        }), 503
+
+    except Exception as e:
+
+        print(
+            "CREATE REFUND ERROR:",
+            repr(e)
         )
 
-        return result, status_code
+        # If the client idempotency record already exists, mark
+        # this request as retryable rather than leaving it stuck
+        # forever in "processing".
+        try:
 
-    # ========================================================
-    # NORMAL MANUAL REVIEW FLOW
-    # ========================================================
+            existing_record = (
+                find_idempotency_record(
+                    client_idempotency_key,
+                    "refund-request"
+                )
+            )
 
-    create_notification(
+            if existing_record:
 
-        host_email,
+                retry_response = {
 
-        "New refund request",
+                    "success":
+                        False,
 
-        (
-            f"A refund request has been submitted for "
-            f"{event.get('title', 'your event')}."
-        ),
+                    "message":
+                        (
+                            "Refund request could not "
+                            "be completed. Please retry."
+                        ),
 
-        "refund"
+                    "retryable":
+                        True
 
-    )
+                }
 
-    return {
+                update_idempotency_record(
 
-        "success":
-            True,
+                    client_idempotency_key,
 
-        "message":
-            (
-                "Refund request submitted and is "
-                "waiting for host approval."
-            ),
+                    "refund-request",
 
-        "autoApproved":
-            False,
+                    status="failed_retryable",
 
-        "refund":
-            refund
+                    response_status=503,
 
-    }, 201
+                    response_body=retry_response
+                )
 
+        except Exception as idempotency_error:
 
+            print(
+                "CREATE REFUND IDEMPOTENCY ERROR:",
+                repr(idempotency_error)
+            )
+
+        return jsonify({
+
+            "success":
+                False,
+
+            "message":
+                "Refund request could not be created.",
+
+            "retryable":
+                True
+
+        }), 503
 
 # ============================================================
 # GET HOST REFUNDS
@@ -28707,1244 +33593,6 @@ def refund_booking_money(
     }
 
 
-# ============================================================
-# COMMON REFUND PROCESSOR
-#
-# SHARED BY:
-# - Host-approved customer refunds
-# - Automatically approved refunds
-# - Event cancellation refunds
-#
-# cancellation=False:
-#     Normal customer refund.
-#     Admin refund fee applies.
-#
-# cancellation=True:
-#     Host/event cancellation.
-#     Customer receives the full ticket subtotal.
-#     No refund fee.
-#
-# IMPORTANT:
-# This function performs EventWaa's INTERNAL accounting.
-# Actual Flutterwave/PesaPal money reversal is separate.
-# ============================================================
-
-def process_eventwaa_refund(
-    refund,
-    booking,
-    event,
-    cancellation=False,
-    processed_by=""
-):
-
-    now = datetime.now().strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-
-    settings = load_admin_settings()
-
-    # ========================================================
-    # BASIC VALIDATION
-    # ========================================================
-
-    if not booking:
-        return {
-            "success": False,
-            "message": "Booking not found."
-        }, 404
-
-    if not event:
-        return {
-            "success": False,
-            "message": "Event not found."
-        }, 404
-
-    current_refund_status = str(
-        refund.get(
-            "status",
-            ""
-        )
-    ).strip().lower()
-
-    if current_refund_status == "refunded":
-        return {
-            "success": True,
-            "message": "Refund has already been processed.",
-            "alreadyProcessed": True,
-            "refund": refund
-        }, 200
-
-    if current_refund_status not in (
-        "pending",
-        "approved"
-    ):
-        return {
-            "success": False,
-            "message": (
-                "This refund cannot be processed "
-                "from its current status."
-            )
-        }, 400
-
-    # ========================================================
-    # DO NOT REFUND CHECKED-IN TICKETS
-    #
-    # Event cancellation is still allowed to refund them.
-    # The event was cancelled, so the customer should not lose
-    # their money because they had already checked in.
-    # ========================================================
-
-    if (
-        not cancellation
-        and booking.get(
-            "checkedIn",
-            False
-        )
-    ):
-
-        return {
-            "success": False,
-            "message": (
-                "Checked-in tickets cannot be refunded."
-            )
-        }, 400
-
-    # ========================================================
-    # LOAD FILES
-    # ========================================================
-
-    bookings = load_json_file(
-        "bookings.json",
-        []
-    )
-
-    events = load_json_file(
-        "events.json",
-        []
-    )
-
-    refunds = load_json_file(
-        "refunds.json",
-        []
-    )
-
-    host_wallets = load_host_wallets()
-
-    admin_wallet = load_wallet()
-
-    # ========================================================
-    # FIND THE CURRENT STORED BOOKING
-    # ========================================================
-
-    booking_id = booking.get(
-        "id"
-    )
-
-    stored_booking = None
-
-    for current_booking in bookings:
-
-        if str(
-            current_booking.get(
-                "id"
-            )
-        ) == str(
-            booking_id
-        ):
-
-            stored_booking = current_booking
-
-            break
-
-    if not stored_booking:
-
-        return {
-            "success": False,
-            "message": "Booking no longer exists."
-        }, 404
-
-    booking = stored_booking
-
-    # ========================================================
-    # FINAL DUPLICATE PROTECTION
-    # ========================================================
-
-    if str(
-        booking.get(
-            "refundStatus",
-            ""
-        )
-    ).lower() == "refunded":
-
-        refund["status"] = "refunded"
-
-        return {
-            "success": True,
-            "message": "Booking has already been refunded.",
-            "alreadyProcessed": True,
-            "refund": refund
-        }, 200
-
-    # ========================================================
-    # CALCULATE REFUND
-    # ========================================================
-
-    money = refund_booking_money(
-        booking,
-        event,
-        cancellation=cancellation
-    )
-
-    original_amount = int(
-        money.get(
-            "originalAmount",
-            0
-        )
-        or 0
-    )
-
-    refund_fee_percent = float(
-        money.get(
-            "refundFeePercent",
-            0
-        )
-        or 0
-    )
-
-    refund_fee = int(
-        money.get(
-            "refundFee",
-            0
-        )
-        or 0
-    )
-
-    refund_amount = int(
-        money.get(
-            "refundAmount",
-            money.get(
-                "totalAmount",
-                0
-            )
-        )
-        or 0
-    )
-
-    if original_amount <= 0:
-        return {
-            "success": False,
-            "message": (
-                "This booking does not contain "
-                "a refundable ticket amount."
-            )
-        }, 400
-
-    if refund_amount <= 0:
-        return {
-            "success": False,
-            "message": (
-                "Calculated refund amount is invalid."
-            )
-        }, 400
-
-    # ========================================================
-    # DETERMINE EVENT TYPE
-    #
-    # Official EventWaa events are created with:
-    #
-    #     adminEvent = true
-    #     hostId = 0
-    #     hostName = EventWaa
-    #
-    # Do NOT use bool(...) here because the string
-    # "false" would also evaluate as True in Python.
-    # ========================================================
-
-    is_admin_event = (
-        str(
-            event.get(
-                "adminEvent",
-                False
-            )
-        ).strip().lower()
-        == "true"
-    )
-
-    # ========================================================
-    # HOST / EVENTWAA ACCOUNTING
-    #
-    # NORMAL HOST EVENT:
-    # - Host contributes its original net earnings.
-    # - EventWaa reverses its commission during cancellation.
-    #
-    # OFFICIAL EVENTWAA EVENT:
-    # - There is no host wallet.
-    # - EventWaa funds the full ticket-subtotal refund.
-    # - EventWaa reverses the full ticket amount.
-    # ========================================================
-
-    try:
-
-        host_id = int(
-            event.get(
-                "hostId"
-            )
-        )
-
-    except (
-        TypeError,
-        ValueError
-    ):
-
-        if not is_admin_event:
-
-            return {
-                "success": False,
-                "message": "Event host ID is invalid."
-            }, 400
-
-        host_id = 0
-
-    commission_percent = float(
-        settings.get(
-            "commission",
-            10
-        )
-        or 0
-    )
-
-    if commission_percent < 0:
-        commission_percent = 0
-
-    if commission_percent > 100:
-        commission_percent = 100
-
-    host_original_amount = int(
-        round(
-            original_amount
-            -
-            (
-                original_amount
-                *
-                commission_percent
-                /
-                100
-            )
-        )
-    )
-
-    # ========================================================
-    # CALCULATE WHO FUNDS THE REFUND
-    # ========================================================
-
-    if is_admin_event:
-
-        # Official EventWaa event:
-        # No host receives event earnings.
-        host_refund_amount = 0
-
-        # EventWaa funded the original ticket amount,
-        # so the entire ticket subtotal is reversed.
-        platform_commission_reversal = original_amount
-
-    elif cancellation:
-
-        # Normal host event cancellation:
-        # Host gives back the net amount it originally earned.
-        host_refund_amount = host_original_amount
-
-        # EventWaa gives back its original commission because
-        # the customer receives the full ticket subtotal.
-        platform_commission_reversal = (
-            original_amount
-            -
-            host_original_amount
-        )
-
-    else:
-
-        # Normal customer refund:
-        # Host contributes up to its original net earnings.
-        host_refund_amount = min(
-            host_original_amount,
-            refund_amount
-        )
-
-        # EventWaa commission remains with EventWaa.
-        platform_commission_reversal = 0
-
-    # ========================================================
-    # DEFAULT WALLET VALUES
-    #
-    # These remain zero for official EventWaa events because
-    # there is intentionally no host wallet.
-    # ========================================================
-
-    host_wallet = None
-
-    available_balance = 0
-
-    pending_balance = 0
-
-    available_used = 0
-
-    pending_used = 0
-
-    # ========================================================
-    # FIND HOST WALLET
-    #
-    # Official EventWaa events intentionally have no host
-    # wallet, so skip the entire host-wallet process.
-    # ========================================================
-
-    if not is_admin_event:
-
-        for wallet in host_wallets:
-
-            try:
-
-                wallet_host_id = int(
-                    wallet.get(
-                        "hostId",
-                        0
-                    )
-                )
-
-            except (
-                TypeError,
-                ValueError
-            ):
-
-                wallet_host_id = 0
-
-            if wallet_host_id == host_id:
-
-                host_wallet = wallet
-
-                break
-
-        if not host_wallet:
-
-            return {
-                "success": False,
-                "message": (
-                    "Host wallet was not found."
-                )
-            }, 404
-
-        available_balance = int(
-            host_wallet.get(
-                "availableBalance",
-                0
-            )
-            or 0
-        )
-
-        pending_balance = int(
-            host_wallet.get(
-                "pendingPayouts",
-                0
-            )
-            or 0
-        )
-
-        host_total_funds = (
-            available_balance
-            +
-            pending_balance
-        )
-
-        if host_total_funds < host_refund_amount:
-
-            return {
-                "success": False,
-                "message": (
-                    "The host does not have enough "
-                    "funds to process this refund."
-                ),
-                "required":
-                    host_refund_amount,
-                "available":
-                    host_total_funds
-            }, 400
-
-        # ====================================================
-        # DEDUCT HOST FUNDS
-        #
-        # Available funds are used first.
-        # Remaining amount comes from pending payouts.
-        # ====================================================
-
-        available_used = min(
-            available_balance,
-            host_refund_amount
-        )
-
-        remaining_host_refund = (
-            host_refund_amount
-            -
-            available_used
-        )
-
-        pending_used = min(
-            pending_balance,
-            remaining_host_refund
-        )
-
-        remaining_host_refund -= pending_used
-
-        if remaining_host_refund > 0:
-
-            return {
-                "success": False,
-                "message": (
-                    "Unable to reconcile the host "
-                    "wallet for this refund."
-                )
-            }, 400
-
-        host_wallet["availableBalance"] = max(
-            0,
-            available_balance
-            -
-            available_used
-        )
-
-        host_wallet["pendingPayouts"] = max(
-            0,
-            pending_balance
-            -
-            pending_used
-        )
-
-        host_wallet["totalEarned"] = max(
-            0,
-            int(
-                host_wallet.get(
-                    "totalEarned",
-                    0
-                )
-                or 0
-            )
-            -
-            host_refund_amount
-        )
-
-        host_wallet["refunds"] = (
-            int(
-                host_wallet.get(
-                    "refunds",
-                    0
-                )
-                or 0
-            )
-            +
-            host_refund_amount
-        )
-
-        # ====================================================
-        # REDUCE SCHEDULED PAYOUTS
-        #
-        # pendingPayouts is the aggregate number.
-        # scheduledPayouts contains the actual future payouts,
-        # so the same refunded money must not become available
-        # later.
-        #
-        # Current payout records do not contain booking IDs,
-        # so reconciliation is done by payout amount.
-        # ====================================================
-
-        if pending_used > 0:
-
-            amount_to_remove = pending_used
-
-            scheduled_payouts = host_wallet.setdefault(
-                "scheduledPayouts",
-                []
-            )
-
-            for payout in scheduled_payouts:
-
-                if amount_to_remove <= 0:
-                    break
-
-                payout_amount = int(
-                    payout.get(
-                        "amount",
-                        0
-                    )
-                    or 0
-                )
-
-                if payout_amount <= 0:
-                    continue
-
-                deduction = min(
-                    payout_amount,
-                    amount_to_remove
-                )
-
-                payout["amount"] = (
-                    payout_amount
-                    -
-                    deduction
-                )
-
-                amount_to_remove -= deduction
-
-            host_wallet["scheduledPayouts"] = [
-                payout
-                for payout in scheduled_payouts
-                if int(
-                    payout.get(
-                        "amount",
-                        0
-                    )
-                    or 0
-                ) > 0
-            ]
-
-            if amount_to_remove > 0:
-
-                return {
-                    "success": False,
-                    "message": (
-                        "Pending refund could not be fully "
-                        "matched against scheduled payouts."
-                    )
-                }, 400
-
-        # ====================================================
-        # HOST REFUND TRANSACTION
-        # ====================================================
-
-        host_wallet.setdefault(
-            "transactions",
-            []
-        )
-
-        host_wallet["transactions"].insert(
-            0,
-            {
-                "type":
-                    "refund",
-
-                "eventId":
-                    event.get(
-                        "id"
-                    ),
-
-                "eventTitle":
-                    event.get(
-                        "title",
-                        ""
-                    ),
-
-                "bookingId":
-                    booking.get(
-                        "id"
-                    ),
-
-                "amount":
-                    -host_refund_amount,
-
-                "originalAmount":
-                    original_amount,
-
-                "refundAmount":
-                    refund_amount,
-
-                "hostRefundAmount":
-                    host_refund_amount,
-
-                "availableUsed":
-                    available_used,
-
-                "pendingUsed":
-                    pending_used,
-
-                "refundFeePercent":
-                    refund_fee_percent,
-
-                "refundFee":
-                    refund_fee,
-
-                "cancellation":
-                    bool(cancellation),
-
-                "date":
-                    now,
-
-                "description":
-                    (
-                        "Event cancellation refund"
-                        if cancellation
-                        else
-                        "Customer refund"
-                    )
-            }
-        )
-
-    # ========================================================
-    # EVENTWAA PLATFORM WALLET
-    #
-    # Normal refund:
-    # - Commission remains with EventWaa.
-    # - Refund fee remains with EventWaa.
-    #
-    # Cancellation:
-    # - Commission is reversed.
-    # - Original service fee is also reversed.
-    #
-    # Official EventWaa event:
-    # - Full ticket subtotal is reversed.
-    # - Original service fee is also reversed.
-    # ========================================================
-
-    if cancellation:
-
-        original_service_fee = int(
-            booking.get(
-                "serviceFee",
-                0
-            )
-            or 0
-        )
-
-        platform_reversal = (
-            platform_commission_reversal
-            +
-            original_service_fee
-        )
-
-        admin_available = int(
-            admin_wallet.get(
-                "availableBalance",
-                0
-            )
-            or 0
-        )
-
-        if admin_available < platform_reversal:
-
-            return {
-                "success": False,
-                "message": (
-                    "EventWaa does not have enough "
-                    "available balance to reverse "
-                    "the platform earnings."
-                ),
-                "required":
-                    platform_reversal,
-                "available":
-                    admin_available
-            }, 400
-
-        admin_wallet["availableBalance"] = (
-            admin_available
-            -
-            platform_reversal
-        )
-
-        admin_wallet["totalCommission"] = max(
-            0,
-            int(
-                admin_wallet.get(
-                    "totalCommission",
-                    0
-                )
-                or 0
-            )
-            -
-            platform_commission_reversal
-        )
-
-        admin_wallet["totalServiceFees"] = max(
-            0,
-            int(
-                admin_wallet.get(
-                    "totalServiceFees",
-                    0
-                )
-                or 0
-            )
-            -
-            original_service_fee
-        )
-
-        admin_wallet["totalRevenue"] = max(
-            0,
-            int(
-                admin_wallet.get(
-                    "totalRevenue",
-                    0
-                )
-                or 0
-            )
-            -
-            platform_reversal
-        )
-
-        admin_wallet.setdefault(
-            "transactions",
-            []
-        )
-
-        admin_wallet["transactions"].insert(
-            0,
-            {
-                "type":
-                    "event_cancellation_refund",
-
-                "eventId":
-                    event.get(
-                        "id"
-                    ),
-
-                "eventTitle":
-                    event.get(
-                        "title",
-                        ""
-                    ),
-
-                "bookingId":
-                    booking.get(
-                        "id"
-                    ),
-
-                "amount":
-                    -platform_reversal,
-
-                "commissionReversed":
-                    platform_commission_reversal,
-
-                "serviceFeeReversed":
-                    original_service_fee,
-
-                "date":
-                    now
-            }
-        )
-
-    # ========================================================
-    # UPDATE BOOKING
-    # ========================================================
-
-    booking["refundStatus"] = "refunded"
-
-    booking["refundId"] = (
-        refund.get(
-            "id"
-        )
-    )
-
-    booking["refundedAt"] = now
-
-    booking["refundAmount"] = (
-        refund_amount
-    )
-
-    booking["refundFee"] = (
-        refund_fee
-    )
-
-    booking["refundFeePercent"] = (
-        refund_fee_percent
-    )
-
-    # ========================================================
-    # INVALIDATE INDIVIDUAL TICKETS
-    #
-    # A refunded ticket must not remain usable.
-    # ========================================================
-
-    if isinstance(
-        booking.get(
-            "tickets"
-        ),
-        list
-    ):
-
-        for ticket in booking["tickets"]:
-
-            ticket["refundStatus"] = "refunded"
-
-            ticket["refundedAt"] = now
-
-    # ========================================================
-    # UPDATE REFUND RECORD
-    # ========================================================
-
-    refund["status"] = "refunded"
-
-    refund["originalAmount"] = (
-        original_amount
-    )
-
-    refund["refundFeePercent"] = (
-        refund_fee_percent
-    )
-
-    refund["refundFee"] = (
-        refund_fee
-    )
-
-    refund["amount"] = (
-        refund_amount
-    )
-
-    refund["refundAmount"] = (
-        refund_amount
-    )
-
-    refund["hostRefundAmount"] = (
-        host_refund_amount
-    )
-
-    refund["availableUsed"] = (
-        available_used
-    )
-
-    refund["pendingUsed"] = (
-        pending_used
-    )
-
-    refund["cancellation"] = (
-        bool(cancellation)
-    )
-
-    refund["source"] = (
-        "event_cancellation"
-        if cancellation
-        else
-        refund.get(
-            "source",
-            "customer_request"
-        )
-    )
-
-    refund["processedAt"] = now
-
-    refund["reviewedAt"] = now
-
-    if processed_by:
-
-        refund["processedBy"] = (
-            processed_by
-        )
-
-        refund["reviewedBy"] = (
-            processed_by
-        )
-
-    # ========================================================
-    # UPDATE EVENT
-    #
-    # IMPORTANT:
-    # The verified-payment fulfillment function stores
-    # event.revenue as GROSS ticket subtotal.
-    #
-    # We therefore reverse the ticket subtotal here.
-    # ========================================================
-
-    event_id = event.get(
-        "id"
-    )
-
-    stored_event = None
-
-    for current_event in events:
-
-        if str(
-            current_event.get(
-                "id"
-            )
-        ) == str(
-            event_id
-        ):
-
-            stored_event = current_event
-
-            break
-
-    if stored_event:
-
-        quantity = int(
-            booking.get(
-                "quantity",
-                1
-            )
-            or 1
-        )
-
-        stored_event["ticketsSold"] = max(
-            0,
-            int(
-                stored_event.get(
-                    "ticketsSold",
-                    0
-                )
-                or 0
-            )
-            -
-            quantity
-        )
-
-        stored_event["revenue"] = max(
-            0,
-            int(
-                stored_event.get(
-                    "revenue",
-                    0
-                )
-                or 0
-            )
-            -
-            original_amount
-        )
-
-        # Return tickets to inventory.
-        for ticket_type in stored_event.get(
-            "tickets",
-            []
-        ):
-
-            if str(
-                ticket_type.get(
-                    "name",
-                    ""
-                )
-            ).strip().lower() == str(
-                booking.get(
-                    "ticketType",
-                    ""
-                )
-            ).strip().lower():
-
-                ticket_type["remaining"] = (
-                    int(
-                        ticket_type.get(
-                            "remaining",
-                            0
-                        )
-                        or 0
-                    )
-                    +
-                    quantity
-                )
-
-                break
-
-    # ========================================================
-    # SAVE ALL ACCOUNTING CHANGES
-    # ========================================================
-
-    # Official EventWaa events do not have a host wallet.
-    if not is_admin_event:
-
-        save_host_wallets(
-            host_wallets
-        )
-
-    save_wallet(
-        admin_wallet
-    )
-
-    save_json_file(
-        "bookings.json",
-        bookings
-    )
-
-    save_json_file(
-        "events.json",
-        events
-    )
-
-    save_json_file(
-        "refunds.json",
-        refunds
-    )
-
-    # ========================================================
-    # CUSTOMER INFORMATION
-    # ========================================================
-
-    buyer = booking.get(
-        "buyer",
-        {}
-    )
-
-    buyer_email = ""
-
-    buyer_name = ""
-
-    if isinstance(
-        buyer,
-        dict
-    ):
-
-        buyer_email = str(
-            buyer.get(
-                "email",
-                ""
-            )
-        ).strip()
-
-        buyer_name = str(
-            buyer.get(
-                "name",
-                ""
-            )
-        ).strip()
-
-    # ========================================================
-    # BUYER PLATFORM NOTIFICATION
-    # ========================================================
-
-    try:
-
-        create_notification(
-
-            buyer_email,
-
-            "Refund processed",
-
-            (
-                f"Your refund of "
-                f"{refund_amount:,} UGX for "
-                f"{event.get('title', 'your event')} "
-                f"has been processed."
-            ),
-
-            "refund",
-
-            f"/events/{event.get('id')}"
-
-        )
-
-    except Exception as e:
-
-        print(
-            "REFUND NOTIFICATION ERROR:",
-            repr(e)
-        )
-
-    # ========================================================
-    # BUYER REFUND EMAIL
-    # ========================================================
-
-    try:
-
-        send_event_cancellation_email(
-
-            buyer_email,
-
-            buyer_name,
-
-            event,
-
-            refund_amount=refund_amount,
-
-            is_free=False,
-
-            cancellation_reason=refund.get(
-                "reason",
-                "Event cancelled by host"
-            )
-
-        )
-
-    except Exception as e:
-
-        print(
-            "REFUND EMAIL ERROR:",
-            repr(e)
-        )
-
-    # ========================================================
-    # SUCCESS
-    # ========================================================
-
-    return {
-
-        "success":
-            True,
-
-        "message":
-            (
-                "Event cancellation refund processed successfully."
-                if cancellation
-                else
-                "Refund processed successfully."
-            ),
-
-        "alreadyProcessed":
-            False,
-
-        "refund":
-            refund,
-
-        "money":
-            {
-
-                "originalAmount":
-                    original_amount,
-
-                "refundFeePercent":
-                    refund_fee_percent,
-
-                "refundFee":
-                    refund_fee,
-
-                "refundAmount":
-                    refund_amount,
-
-                "hostRefundAmount":
-                    host_refund_amount,
-
-                "platformReversal":
-                    (
-                        platform_commission_reversal
-                        +
-                        int(
-                            booking.get(
-                                "serviceFee",
-                                0
-                            )
-                            or 0
-                        )
-                        if cancellation
-                        else 0
-                    )
-
-            },
-
-        "wallet":
-            {
-
-                "hostAvailableBalance":
-                    (
-                        host_wallet.get(
-                            "availableBalance",
-                            0
-                        )
-                        if host_wallet
-                        else 0
-                    ),
-
-                "hostPendingPayouts":
-                    (
-                        host_wallet.get(
-                            "pendingPayouts",
-                            0
-                        )
-                        if host_wallet
-                        else 0
-                    )
-
-            }
-
-    }, 200
 
 # ============================================================
 # HOST REVIEW REFUND
@@ -30416,15 +34064,40 @@ def get_admin_refunds():
             "message": "Failed to load refunds."
         }), 500
 
+
 # ============================================================
 # CREATE BOOKING
+#
+# PROTECTION:
+# - Idempotency-Key
+# - ticketId fallback for existing payment flow
+# - request hash validation
+# - booking file lock
+# - inventory checked INSIDE lock
+# - duplicate ticket/payment protection
+# - response replay
+#
+# ACCOUNTING:
+# - Historical commissionAmount is stored on every ticket.
+# - Historical hostAmount is stored on every ticket.
+# - Refunds therefore do NOT depend on current Admin Settings.
+# - Event revenue matches the host-side amount for host events.
+# - Official/admin events have no host share.
+#
+# IMPORTANT:
+# JSON storage still does not provide a true database
+# transaction across multiple files.
 # ============================================================
-
 @app.route(
     "/bookings",
     methods=["GET", "POST"]
 )
 def create_booking():
+
+    # ========================================================
+    # GET BOOKINGS
+    # ========================================================
+
     if request.method == "GET":
 
         bookings = load_json_file(
@@ -30433,858 +34106,1527 @@ def create_booking():
         )
 
         return jsonify({
-            "success": True,
-            "bookings": bookings
+            "success":
+                True,
+            "bookings":
+                bookings
         }), 200
+
+    # ========================================================
+    # REQUEST BODY
+    # ========================================================
 
     data = request.get_json(
         silent=True
     ) or {}
 
-
-    # --------------------------------------------------------
-    # LOAD DATA
-    # --------------------------------------------------------
-
-    bookings = load_json_file(
-        "bookings.json",
-        []
-    )
-
-    events = load_json_file(
-        "events.json",
-        []
-    )
-
-
-    # --------------------------------------------------------
-    # VALIDATE QUANTITY
-    # --------------------------------------------------------
-
-    try:
-
-        quantity = int(
-            data.get(
-                "quantity",
-                1
-            )
-        )
-
-    except (
-        ValueError,
-        TypeError
-    ):
-
-        return jsonify({
-            "success": False,
-            "message": "Invalid ticket quantity."
-        }), 400
-
-
-    if quantity <= 0:
-
-        return jsonify({
-            "success": False,
-            "message": "Invalid ticket quantity."
-        }), 400
-
-
-    # --------------------------------------------------------
-    # FIND EVENT
-    # --------------------------------------------------------
-
-    event = None
-
-    for current_event in events:
-
-        if str(
-            current_event.get("id")
-        ) == str(
-            data.get("eventId")
-        ):
-
-            event = current_event
-
-            break
-
-
-    if not event:
-
-        return jsonify({
-            "success": False,
-            "message": "Event not found."
-        }), 404
-
-    # ============================================================
-    # BLOCK BOOKINGS FOR CANCELLED EVENTS
-    # ============================================================
-
-    if str(event.get("status", "")).lower() == "cancelled":
-
-        return {
-            "success": False,
-            "message": (
-                "This event has been cancelled. "
-                "New bookings are no longer available."
-            ),
-            "eventCancelled": True
-        }, 400
-
-    # --------------------------------------------------------
-    # FIND TICKET TYPE
-    # --------------------------------------------------------
-
-    ticket_type = data.get(
-        "ticketType"
-    )
-
-    selected_ticket = None
-
-    for ticket in event.get(
-        "tickets",
-        []
-    ):
-
-        if str(
-            ticket.get("name", "")
-        ).strip().lower() == str(
-            ticket_type or ""
-        ).strip().lower():
-
-            selected_ticket = ticket
-
-            break
-
-
-    if not selected_ticket:
-
-        return jsonify({
-            "success": False,
-            "message": "Selected ticket type not found."
-        }), 404
-
-
-    # --------------------------------------------------------
-    # CALCULATE TICKET PRICE FROM SERVER
+    # ========================================================
+    # IDEMPOTENCY KEY
     #
-    # NEVER TRUST THE FRONTEND TOTAL
-    # --------------------------------------------------------
-
-    try:
-
-        ticket_price = int(
-            float(
-                selected_ticket.get(
-                    "price",
-                    0
-                )
-            )
-        )
-
-    except (
-        ValueError,
-        TypeError
-    ):
-
-        return jsonify({
-            "success": False,
-            "message": "Invalid ticket price."
-        }), 400
-
-
-    if ticket_price < 0:
-
-        return jsonify({
-            "success": False,
-            "message": "Invalid ticket price."
-        }), 400
-
-
-    subtotal = (
-        ticket_price
-        *
-        quantity
-    )
-
-
-    # ========================================================
-    # SERVICE FEE
-    # ========================================================
-
-    service_fee_percent = 5.0
-
-    service_fee = int(
-        subtotal
-        *
-        service_fee_percent
-        /
-        100
-    )
-
-
-    customer_total = (
-        subtotal
-        +
-        service_fee
-    )
-
-
-    # ========================================================
-    # EVENTWAA COMMISSION
+    # Preferred:
+    #     Idempotency-Key header
     #
-    # 10% OF TICKET PRICE
+    # Existing payment compatibility:
+    #     ticketId
+    #
+    # If neither exists, generate a key only for this request.
+    # Such a generated key cannot protect a client retry, so the
+    # frontend should eventually send Idempotency-Key.
     # ========================================================
 
-    settings = load_admin_settings()
-
-    commission_percent = float(
-        settings.get(
-            "commission",
-            10
+    incoming_idempotency_key = str(
+        request.headers.get(
+            "Idempotency-Key",
+            ""
         )
-    )
-
-
-    commission = int(
-        subtotal
-        *
-        commission_percent
-        /
-        100
-    )
-
-
-    # ========================================================
-    # HOST EARNING
-    # ========================================================
-
-    host_amount = (
-        subtotal
-        -
-        commission
-    )
-
-
-    # ========================================================
-    # CHECK INVENTORY
-    # ========================================================
-
-    if "remaining" not in selected_ticket:
-
-        selected_ticket["remaining"] = int(
-            selected_ticket.get(
-                "quantity",
-                0
-            )
-        )
-
-
-    remaining = int(
-        selected_ticket.get(
-            "remaining",
-            0
-        )
-    )
-
-
-    if remaining < quantity:
-
-        return jsonify({
-            "success": False,
-            "message": (
-                f"Only {remaining} "
-                f"tickets remaining."
-            )
-        }), 400
-
-
-    # ========================================================
-    # PREVENT DUPLICATE PAYMENT / BOOKING
-    # ========================================================
+        or ""
+    ).strip()
 
     incoming_ticket_id = str(
         data.get(
             "ticketId",
             ""
         )
+        or ""
     ).strip()
 
+    if incoming_idempotency_key:
 
-    if incoming_ticket_id:
+        idempotency_key = (
+            incoming_idempotency_key
+        )
 
-        for existing_booking in bookings:
+    elif incoming_ticket_id:
 
-            existing_ticket_id = str(
-                existing_booking.get(
-                    "ticketId",
-                    ""
-                )
-            ).strip()
+        idempotency_key = (
+            f"booking-ticket-{incoming_ticket_id}"
+        )
 
+    else:
 
-            if (
-                existing_ticket_id
-                == incoming_ticket_id
-            ):
+        idempotency_key = str(
+            uuid.uuid4()
+        )
 
-                return jsonify({
-
-                    "success": False,
-
-                    "duplicate": True,
-
-                    "message": (
-                        "This payment has already "
-                        "been processed."
-                    ),
-
-                    "tickets": [
-                        existing_booking
-                    ]
-
-                }), 409
-
-
-    # ========================================================
-    # HOST ID
-    # ========================================================
-
-    host_id = event.get(
-        "hostId"
+    request_hash = make_request_hash(
+        data
     )
 
-
-    if not host_id:
-
-        return jsonify({
-            "success": False,
-            "message": "Event host ID is missing."
-        }), 400
-
+    # ========================================================
+    # BOOKING LOCK
+    #
+    # EVERYTHING THAT CHECKS OR CHANGES INVENTORY/WALLETS
+    # MUST HAPPEN INSIDE THIS LOCK.
+    # ========================================================
 
     try:
 
-        host_id = int(
-            host_id
-        )
-
-    except (
-        ValueError,
-        TypeError
-    ):
-
-        return jsonify({
-            "success": False,
-            "message": "Invalid event host ID."
-        }), 400
-
-
-    # ========================================================
-    # EVENTWAA WALLET
-    # ========================================================
-
-    wallet = load_wallet()
-
-
-    wallet["availableBalance"] = (
-        int(
-            wallet.get(
-                "availableBalance",
-                0
-            )
-        )
-        +
-        commission
-        +
-        service_fee
-    )
-
-
-    wallet["totalCommission"] = (
-        int(
-            wallet.get(
-                "totalCommission",
-                0
-            )
-        )
-        +
-        commission
-    )
-
-
-    wallet["totalServiceFees"] = (
-        int(
-            wallet.get(
-                "totalServiceFees",
-                0
-            )
-        )
-        +
-        service_fee
-    )
-
-
-    save_wallet(
-        wallet
-    )
-
-
-    # ========================================================
-    # HOST WALLET
-    # ========================================================
-
-    wallets = load_host_wallets()
-
-    host_wallet = None
-
-
-    for current_wallet in wallets:
-
-        try:
-
-            wallet_host_id = int(
-                current_wallet.get(
-                    "hostId",
-                    0
-                )
-            )
-
-        except (
-            ValueError,
-            TypeError
+        with eventwaa_file_lock(
+            "booking"
         ):
 
-            wallet_host_id = 0
+            # ==================================================
+            # IDEMPOTENCY CHECK
+            # ==================================================
 
+            existing_idempotency = (
+                find_idempotency_record(
+                    idempotency_key,
+                    "booking"
+                )
+            )
 
-        if wallet_host_id == host_id:
+            if existing_idempotency:
 
-            host_wallet = current_wallet
+                stored_hash = str(
+                    existing_idempotency.get(
+                        "requestHash",
+                        ""
+                    )
+                )
 
-            break
+                if (
+                    stored_hash
+                    and
+                    stored_hash
+                    != request_hash
+                ):
 
+                    return jsonify({
+                        "success":
+                            False,
+                        "message":
+                            (
+                                "This Idempotency-Key "
+                                "has already been used "
+                                "for a different request."
+                            ),
+                        "idempotencyConflict":
+                            True
+                    }), 409
 
-    # --------------------------------------------------------
-    # CREATE HOST WALLET
-    # --------------------------------------------------------
+                return idempotency_response(
+                    existing_idempotency
+                )
 
-    if not host_wallet:
+            # ==================================================
+            # CREATE IDEMPOTENCY RECORD BEFORE MUTATION
+            # ==================================================
 
-        host_wallet = {
+            create_idempotency_record(
 
-            "hostId": host_id,
+                key=idempotency_key,
 
-            "availableBalance": 0,
+                scope="booking",
 
-            "pendingPayouts": 0,
+                request_hash=request_hash,
 
-            "totalEarned": 0,
+                status="processing"
+            )
 
-            "totalWithdrawn": 0,
+            # ==================================================
+            # LOAD DATA
+            # ==================================================
 
-            "withdrawals": [],
+            bookings = load_json_file(
+                "bookings.json",
+                []
+            )
 
-            "scheduledPayouts": [],
+            events = load_json_file(
+                "events.json",
+                []
+            )
 
-            "transactions": [],
+            settings = load_admin_settings()
 
-            "refunds": 0
+            # ==================================================
+            # VALIDATE QUANTITY
+            # ==================================================
 
-        }
+            try:
 
+                quantity = int(
+                    data.get(
+                        "quantity",
+                        1
+                    )
+                )
 
-        wallets.append(
-            host_wallet
-        )
+            except (
+                ValueError,
+                TypeError
+            ):
 
+                response_body = {
+                    "success":
+                        False,
+                    "message":
+                        "Invalid ticket quantity."
+                }
 
-    # ========================================================
-    # HOST PAYOUT DELAY
-    # ========================================================
+                update_idempotency_record(
+                    idempotency_key,
+                    "booking",
+                    status="failed",
+                    response_status=400,
+                    response_body=response_body
+                )
 
-    host_email = event.get(
-        "hostEmail"
-    )
+                return jsonify(
+                    response_body
+                ), 400
 
+            if quantity <= 0:
 
-    users = load_json_file(
-        "users.json",
-        []
-    )
+                response_body = {
+                    "success":
+                        False,
+                    "message":
+                        "Invalid ticket quantity."
+                }
 
+                update_idempotency_record(
+                    idempotency_key,
+                    "booking",
+                    status="failed",
+                    response_status=400,
+                    response_body=response_body
+                )
 
-    host_user = None
+                return jsonify(
+                    response_body
+                ), 400
 
+            # ==================================================
+            # FIND EVENT
+            # ==================================================
 
-    if host_email:
+            event = None
 
-        for current_user in users:
+            for current_event in events:
+
+                if str(
+                    current_event.get(
+                        "id"
+                    )
+                ) == str(
+                    data.get(
+                        "eventId"
+                    )
+                ):
+
+                    event = current_event
+                    break
+
+            if not event:
+
+                response_body = {
+                    "success":
+                        False,
+                    "message":
+                        "Event not found."
+                }
+
+                update_idempotency_record(
+                    idempotency_key,
+                    "booking",
+                    status="failed",
+                    response_status=404,
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 404
+
+            # ==================================================
+            # BLOCK CANCELLED EVENTS
+            # ==================================================
 
             if str(
-                current_user.get(
-                    "email",
+                event.get(
+                    "status",
                     ""
                 )
-            ).strip().lower() == str(
-                host_email
-            ).strip().lower():
+            ).lower() == "cancelled":
 
-                host_user = current_user
+                response_body = {
+                    "success":
+                        False,
+                    "message":
+                        (
+                            "This event has been cancelled. "
+                            "New bookings are no longer "
+                            "available."
+                        ),
+                    "eventCancelled":
+                        True
+                }
 
-                break
+                update_idempotency_record(
+                    idempotency_key,
+                    "booking",
+                    status="failed",
+                    response_status=400,
+                    response_body=response_body
+                )
 
+                return jsonify(
+                    response_body
+                ), 400
 
-    if host_user and host_user.get(
-        "trustedHost",
-        False
-    ):
+            # ==================================================
+            # EVENT TYPE
+            #
+            # Official/admin events have no host share.
+            # ==================================================
 
-        payout_delay = int(
-            settings.get(
-                "trustedHostPayout",
-                0
+            is_admin_event = (
+                str(
+                    event.get(
+                        "adminEvent",
+                        False
+                    )
+                ).strip().lower()
+                ==
+                "true"
             )
-        )
 
-    elif host_user and host_user.get(
-        "verifiedHost",
-        False
-    ):
+            # ==================================================
+            # FIND TICKET TYPE
+            # ==================================================
 
-        payout_delay = int(
-            settings.get(
-                "verifiedHostPayout",
-                1
+            ticket_type = data.get(
+                "ticketType"
             )
-        )
 
-    else:
+            selected_ticket = None
 
-        payout_delay = int(
-            settings.get(
-                "newHostPayout",
-                2
+            for ticket in event.get(
+                "tickets",
+                []
+            ):
+
+                if str(
+                    ticket.get(
+                        "name",
+                        ""
+                    )
+                ).strip().lower() == str(
+                    ticket_type or ""
+                ).strip().lower():
+
+                    selected_ticket = ticket
+                    break
+
+            if not selected_ticket:
+
+                response_body = {
+                    "success":
+                        False,
+                    "message":
+                        "Selected ticket type not found."
+                }
+
+                update_idempotency_record(
+                    idempotency_key,
+                    "booking",
+                    status="failed",
+                    response_status=404,
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 404
+
+            # ==================================================
+            # SERVER-SIDE PRICE
+            # ==================================================
+
+            try:
+
+                ticket_price = int(
+                    float(
+                        selected_ticket.get(
+                            "price",
+                            0
+                        )
+                    )
+                )
+
+            except (
+                ValueError,
+                TypeError
+            ):
+
+                response_body = {
+                    "success":
+                        False,
+                    "message":
+                        "Invalid ticket price."
+                }
+
+                update_idempotency_record(
+                    idempotency_key,
+                    "booking",
+                    status="failed",
+                    response_status=400,
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 400
+
+            if ticket_price < 0:
+
+                response_body = {
+                    "success":
+                        False,
+                    "message":
+                        "Invalid ticket price."
+                }
+
+                update_idempotency_record(
+                    idempotency_key,
+                    "booking",
+                    status="failed",
+                    response_status=400,
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 400
+
+            # ==================================================
+            # SALE TOTALS
+            # ==================================================
+
+            subtotal = (
+                ticket_price
+                *
+                quantity
             )
-        )
 
+            # ==================================================
+            # SERVICE FEE
+            # ==================================================
 
-    # ========================================================
-    # ADD HOST EARNING
-    # ========================================================
+            service_fee_percent = 5.0
 
-    if payout_delay > 0:
+            service_fee = int(
+                subtotal
+                *
+                service_fee_percent
+                /
+                100
+            )
 
-        host_wallet.setdefault(
-            "scheduledPayouts",
-            []
-        )
-
-
-        host_wallet["scheduledPayouts"].append({
-
-            "amount": host_amount,
-
-            "availableAt": (
-                datetime.now().timestamp()
+            customer_total = (
+                subtotal
                 +
-                (
-                    payout_delay
-                    *
-                    24
-                    *
-                    60
-                    *
-                    60
-                )
-            ),
-
-            "createdAt":
-                datetime.now().strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                )
-
-        })
-
-
-        host_wallet["pendingPayouts"] = (
-            int(
-                host_wallet.get(
-                    "pendingPayouts",
-                    0
-                )
-            )
-            +
-            host_amount
-        )
-
-    else:
-
-        host_wallet["availableBalance"] = (
-            int(
-                host_wallet.get(
-                    "availableBalance",
-                    0
-                )
-            )
-            +
-            host_amount
-        )
-
-
-    host_wallet["totalEarned"] = (
-        int(
-            host_wallet.get(
-                "totalEarned",
-                0
-            )
-        )
-        +
-        host_amount
-    )
-
-
-    # ========================================================
-    # HOST TRANSACTION
-    # ========================================================
-
-    host_wallet.setdefault(
-        "transactions",
-        []
-    )
-
-
-    host_wallet["transactions"].insert(
-        0,
-        {
-
-            "type": "sale",
-
-            "eventId":
-                event.get("id"),
-
-            "eventTitle":
-                event.get("title"),
-
-            "amount":
-                host_amount,
-
-            "grossAmount":
-                subtotal,
-
-            "commission":
-                commission,
-
-            "commissionPercent":
-                commission_percent,
-
-            "serviceFee":
-                service_fee,
-
-            "customerTotal":
-                customer_total,
-
-            "date":
-                datetime.now().strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                )
-
-        }
-    )
-
-
-    save_host_wallets(
-        wallets
-    )
-
-
-    # ========================================================
-    # UPDATE INVENTORY
-    # ========================================================
-
-    selected_ticket["remaining"] = (
-        remaining
-        -
-        quantity
-    )
-
-
-    event["ticketsSold"] = (
-        int(
-            event.get(
-                "ticketsSold",
-                0
-            )
-        )
-        +
-        quantity
-    )
-
-
-    # ========================================================
-    # IMPORTANT:
-    # EVENT REVENUE = HOST EARNING
-    #
-    # NOT customer total.
-    # NOT subtotal.
-    # NOT service fee.
-    # ========================================================
-
-    event["revenue"] = (
-        int(
-            event.get(
-                "revenue",
-                0
-            )
-        )
-        +
-        host_amount
-    )
-
-
-    # ========================================================
-    # CREATE INDIVIDUAL TICKETS
-    # ========================================================
-
-    created_tickets = []
-
-
-    for i in range(quantity):
-
-        ticket_number = (
-            len(bookings)
-            +
-            i
-            +
-            1
-        )
-
-
-        ticket = {
-
-            "id":
-                ticket_number,
-
-            "eventId":
-                data.get("eventId"),
-
-            "eventTitle":
-                event.get("title"),
-
-            "buyer":
-                data.get("buyer"),
-
-            "ticketType":
-                ticket_type,
-
-            "ticketPrice":
-                ticket_price,
-
-            "subtotal":
-                ticket_price,
-
-            "serviceFee":
                 service_fee
-                / quantity,
+            )
 
-            "serviceFeePercent":
-                service_fee_percent,
+            # ==================================================
+            # COMMISSION
+            #
+            # Commission is calculated from the ticket subtotal,
+            # NOT the service-fee-inclusive customer total.
+            # ==================================================
 
-            "customerTotal":
-                (
-                    customer_total
-                    // quantity
-                ),
+            try:
 
-            # Host/event accounting amount
-            "totalPrice":
-                ticket_price,
+                commission_percent = float(
+                    settings.get(
+                        "commission",
+                        10
+                    )
+                    or 0
+                )
 
-            "ticketId":
-                (
-                    f"{incoming_ticket_id}-"
-                    f"{i + 1}"
-                ),
+            except (
+                ValueError,
+                TypeError
+            ):
 
-            "checkedIn":
+                commission_percent = 10
+
+            commission_percent = max(
+                0,
+                min(
+                    100,
+                    commission_percent
+                )
+            )
+
+            if is_admin_event:
+
+                commission = subtotal
+
+                host_amount = 0
+
+            else:
+
+                commission = int(
+                    subtotal
+                    *
+                    commission_percent
+                    /
+                    100
+                )
+
+                host_amount = (
+                    subtotal
+                    -
+                    commission
+                )
+
+            # ==================================================
+            # INVENTORY
+            #
+            # IMPORTANT:
+            # This check is INSIDE the booking lock.
+            # ==================================================
+
+            if "remaining" not in selected_ticket:
+
+                try:
+
+                    selected_ticket["remaining"] = int(
+                        selected_ticket.get(
+                            "quantity",
+                            0
+                        )
+                    )
+
+                except (
+                    ValueError,
+                    TypeError
+                ):
+
+                    selected_ticket["remaining"] = 0
+
+            try:
+
+                remaining = int(
+                    selected_ticket.get(
+                        "remaining",
+                        0
+                    )
+                )
+
+            except (
+                ValueError,
+                TypeError
+            ):
+
+                remaining = 0
+
+            if remaining < quantity:
+
+                response_body = {
+                    "success":
+                        False,
+                    "message":
+                        (
+                            f"Only {remaining} "
+                            f"tickets remaining."
+                        )
+                }
+
+                update_idempotency_record(
+                    idempotency_key,
+                    "booking",
+                    status="failed",
+                    response_status=400,
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 400
+
+            # ==================================================
+            # PREVENT DUPLICATE PAYMENT / BOOKING
+            # ==================================================
+
+            if incoming_ticket_id:
+
+                duplicate_booking = None
+
+                for existing_booking in bookings:
+
+                    existing_ticket_id = str(
+                        existing_booking.get(
+                            "ticketId",
+                            ""
+                        )
+                    ).strip()
+
+                    if (
+                        existing_ticket_id
+                        ==
+                        incoming_ticket_id
+                    ):
+
+                        duplicate_booking = (
+                            existing_booking
+                        )
+
+                        break
+
+                if duplicate_booking:
+
+                    response_body = {
+                        "success":
+                            False,
+                        "duplicate":
+                            True,
+                        "message":
+                            (
+                                "This payment has already "
+                                "been processed."
+                            ),
+                        "tickets":
+                            [
+                                duplicate_booking
+                            ]
+                    }
+
+                    update_idempotency_record(
+                        idempotency_key,
+                        "booking",
+                        status="succeeded",
+                        response_status=409,
+                        response_body=response_body,
+                        resource_id=str(
+                            duplicate_booking.get(
+                                "id"
+                            )
+                        )
+                    )
+
+                    return jsonify(
+                        response_body
+                    ), 409
+
+            # ==================================================
+            # HOST ID
+            #
+            # Official/admin events do not require a host.
+            # ==================================================
+
+            host_id = event.get(
+                "hostId"
+            )
+
+            if not is_admin_event and not host_id:
+
+                response_body = {
+                    "success":
+                        False,
+                    "message":
+                        "Event host ID is missing."
+                }
+
+                update_idempotency_record(
+                    idempotency_key,
+                    "booking",
+                    status="failed",
+                    response_status=400,
+                    response_body=response_body
+                )
+
+                return jsonify(
+                    response_body
+                ), 400
+
+            if host_id is not None:
+
+                try:
+
+                    host_id = int(
+                        host_id
+                    )
+
+                except (
+                    ValueError,
+                    TypeError
+                ):
+
+                    if not is_admin_event:
+
+                        response_body = {
+                            "success":
+                                False,
+                            "message":
+                                "Invalid event host ID."
+                        }
+
+                        update_idempotency_record(
+                            idempotency_key,
+                            "booking",
+                            status="failed",
+                            response_status=400,
+                            response_body=response_body
+                        )
+
+                        return jsonify(
+                            response_body
+                        ), 400
+
+                    host_id = None
+
+            # ==================================================
+            # EVENTWAA WALLET
+            #
+            # EventWaa receives:
+            #
+            # - commission
+            # - service fee
+            #
+            # For official/admin events the entire subtotal is
+            # the platform amount, therefore commission == subtotal.
+            # ==================================================
+
+            wallet = load_wallet()
+
+            wallet["availableBalance"] = (
+                int(
+                    wallet.get(
+                        "availableBalance",
+                        0
+                    )
+                    or 0
+                )
+                +
+                commission
+                +
+                service_fee
+            )
+
+            wallet["totalCommission"] = (
+                int(
+                    wallet.get(
+                        "totalCommission",
+                        0
+                    )
+                    or 0
+                )
+                +
+                commission
+            )
+
+            wallet["totalServiceFees"] = (
+                int(
+                    wallet.get(
+                        "totalServiceFees",
+                        0
+                    )
+                    or 0
+                )
+                +
+                service_fee
+            )
+
+            wallet["totalRevenue"] = (
+                int(
+                    wallet.get(
+                        "totalRevenue",
+                        0
+                    )
+                    or 0
+                )
+                +
+                commission
+                +
+                service_fee
+            )
+
+            # ==================================================
+            # HOST WALLET
+            # ==================================================
+
+            wallets = load_host_wallets()
+
+            host_wallet = None
+
+            if not is_admin_event:
+
+                for current_wallet in wallets:
+
+                    try:
+
+                        wallet_host_id = int(
+                            current_wallet.get(
+                                "hostId",
+                                0
+                            )
+                        )
+
+                    except (
+                        ValueError,
+                        TypeError
+                    ):
+
+                        wallet_host_id = 0
+
+                    if wallet_host_id == host_id:
+
+                        host_wallet = current_wallet
+                        break
+
+                # ==================================================
+                # CREATE HOST WALLET
+                # ==================================================
+
+                if not host_wallet:
+
+                    host_wallet = {
+                        "hostId":
+                            host_id,
+                        "availableBalance":
+                            0,
+                        "pendingPayouts":
+                            0,
+                        "totalEarned":
+                            0,
+                        "totalWithdrawn":
+                            0,
+                        "withdrawals":
+                            [],
+                        "scheduledPayouts":
+                            [],
+                        "transactions":
+                            [],
+                        "refunds":
+                            0
+                    }
+
+                    wallets.append(
+                        host_wallet
+                    )
+
+                # ==================================================
+                # HOST PAYOUT DELAY
+                # ==================================================
+
+                host_email = event.get(
+                    "hostEmail"
+                )
+
+                users = load_json_file(
+                    "users.json",
+                    []
+                )
+
+                host_user = None
+
+                if host_email:
+
+                    for current_user in users:
+
+                        if str(
+                            current_user.get(
+                                "email",
+                                ""
+                            )
+                        ).strip().lower() == str(
+                            host_email
+                        ).strip().lower():
+
+                            host_user = current_user
+                            break
+
+                if (
+                    host_user
+                    and
+                    host_user.get(
+                        "trustedHost",
+                        False
+                    )
+                ):
+
+                    payout_delay = int(
+                        settings.get(
+                            "trustedHostPayout",
+                            0
+                        )
+                        or 0
+                    )
+
+                elif (
+                    host_user
+                    and
+                    host_user.get(
+                        "verifiedHost",
+                        False
+                    )
+                ):
+
+                    payout_delay = int(
+                        settings.get(
+                            "verifiedHostPayout",
+                            1
+                        )
+                        or 1
+                    )
+
+                else:
+
+                    payout_delay = int(
+                        settings.get(
+                            "newHostPayout",
+                            2
+                        )
+                        or 2
+                    )
+
+                # ==================================================
+                # ADD HOST EARNING
+                # ==================================================
+
+                if payout_delay > 0:
+
+                    host_wallet.setdefault(
+                        "scheduledPayouts",
+                        []
+                    )
+
+                    host_wallet["scheduledPayouts"].append({
+                        "amount":
+                            host_amount,
+                        "availableAt":
+                            (
+                                datetime.now().timestamp()
+                                +
+                                (
+                                    payout_delay
+                                    *
+                                    24
+                                    *
+                                    60
+                                    *
+                                    60
+                                )
+                            ),
+                        "createdAt":
+                            datetime.now().strftime(
+                                "%Y-%m-%d %H:%M:%S"
+                            )
+                    })
+
+                    host_wallet["pendingPayouts"] = (
+                        int(
+                            host_wallet.get(
+                                "pendingPayouts",
+                                0
+                            )
+                            or 0
+                        )
+                        +
+                        host_amount
+                    )
+
+                else:
+
+                    host_wallet["availableBalance"] = (
+                        int(
+                            host_wallet.get(
+                                "availableBalance",
+                                0
+                            )
+                            or 0
+                        )
+                        +
+                        host_amount
+                    )
+
+                host_wallet["totalEarned"] = (
+                    int(
+                        host_wallet.get(
+                            "totalEarned",
+                            0
+                        )
+                        or 0
+                    )
+                    +
+                    host_amount
+                )
+
+                # ==================================================
+                # HOST TRANSACTION
+                #
+                # This is the TOTAL sale transaction.
+                # The booking/ticket records below store the
+                # per-ticket historical amounts.
+                # ==================================================
+
+                host_wallet.setdefault(
+                    "transactions",
+                    []
+                )
+
+                host_wallet["transactions"].insert(
+                    0,
+                    {
+                        "type":
+                            "sale",
+                        "eventId":
+                            event.get(
+                                "id"
+                            ),
+                        "eventTitle":
+                            event.get(
+                                "title"
+                            ),
+                        "bookingId":
+                            incoming_ticket_id
+                            or None,
+                        "amount":
+                            host_amount,
+                        "grossAmount":
+                            subtotal,
+                        "commission":
+                            commission,
+                        "commissionPercent":
+                            commission_percent,
+                        "serviceFee":
+                            service_fee,
+                        "customerTotal":
+                            customer_total,
+                        "date":
+                            datetime.now().strftime(
+                                "%Y-%m-%d %H:%M:%S"
+                            )
+                    }
+                )
+
+            # ==================================================
+            # UPDATE INVENTORY
+            # ==================================================
+
+            selected_ticket["remaining"] = (
+                remaining
+                -
+                quantity
+            )
+
+            event["ticketsSold"] = (
+                int(
+                    event.get(
+                        "ticketsSold",
+                        0
+                    )
+                    or 0
+                )
+                +
+                quantity
+            )
+
+            # ==================================================
+            # EVENT REVENUE
+            #
+            # Host event:
+            #     revenue = hostAmount
+            #
+            # Official/admin event:
+            #     revenue = full subtotal
+            #
+            # This now matches the refund processor.
+            # ==================================================
+
+            event_revenue = (
+                subtotal
+                if is_admin_event
+                else host_amount
+            )
+
+            event["revenue"] = (
+                int(
+                    event.get(
+                        "revenue",
+                        0
+                    )
+                    or 0
+                )
+                +
+                event_revenue
+            )
+
+            # ==================================================
+            # PER-TICKET ACCOUNTING ALLOCATION
+            #
+            # Because bookings.json stores individual tickets,
+            # the total sale amounts must be distributed across
+            # those tickets.
+            #
+            # This guarantees:
+            #
+            # sum(ticket commissionAmount) == commission
+            # sum(ticket hostAmount) == host_amount
+            # sum(ticket serviceFee) == service_fee
+            #
+            # even when integer rounding creates a remainder.
+            # ==================================================
+
+            commission_per_ticket = (
+                commission // quantity
+            )
+
+            commission_remainder = (
+                commission
+                %
+                quantity
+            )
+
+            host_amount_per_ticket = (
+                host_amount // quantity
+            )
+
+            host_amount_remainder = (
+                host_amount
+                %
+                quantity
+            )
+
+            service_fee_per_ticket = (
+                service_fee // quantity
+            )
+
+            service_fee_remainder = (
+                service_fee
+                %
+                quantity
+            )
+
+            customer_total_per_ticket = (
+                customer_total // quantity
+            )
+
+            customer_total_remainder = (
+                customer_total
+                %
+                quantity
+            )
+
+            # ==================================================
+            # PAYMENT INFORMATION
+            #
+            # Preserve provider information on the individual
+            # booking because the refund processor later needs it.
+            # ==================================================
+
+            payment_provider = str(
+                data.get(
+                    "paymentProvider",
+                    ""
+                )
+                or ""
+            ).strip().lower()
+
+            transaction_id = str(
+                data.get(
+                    "transactionId",
+                    ""
+                )
+                or ""
+            ).strip()
+
+            tx_ref = str(
+                data.get(
+                    "txRef",
+                    ""
+                )
+                or ""
+            ).strip()
+
+            # ==================================================
+            # CREATE INDIVIDUAL TICKETS
+            # ==================================================
+
+            created_tickets = []
+
+            for i in range(quantity):
+
+                ticket_number = (
+                    len(bookings)
+                    +
+                    i
+                    +
+                    1
+                )
+
+                # ----------------------------------------------
+                # PER-TICKET AMOUNTS
+                # ----------------------------------------------
+
+                ticket_commission = (
+                    commission_per_ticket
+                    +
+                    (
+                        1
+                        if i < commission_remainder
+                        else 0
+                    )
+                )
+
+                ticket_host_amount = (
+                    host_amount_per_ticket
+                    +
+                    (
+                        1
+                        if i < host_amount_remainder
+                        else 0
+                    )
+                )
+
+                ticket_service_fee = (
+                    service_fee_per_ticket
+                    +
+                    (
+                        1
+                        if i < service_fee_remainder
+                        else 0
+                    )
+                )
+
+                ticket_customer_total = (
+                    customer_total_per_ticket
+                    +
+                    (
+                        1
+                        if i < customer_total_remainder
+                        else 0
+                    )
+                )
+
+                # ----------------------------------------------
+                # EXISTING PAYMENT FLOW TICKET ID
+                # ----------------------------------------------
+
+                if incoming_ticket_id:
+
+                    generated_ticket_id = (
+                        f"{incoming_ticket_id}-"
+                        f"{i + 1}"
+                    )
+
+                else:
+
+                    generated_ticket_id = (
+                        f"BOOKING-"
+                        f"{uuid.uuid4()}"
+                    )
+
+                # ----------------------------------------------
+                # INDIVIDUAL BOOKING/TICKET
+                # ----------------------------------------------
+
+                ticket = {
+
+                    "id":
+                        ticket_number,
+
+                    "eventId":
+                        data.get(
+                            "eventId"
+                        ),
+
+                    "eventTitle":
+                        event.get(
+                            "title"
+                        ),
+
+                    "buyer":
+                        data.get(
+                            "buyer"
+                        ),
+
+                    "ticketType":
+                        ticket_type,
+
+                    "ticketPrice":
+                        ticket_price,
+
+                    "subtotal":
+                        ticket_price,
+
+                    "serviceFee":
+                        ticket_service_fee,
+
+                    "serviceFeePercent":
+                        service_fee_percent,
+
+                    "customerTotal":
+                        ticket_customer_total,
+
+                    "totalPrice":
+                        ticket_price,
+
+                    # ------------------------------------------
+                    # HISTORICAL SALE ACCOUNTING
+                    #
+                    # These values MUST NOT later be recalculated
+                    # using current Admin Settings.
+                    # ------------------------------------------
+
+                    "commissionAmount":
+                        ticket_commission,
+
+                    "commissionPercent":
+                        commission_percent,
+
+                    "hostAmount":
+                        ticket_host_amount,
+
+                    "platformAmount":
+                        ticket_commission,
+
+                    # ------------------------------------------
+                    # PAYMENT INFORMATION
+                    # ------------------------------------------
+
+                    "paymentProvider":
+                        payment_provider,
+
+                    "transactionId":
+                        transaction_id,
+
+                    "txRef":
+                        tx_ref,
+
+                    # ------------------------------------------
+                    # PAYMENT TOTALS
+                    # ------------------------------------------
+
+                    "grossTicketAmount":
+                        ticket_price,
+
+                    "serviceFeeAmount":
+                        ticket_service_fee,
+
+                    "amountPaid":
+                        ticket_customer_total,
+
+                    # ------------------------------------------
+                    # IDENTIFIERS
+                    # ------------------------------------------
+
+                    "ticketId":
+                        generated_ticket_id,
+
+                    # ------------------------------------------
+                    # ENTRY CONTROL
+                    #
+                    # ONE successful entry only.
+                    # ------------------------------------------
+
+                    "checkedIn":
+                        False,
+
+                    "checkInCount":
+                        0,
+
+                    "checkInLimit":
+                        1,
+
+                    "checkInHistory":
+                        [],
+
+                    # ------------------------------------------
+                    # REFUND / VALIDITY
+                    # ------------------------------------------
+
+                    "refundStatus":
+                        None,
+
+                    "refundId":
+                        None,
+
+                    "refundAmount":
+                        0,
+
+                    "refundFee":
+                        0,
+
+                    "valid":
+                        True,
+
+                    "cancelled":
+                        False,
+
+                    # ------------------------------------------
+                    # TIMESTAMP
+                    # ------------------------------------------
+
+                    "createdAt":
+                        datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        )
+                }
+
+                bookings.append(
+                    ticket
+                )
+
+                created_tickets.append(
+                    ticket
+                )
+
+            # ==================================================
+            # SAVE ACCOUNTING + BOOKING
+            # ==================================================
+
+            save_wallet(
+                wallet
+            )
+
+            save_host_wallets(
+                wallets
+            )
+
+            save_json_file(
+                "events.json",
+                events
+            )
+
+            save_json_file(
+                "bookings.json",
+                bookings
+            )
+
+            # ==================================================
+            # RESPONSE
+            # ==================================================
+
+            response_body = {
+
+                "success":
+                    True,
+
+                "message":
+                    "Booking completed successfully.",
+
+                "tickets":
+                    created_tickets,
+
+                "event":
+                    event,
+
+                "payment":
+                    {
+                        "subtotal":
+                            subtotal,
+
+                        "serviceFee":
+                            service_fee,
+
+                        "serviceFeePercent":
+                            service_fee_percent,
+
+                        "customerTotal":
+                            customer_total,
+
+                        "commission":
+                            commission,
+
+                        "hostAmount":
+                            host_amount,
+
+                        "adminEvent":
+                            is_admin_event
+                    }
+            }
+
+            # ==================================================
+            # SAVE SUCCESSFUL IDEMPOTENCY RESPONSE
+            # ==================================================
+
+            update_idempotency_record(
+
+                idempotency_key,
+
+                "booking",
+
+                status="succeeded",
+
+                response_status=201,
+
+                response_body=response_body,
+
+                resource_id=str(
+                    created_tickets[0].get(
+                        "id"
+                    )
+                )
+            )
+
+            return jsonify(
+                response_body
+            ), 201
+
+    except TimeoutError as e:
+
+        return jsonify({
+
+            "success":
                 False,
 
-            "refundStatus":
-                None,
+            "message":
+                str(e),
 
-            "createdAt":
-                datetime.now().strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                )
+            "processing":
+                False,
 
-        }
+            "retryable":
+                True
 
+        }), 503
 
-        bookings.append(
-            ticket
+    except Exception as e:
+
+        print(
+            "CREATE BOOKING ERROR:",
+            repr(e)
         )
 
+        return jsonify({
 
-        created_tickets.append(
-            ticket
-        )
+            "success":
+                False,
 
+            "message":
+                "Booking could not be completed.",
 
-    # ========================================================
-    # SAVE
-    # ========================================================
+            "retryable":
+                True
 
-    save_json_file(
-        "events.json",
-        events
-    )
-
-
-    save_json_file(
-        "bookings.json",
-        bookings
-    )
-
-
-    # ========================================================
-    # RESPONSE
-    # ========================================================
-
-    return jsonify({
-
-        "success": True,
-
-        "message":
-            "Booking completed successfully.",
-
-        "tickets":
-            created_tickets,
-
-        "event":
-            event,
-
-        "payment": {
-
-            "subtotal":
-                subtotal,
-
-            "serviceFee":
-                service_fee,
-
-            "serviceFeePercent":
-                service_fee_percent,
-
-            "customerTotal":
-                customer_total,
-
-            "commission":
-                commission,
-
-            "hostAmount":
-                host_amount
-
-        }
-
-    }), 201
+        }), 500
 
 # ============================================================
 # DELETE INDIVIDUAL PAST TICKET

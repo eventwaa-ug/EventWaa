@@ -1,186 +1,160 @@
+/* ============================================================
+   HOST WALLET PAGE - THEME COLOR VERSION
+   Uses EventWaa theme, not hardcoded green
+   ============================================================ */
+
+:root {
+  /* Change this one line if you want - wallet will follow */
+  --ew-theme: var(--primary, var(--eventwaa-primary, #ff6b00));
+  --ew-theme-dark: var(--primary-dark, var(--eventwaa-primary-dark, #e05a00));
+  --ew-theme-light: var(--primary-light, #fff7ed);
+  --ew-theme-ring: var(--primary-ring, rgba(255, 107, 0, 0.15));
+}
+
 .host-wallet-page{
-    padding:30px;
-    width:min(100%,1100px);
-    margin:0 auto;
-    box-sizing:border-box;
-    color:#1f2937;
-    font-family:Arial, Helvetica, sans-serif;
-    overflow-x:hidden;
+    padding: 30px;
+    width: min(100%, 1100px);
+    margin: 0 auto;
+    color: #1f2937;
+    font-family: Inter, Arial, Helvetica, sans-serif;
+    overflow-x: hidden;
 }
-.host-wallet-page *{
-    box-sizing:border-box;
-    font-family:inherit;
-}
-.host-wallet-header{
-    margin-bottom:30px;
-}
+.host-wallet-page *{ box-sizing: border-box; font-family: inherit; }
+
+/* Header */
+.host-wallet-header{ margin-bottom: 28px; }
 .host-wallet-header h1{
-    font-size:clamp(1.65rem,3vw,2.2rem);
-    display:flex;
-    align-items:center;
-    gap:9px;
+    font-size: clamp(1.65rem, 3vw, 2.2rem);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    color: #111827;
 }
 .wallet-title-icon,
 .wallet-section-icon,
 .wallet-detail-icon{
-    flex-shrink:0;
-    color:#168a58;
-    stroke:currentColor;
+    flex-shrink: 0;
+    color: var(--ew-theme);
+    stroke: currentColor;
 }
-.wallet-title-icon{
-    width:30px;
-    height:30px;
-}
-.wallet-section-icon{
-    width:23px;
-    height:23px;
-    vertical-align:middle;
-}
-.wallet-detail-icon{
-    width:16px;
-    height:16px;
-    margin-right:6px;
-    vertical-align:-3px;
-}
+.wallet-title-icon{ width: 30px; height: 30px; }
+.wallet-section-icon{ width: 23px; height: 23px; }
+.wallet-detail-icon{ width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; }
+
+/* Cards */
 .host-wallet-cards{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
 }
 .host-wallet-card{
-    background:white;
-    padding:25px;
-    border-radius:15px;
-    box-shadow:0 5px 20px rgba(0,0,0,0.08);
+    background: #ffffff;
+    padding: 22px;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 .host-wallet-card h3{
-    color:#666;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 .host-wallet-card h2{
-    margin-top:10px;
-    font-size:clamp(1.15rem,2vw,1.55rem);
-    overflow-wrap:anywhere;
+    margin-top: 10px;
+    font-size: clamp(1.15rem, 2vw, 1.55rem);
+    overflow-wrap: anywhere;
+    color: #111827;
 }
+
+/* Withdraw */
 .host-withdraw-section{
-    margin-top:40px;
-    background:white;
-    padding:30px;
-    border-radius:15px;
-    box-shadow:0 5px 20px rgba(0,0,0,0.08);
+    margin-top: 30px;
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
+.host-withdraw-section h2{ margin: 0 0 16px; font-size: 1.2rem; }
 .host-withdraw-section input,
 .host-withdraw-section select{
-    width:100%;
-    padding:14px;
-    margin:10px 0;
-    border-radius:8px;
-    border:1px solid #ddd;
+    width: 100%;
+    padding: 14px;
+    margin: 8px 0 14px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    font-size: 15px;
+    outline: none;
+    transition: 0.2s;
+}
+.host-withdraw-section input:focus,
+.host-withdraw-section select:focus{
+    border-color: var(--ew-theme);
+    box-shadow: 0 0 0 3px var(--ew-theme-ring);
 }
 .host-withdraw-section button{
-    width:100%;
-    padding:15px;
-    background:#168a58;
-    color:white;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
+    width: 100%;
+    padding: 14px;
+    background: var(--ew-theme);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 15px;
+    transition: 0.2s;
 }
-.host-withdraw-section button:hover{
-    background:#0f6f49;
-}
-.wallet-message{
-    margin-top:15px;
-    font-weight:bold;
-}
-.host-history{
-    margin-top:40px;
-}
-.host-history-row{
-    display:flex;
-    justify-content:space-between;
-    background:white;
-    padding:15px;
-    margin-top:10px;
-    border-radius:10px;
-}
-.pending{
-    color:#b7791f;
-    font-weight:bold;
-}
-.completed{
-    color:green;
-    font-weight:bold;
-}
+.host-withdraw-section button:hover{ background: var(--ew-theme-dark); }
+.host-withdraw-section button:active{ transform: scale(0.98); }
+.host-withdraw-section button:disabled{ opacity: 0.6; cursor: not-allowed; }
 
+.wallet-message{ margin-top: 14px; font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+
+/* Earnings */
 .earnings-card {
-    margin-top: 25px;
+    margin-top: 30px;
     background: white;
+    border: 1px solid #e5e7eb;
     border-radius: 16px;
-    padding: 25px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    padding: 24px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
-
-
-.earnings-card h2 {
-    margin-bottom: 20px;
-    font-size: clamp(1.15rem, 2vw, 1.45rem);
-}
-
-
+.earnings-card h2 { margin: 0 0 16px; font-size: clamp(1.15rem, 2vw, 1.45rem); }
 .earnings-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 0;
-    border-bottom: 1px solid #eee;
+    padding: 14px 0;
+    border-bottom: 1px solid #f1f5f9;
 }
-
-
-.earnings-row:last-child {
-    border-bottom: none;
-}
-
-
-.earnings-row span {
-    color: #555;
-    font-size: 15px;
-}
-
-
-.earnings-row strong {
-    font-size: 18px;
-    color: #1f2937;
-}
-
-
-/* Highlight host earnings */
+.earnings-row:last-child { border-bottom: none; }
+.earnings-row span { color: #6b7280; font-size: 14px; }
+.earnings-row strong { font-size: 16px; color: #111827; overflow-wrap: anywhere; }
 .earnings-row.highlight {
-    background: #f5fff7;
+    background: var(--ew-theme-light);
+    border: 1px solid color-mix(in srgb, var(--ew-theme) 20%, white);
     border-radius: 12px;
-    padding: 18px;
+    padding: 16px 18px;
+    margin-top: 12px;
+}
+.earnings-row.highlight strong { color: var(--ew-theme); }
+
+/* History */
+.host-history{ margin-top: 30px; }
+.host-history-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 14px 16px;
     margin-top: 10px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
 }
-
-
-.earnings-row.highlight strong {
-    color: #16a34a;
-}
-
-
-/* Mobile */
-@media (max-width: 600px) {
-
-    .earnings-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-}
-/* ============================================================
-   TRANSACTION HISTORY
-============================================================ */
-
 .wallet-transactions {
     background: #ffffff;
     border: 1px solid #e5e7eb;
@@ -188,12 +162,7 @@
     padding: 24px;
     margin-top: 30px;
 }
-
-.wallet-transactions h2 {
-    margin: 0 0 20px;
-    color: #111827;
-}
-
+.wallet-transactions h2 { margin: 0 0 18px; color: #111827; font-size: 1.2rem; }
 .wallet-transaction-row {
     display: flex;
     justify-content: space-between;
@@ -201,97 +170,25 @@
     padding: 14px 0;
     border-bottom: 1px solid #f1f5f9;
 }
-
-.wallet-transaction-row:last-child {
-    border-bottom: none;
-}
-
-.transaction-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.transaction-info strong {
-    color: #111827;
-    font-size: 15px;
-}
-
-.transaction-info span {
-    color: #6b7280;
-    font-size: 13px;
-}
-
-.transaction-amount {
-    font-weight: 700;
-    font-size: clamp(0.82rem, 1.5vw, 0.95rem);
-    overflow-wrap: anywhere;
-}
-
-.transaction-amount.income {
-    color: #059669;
-}
-
-.transaction-amount.expense {
-    color: #dc2626;
-}
+.wallet-transaction-row:last-child { border-bottom: none; }
+.transaction-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.transaction-info strong { color: #111827; font-size: 14px; overflow-wrap: anywhere; }
+.transaction-info span { color: #6b7280; font-size: 12px; }
+.transaction-amount { font-weight: 700; font-size: 14px; white-space: nowrap; flex-shrink: 0; }
+.transaction-amount.income { color: var(--ew-theme); }
+.transaction-amount.expense { color: #dc2626; }
+.pending{ color: #b45309; font-weight: 700; }
+.completed{ color: var(--ew-theme); font-weight: 700; }
 
 @media (max-width: 768px) {
-    .host-wallet-page {
-        padding: 22px 16px;
-    }
-
-    .host-wallet-cards {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-    }
-
-    .host-wallet-card,
-    .host-withdraw-section,
-    .earnings-card {
-        padding: 18px;
-    }
-
-    .host-history-row {
-        flex-wrap: wrap;
-        gap: 8px 14px;
-    }
-
-    .wallet-transactions {
-        padding: 18px;
-    }
-
-    .wallet-transaction-row {
-        align-items: flex-start;
-        gap: 10px;
-    }
-
-    .transaction-amount {
-        font-size: 14px;
-    }
+    .host-wallet-page { padding: 20px 16px; }
+    .host-wallet-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .host-wallet-card, .host-withdraw-section, .earnings-card, .wallet-transactions { padding: 18px; }
 }
-
 @media (max-width: 480px) {
-    .host-wallet-page {
-        padding: 18px 12px;
-    }
-
-    .host-wallet-cards {
-        grid-template-columns: 1fr;
-    }
-
-    .host-wallet-card h2 {
-        font-size: 1.2rem;
-    }
-
-    .host-withdraw-section {
-        margin-top: 26px;
-        padding: 16px;
-    }
-
-    .host-history-row,
-    .wallet-transaction-row {
-        align-items: flex-start;
-        flex-direction: column;
-    }
+    .host-wallet-page { padding: 16px 12px; }
+    .host-wallet-cards { grid-template-columns: 1fr; }
+    .host-history-row, .wallet-transaction-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .earnings-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .transaction-amount { white-space: normal; overflow-wrap: anywhere; }
 }
