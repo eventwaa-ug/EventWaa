@@ -1,178 +1,308 @@
+/* ============================================================
+   EVENTWAA PAYMENT SUCCESS PAGE
+   ============================================================ */
 .payment-success-page {
   min-height: 100vh;
+  width: 100%;
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 30px 20px;
-  background: #f7f8fa;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #f6f7f9;
+  box-sizing: border-box;
 }
-
+/* ============================================================
+   MAIN CARD
+   ============================================================ */
 .payment-success-card {
   width: 100%;
-  max-width: 520px;
-  background: white;
-  border-radius: 22px;
-  padding: 45px 35px;
+  max-width: 620px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 42px;
   text-align: center;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eeeeee;
+  box-sizing: border-box;
 }
-
-.payment-success-card h1 {
-  margin: 20px 0 10px;
-  font-size: 30px;
-  color: #222;
-}
-
-.payment-success-card p {
-  color: #666;
-  line-height: 1.6;
-  margin: 8px 0;
-}
-
-/* =========================================================
-   LOADER
-   ========================================================= */
-
-.payment-loader {
-  width: 55px;
-  height: 55px;
-  margin: 0 auto;
-  border: 5px solid #e8e8e8;
-  border-top: 5px solid #111;
+/* ============================================================
+   STATUS ICON
+   ============================================================ */
+.payment-status-icon {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
-  animation: paymentSpin 0.9s linear infinite;
+  background: #eaf8ef;
+  color: #1f9d55;
 }
-
+.payment-status-icon svg {
+  width: 44px;
+  height: 44px;
+}
+/* ============================================================
+   HEADINGS
+   ============================================================ */
+.payment-success-card h1 {
+  margin: 0 0 12px;
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #202124;
+}
+.payment-success-card > p {
+  margin: 0 auto 8px;
+  max-width: 480px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #6b7280;
+}
+/* ============================================================
+   PROCESSING STATE
+   ============================================================ */
+.payment-loader {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 24px;
+  border: 4px solid #eeeeee;
+  border-top-color: #ff6b00;
+  border-radius: 50%;
+  animation: paymentSpin 0.8s linear infinite;
+}
 @keyframes paymentSpin {
+  from {
+    transform: rotate(0deg);
+  }
   to {
     transform: rotate(360deg);
   }
 }
-
-/* =========================================================
-   STATUS ICON
-   ========================================================= */
-
-.payment-status-icon {
-  width: 75px;
-  height: 75px;
-  margin: 0 auto;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #ffe8e8;
-  color: #d93025;
-  font-size: 40px;
-  font-weight: 700;
+/* ============================================================
+   FAILED STATE
+   ============================================================ */
+.payment-failed {
+  border-color: #f0d6d6;
 }
-
-.success-icon {
-  background: #e7f8ee;
-  color: #1b9b55;
+.payment-failed .payment-status-icon {
+  background: #fff0f0;
+  color: #d64545;
 }
-
-/* =========================================================
+.payment-failed .payment-status-icon svg {
+  width: 44px;
+  height: 44px;
+}
+/* ============================================================
    BOOKING DETAILS
-   ========================================================= */
-
-.booking-success-details {
-  margin-top: 25px;
-  border: 1px solid #e8e8e8;
-  border-radius: 15px;
+   ============================================================ */
+.payment-booking-details {
+  width: 100%;
+  margin: 30px 0;
+  padding: 6px 0;
+  background: #fafafa;
+  border: 1px solid #eeeeee;
+  border-radius: 14px;
   overflow: hidden;
   text-align: left;
 }
-
-.success-detail {
+.payment-detail-row {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding: 14px 16px;
+  padding: 16px 18px;
   border-bottom: 1px solid #eeeeee;
 }
-
-.success-detail:last-child {
+.payment-detail-row:last-child {
   border-bottom: none;
 }
-
-.success-detail span {
-  color: #777;
-}
-
-.success-detail strong {
-  color: #222;
-  text-align: right;
-  word-break: break-word;
-}
-
-/* =========================================================
-   BUTTONS
-   ========================================================= */
-
-.payment-actions {
+.payment-detail-row span {
   display: flex;
-  gap: 12px;
-  margin-top: 28px;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+  font-size: 14px;
+  color: #6b7280;
 }
-
-.payment-actions button {
-  flex: 1;
+.payment-detail-row span svg {
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+}
+.payment-detail-row strong {
+  max-width: 60%;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 600;
+  color: #202124;
+  overflow-wrap: anywhere;
+}
+/* ============================================================
+   ACTION BUTTONS
+   ============================================================ */
+.payment-success-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 26px;
+}
+.payment-success-actions button {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 14px 20px;
   border: none;
   border-radius: 12px;
-  padding: 14px 18px;
-  background: #111;
-  color: white;
+  background: #ff6b00;
+  color: #ffffff;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 }
-
-.payment-actions button:hover {
+.payment-success-actions button:hover {
+  background: #e85f00;
   transform: translateY(-1px);
-  opacity: 0.92;
+  box-shadow: 0 6px 18px rgba(255, 107, 0, 0.22);
 }
-
-.payment-actions .secondary-payment-button {
-  background: #eeeeee;
-  color: #222;
+.payment-success-actions button:active {
+  transform: translateY(0);
 }
-
-.payment-small-text {
-  margin-top: 22px !important;
-  font-size: 13px;
-  color: #888 !important;
+.payment-success-actions button svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
-@media (max-width: 600px) {
+/* ============================================================
+   SECONDARY BUTTON
+   ============================================================ */
+.payment-success-actions .secondary-btn {
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #dddddd;
+  box-shadow: none;
+}
+.payment-success-actions .secondary-btn:hover {
+  background: #f7f7f7;
+  border-color: #cccccc;
+  box-shadow: none;
+}
+/* ============================================================
+   FAILED PAGE BUTTON
+   ============================================================ */
+.payment-failed button {
+  margin-top: 22px;
+}
+/* ============================================================
+   TABLET
+   ============================================================ */
+@media (max-width: 700px) {
   .payment-success-page {
-    padding: 20px 14px;
+    padding: 28px 16px;
   }
-
   .payment-success-card {
-    padding: 35px 20px;
+    padding: 32px 24px;
     border-radius: 18px;
   }
-
   .payment-success-card h1 {
-    font-size: 25px;
+    font-size: 26px;
   }
-
-  .payment-actions {
+  .payment-status-icon {
+    width: 68px;
+    height: 68px;
+  }
+  .payment-status-icon svg {
+    width: 39px;
+    height: 39px;
+  }
+  .payment-detail-row {
+    gap: 12px;
+    padding: 15px;
+  }
+  .payment-detail-row span {
+    min-width: 100px;
+  }
+  .payment-detail-row strong {
+    max-width: 58%;
+  }
+}
+/* ============================================================
+   MOBILE
+   ============================================================ */
+@media (max-width: 480px) {
+  .payment-success-page {
+    min-height: 100svh;
+    padding: 20px 12px;
+  }
+  .payment-success-card {
+    padding: 28px 18px;
+    border-radius: 16px;
+  }
+  .payment-success-card h1 {
+    font-size: 23px;
+  }
+  .payment-success-card > p {
+    font-size: 14px;
+  }
+  .payment-loader {
+    width: 46px;
+    height: 46px;
+  }
+  .payment-status-icon {
+    width: 62px;
+    height: 62px;
+    margin-bottom: 18px;
+  }
+  .payment-status-icon svg {
+    width: 36px;
+    height: 36px;
+  }
+  .payment-booking-details {
+    margin: 24px 0;
+    border-radius: 12px;
+  }
+  .payment-detail-row {
+    align-items: flex-start;
     flex-direction: column;
+    gap: 6px;
+    padding: 14px;
   }
-
-  .success-detail {
-    flex-direction: column;
-    gap: 5px;
+  .payment-detail-row span {
+    min-width: 0;
   }
-
-  .success-detail strong {
+  .payment-detail-row strong {
+    max-width: 100%;
     text-align: left;
+    font-size: 14px;
+  }
+  .payment-success-actions {
+    margin-top: 22px;
+  }
+  .payment-success-actions button {
+    min-height: 50px;
+    font-size: 14px;
+  }
+}
+/* ============================================================
+   SMALL MOBILE
+   ============================================================ */
+@media (max-width: 360px) {
+  .payment-success-card {
+    padding: 24px 14px;
+  }
+  .payment-success-card h1 {
+    font-size: 21px;
+  }
+  .payment-detail-row {
+    padding: 13px;
   }
 }

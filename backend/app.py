@@ -22801,6 +22801,11 @@ def initialize_pesapal_payment():
             )
             or
             data.get(
+                "phoneNumber",
+                ""
+            )
+            or
+            data.get(
                 "phone",
                 ""
             )
@@ -24578,6 +24583,26 @@ def initialize_payment():
 
 
         # ====================================================
+        # PAYMENT METHOD
+        # ====================================================
+
+        payment_method = str(
+            data.get(
+                "paymentMethod",
+                "card"
+            )
+        ).strip().lower()
+
+
+        phone_number = str(
+            data.get(
+                "phoneNumber",
+                ""
+            )
+        ).strip()
+
+
+        # ====================================================
         # VALIDATION
         # ====================================================
 
@@ -24619,6 +24644,46 @@ def initialize_payment():
             return jsonify({
                 "success": False,
                 "message": "Buyer email is required."
+            }), 400
+
+
+        # ====================================================
+        # VALIDATE PAYMENT METHOD
+        # ====================================================
+
+        allowed_payment_methods = {
+            "mtn",
+            "airtel",
+            "card"
+        }
+
+
+        if payment_method not in allowed_payment_methods:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "Invalid payment method."
+            }), 400
+
+
+        # ====================================================
+        # MOBILE MONEY PHONE NUMBER
+        # ====================================================
+
+        if (
+            payment_method in {
+                "mtn",
+                "airtel"
+            }
+            and
+            not phone_number
+        ):
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "Phone number is required for mobile money payments."
             }), 400
 
 
@@ -24863,6 +24928,18 @@ def initialize_payment():
 
             },
 
+            # =================================================
+            # PAYMENT METHOD INFORMATION
+            # =================================================
+
+            "paymentMethod":
+                payment_method,
+
+            "phoneNumber":
+                phone_number
+                if payment_method != "card"
+                else "",
+
             "ticketPrice":
                 ticket_price,
 
@@ -24912,6 +24989,32 @@ def initialize_payment():
 
 
         # ====================================================
+        # FLUTTERWAVE PAYMENT OPTIONS
+        #
+        # Standard Checkout supports:
+        #
+        # card
+        # mobilemoneyuganda
+        #
+        # MTN and Airtel are both represented by
+        # mobilemoneyuganda in Standard Checkout.
+        #
+        # We are NOT using the direct-charge network
+        # flow here yet.
+        # ====================================================
+
+        if payment_method == "card":
+
+            flutterwave_payment_options = "card"
+
+        else:
+
+            flutterwave_payment_options = (
+                "mobilemoneyuganda"
+            )
+
+
+        # ====================================================
         # FLUTTERWAVE STANDARD CHECKOUT
         # ====================================================
 
@@ -24929,13 +25032,19 @@ def initialize_payment():
             "redirect_url":
                 f"{FRONTEND_URL}/payment-success",
 
+            "payment_options":
+                flutterwave_payment_options,
+
             "customer": {
 
                 "email":
                     buyer_email,
 
                 "name":
-                    buyer_name
+                    buyer_name,
+
+                "phonenumber":
+                    phone_number
 
             },
 
@@ -24961,7 +25070,10 @@ def initialize_payment():
                     ticket_type,
 
                 "quantity":
-                    quantity
+                    quantity,
+
+                "paymentMethod":
+                    payment_method
 
             }
 
@@ -25018,11 +25130,11 @@ def initialize_payment():
             "FLUTTERWAVE INITIALIZE STATUS:",
             response.status_code
         )
+
         print(
-                        "FLUTTERWAVE INITIALIZE RESPONSE:",
-                        flutterwave_data
-                    )
-        
+            "FLUTTERWAVE INITIALIZE RESPONSE:",
+            flutterwave_data
+        )
 
 
         # ====================================================
@@ -25043,7 +25155,9 @@ def initialize_payment():
             )
 
 
-            # Remove pending payment record
+            # ------------------------------------------------
+            # REMOVE PENDING PAYMENT RECORD
+            # ------------------------------------------------
 
             payments = load_payments()
 
@@ -25100,7 +25214,9 @@ def initialize_payment():
 
         if not checkout_link:
 
-            # Remove pending payment
+            # ------------------------------------------------
+            # REMOVE PENDING PAYMENT
+            # ------------------------------------------------
 
             payments = load_payments()
 
@@ -25156,6 +25272,9 @@ def initialize_payment():
 
                 "currency":
                     "UGX",
+
+                "paymentMethod":
+                    payment_method,
 
                 "checkoutLink":
                     checkout_link
