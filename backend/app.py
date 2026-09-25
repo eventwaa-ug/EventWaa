@@ -44053,7 +44053,7 @@ def create_event_report():
     "/admin/event-reports",
     methods=["GET"]
 )
-@admin_requireed
+@admin_required
 def get_event_reports():
 
     reports = load_event_reports()
