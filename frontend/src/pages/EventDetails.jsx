@@ -14,7 +14,7 @@ import {
     X,
     Ticket,
     ShieldCheck,
-    Copy,
+    Flag,
 } from "lucide-react";
 
 import { EventContext } from "../context/EventContext";
