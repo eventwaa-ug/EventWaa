@@ -116,6 +116,7 @@ import Support from "./pages/Support";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import MaintenanceGuard from "./components/MaintenanceGuard";
+import VerifiedHostRoute from "./components/VerifiedHostRoute";
 
 function App() {
     return (
@@ -396,9 +397,9 @@ function App() {
                         <Route
                             path="dashboard"
                             element={
-                                <ProtectedRoute>
+                                <VerifiedHostRoute>
                                     <Dashboard />
-                                </ProtectedRoute>
+                                </VerifiedHostRoute>
                             }
                         />
 
@@ -406,9 +407,9 @@ function App() {
                         <Route
                             path="create-event"
                             element={
-                                <ProtectedRoute>
+                                <VerifiedHostRoute>
                                     <CreateEvent />
-                                </ProtectedRoute>
+                                </VerifiedHostRoute>
                             }
                         />
 

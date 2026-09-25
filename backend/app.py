@@ -1488,7 +1488,18 @@ Uganda's event discovery and ticketing platform
 # ADMIN LOGIN SECURITY
 # ============================================================
 
+# ============================================================
+# ADMIN LOGIN SECURITY
+# ============================================================
+
 admin_failed_login_attempts = 0
+
+# Unix timestamp when the admin account lock expires.
+# None means the account is currently not locked.
+admin_login_locked_until = None
+
+# Admin account lock duration.
+ADMIN_LOGIN_LOCKOUT_SECONDS = 15 * 60
 
 
 # ============================================================
@@ -11969,8 +11980,64 @@ def save_admin_password_hash(
 def admin_login():
 
     global admin_failed_login_attempts
+    global admin_login_locked_until
 
     try:
+
+        # ====================================================
+        # CURRENT TIME
+        # ====================================================
+
+        current_time = time.time()
+
+        # ====================================================
+        # CHECK WHETHER ADMIN ACCOUNT IS LOCKED
+        # ====================================================
+
+        if (
+            admin_login_locked_until is not None
+            and current_time < admin_login_locked_until
+        ):
+
+            remaining_seconds = int(
+                admin_login_locked_until - current_time
+            )
+
+            remaining_minutes = max(
+                1,
+                (remaining_seconds + 59) // 60
+            )
+
+            return jsonify({
+
+                "success": False,
+
+                "locked": True,
+
+                "message":
+                    "Admin account is temporarily locked "
+                    "because of multiple failed login attempts. "
+                    f"Please try again after {remaining_minutes} "
+                    "minute(s)."
+
+            }), 429
+
+        # ====================================================
+        # LOCKOUT HAS EXPIRED
+        # ====================================================
+
+        if (
+            admin_login_locked_until is not None
+            and current_time >= admin_login_locked_until
+        ):
+
+            admin_failed_login_attempts = 0
+
+            admin_login_locked_until = None
+
+        # ====================================================
+        # READ REQUEST DATA
+        # ====================================================
 
         data = request.get_json(
             silent=True
@@ -12005,7 +12072,6 @@ def admin_login():
 
             }), 500
 
-
         if not ADMIN_PASSWORD_HASH:
 
             return jsonify({
@@ -12016,7 +12082,6 @@ def admin_login():
                     "Admin authentication is not configured."
 
             }), 500
-
 
         if not ADMIN_AUTH_SECRET:
 
@@ -12034,7 +12099,6 @@ def admin_login():
 
             }), 500
 
-
         # ====================================================
         # VALIDATE INPUT
         # ====================================================
@@ -12050,6 +12114,40 @@ def admin_login():
 
             }), 400
 
+        # ====================================================
+        # GET REQUEST INFORMATION
+        # ====================================================
+
+        forwarded_for = (
+            request.headers.get(
+                "X-Forwarded-For",
+                ""
+            ).strip()
+        )
+
+        if forwarded_for:
+
+            # Railway/proxy environments may provide
+            # a comma-separated forwarding chain.
+            ip_address = (
+                forwarded_for
+                .split(",")[0]
+                .strip()
+            )
+
+        else:
+
+            ip_address = (
+                request.remote_addr
+                or "Unknown IP"
+            )
+
+        user_agent = (
+            request.headers.get(
+                "User-Agent",
+                "Unknown device"
+            )
+        )
 
         # ====================================================
         # CHECK EMAIL
@@ -12062,9 +12160,8 @@ def admin_login():
         # ====================================================
         # INVALID EMAIL
         #
-        # We deliberately use the same generic message.
-        # This prevents revealing whether an email belongs
-        # to the admin account.
+        # Keep the response generic so we don't reveal
+        # whether an email belongs to the admin account.
         # ====================================================
 
         if not email_matches_admin:
@@ -12083,7 +12180,6 @@ def admin_login():
 
             }), 401
 
-
         # ====================================================
         # CHECK PASSWORD
         # ====================================================
@@ -12096,7 +12192,6 @@ def admin_login():
             current_admin_password_hash,
             password
         )
-
 
         # ====================================================
         # FAILED ADMIN LOGIN
@@ -12112,45 +12207,53 @@ def admin_login():
 
             print(
                 "ADMIN LOGIN FAILED:",
-                current_attempt
+                current_attempt,
+                "IP:",
+                ip_address
             )
 
-
             # =================================================
-            # SECURITY ALERT AFTER 2 FAILED ATTEMPTS
+            # LOCK ACCOUNT AFTER 2 FAILED ATTEMPTS
             # =================================================
 
-            if current_attempt == 2:
+            if current_attempt >= 2:
+
+                admin_login_locked_until = (
+                    time.time()
+                    + ADMIN_LOGIN_LOCKOUT_SECONDS
+                )
+
+                locked_until_datetime = (
+                    datetime.fromtimestamp(
+                        admin_login_locked_until
+                    )
+                )
+
+                locked_until_text = (
+                    locked_until_datetime.strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+                )
+
+                print(
+                    "ADMIN ACCOUNT LOCKED.",
+                    "IP:",
+                    ip_address,
+                    "LOCKED UNTIL:",
+                    locked_until_text
+                )
+
+                # =============================================
+                # SECURITY EMAIL
+                # =============================================
 
                 try:
-
-                    # -----------------------------------------
-                    # REQUEST INFORMATION
-                    # -----------------------------------------
-
-                    ip_address = (
-                        request.headers.get(
-                            "X-Forwarded-For",
-                            request.remote_addr
-                        )
-                    )
-
-                    user_agent = (
-                        request.headers.get(
-                            "User-Agent",
-                            "Unknown device"
-                        )
-                    )
-
-                    # -----------------------------------------
-                    # SECURITY EMAIL
-                    # -----------------------------------------
 
                     msg = Message(
 
                         subject=(
-                            "🚨 EventWaa Admin Security Alert "
-                            "— 2 Failed Login Attempts"
+                            "🚨 EventWaa Admin Account "
+                            "Locked — Security Alert"
                         ),
 
                         recipients=[
@@ -12162,12 +12265,21 @@ def admin_login():
                     msg.body = f"""
 EventWaa Admin Security Alert
 
-Two unsuccessful login attempts were detected
-on the EventWaa administrator account.
+The EventWaa administrator account has been
+temporarily locked after 2 failed login attempts.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-TIME
+ACCOUNT STATUS
+TEMPORARILY LOCKED
+
+LOCKOUT DURATION
+15 minutes
+
+LOCKED UNTIL
+{locked_until_text}
+
+TIME OF SECURITY EVENT
 {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
 IP ADDRESS
@@ -12181,15 +12293,19 @@ BROWSER / DEVICE
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-If these login attempts were made by you,
-you can safely ignore this message.
+If you made these login attempts,
+you can safely wait until the lock expires
+and try again.
 
 If you did NOT attempt to sign in:
 
-• Change your admin password immediately.
-• Check your admin account activity.
+• Review the IP address above.
+• Change your admin password.
+• Check your EventWaa server and deployment security.
 • Do not share your admin credentials.
-• Review your server and deployment security.
+
+The account has been temporarily locked to
+prevent further login attempts.
 
 This is an automated security notification
 from EventWaa.
@@ -12197,26 +12313,38 @@ from EventWaa.
 EventWaa Security System
 """
 
-                    # -----------------------------------------
-                    # SEND EMAIL
-                    # -----------------------------------------
-
                     mail.send(msg)
 
                     print(
-                        "ADMIN SECURITY ALERT EMAIL SENT."
+                        "ADMIN LOCKOUT SECURITY EMAIL SENT."
                     )
 
                 except Exception as email_error:
 
                     print(
-                        "ADMIN SECURITY EMAIL ERROR:",
+                        "ADMIN LOCKOUT EMAIL ERROR:",
                         str(email_error)
                     )
 
+                # =============================================
+                # LOCKOUT RESPONSE
+                # =============================================
+
+                return jsonify({
+
+                    "success": False,
+
+                    "locked": True,
+
+                    "message":
+                        "Admin account is temporarily locked "
+                        "after 2 failed login attempts. "
+                        "Please try again after 15 minutes."
+
+                }), 429
 
             # =================================================
-            # RESPONSE
+            # FAILED ATTEMPT BEFORE LOCKOUT
             # =================================================
 
             return jsonify({
@@ -12228,22 +12356,21 @@ EventWaa Security System
 
             }), 401
 
-
         # ====================================================
         # SUCCESSFUL ADMIN LOGIN
         #
-        # Reset failed attempts.
+        # Reset failed attempts and any previous lock.
         # ====================================================
 
         admin_failed_login_attempts = 0
 
+        admin_login_locked_until = None
 
         # ====================================================
-        # CREATE SESSION TOKEN
+        # CREATE ADMIN SESSION TOKEN
         # ====================================================
 
         token = create_admin_token()
-
 
         # ====================================================
         # SUCCESS
@@ -12271,7 +12398,6 @@ EventWaa Security System
 
         }), 200
 
-
     except Exception as e:
 
         print(
@@ -12287,7 +12413,6 @@ EventWaa Security System
                 "Unable to login as admin."
 
         }), 500
-
         
 
 # ============================================================
@@ -25404,22 +25529,20 @@ def google_login():
             "message": "Unable to authenticate with Google."
         }), 400
 
-
 # ============================================================
 # CREATE EVENT
 #
 # Supports:
-# - Normal verified/community hosts
+# - Verified hosts creating FREE events
+# - Verified hosts creating PAID events
 # - Official EventWaa admin events
 #
-# ADMIN EVENTS:
-# adminEvent=true
-#
-# Admin-created events do NOT require a host account.
-# They are automatically:
-# - owned by EventWaa
-# - verified
-# - published
+# SECURITY:
+# - Normal users cannot create events.
+# - Only users with verifiedHost=True can create events.
+# - The backend determines verification from users.json.
+# - The frontend cannot make itself a verified host.
+# - adminEvent=true requires a valid admin token.
 # ============================================================
 
 @app.route(
@@ -25445,6 +25568,44 @@ def create_event():
         ).lower()
         == "true"
     )
+
+    # ========================================================
+    # ADMIN EVENT SECURITY
+    #
+    # adminEvent=true is only allowed when the request
+    # contains a valid EventWaa administrator token.
+    # ========================================================
+
+    if is_admin_event:
+
+        authorization = request.headers.get(
+            "Authorization",
+            ""
+        ).strip()
+
+        if not authorization.startswith(
+            "Bearer "
+        ):
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "Admin authentication required."
+            }), 401
+
+        admin_token = authorization[
+            len("Bearer "):
+        ].strip()
+
+        if not verify_admin_token(
+            admin_token
+        ):
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "Invalid admin authentication."
+            }), 401
 
     # ========================================================
     # TICKET TYPES
@@ -25479,7 +25640,8 @@ def create_event():
 
             return jsonify({
                 "success": False,
-                "message": "Invalid ticket data."
+                "message":
+                    "Invalid ticket data."
             }), 400
 
     # ========================================================
@@ -25503,7 +25665,8 @@ def create_event():
     # No real host account is required.
     #
     # NORMAL EVENT:
-    # Existing host verification system remains unchanged.
+    # The backend looks up the user account and determines
+    # whether that user is actually a verified host.
     # ========================================================
 
     if is_admin_event:
@@ -25538,8 +25701,13 @@ def create_event():
 
             return jsonify({
                 "success": False,
-                "message": "Invalid host ID."
+                "message":
+                    "Invalid host ID."
             }), 400
+
+        # ----------------------------------------------------
+        # LOAD USERS
+        # ----------------------------------------------------
 
         users = load_json_file(
             "users.json",
@@ -25570,38 +25738,60 @@ def create_event():
 
                 continue
 
+        # ----------------------------------------------------
+        # HOST ACCOUNT MUST EXIST
+        # ----------------------------------------------------
+
         if not host:
 
             return jsonify({
                 "success": False,
-                "message": "Host account not found."
+                "message":
+                    "Host account not found."
             }), 404
 
-        host_name = data.get(
-            "hostName",
-            host.get(
-                "name",
-                ""
-            )
+        # ----------------------------------------------------
+        # HOST INFORMATION
+        #
+        # These values are used for the event record,
+        # but verification comes ONLY from the backend user.
+        # ----------------------------------------------------
+
+        host_name = host.get(
+            "name",
+            ""
         )
 
-        host_email = data.get(
-            "hostEmail",
-            host.get(
-                "email",
-                ""
-            )
+        host_email = host.get(
+            "email",
+            ""
         )
 
-        host_verified = bool(
+        # ----------------------------------------------------
+        # REAL HOST VERIFICATION
+        #
+        # DO NOT trust:
+        #
+        # data["verifiedHost"]
+        #
+        # The backend user account is the source of truth.
+        # ----------------------------------------------------
+
+        host_verified = (
             host.get(
                 "verifiedHost",
                 False
             )
+            is True
         )
 
         # ----------------------------------------------------
-        # HOST VERIFICATION
+        # ONLY VERIFIED HOSTS CAN CREATE EVENTS
+        #
+        # This applies to BOTH:
+        #
+        # - Paid events
+        # - Free events
         # ----------------------------------------------------
 
         host_verification_required = settings.get(
@@ -25609,36 +25799,17 @@ def create_event():
             True
         )
 
-        community_hosts_allowed = settings.get(
-            "communityHosts",
-            False
-        )
+        if host_verification_required:
 
-        host_is_community = bool(
-            host.get(
-                "communityHost",
-                False
-            )
-        )
+            if not host_verified:
 
-        if is_paid_event:
-
-            if host_verification_required:
-
-                if not host_verified:
-
-                    if not (
-                        community_hosts_allowed
-                        and host_is_community
-                    ):
-
-                        return jsonify({
-                            "success": False,
-                            "message": (
-                                "You must be a verified host "
-                                "before creating paid events."
-                            )
-                        }), 403
+                return jsonify({
+                    "success": False,
+                    "message": (
+                        "You must be a verified host "
+                        "before creating events."
+                    )
+                }), 403
 
     # ========================================================
     # VALIDATE TICKETS
@@ -25725,8 +25896,6 @@ def create_event():
                     )
                 }), 400
 
-
-
             cleaned_tickets.append({
 
                 "name":
@@ -25743,6 +25912,10 @@ def create_event():
 
             })
 
+        # ----------------------------------------------------
+        # PAID EVENT MUST HAVE TICKETS
+        # ----------------------------------------------------
+
         if not cleaned_tickets:
 
             return jsonify({
@@ -25757,9 +25930,9 @@ def create_event():
 
     else:
 
-        # ----------------------------------------------------
+        # ====================================================
         # FREE EVENT
-        # ----------------------------------------------------
+        # ====================================================
 
         capacity_value = data.get(
             "capacity",
@@ -25781,13 +25954,32 @@ def create_event():
 
             free_quantity = 0
 
+        if free_quantity <= 0:
+
+            return jsonify({
+                "success": False,
+                "message": (
+                    "A free event must have "
+                    "a capacity greater than zero."
+                )
+            }), 400
+
         tickets = [{
-            "name": "Free Entry",
-            "price": "0",
-            "quantity": str(
+
+            "name":
+                "Free Entry",
+
+            "price":
+                "0",
+
+            "quantity":
+                str(
+                    free_quantity
+                ),
+
+            "remaining":
                 free_quantity
-            ),
-            "remaining": free_quantity
+
         }]
 
     # ========================================================
@@ -25954,7 +26146,9 @@ def create_event():
         "ticketType":
             (
                 "Free"
-                if str(event_type).lower() == "free"
+                if str(
+                    event_type
+                ).lower() == "free"
                 else "Paid"
             ),
 
@@ -26049,25 +26243,6 @@ def create_event():
             event
 
     }), 201
-
-# ============================================================
-# GET ALL EVENTS
-# ============================================================
-
-@app.route(
-    "/events",
-    methods=["GET"]
-)
-def get_events():
-
-    events = load_json_file(
-        "events.json",
-        []
-    )
-
-    return jsonify(
-        events
-    )
 
 # ============================================================
 # GET SINGLE EVENT
