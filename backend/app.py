@@ -1612,58 +1612,6 @@ def get_admin_token_serializer():
         salt="eventwaa-admin-auth"
     )
 
-# ============================================================
-# VERIFY ADMIN AUTH TOKEN
-# ============================================================
-
-def verify_admin_token():
-
-    auth_header = request.headers.get(
-        "Authorization",
-        ""
-    ).strip()
-
-    # --------------------------------------------------------
-    # Expected format:
-    #
-    # Authorization: Bearer <admin_token>
-    # --------------------------------------------------------
-
-    if not auth_header.startswith(
-        "Bearer "
-    ):
-
-        return False
-
-    token = auth_header[
-        len("Bearer "):
-    ].strip()
-
-    if not token:
-
-        return False
-
-    try:
-
-        serializer = (
-            get_admin_token_serializer()
-        )
-
-        serializer.loads(
-            token,
-            max_age=60 * 60 * 24
-        )
-
-        return True
-
-    except Exception as e:
-
-        print(
-            "ADMIN TOKEN VERIFICATION ERROR:",
-            repr(e)
-        )
-
-        return False
 
 # ============================================================
 # ADMIN TEAM TOKEN AUTHENTICATION
@@ -4442,7 +4390,6 @@ def get_team_dashboard(account):
         }), 500
 
 
-
 # ============================================================
 # CREATE ADMIN TOKEN
 # ============================================================
@@ -4458,92 +4405,98 @@ def create_admin_token():
 
 
 # ============================================================
+# ADMIN TOKEN VERIFICATION
+# ============================================================
+
+def verify_admin_token(token):
+
+    if not token:
+        return False
+
+    try:
+
+        serializer = get_admin_token_serializer()
+
+        data = serializer.loads(token)
+
+        if not isinstance(data, dict):
+            return False
+
+        if data.get("role") != "admin":
+            return False
+
+        token_email = str(
+            data.get("email", "")
+        ).strip().lower()
+
+        admin_email = str(
+            ADMIN_EMAIL
+        ).strip().lower()
+
+        if token_email != admin_email:
+            return False
+
+        return True
+
+    except Exception as e:
+
+        print(
+            "ADMIN TOKEN VERIFICATION ERROR:",
+            str(e)
+        )
+
+        return False
+
+
+# ============================================================
 # ADMIN REQUIRED
 # ============================================================
 
 def admin_required(function):
 
     @wraps(function)
-    def decorated(*args, **kwargs):
-
-        # ----------------------------------------------------
-        # READ AUTHORIZATION HEADER
-        # ----------------------------------------------------
+    def decorated_function(*args, **kwargs):
 
         authorization = request.headers.get(
             "Authorization",
             ""
         ).strip()
 
-
-        # ----------------------------------------------------
-        # CHECK HEADER
-        # ----------------------------------------------------
-
-        if not authorization:
+        if not authorization.startswith("Bearer "):
 
             return jsonify({
-
                 "success": False,
-
                 "message":
                     "Admin authentication required."
-
             }), 401
-
-
-        # ----------------------------------------------------
-        # EXPECT:
-        #
-        # Authorization: Bearer <token>
-        # ----------------------------------------------------
-
-        if not authorization.startswith(
-            "Bearer "
-        ):
-
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    "Invalid admin authorization."
-
-            }), 401
-
 
         token = authorization[
             len("Bearer "):
         ].strip()
 
+        if not token:
 
-        # ----------------------------------------------------
-        # VERIFY TOKEN
-        # ----------------------------------------------------
+            return jsonify({
+                "success": False,
+                "message":
+                    "Admin authentication required."
+            }), 401
 
         if not verify_admin_token(token):
 
             return jsonify({
-
                 "success": False,
-
                 "message":
-                    "Admin session is invalid or expired."
-
+                    "Invalid or expired admin session."
             }), 401
-
-
-        # ----------------------------------------------------
-        # AUTHENTICATED ADMIN
-        # ----------------------------------------------------
 
         return function(
             *args,
             **kwargs
         )
 
+    return decorated_function
 
-    return decorated
 
 # ============================================================
 # EVENTWAA TICKET ACTOR IDENTIFICATION
@@ -7949,153 +7902,6 @@ def save_team_accounts(
             ensure_ascii=False
         )
 
-
-# ============================================================
-# ADMIN TOKEN VERIFICATION
-#
-# IMPORTANT:
-# This is the ONLY admin token verification function
-# used by this section.
-#
-# Do NOT define another verify_admin_token()
-# below this section.
-# ============================================================
-
-def verify_admin_token(
-    token
-):
-
-    if not token:
-
-        return False
-
-
-    try:
-
-        serializer = (
-            get_admin_token_serializer()
-        )
-
-
-        data = serializer.loads(
-            token
-        )
-
-
-        if not isinstance(
-            data,
-            dict
-        ):
-
-            return False
-
-
-        if (
-            data.get("role")
-            !=
-            "admin"
-        ):
-
-            return False
-
-
-        token_email = str(
-            data.get(
-                "email",
-                ""
-            )
-        ).strip().lower()
-
-
-        admin_email = str(
-            ADMIN_EMAIL
-        ).strip().lower()
-
-
-        if (
-            token_email
-            !=
-            admin_email
-        ):
-
-            return False
-
-
-        return True
-
-
-    except Exception as e:
-
-        print(
-            "ADMIN TOKEN VERIFICATION ERROR:",
-            str(e)
-        )
-
-        return False
-
-
-# ============================================================
-# ADMIN REQUIRED DECORATOR
-# ============================================================
-
-def admin_required(
-    function
-):
-
-    @wraps(function)
-    def decorated_function(
-        *args,
-        **kwargs
-    ):
-
-        authorization = request.headers.get(
-            "Authorization",
-            ""
-        ).strip()
-
-
-        if not authorization.startswith(
-            "Bearer "
-        ):
-
-            return jsonify({
-
-                "success":
-                    False,
-
-                "message":
-                    "Admin authentication required."
-
-            }), 401
-
-
-        token = authorization[
-            len("Bearer "):
-        ].strip()
-
-
-        if not verify_admin_token(
-            token
-        ):
-
-            return jsonify({
-
-                "success":
-                    False,
-
-                "message":
-                    "Invalid or expired admin session."
-
-            }), 401
-
-
-        return function(
-            *args,
-            **kwargs
-        )
-
-
-    return decorated_function
 
 
 # ============================================================
@@ -14198,6 +14004,7 @@ def get_platform_stats():
         }), 500
 
 @app.route("/admin/upload-logo", methods=["POST"])
+@admin_required
 def upload_platform_logo():
 
     if "logo" not in request.files:
@@ -14252,6 +14059,7 @@ def upload_platform_logo():
 
 
 @app.route("/admin/remove-logo", methods=["DELETE"])
+@admin_required
 def remove_platform_logo():
 
     settings = load_admin_settings()
@@ -15165,6 +14973,7 @@ def upload_profile_photo(user_id):
     })
 
 @app.route("/admin/users", methods=["GET"])
+@admin_required
 def admin_get_users():
     return jsonify(
         load_json_file("users.json", [])
@@ -15172,6 +14981,7 @@ def admin_get_users():
 
 
 @app.route("/admin/events", methods=["GET"])
+@admin_required
 def admin_get_events():
     return jsonify(
         load_json_file("events.json", [])
@@ -15179,6 +14989,7 @@ def admin_get_events():
 
 
 @app.route("/admin/host-applications", methods=["GET"])
+@admin_required
 def admin_get_host_applications():
     return jsonify(
         load_applications()
@@ -18742,6 +18553,7 @@ def home():
     "/admin/settings",
     methods=["GET"]
 )
+@admin_required
 def get_admin_settings():
 
     settings = load_admin_settings()
@@ -18753,6 +18565,7 @@ def get_admin_settings():
     "/admin/settings",
     methods=["PUT"]
 )
+@admin_required
 def update_admin_settings():
 
     data = request.get_json(
@@ -26338,6 +26151,7 @@ def get_event(event_identifier):
     "/admin/events/<int:event_id>/feature",
     methods=["PUT"]
 )
+@admin_required
 def toggle_featured_event(event_id):
 
     events = load_json_file(
@@ -32135,18 +31949,8 @@ def cancel_event(event_id):
     "/admin/events/<int:event_id>/cancel",
     methods=["POST"]
 )
+@admin_required
 def admin_cancel_event(event_id):
-
-    # ========================================================
-    # ADMIN AUTHENTICATION
-    # ========================================================
-
-    if not verify_admin_token():
-
-        return {
-            "success": False,
-            "message": "Unauthorized."
-        }, 401
 
     data = request.get_json() or {}
 
@@ -34187,6 +33991,7 @@ def host_review_refund(refund_id):
     "/admin/refunds",
     methods=["GET"]
 )
+@admin_required
 def get_admin_refunds():
 
     try:
@@ -42123,6 +41928,7 @@ def get_notifications(user_id):
     "/admin/notifications",
     methods=["GET"]
 )
+@admin_required
 def get_admin_notifications():
 
     notifications = load_notifications()
@@ -43866,6 +43672,7 @@ def update_host_profile(user_id):
     "/admin/users/<int:user_id>",
     methods=["PUT"]
 )
+@admin_required
 def admin_update_user(user_id):
 
     data = request.get_json(
@@ -43966,6 +43773,7 @@ def admin_update_user(user_id):
     "/admin/stats",
     methods=["GET"]
 )
+@admin_required
 def admin_stats():
 
     users = load_json_file(
@@ -44061,6 +43869,7 @@ def admin_stats():
     "/admin/revenue",
     methods=["GET"]
 )
+@admin_required
 def admin_revenue():
 
     bookings = load_json_file(
@@ -44244,6 +44053,7 @@ def create_event_report():
     "/admin/event-reports",
     methods=["GET"]
 )
+@admin_requireed
 def get_event_reports():
 
     reports = load_event_reports()
@@ -44264,6 +44074,7 @@ def get_event_reports():
     "/admin/event-reports/<int:report_id>/dismiss",
     methods=["PUT"]
 )
+@admin_required
 def dismiss_event_report(report_id):
 
     reports = load_event_reports()

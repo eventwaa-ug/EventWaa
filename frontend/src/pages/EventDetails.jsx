@@ -65,11 +65,53 @@ function EventDetails() {
     ============================================================ */
 
     const event =
-        (events || []).find(
-            (item) =>
-                Number(item?.id) === Number(id)
+    (events || []).find((item) => {
+
+        /* ========================================================
+           OLD NUMERIC EVENT URL
+           Example:
+           /events/2
+        ======================================================== */
+
+        if (
+            String(item?.id) === String(id)
+        ) {
+            return true;
+        }
+
+
+        /* ========================================================
+           NEW EVENT SLUG URL
+           Example:
+           /events/event-waa-test
+        ======================================================== */
+
+        const createSlug = (value) => {
+
+            return String(value || "")
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, "")
+                .replace(/\s+/g, "-")
+                .replace(/-+/g, "-")
+                .replace(/^-|-$/g, "");
+
+        };
+
+
+        const eventSlug =
+            item?.slug ||
+            item?.eventSlug ||
+            item?.event_slug ||
+            createSlug(item?.title);
+
+
+        return (
+            String(eventSlug) ===
+            String(id).toLowerCase()
         );
 
+    });
 
     /* ============================================================
        EVENT NOT FOUND
@@ -268,29 +310,44 @@ function EventDetails() {
 
     const getShareUrl = () => {
 
-        const origin =
-            window.location.origin;
+    const origin =
+        window.location.origin;
 
-        /*
-         * Keep the public EventWaa event route
-         * consistent instead of sharing a temporary
-         * or environment-specific URL.
-         *
-         * If the event has a slug, use it.
-         * Otherwise use the event ID.
-         */
 
-        const eventIdentifier =
-            event.slug ||
-            event.eventSlug ||
-            event.event_id ||
-            event.id;
+    /* ========================================================
+       USE EXISTING SLUG IF THE EVENT HAS ONE
+    ======================================================== */
 
-        return `${origin}/events/${encodeURIComponent(
-            eventIdentifier
-        )}`;
+    const existingSlug =
+        event.slug ||
+        event.eventSlug ||
+        event.event_slug;
 
-    };
+
+    /* ========================================================
+       OTHERWISE CREATE SLUG FROM EVENT TITLE
+       Example:
+       "EventWaa test"
+       becomes:
+       "event-waa-test"
+    ======================================================== */
+
+    const eventSlug =
+        existingSlug ||
+        String(event.title || "event")
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, "")
+            .replace(/\s+/g, "-")
+            .replace(/-+/g, "-")
+            .replace(/^-|-$/g, "");
+
+
+    return `${origin}/events/${encodeURIComponent(
+        eventSlug
+    )}`;
+
+};
 
 
     const copyShareLink = async (

@@ -653,34 +653,55 @@ function Dashboard() {
        * Numeric ID remains the fallback so
        * older events continue to work.
        */
-      const eventIdentifier =
-        currentEvent.slug ||
-        currentEvent.eventSlug ||
-        currentEvent.id;
+      /* =========================================================
+        CREATE PUBLIC EVENT SLUG
+      ========================================================= */
 
-      if (
-        eventIdentifier ===
-        undefined ||
-        eventIdentifier ===
-        null ||
-        String(
-          eventIdentifier
-        ).trim() === ""
-      ) {
-        showShareMessage(
-          "Unable to create the event link."
-        );
+      const existingSlug =
+          currentEvent.slug ||
+          currentEvent.eventSlug ||
+          currentEvent.event_slug;
 
-        return;
+      const eventSlug =
+          existingSlug ||
+          String(
+            currentEvent.title || "event"
+          )
+            .trim()
+            .toLowerCase()
+            .replace(
+              /[^a-z0-9\s-]/g,
+              ""
+            )
+            .replace(
+              /\s+/g,
+              "-"
+            )
+            .replace(
+              /-+/g,
+              "-"
+            )
+            .replace(
+              /^-|-$/g,
+              ""
+            );
+
+      if (!eventSlug) {
+          showShareMessage(
+            "Unable to create the event link."
+          );
+
+          return;
       }
 
-      /*
-       * Generate the public EventWaa URL.
-       */
+      /* =========================================================
+        GENERATE PUBLIC EVENTWAA URL
+      ========================================================= */
+
       const eventUrl =
-        `${window.location.origin}/events/${encodeURIComponent(
-          String(eventIdentifier)
-        )}`;
+          `${window.location.origin}/events/${encodeURIComponent(
+            eventSlug
+          )}`;
 
       const shareTitle =
         currentEvent.title ||
