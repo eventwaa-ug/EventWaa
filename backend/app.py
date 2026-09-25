@@ -18671,20 +18671,34 @@ def home():
 
 
 # ============================================================
-# ADMIN SETTINGS
+# PLATFORM SETTINGS
 # ============================================================
+
+# ------------------------------------------------------------
+# PUBLIC SETTINGS
+#
+# The frontend needs these settings before an admin is logged
+# in. This endpoint is therefore intentionally public.
+#
+# It is READ-ONLY.
+# ------------------------------------------------------------
 
 @app.route(
     "/admin/settings",
     methods=["GET"]
 )
-@admin_required
 def get_admin_settings():
 
     settings = load_admin_settings()
 
-    return jsonify(settings)
+    return jsonify(settings), 200
 
+
+# ------------------------------------------------------------
+# ADMIN SETTINGS UPDATE
+#
+# Changing platform settings still requires an administrator.
+# ------------------------------------------------------------
 
 @app.route(
     "/admin/settings",
@@ -18704,11 +18718,14 @@ def update_admin_settings():
             "message": "Invalid settings data."
         }), 400
 
-    settings = save_admin_settings(data)
+    settings = save_admin_settings(
+        data
+    )
 
     return jsonify({
         "success": True,
-        "message": "Settings saved successfully.",
+        "message":
+            "Settings saved successfully.",
         "settings": settings
     })
 
