@@ -1,6 +1,6 @@
 {
     "platformName": "EventWaa",
-    "platformLogo": "http://127.0.0.1:5000/uploads/platform/platform_logo_1788354036_elep.jpeg",
+    "platformLogo": "/uploads/platform/platform_logo_1788354036_elep.jpeg",
     "maintenanceMode": false,
     "allowRegistration": true,
     "emailVerification": true,

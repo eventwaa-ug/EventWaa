@@ -1,11 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
+
 import {
     User,
     Share2,
-    MessageCircle,
-    Link,
-    Flag,
     CheckCircle,
     MapPin,
     CalendarDays,
@@ -15,7 +13,8 @@ import {
     Tag,
     X,
     Ticket,
-    ShieldCheck
+    ShieldCheck,
+    Copy,
 } from "lucide-react";
 
 import { EventContext } from "../context/EventContext";
@@ -40,16 +39,13 @@ function EventDetails() {
        STATE
     ============================================================ */
 
-    const [showShareMenu, setShowShareMenu] =
-        useState(false);
-
     const [showReportForm, setShowReportForm] =
         useState(false);
 
     const [reportData, setReportData] =
         useState({
             reason: "",
-            description: ""
+            description: "",
         });
 
     const [submittingReport, setSubmittingReport] =
@@ -60,7 +56,8 @@ function EventDetails() {
        BACKEND
     ============================================================ */
 
-    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+    const BACKEND_URL =
+        import.meta.env.VITE_API_BASE_URL || "";
 
 
     /* ============================================================
@@ -68,10 +65,9 @@ function EventDetails() {
     ============================================================ */
 
     const event =
-        events.find(
-            item =>
-                Number(item.id) ===
-                Number(id)
+        (events || []).find(
+            (item) =>
+                Number(item?.id) === Number(id)
         );
 
 
@@ -87,9 +83,7 @@ function EventDetails() {
 
                 <div className="event-not-found-icon">
 
-                    <Ticket
-                        size={34}
-                    />
+                    <Ticket size={34} />
 
                 </div>
 
@@ -139,21 +133,31 @@ function EventDetails() {
             event.poster;
 
         if (!image) {
-
             return "/default-event.jpg";
+        }
 
+        const imageUrl =
+            String(image).trim();
+
+        if (!imageUrl) {
+            return "/default-event.jpg";
         }
 
         if (
-            image.startsWith("http://") ||
-            image.startsWith("https://")
+            imageUrl.startsWith("http://") ||
+            imageUrl.startsWith("https://")
         ) {
-
-            return image;
-
+            return imageUrl;
         }
 
-        return `${BACKEND_URL}${image}`;
+        const backend =
+            BACKEND_URL.replace(/\/+$/, "");
+
+        if (imageUrl.startsWith("/")) {
+            return `${backend}${imageUrl}`;
+        }
+
+        return `${backend}/${imageUrl}`;
 
     };
 
@@ -173,8 +177,8 @@ function EventDetails() {
                     name: "Regular",
                     price: event.price || 0,
                     quantity:
-                        event.capacity || 100
-                }
+                        event.capacity || 100,
+                },
             ];
 
 
@@ -183,10 +187,6 @@ function EventDetails() {
     ============================================================ */
 
     const bookTicket = (ticket) => {
-
-        // --------------------------------------------------------
-        // CANCELLED EVENT
-        // --------------------------------------------------------
 
         if (isCancelled) {
 
@@ -210,8 +210,8 @@ function EventDetails() {
                 {
                     state: {
                         from:
-                            `/booking/${event.id}`
-                    }
+                            `/booking/${event.id}`,
+                    },
                 }
             );
 
@@ -224,8 +224,8 @@ function EventDetails() {
             `/booking/${event.id}`,
             {
                 state: {
-                    ticket
-                }
+                    ticket,
+                },
             }
         );
 
@@ -234,10 +234,6 @@ function EventDetails() {
 
     /* ============================================================
        VIEW HOST
-       
-       Your App.jsx already has:
-
-       /host/:id
     ============================================================ */
 
     const viewHost = () => {
@@ -262,44 +258,92 @@ function EventDetails() {
 
 
     /* ============================================================
-       SHARE — WHATSAPP
+       SHARE EVENT
+       
+       Uses the device/browser native share sheet.
+       
+       Falls back to copying the public EventWaa event link
+       when navigator.share is unavailable.
     ============================================================ */
 
-    const shareOnWhatsApp = () => {
+    const getShareUrl = () => {
 
-        const eventUrl =
-            window.location.href;
+        const origin =
+            window.location.origin;
 
-        const message =
-            `Check out this event on EventWaa!\n\n` +
-            `${event.title}\n\n` +
-            `${event.description || ""}\n\n` +
-            `${eventUrl}`;
+        /*
+         * Keep the public EventWaa event route
+         * consistent instead of sharing a temporary
+         * or environment-specific URL.
+         *
+         * If the event has a slug, use it.
+         * Otherwise use the event ID.
+         */
 
-        window.open(
-            `https://wa.me/?text=${encodeURIComponent(
-                message
-            )}`,
-            "_blank",
-            "noopener,noreferrer"
-        );
+        const eventIdentifier =
+            event.slug ||
+            event.eventSlug ||
+            event.event_id ||
+            event.id;
 
-        setShowShareMenu(false);
+        return `${origin}/events/${encodeURIComponent(
+            eventIdentifier
+        )}`;
 
     };
 
 
-    /* ============================================================
-       COPY EVENT LINK
-    ============================================================ */
-
-    const copyEventLink = async () => {
+    const copyShareLink = async (
+        eventUrl
+    ) => {
 
         try {
 
-            await navigator.clipboard.writeText(
-                window.location.href
-            );
+            if (
+                navigator.clipboard &&
+                window.isSecureContext
+            ) {
+
+                await navigator.clipboard.writeText(
+                    eventUrl
+                );
+
+            } else {
+
+                /*
+                 * Fallback for browsers where the
+                 * Clipboard API is unavailable.
+                 */
+
+                const textArea =
+                    document.createElement(
+                        "textarea"
+                    );
+
+                textArea.value =
+                    eventUrl;
+
+                textArea.style.position =
+                    "fixed";
+
+                textArea.style.opacity = "0";
+
+                document.body.appendChild(
+                    textArea
+                );
+
+                textArea.focus();
+                textArea.select();
+
+                document.execCommand(
+                    "copy"
+                );
+
+                document.body.removeChild(
+                    textArea
+                );
+
+            }
 
             alert(
                 "Event link copied successfully!"
@@ -318,7 +362,78 @@ function EventDetails() {
 
         }
 
-        setShowShareMenu(false);
+    };
+
+
+    const handleShare = async () => {
+
+        const eventUrl =
+            getShareUrl();
+
+        const shareTitle =
+            event.title ||
+            "EventWaa Event";
+
+        const shareText =
+            `Check out ${shareTitle} on EventWaa!`;
+
+        /*
+         * Native device/browser share.
+         */
+
+        if (
+            typeof navigator.share ===
+            "function"
+        ) {
+
+            try {
+
+                await navigator.share({
+                    title:
+                        shareTitle,
+
+                    text:
+                        shareText,
+
+                    url:
+                        eventUrl,
+                });
+
+                return;
+
+            } catch (error) {
+
+                /*
+                 * AbortError means the user closed
+                 * the share sheet without sharing.
+                 *
+                 * Do not show an error in that case.
+                 */
+
+                if (
+                    error?.name ===
+                    "AbortError"
+                ) {
+                    return;
+                }
+
+                console.error(
+                    "NATIVE SHARE ERROR:",
+                    error
+                );
+
+            }
+
+        }
+
+        /*
+         * Fallback for browsers/devices without
+         * native Web Share support.
+         */
+
+        await copyShareLink(
+            eventUrl
+        );
 
     };
 
@@ -340,8 +455,8 @@ function EventDetails() {
                 {
                     state: {
                         from:
-                            `/events/${event.id}`
-                    }
+                            `/events/${event.id}`,
+                    },
                 }
             );
 
@@ -379,7 +494,7 @@ function EventDetails() {
                 reportData.reason,
 
             description:
-                reportData.description.trim()
+                reportData.description.trim(),
 
         };
 
@@ -397,19 +512,29 @@ function EventDetails() {
 
                         headers: {
                             "Content-Type":
-                                "application/json"
+                                "application/json",
                         },
 
                         body:
                             JSON.stringify(
                                 report
-                            )
+                            ),
                     }
                 );
 
 
-            const data =
-                await response.json();
+            let data = {};
+
+            try {
+
+                data =
+                    await response.json();
+
+            } catch {
+
+                data = {};
+
+            }
 
 
             if (
@@ -432,11 +557,13 @@ function EventDetails() {
 
             setReportData({
                 reason: "",
-                description: ""
+                description: "",
             });
 
 
-            setShowReportForm(false);
+            setShowReportForm(
+                false
+            );
 
 
         } catch (error) {
@@ -453,7 +580,9 @@ function EventDetails() {
 
         } finally {
 
-            setSubmittingReport(false);
+            setSubmittingReport(
+                false
+            );
 
         }
 
@@ -467,9 +596,7 @@ function EventDetails() {
     const formatDate = (value) => {
 
         if (!value) {
-
             return "Date not available";
-
         }
 
         const date =
@@ -480,9 +607,7 @@ function EventDetails() {
                 date.getTime()
             )
         ) {
-
             return value;
-
         }
 
         return date.toLocaleDateString(
@@ -491,7 +616,7 @@ function EventDetails() {
                 weekday: "long",
                 year: "numeric",
                 month: "long",
-                day: "numeric"
+                day: "numeric",
             }
         );
 
@@ -507,7 +632,9 @@ function EventDetails() {
         const amount =
             Number(price || 0);
 
-        return amount.toLocaleString();
+        return Number.isFinite(amount)
+            ? amount.toLocaleString()
+            : "0";
 
     };
 
@@ -537,7 +664,6 @@ function EventDetails() {
             }`}
         >
 
-
             {/* =====================================================
                 POSTER
             ===================================================== */}
@@ -560,9 +686,7 @@ function EventDetails() {
                                     "default-event.jpg"
                                 )
                             ) {
-
                                 return;
-
                             }
 
                             e.currentTarget.src =
@@ -632,7 +756,6 @@ function EventDetails() {
 
             <section className="event-header">
 
-
                 <div className="event-title-row">
 
                     <div>
@@ -648,7 +771,9 @@ function EventDetails() {
                                 Organized by{" "}
 
                                 <strong>
-                                    {event.organizerName}
+                                    {
+                                        event.organizerName
+                                    }
                                 </strong>
 
                             </p>
@@ -670,9 +795,7 @@ function EventDetails() {
 
                         <div className="event-cancelled-notice-icon">
 
-                            <X
-                                size={22}
-                            />
+                            <X size={22} />
 
                         </div>
 
@@ -683,8 +806,9 @@ function EventDetails() {
                             </strong>
 
                             <p>
-                                Ticket purchases and attendance
-                                reservations are no longer available.
+                                Ticket purchases and
+                                attendance reservations
+                                are no longer available.
                             </p>
 
                             {event.cancellationReason && (
@@ -695,7 +819,9 @@ function EventDetails() {
                                         Reason:
                                     </strong>{" "}
 
-                                    {event.cancellationReason}
+                                    {
+                                        event.cancellationReason
+                                    }
 
                                 </p>
 
@@ -729,7 +855,6 @@ function EventDetails() {
 
                 <div className="event-action-bar">
 
-
                     {/* =============================================
                         VIEW HOST
                     ============================================= */}
@@ -737,14 +862,10 @@ function EventDetails() {
                     <button
                         type="button"
                         className="event-action-btn organizer-btn"
-                        onClick={
-                            viewHost
-                        }
+                        onClick={viewHost}
                     >
 
-                        <User
-                            size={18}
-                        />
+                        <User size={18} />
 
                         <span>
                             View Host
@@ -757,76 +878,19 @@ function EventDetails() {
                         SHARE
                     ============================================= */}
 
-                    <div className="event-share-wrapper">
+                    <button
+                        type="button"
+                        className="event-action-btn share-btn"
+                        onClick={handleShare}
+                    >
 
-                        <button
-                            type="button"
-                            className="event-action-btn share-btn"
-                            onClick={() =>
-                                setShowShareMenu(
-                                    previous =>
-                                        !previous
-                                )
-                            }
-                        >
+                        <Share2 size={18} />
 
-                            <Share2
-                                size={18}
-                            />
+                        <span>
+                            Share
+                        </span>
 
-                            <span>
-                                Share
-                            </span>
-
-                        </button>
-
-
-                        {showShareMenu && (
-
-                            <div
-                                className="event-share-menu"
-                            >
-
-                                <button
-                                    type="button"
-                                    onClick={
-                                        shareOnWhatsApp
-                                    }
-                                >
-
-                                    <MessageCircle
-                                        size={18}
-                                    />
-
-                                    <span>
-                                        Share on WhatsApp
-                                    </span>
-
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    onClick={
-                                        copyEventLink
-                                    }
-                                >
-
-                                    <Link
-                                        size={18}
-                                    />
-
-                                    <span>
-                                        Copy Event Link
-                                    </span>
-
-                                </button>
-
-                            </div>
-
-                        )}
-
-                    </div>
+                    </button>
 
 
                     {/* =============================================
@@ -861,7 +925,6 @@ function EventDetails() {
                 ================================================= */}
 
                 <div className="event-meta">
-
 
                     {/* =============================================
                         VENUE
@@ -1094,9 +1157,7 @@ function EventDetails() {
 
                         <div className="section-heading-icon">
 
-                            <X
-                                size={22}
-                            />
+                            <X size={22} />
 
                         </div>
 
@@ -1107,8 +1168,9 @@ function EventDetails() {
                             </h2>
 
                             <p>
-                                Ticket purchases and attendance
-                                reservations are unavailable.
+                                Ticket purchases and
+                                attendance reservations
+                                are unavailable.
                             </p>
 
                         </div>
@@ -1119,14 +1181,15 @@ function EventDetails() {
                     <div className="cancelled-event-card">
 
                         <strong>
-                            This event is no longer accepting
-                            bookings.
+                            This event is no longer
+                            accepting bookings.
                         </strong>
 
                         <p>
-                            If you previously purchased a ticket,
-                            please check your EventWaa notifications
-                            for refund information.
+                            If you previously purchased
+                            a ticket, please check your
+                            EventWaa notifications for
+                            refund information.
                         </p>
 
                     </div>
@@ -1250,7 +1313,11 @@ function EventDetails() {
 
                                     <div
                                         className="ticket-card"
-                                        key={index}
+                                        key={
+                                            ticket.id ||
+                                            ticket.ticketId ||
+                                            `${ticket.name || "ticket"}-${index}`
+                                        }
                                     >
 
                                         <div className="ticket-card-top">
@@ -1321,9 +1388,9 @@ function EventDetails() {
                                             {soldOut
                                                 ? "Sold Out"
                                                 : `Book ${
-                                                    ticket.name ||
-                                                    "Ticket"
-                                                }`}
+                                                      ticket.name ||
+                                                      "Ticket"
+                                                  }`}
 
                                         </button>
 
@@ -1366,7 +1433,11 @@ function EventDetails() {
                                 EVENT HOST
                             </span>
 
-
+                            <strong>
+                                {event.organizerName ||
+                                    event.hostName ||
+                                    "EventWaa Host"}
+                            </strong>
 
                             {event.verifiedHost && (
 
@@ -1385,8 +1456,6 @@ function EventDetails() {
                         </div>
 
                     </div>
-
-
 
                 </div>
 
@@ -1419,7 +1488,6 @@ function EventDetails() {
 
                     <div className="event-report-modal">
 
-
                         <div className="event-report-header">
 
                             <div>
@@ -1446,9 +1514,7 @@ function EventDetails() {
                                 }
                             >
 
-                                <X
-                                    size={20}
-                                />
+                                <X size={20} />
 
                             </button>
 
@@ -1456,7 +1522,6 @@ function EventDetails() {
 
 
                         <div className="event-report-form">
-
 
                             <label htmlFor="report-reason">
                                 Reason
@@ -1469,10 +1534,10 @@ function EventDetails() {
                                 }
                                 onChange={(e) =>
                                     setReportData(
-                                        previous => ({
+                                        (previous) => ({
                                             ...previous,
                                             reason:
-                                                e.target.value
+                                                e.target.value,
                                         })
                                     )
                                 }
@@ -1520,10 +1585,10 @@ function EventDetails() {
                                 }
                                 onChange={(e) =>
                                     setReportData(
-                                        previous => ({
+                                        (previous) => ({
                                             ...previous,
                                             description:
-                                                e.target.value
+                                                e.target.value,
                                         })
                                     )
                                 }

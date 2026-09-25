@@ -24,6 +24,7 @@ import {
   ScanLine,
   Trash2,
   ArrowRight,
+  Share2,
 } from "lucide-react";
 
 function Dashboard() {
@@ -56,6 +57,13 @@ function Dashboard() {
 
   const [cancellingEvent, setCancellingEvent] =
     useState(false);
+
+  /* =========================================================
+     SHARE STATE
+  ========================================================= */
+
+  const [shareMessage, setShareMessage] =
+    useState("");
 
   /* =========================================================
      HOST EVENTS
@@ -518,6 +526,239 @@ function Dashboard() {
     };
 
   /* =========================================================
+     SHARE MESSAGE
+  ========================================================= */
+
+  const showShareMessage =
+    (message) => {
+      setShareMessage(message);
+
+      setTimeout(() => {
+        setShareMessage("");
+      }, 3000);
+    };
+
+  /* =========================================================
+     COPY EVENT URL
+  ========================================================= */
+
+  const copyEventUrl =
+    async (eventUrl) => {
+      /*
+       * Modern clipboard API.
+       */
+      try {
+        if (
+          navigator.clipboard &&
+          typeof navigator.clipboard.writeText ===
+            "function"
+        ) {
+          await navigator.clipboard.writeText(
+            eventUrl
+          );
+
+          showShareMessage(
+            "Event link copied to clipboard."
+          );
+
+          return true;
+        }
+      } catch (error) {
+        console.error(
+          "MODERN CLIPBOARD ERROR:",
+          error
+        );
+      }
+
+      /*
+       * Older browser fallback.
+       */
+      try {
+        const textArea =
+          document.createElement(
+            "textarea"
+          );
+
+        textArea.value =
+          eventUrl;
+
+        textArea.setAttribute(
+          "readonly",
+          ""
+        );
+
+        textArea.style.position =
+          "fixed";
+
+        textArea.style.opacity =
+          "0";
+
+        textArea.style.pointerEvents =
+          "none";
+
+        document.body.appendChild(
+          textArea
+        );
+
+        textArea.focus();
+        textArea.select();
+
+        const copied =
+          document.execCommand(
+            "copy"
+          );
+
+        document.body.removeChild(
+          textArea
+        );
+
+        if (copied) {
+          showShareMessage(
+            "Event link copied to clipboard."
+          );
+
+          return true;
+        }
+      } catch (error) {
+        console.error(
+          "LEGACY CLIPBOARD ERROR:",
+          error
+        );
+      }
+
+      return false;
+    };
+
+  /* =========================================================
+     SHARE EVENT
+  ========================================================= */
+
+  const handleShareEvent =
+    async () => {
+      if (!currentEvent) {
+        return;
+      }
+
+      /*
+       * Cancelled events should not be shared
+       * from the Host Dashboard.
+       */
+      if (isCancelled) {
+        return;
+      }
+
+      /*
+       * Prefer the event slug.
+       *
+       * Numeric ID remains the fallback so
+       * older events continue to work.
+       */
+      const eventIdentifier =
+        currentEvent.slug ||
+        currentEvent.eventSlug ||
+        currentEvent.id;
+
+      if (
+        eventIdentifier ===
+        undefined ||
+        eventIdentifier ===
+        null ||
+        String(
+          eventIdentifier
+        ).trim() === ""
+      ) {
+        showShareMessage(
+          "Unable to create the event link."
+        );
+
+        return;
+      }
+
+      /*
+       * Generate the public EventWaa URL.
+       */
+      const eventUrl =
+        `${window.location.origin}/events/${encodeURIComponent(
+          String(eventIdentifier)
+        )}`;
+
+      const shareTitle =
+        currentEvent.title ||
+        "EventWaa Event";
+
+      const shareText =
+        `Check out ${shareTitle} on EventWaa.`;
+
+      /*
+       * Native Web Share API.
+       *
+       * This opens the phone's native
+       * sharing sheet on supported devices.
+       */
+      if (
+        navigator.share &&
+        typeof navigator.share ===
+          "function"
+      ) {
+        try {
+          await navigator.share({
+            title:
+              shareTitle,
+
+            text:
+              shareText,
+
+            url:
+              eventUrl,
+          });
+
+          return;
+        } catch (error) {
+          /*
+           * The user closed/cancelled
+           * the native share sheet.
+           */
+          if (
+            error?.name ===
+            "AbortError"
+          ) {
+            return;
+          }
+
+          console.error(
+            "NATIVE SHARE ERROR:",
+            error
+          );
+
+          /*
+           * Continue to clipboard
+           * fallback if native sharing
+           * failed for another reason.
+           */
+        }
+      }
+
+      /*
+       * Clipboard fallback.
+       */
+      const copied =
+        await copyEventUrl(
+          eventUrl
+        );
+
+      /*
+       * If clipboard copying is not
+       * available, show the URL so
+       * the user can manually copy it.
+       */
+      if (!copied) {
+        showShareMessage(
+          `Share this event: ${eventUrl}`
+        );
+      }
+    };
+
+  /* =========================================================
      HOST BOOKINGS
   ========================================================= */
 
@@ -709,6 +950,26 @@ function Dashboard() {
       <HostSidebar />
 
       <main className="host-dashboard-content">
+
+        {/* ===================================================
+            SHARE TOAST
+        =================================================== */}
+
+        {shareMessage && (
+          <div
+            className="share-toast"
+            role="status"
+            aria-live="polite"
+          >
+            <CheckCircle2
+              size={18}
+            />
+
+            <span>
+              {shareMessage}
+            </span>
+          </div>
+        )}
 
         {/* ===================================================
             WELCOME HEADER
@@ -1471,6 +1732,34 @@ function Dashboard() {
 
                   <span>
                     View Attendees
+                  </span>
+
+                </button>
+
+
+                {/* SHARE */}
+
+                <button
+                  className="share-btn"
+                  onClick={
+                    handleShareEvent
+                  }
+                  disabled={
+                    isCancelled
+                  }
+                  title={
+                    isCancelled
+                      ? "Cancelled events cannot be shared."
+                      : "Share event"
+                  }
+                >
+
+                  <Share2
+                    size={17}
+                  />
+
+                  <span>
+                    Share
                   </span>
 
                 </button>

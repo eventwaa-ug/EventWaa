@@ -71,29 +71,40 @@
 .admin-event-card.cancelled:hover { transform: none; box-shadow: 0 5px 20px rgba(255,107,0,0.05); }
 
 /* POSTER */
-.admin-poster-wrapper { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 300px; overflow: hidden; background: #FFF8F3; }
+.admin-poster-wrapper { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 300px; 
+  overflow: hidden; background: #FFF8F3; }
 .admin-event-poster { display: block; width: 100%; height: auto; max-height: 520px; object-fit: contain; object-position: center; background: #FFF8F3; }
-.admin-event-poster-placeholder { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 300px; background: #FFF8F3; color: #FF8A3D; }
+.admin-event-poster-placeholder { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 300px; background: #FFF8F3; 
+  color: #FF8A3D; }
 .admin-event-poster-placeholder svg { font-size: 54px; }
 
 /* OVERLAYS */
-.event-type-overlay { position: absolute; top: 14px; right: 14px; z-index: 3; padding: 7px 12px; border: 1px solid rgba(255,255,255,0.35); border-radius: 999px; background: rgba(26,26,26,0.78); color: #ffffff; font-size: 12px; font-weight: 800; letter-spacing: 0.4px; backdrop-filter: blur(8px); }
-.featured-overlay { position: absolute; top: 14px; left: 14px; z-index: 3; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border: 1px solid rgba(255,255,255,0.25); border-radius: 999px; background: #FF6B00; color: #ffffff; font-size: 12px; font-weight: 750; backdrop-filter: blur(8px); }
+.event-type-overlay { position: absolute; top: 14px; right: 14px; z-index: 3; padding: 7px 12px; border: 1px solid rgba(255,255,255,0.35); 
+  border-radius: 999px; background: rgba(26,26,26,0.78); color: #ffffff; font-size: 12px; font-weight: 800; letter-spacing: 0.4px; 
+  backdrop-filter: blur(8px); }
+.featured-overlay { position: absolute; top: 14px; left: 14px; z-index: 3; display: inline-flex; align-items: center; gap: 6px; 
+  padding: 7px 12px; border: 1px solid rgba(255,255,255,0.25); border-radius: 999px; background: #FF6B00; color: #ffffff; font-size: 12px; 
+  font-weight: 750; backdrop-filter: blur(8px); }
 .featured-overlay svg { font-size: 14px; }
-.cancelled-overlay { position: absolute; inset: 0; z-index: 4; display: flex; align-items: center; justify-content: center; background: rgba(60,60,60,0.38); color: #ffffff; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; letter-spacing: 2px; text-shadow: 0 2px 8px rgba(0,0,0,0.25); pointer-events: none; }
+.cancelled-overlay { position: absolute; inset: 0; z-index: 4; display: flex; align-items: center; justify-content: center; 
+  background: rgba(60,60,60,0.38); color: #ffffff; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; letter-spacing: 2px; 
+  text-shadow: 0 2px 8px rgba(0,0,0,0.25); pointer-events: none; }
 
 /* CARD CONTENT */
 .admin-event-card-content { padding: 24px; }
 .admin-event-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 22px; }
 .admin-event-title-row > div:first-child { min-width: 0; }
-.admin-event-title-row h2 { margin: 0; color: #111827; font-size: clamp(1.12rem, 2vw, 1.42rem); line-height: 1.3; font-weight: 800; overflow-wrap: anywhere; }
+.admin-event-title-row h2 { margin: 0; color: #111827; font-size: clamp(1.12rem, 2vw, 1.42rem); line-height: 1.3; font-weight: 800; 
+  overflow-wrap: anywhere; }
 .admin-event-id { display: block; margin-top: 7px; color: #9ca3af; font-size: 12px; font-weight: 600; }
-.admin-official-badge { flex-shrink: 0; padding: 6px 10px; border: 1px solid #FFE5D0; border-radius: 999px; background: #FFF4ED; color: #FF6B00; font-size: 11px; font-weight: 800; white-space: nowrap; }
+.admin-official-badge { flex-shrink: 0; padding: 6px 10px; border: 1px solid #FFE5D0; border-radius: 999px; background: #FFF4ED; 
+  color: #FF6B00; font-size: 11px; font-weight: 800; white-space: nowrap; }
 
 /* DETAILS */
 .admin-event-details { display: grid; grid-template-columns: 1fr 1fr; gap: 13px 18px; margin-bottom: 24px; }
 .admin-event-details > div { min-width: 0; }
-.admin-event-details strong { display: block; margin-bottom: 4px; color: #a67c5b; font-size: 11px; font-weight: 750; letter-spacing: 0.35px; text-transform: uppercase; }
+.admin-event-details strong { display: block; margin-bottom: 4px; color: #a67c5b; font-size: 11px; font-weight: 750; letter-spacing: 0.35px; 
+  text-transform: uppercase; }
 .admin-event-details span { display: block; color: #293330; font-size: 14px; font-weight: 650; line-height: 1.45; overflow-wrap: anywhere; }
 
 /* ACTIONS */
@@ -121,7 +132,8 @@
 .delete-btn:hover:not(:disabled) { background: #fee2e2; box-shadow: 0 5px 12px rgba(220,38,38,0.1); }
 
 /* EMPTY */
-.admin-events-empty { min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; background: #ffffff; border: 1px dashed #FFD8B5; border-radius: 18px; }
+.admin-events-empty { min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+  padding: 40px; text-align: center; background: #ffffff; border: 1px dashed #FFD8B5; border-radius: 18px; }
 .admin-events-empty > svg { margin-bottom: 15px; color: #FF8A3D; font-size: 52px; }
 .admin-events-empty h3 { margin: 0 0 9px; color: #111827; font-size: 23px; font-weight: 800; }
 .admin-events-empty p { max-width: 520px; margin: 0; color: #7b8581; font-size: 15px; line-height: 1.6; }
@@ -129,7 +141,8 @@
 /* LOADING */
 .admin-events-loading { min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #8a6d5a; }
 .admin-events-loading p { margin: 16px 0 0; font-size: 15px; font-weight: 600; }
-.admin-events-spinner { width: 42px; height: 42px; border: 4px solid #FFE5D0; border-top-color: #FF6B00; border-radius: 50%; animation: adminEventsSpin 0.8s linear infinite; }
+.admin-events-spinner { width: 42px; height: 42px; border: 4px solid #FFE5D0; border-top-color: #FF6B00; border-radius: 50%; 
+  animation: adminEventsSpin 0.8s linear infinite; }
 @keyframes adminEventsSpin { to { transform: rotate(360deg); } }
 
 /* FOCUS */
@@ -155,9 +168,13 @@
   .admin-events-toolbar { gap: 12px; margin-bottom: 15px; }
   .admin-events-search { width: 100%; }
   .admin-events-search input { height: 50px; font-size: 14px; border-radius: 13px; }
-  .admin-events-filters { width: calc(100vw - 28px); max-width: none; margin-left: 50%; transform: translateX(-50%); display: flex; flex-wrap: nowrap; align-items: center; gap: 4px; padding: 4px; overflow-x: auto; overflow-y: hidden; border: 1px solid #FFE5D0; border-radius: 13px; background: #FFF4ED; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .admin-events-filters { width: calc(100vw - 28px); max-width: none; 
+    margin-left: 50%; transform: translateX(-50%); display: flex; flex-wrap: nowrap; align-items: center; gap: 4px; 
+    padding: 4px; overflow-x: auto; overflow-y: hidden; border: 1px solid #FFE5D0; border-radius: 13px; background: #FFF4ED; 
+    scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   .admin-events-filters::-webkit-scrollbar { display: none; }
-  .admin-events-filters button { flex: 0 0 auto; min-height: 39px; padding: 0 13px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: #7a5a44; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .admin-events-filters button { flex: 0 0 auto; min-height: 39px; padding: 0 13px; border: 1px solid transparent; 
+    border-radius: 9px; background: transparent; color: #7a5a44; font-size: 12px; font-weight: 700; white-space: nowrap; }
   .admin-events-filters button:hover { background: transparent; color: #7a5a44; }
   .admin-events-filters button.active { background: #FF6B00; color: #ffffff; box-shadow: 0 1px 3px rgba(255,107,0,0.2); }
   .admin-events-count { margin-bottom: 16px; font-size: 13px; }
@@ -193,4 +210,66 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .admin-events *, .admin-events *::before, .admin-events *::after { scroll-behavior: auto !important; transition: none !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}
+
+/* ============================================================
+   SHARE EVENT BUTTON
+   ============================================================ */
+
+.share-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+
+    background: #ffffff;
+    color: #374151;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.15s ease;
+}
+
+.share-btn svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+.share-btn:hover {
+    background: #fff7ed;
+    border-color: #ff6b00;
+    color: #ff6b00;
+}
+
+.share-btn:active {
+    transform: scale(0.97);
+}
+
+.share-btn:focus-visible {
+    outline: 2px solid #ff6b00;
+    outline-offset: 2px;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .share-btn {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .share-btn svg {
+        width: 14px;
+        height: 14px;
+    }
 }

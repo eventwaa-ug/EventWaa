@@ -1,7 +1,13 @@
-import { useContext, useMemo, useState, useEffect } from "react";
+import {
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { EventContext } from "../context/EventContext";
 import { useAuth } from "../context/AuthContext";
+
 import {
     FiCalendar,
     FiPlus,
@@ -17,11 +23,11 @@ import {
     FiFilter,
     FiCreditCard,
     FiChevronRight,
-    FiEye,
     FiGrid,
     FiXCircle,
     FiChevronLeft,
 } from "react-icons/fi";
+
 import "../styles/HostEvents.css";
 
 const EVENTS_PER_PAGE = 12;
@@ -32,40 +38,66 @@ function HostEvents() {
     const { events, deleteEvent } = useContext(EventContext);
     const { user } = useAuth();
 
+    const BACKEND_URL =
+        import.meta.env.VITE_API_BASE_URL || "";
+
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState("all");
     const [sortBy, setSortBy] = useState("soonest");
     const [currentPage, setCurrentPage] = useState(1);
-    const [cancellingEventId, setCancellingEventId] = useState(null);
-
-    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+    const [cancellingEventId, setCancellingEventId] =
+        useState(null);
 
     /*
-     * ---------------------------------------------------------
+     * =========================================================
      * MY EVENTS
-     * ---------------------------------------------------------
+     * =========================================================
      */
+
     const myEvents = useMemo(() => {
+        if (!user?.email) return [];
+
         return (events || []).filter(
-            (event) => event.hostEmail === user?.email
+            (event) =>
+                String(event?.hostEmail || "").toLowerCase() ===
+                String(user.email).toLowerCase()
         );
-    }, [events, user]);
+    }, [events, user?.email]);
 
     /*
-     * ---------------------------------------------------------
+     * =========================================================
      * HELPERS
-     * ---------------------------------------------------------
+     * =========================================================
      */
+
     const getEventDate = (event) => {
-        if (!event?.date) return null;
+        if (!event) return null;
 
-        const date = new Date(event.date);
+        const rawDate =
+            event.date ||
+            event.eventDate ||
+            event.startDate;
 
+        if (!rawDate) return null;
+
+        let date = new Date(rawDate);
+
+        if (Number.isNaN(date.getTime())) {
+            return null;
+        }
+
+        /*
+         * If a separate event time exists, apply it.
+         */
         if (event.time) {
-            const [hours, minutes] = String(event.time).split(":");
+            const timeParts = String(event.time).split(":");
+
+            const hours = Number(timeParts[0]);
+            const minutes = Number(timeParts[1]);
+
             date.setHours(
-                Number(hours) || 0,
-                Number(minutes) || 0,
+                Number.isFinite(hours) ? hours : 0,
+                Number.isFinite(minutes) ? minutes : 0,
                 0,
                 0
             );
@@ -75,54 +107,75 @@ function HostEvents() {
     };
 
     const getSold = (event) => {
-        return Number(
+        const value =
             event?.ticketsSold ??
             event?.sold ??
             event?.bookingsCount ??
-            0
-        );
+            0;
+
+        const number = Number(value);
+
+        return Number.isFinite(number) ? number : 0;
     };
 
     const getCapacity = (event) => {
-        return Number(
+        const value =
             event?.capacity ??
             event?.ticketCapacity ??
             event?.totalTickets ??
-            0
-        );
+            0;
+
+        const number = Number(value);
+
+        return Number.isFinite(number) ? number : 0;
     };
 
     const getRemaining = (event) => {
         const capacity = getCapacity(event);
         const sold = getSold(event);
 
-        if (!capacity) return 0;
+        if (capacity <= 0) return 0;
 
         return Math.max(capacity - sold, 0);
     };
 
     const getCheckedIn = (event) => {
-        return Number(
+        const value =
             event?.checkedIn ??
             event?.checkedInCount ??
             event?.attendanceCount ??
-            0
-        );
+            0;
+
+        const number = Number(value);
+
+        return Number.isFinite(number) ? number : 0;
     };
 
     const getRevenue = (event) => {
-        return Number(
+        const value =
             event?.revenue ??
             event?.totalRevenue ??
-            0
-        );
+            0;
+
+        const number = Number(value);
+
+        return Number.isFinite(number) ? number : 0;
+    };
+
+    const getPrice = (event) => {
+        const number = Number(event?.price ?? 0);
+
+        return Number.isFinite(number) ? number : 0;
     };
 
     const isCancelled = (event) => {
-        return String(event?.status || "").toLowerCase() === "cancelled";
+        return (
+            String(event?.status || "").toLowerCase() ===
+            "cancelled"
+        );
     };
 
-    const getStatus = (event) => {
+    const getStatus = (event, now = new Date()) => {
         if (isCancelled(event)) {
             return {
                 label: "Cancelled",
@@ -132,7 +185,7 @@ function HostEvents() {
 
         const eventDate = getEventDate(event);
 
-        if (eventDate && eventDate < new Date()) {
+        if (eventDate && eventDate < now) {
             return {
                 label: "Past",
                 className: "status-past",
@@ -148,7 +201,7 @@ function HostEvents() {
     const formatDate = (event) => {
         const date = getEventDate(event);
 
-        if (!date || Number.isNaN(date.getTime())) {
+        if (!date) {
             return "Date not set";
         }
 
@@ -160,14 +213,28 @@ function HostEvents() {
     };
 
     const formatTime = (event) => {
-        if (!event?.time) return "Time not set";
+        if (!event?.time) {
+            return "Time not set";
+        }
 
-        const [hours, minutes] = String(event.time).split(":");
+        const [hoursRaw, minutesRaw] =
+            String(event.time).split(":");
+
+        const hours = Number(hoursRaw);
+        const minutes = Number(minutesRaw);
+
+        if (
+            !Number.isFinite(hours) ||
+            !Number.isFinite(minutes)
+        ) {
+            return "Time not set";
+        }
 
         const date = new Date();
+
         date.setHours(
-            Number(hours) || 0,
-            Number(minutes) || 0,
+            hours,
+            minutes,
             0,
             0
         );
@@ -179,91 +246,130 @@ function HostEvents() {
     };
 
     const formatCurrency = (amount) => {
-        return `UGX ${Number(amount || 0).toLocaleString()}`;
+        const number = Number(amount || 0);
+
+        return `UGX ${
+            Number.isFinite(number)
+                ? number.toLocaleString()
+                : "0"
+        }`;
     };
 
     const getImageUrl = (image) => {
         if (!image) return "";
 
+        const imageUrl = String(image).trim();
+
+        if (!imageUrl) return "";
+
+        /*
+         * Already a complete URL.
+         */
         if (
-            image.startsWith("http://") ||
-            image.startsWith("https://")
+            imageUrl.startsWith("http://") ||
+            imageUrl.startsWith("https://")
         ) {
-            return image;
+            return imageUrl;
         }
 
-        if (image.startsWith("/")) {
-            return `${BACKEND_URL}${image}`;
+        /*
+         * Backend-hosted relative image.
+         */
+        const backend = BACKEND_URL.replace(/\/+$/, "");
+
+        if (imageUrl.startsWith("/")) {
+            return `${backend}${imageUrl}`;
         }
 
-        return `${BACKEND_URL}/${image}`;
+        return `${backend}/${imageUrl}`;
     };
 
     /*
-     * ---------------------------------------------------------
+     * =========================================================
      * FILTER + SEARCH + SORT
-     * ---------------------------------------------------------
+     * =========================================================
      */
+
     const filteredEvents = useMemo(() => {
         const now = new Date();
 
         let result = [...myEvents];
 
-        if (search.trim()) {
-            const query = search.toLowerCase();
+        /*
+         * SEARCH
+         */
+        const query = search.trim().toLowerCase();
 
+        if (query) {
             result = result.filter((event) => {
-                return (
-                    String(event?.title || "")
-                        .toLowerCase()
-                        .includes(query) ||
-                    String(event?.venue || "")
-                        .toLowerCase()
-                        .includes(query) ||
-                    String(event?.location || "")
-                        .toLowerCase()
-                        .includes(query) ||
-                    String(event?.category || "")
+                const searchableValues = [
+                    event?.title,
+                    event?.venue,
+                    event?.location,
+                    event?.city,
+                    event?.category,
+                ];
+
+                return searchableValues.some((value) =>
+                    String(value || "")
                         .toLowerCase()
                         .includes(query)
                 );
             });
         }
 
+        /*
+         * FILTER
+         */
         result = result.filter((event) => {
             const date = getEventDate(event);
             const cancelled = isCancelled(event);
 
             switch (filter) {
                 case "upcoming":
-                    return !cancelled && date && date >= now;
+                    return (
+                        !cancelled &&
+                        date &&
+                        date >= now
+                    );
 
                 case "past":
-                    return !cancelled && date && date < now;
+                    return (
+                        !cancelled &&
+                        date &&
+                        date < now
+                    );
 
                 case "free":
                     return (
-                        Number(event?.price || 0) === 0 &&
+                        getPrice(event) === 0 &&
                         !cancelled
                     );
 
                 case "paid":
                     return (
-                        Number(event?.price || 0) > 0 &&
+                        getPrice(event) > 0 &&
                         !cancelled
                     );
 
                 case "cancelled":
                     return cancelled;
 
+                case "all":
                 default:
                     return true;
             }
         });
 
+        /*
+         * SORT
+         */
         result.sort((a, b) => {
-            const dateA = getEventDate(a)?.getTime() || 0;
-            const dateB = getEventDate(b)?.getTime() || 0;
+            const dateA =
+                getEventDate(a)?.getTime() ?? 0;
+
+            const dateB =
+                getEventDate(b)?.getTime() ?? 0;
 
             switch (sortBy) {
                 case "newest":
@@ -276,7 +382,10 @@ function HostEvents() {
                     return getSold(b) - getSold(a);
 
                 case "highestRevenue":
-                    return getRevenue(b) - getRevenue(a);
+                    return (
+                        getRevenue(b) -
+                        getRevenue(a)
+                    );
 
                 case "soonest":
                 default:
@@ -285,23 +394,35 @@ function HostEvents() {
         });
 
         return result;
-    }, [myEvents, search, filter, sortBy]);
+    }, [
+        myEvents,
+        search,
+        filter,
+        sortBy,
+    ]);
 
     /*
-     * Reset pagination when filters/search change.
+     * =========================================================
+     * RESET PAGINATION
+     * =========================================================
      */
+
     useEffect(() => {
         setCurrentPage(1);
     }, [search, filter, sortBy]);
 
     /*
-     * ---------------------------------------------------------
+     * =========================================================
      * PAGINATION
-     * ---------------------------------------------------------
+     * =========================================================
      */
+
     const totalPages = Math.max(
         1,
-        Math.ceil(filteredEvents.length / EVENTS_PER_PAGE)
+        Math.ceil(
+            filteredEvents.length /
+                EVENTS_PER_PAGE
+        )
     );
 
     const safeCurrentPage = Math.min(
@@ -310,15 +431,22 @@ function HostEvents() {
     );
 
     const startIndex =
-        (safeCurrentPage - 1) * EVENTS_PER_PAGE;
+        (safeCurrentPage - 1) *
+        EVENTS_PER_PAGE;
 
-    const paginatedEvents = filteredEvents.slice(
-        startIndex,
-        startIndex + EVENTS_PER_PAGE
-    );
+    const paginatedEvents =
+        filteredEvents.slice(
+            startIndex,
+            startIndex + EVENTS_PER_PAGE
+        );
 
     const goToPage = (page) => {
-        if (page < 1 || page > totalPages) return;
+        if (
+            page < 1 ||
+            page > totalPages
+        ) {
+            return;
+        }
 
         setCurrentPage(page);
 
@@ -329,36 +457,50 @@ function HostEvents() {
     };
 
     /*
-     * ---------------------------------------------------------
+     * =========================================================
      * NEXT UPCOMING EVENT
-     * ---------------------------------------------------------
+     * =========================================================
      */
+
     const upcomingEvent = useMemo(() => {
         const now = new Date();
 
-        return myEvents
-            .filter((event) => {
-                const date = getEventDate(event);
+        return (
+            myEvents
+                .filter((event) => {
+                    const date =
+                        getEventDate(event);
 
-                return (
-                    !isCancelled(event) &&
-                    date &&
-                    date >= now
-                );
-            })
-            .sort(
-                (a, b) =>
-                    getEventDate(a).getTime() -
-                    getEventDate(b).getTime()
-            )[0] || null;
+                    return (
+                        !isCancelled(event) &&
+                        date &&
+                        date >= now
+                    );
+                })
+                .sort((a, b) => {
+                    const dateA =
+                        getEventDate(a);
+
+                    const dateB =
+                        getEventDate(b);
+
+                    return (
+                        dateA.getTime() -
+                        dateB.getTime()
+                    );
+                })[0] || null
+        );
     }, [myEvents]);
 
     /*
-     * ---------------------------------------------------------
+     * =========================================================
      * DELETE
-     * ---------------------------------------------------------
+     * =========================================================
      */
+
     const handleDelete = async (event) => {
+        if (!event?.id) return;
+
         const confirmed = window.confirm(
             `Are you sure you want to delete "${event.title}"? This action cannot be undone.`
         );
@@ -368,23 +510,40 @@ function HostEvents() {
         try {
             await deleteEvent(event.id);
         } catch (error) {
-            console.error("Failed to delete event:", error);
-            alert("Failed to delete event. Please try again.");
+            console.error(
+                "Failed to delete event:",
+                error
+            );
+
+            alert(
+                "Failed to delete event. Please try again."
+            );
         }
     };
 
     /*
-     * ---------------------------------------------------------
+     * =========================================================
      * CANCEL
-     * ---------------------------------------------------------
+     * =========================================================
      */
+
     const handleCancel = async (event) => {
-        if (isCancelled(event)) return;
+        if (!event?.id) return;
 
-        const eventDate = getEventDate(event);
+        if (isCancelled(event)) {
+            return;
+        }
 
-        if (eventDate && eventDate < new Date()) {
-            alert("Past events cannot be cancelled.");
+        const eventDate =
+            getEventDate(event);
+
+        if (
+            eventDate &&
+            eventDate < new Date()
+        ) {
+            alert(
+                "Past events cannot be cancelled."
+            );
             return;
         }
 
@@ -394,6 +553,13 @@ function HostEvents() {
 
         if (!confirmed) return;
 
+        if (!user?.email) {
+            alert(
+                "Your host session could not be verified. Please log in again."
+            );
+            return;
+        }
+
         setCancellingEventId(event.id);
 
         try {
@@ -402,36 +568,53 @@ function HostEvents() {
                 {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json",
+                        "Content-Type":
+                            "application/json",
                     },
                     body: JSON.stringify({
-                        hostEmail: user?.email,
+                        hostEmail:
+                            user.email,
                     }),
                 }
             );
 
-            const data = await response.json();
+            let data = {};
+
+            try {
+                data =
+                    await response.json();
+            } catch {
+                data = {};
+            }
 
             if (!response.ok) {
                 throw new Error(
                     data?.message ||
-                    data?.error ||
-                    "Failed to cancel event."
+                        data?.error ||
+                        "Failed to cancel event."
                 );
             }
 
             alert(
                 data?.message ||
-                "Event cancelled successfully."
+                    "Event cancelled successfully."
             );
 
+            /*
+             * Reload so EventContext receives
+             * the updated event status and all
+             * cancellation/refund data.
+             */
             window.location.reload();
         } catch (error) {
-            console.error("Failed to cancel event:", error);
+            console.error(
+                "Failed to cancel event:",
+                error
+            );
 
             alert(
-                error.message ||
-                "Failed to cancel event. Please try again."
+                error?.message ||
+                    "Failed to cancel event. Please try again."
             );
         } finally {
             setCancellingEventId(null);
@@ -439,41 +622,57 @@ function HostEvents() {
     };
 
     /*
-     * ---------------------------------------------------------
+     * =========================================================
      * SUMMARY
-     * ---------------------------------------------------------
+     * =========================================================
      */
-    const totalEvents = myEvents.length;
 
-    const upcomingCount = myEvents.filter((event) => {
-        const date = getEventDate(event);
+    const totalEvents =
+        myEvents.length;
 
-        return (
-            !isCancelled(event) &&
-            date &&
-            date >= new Date()
+    const upcomingCount = myEvents.filter(
+        (event) => {
+            const date =
+                getEventDate(event);
+
+            return (
+                !isCancelled(event) &&
+                date &&
+                date >= new Date()
+            );
+        }
+    ).length;
+
+    const totalTicketsSold =
+        myEvents.reduce(
+            (total, event) =>
+                total + getSold(event),
+            0
         );
-    }).length;
 
-    const totalTicketsSold = myEvents.reduce(
-        (total, event) => total + getSold(event),
-        0
-    );
-
-    const totalRevenue = myEvents.reduce(
-        (total, event) => total + getRevenue(event),
-        0
-    );
+    const totalRevenue =
+        myEvents.reduce(
+            (total, event) =>
+                total + getRevenue(event),
+            0
+        );
 
     /*
-     * ---------------------------------------------------------
+     * =========================================================
      * PAGE NUMBERS
-     * ---------------------------------------------------------
+     * =========================================================
      */
+
     const pageNumbers = Array.from(
         { length: totalPages },
         (_, index) => index + 1
     );
+
+    /*
+     * =========================================================
+     * RENDER
+     * =========================================================
+     */
 
     return (
         <div className="host-events-page">
@@ -481,6 +680,7 @@ function HostEvents() {
             {/* =================================================
                 HEADER
             ================================================= */}
+
             <header className="host-events-header">
                 <div>
                     <span className="host-events-eyebrow">
@@ -493,15 +693,18 @@ function HostEvents() {
                     </h1>
 
                     <p>
-                        Manage your events, track attendance,
-                        tickets, revenue and event activity.
+                        Manage your events, track
+                        attendance, tickets, revenue
+                        and event activity.
                     </p>
                 </div>
 
                 <button
                     type="button"
                     className="create-host-event-btn"
-                    onClick={() => navigate("/create-event")}
+                    onClick={() =>
+                        navigate("/create-event")
+                    }
                 >
                     <FiPlus />
                     Create Event
@@ -511,6 +714,7 @@ function HostEvents() {
             {/* =================================================
                 SUMMARY
             ================================================= */}
+
             <section className="host-events-summary">
 
                 <div className="host-event-summary-card">
@@ -519,8 +723,13 @@ function HostEvents() {
                     </span>
 
                     <div>
-                        <small>Total Events</small>
-                        <strong>{totalEvents}</strong>
+                        <small>
+                            Total Events
+                        </small>
+
+                        <strong>
+                            {totalEvents}
+                        </strong>
                     </div>
                 </div>
 
@@ -530,8 +739,13 @@ function HostEvents() {
                     </span>
 
                     <div>
-                        <small>Upcoming</small>
-                        <strong>{upcomingCount}</strong>
+                        <small>
+                            Upcoming
+                        </small>
+
+                        <strong>
+                            {upcomingCount}
+                        </strong>
                     </div>
                 </div>
 
@@ -541,8 +755,13 @@ function HostEvents() {
                     </span>
 
                     <div>
-                        <small>Tickets Sold</small>
-                        <strong>{totalTicketsSold}</strong>
+                        <small>
+                            Tickets Sold
+                        </small>
+
+                        <strong>
+                            {totalTicketsSold}
+                        </strong>
                     </div>
                 </div>
 
@@ -552,9 +771,14 @@ function HostEvents() {
                     </span>
 
                     <div>
-                        <small>Total Revenue</small>
+                        <small>
+                            Total Revenue
+                        </small>
+
                         <strong>
-                            {formatCurrency(totalRevenue)}
+                            {formatCurrency(
+                                totalRevenue
+                            )}
                         </strong>
                     </div>
                 </div>
@@ -564,13 +788,19 @@ function HostEvents() {
             {/* =================================================
                 NEXT UPCOMING EVENT
             ================================================= */}
+
             {upcomingEvent && (
                 <section className="current-event-section">
 
                     <div className="current-event-heading">
                         <div>
-                            <span>NEXT UPCOMING EVENT</span>
-                            <h2>Keep an eye on what's next</h2>
+                            <span>
+                                NEXT UPCOMING EVENT
+                            </span>
+
+                            <h2>
+                                Keep an eye on what's next
+                            </h2>
                         </div>
 
                         <button
@@ -594,27 +824,37 @@ function HostEvents() {
                                     src={getImageUrl(
                                         upcomingEvent.image
                                     )}
-                                    alt={upcomingEvent.title}
+                                    alt={
+                                        upcomingEvent.title ||
+                                        "Event poster"
+                                    }
                                     className="current-event-poster"
                                 />
                             ) : (
-                                <FiCalendar size={50} />
+                                <FiCalendar
+                                    size={50}
+                                />
                             )}
                         </div>
 
                         <div className="current-event-info">
+
                             <h2>
                                 {upcomingEvent.title}
                             </h2>
 
                             <p>
                                 <FiCalendar />
-                                {formatDate(upcomingEvent)}
+                                {formatDate(
+                                    upcomingEvent
+                                )}
                             </p>
 
                             <p>
                                 <FiClock />
-                                {formatTime(upcomingEvent)}
+                                {formatTime(
+                                    upcomingEvent
+                                )}
                             </p>
 
                             <p>
@@ -627,18 +867,26 @@ function HostEvents() {
                             {upcomingEvent.category && (
                                 <p>
                                     <FiTag />
-                                    {upcomingEvent.category}
+                                    {
+                                        upcomingEvent.category
+                                    }
                                 </p>
                             )}
+
                         </div>
 
                         <div className="current-event-stats">
 
                             <div>
                                 <strong>
-                                    {getSold(upcomingEvent)}
+                                    {getSold(
+                                        upcomingEvent
+                                    )}
                                 </strong>
-                                <span>Tickets Sold</span>
+
+                                <span>
+                                    Tickets Sold
+                                </span>
                             </div>
 
                             <div>
@@ -647,7 +895,10 @@ function HostEvents() {
                                         upcomingEvent
                                     )}
                                 </strong>
-                                <span>Checked In</span>
+
+                                <span>
+                                    Checked In
+                                </span>
                             </div>
 
                             <div>
@@ -656,7 +907,10 @@ function HostEvents() {
                                         upcomingEvent
                                     )}
                                 </strong>
-                                <span>Remaining</span>
+
+                                <span>
+                                    Remaining
+                                </span>
                             </div>
 
                         </div>
@@ -668,6 +922,7 @@ function HostEvents() {
             {/* =================================================
                 TOOLBAR
             ================================================= */}
+
             <section className="host-events-toolbar">
 
                 <div className="host-events-search">
@@ -677,8 +932,10 @@ function HostEvents() {
                         type="text"
                         placeholder="Search your events..."
                         value={search}
-                        onChange={(e) =>
-                            setSearch(e.target.value)
+                        onChange={(event) =>
+                            setSearch(
+                                event.target.value
+                            )
                         }
                     />
                 </div>
@@ -688,8 +945,10 @@ function HostEvents() {
 
                     <select
                         value={filter}
-                        onChange={(e) =>
-                            setFilter(e.target.value)
+                        onChange={(event) =>
+                            setFilter(
+                                event.target.value
+                            )
                         }
                     >
                         <option value="all">
@@ -721,8 +980,10 @@ function HostEvents() {
                 <div className="host-events-sort">
                     <select
                         value={sortBy}
-                        onChange={(e) =>
-                            setSortBy(e.target.value)
+                        onChange={(event) =>
+                            setSortBy(
+                                event.target.value
+                            )
                         }
                     >
                         <option value="soonest">
@@ -752,14 +1013,19 @@ function HostEvents() {
             {/* =================================================
                 ALL EVENTS
             ================================================= */}
+
             <section className="all-host-events">
 
                 <div className="all-host-events-heading">
+
                     <div>
-                        <h2>All My Events</h2>
+                        <h2>
+                            All My Events
+                        </h2>
 
                         <p>
-                            {filteredEvents.length === 0
+                            {filteredEvents.length ===
+                            0
                                 ? "No events found."
                                 : `Showing ${
                                       startIndex + 1
@@ -774,8 +1040,10 @@ function HostEvents() {
                     </div>
 
                     <span className="events-page-count">
-                        Page {safeCurrentPage} of {totalPages}
+                        Page {safeCurrentPage} of{" "}
+                        {totalPages}
                     </span>
+
                 </div>
 
                 {paginatedEvents.length === 0 ? (
@@ -786,359 +1054,418 @@ function HostEvents() {
                         </div>
 
                         <h2>
-                            {search || filter !== "all"
+                            {search ||
+                            filter !== "all"
                                 ? "No matching events"
                                 : "You haven't created any events yet"}
                         </h2>
 
                         <p>
-                            {search || filter !== "all"
+                            {search ||
+                            filter !== "all"
                                 ? "Try changing your search or filter."
                                 : "Create your first event and start building your audience."}
                         </p>
 
-                        {!search && filter === "all" && (
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    navigate("/create-event")
-                                }
-                            >
-                                <FiPlus />
-                                Create Your First Event
-                            </button>
-                        )}
+                        {!search &&
+                            filter === "all" && (
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        navigate(
+                                            "/create-event"
+                                        )
+                                    }
+                                >
+                                    <FiPlus />
+                                    Create Your First
+                                    Event
+                                </button>
+                            )}
 
                     </div>
                 ) : (
                     <div className="host-events-list">
 
-                        {paginatedEvents.map((event) => {
-                            const status = getStatus(event);
-                            const sold = getSold(event);
-                            const capacity = getCapacity(event);
-                            const checkedIn =
-                                getCheckedIn(event);
-                            const remaining =
-                                getRemaining(event);
+                        {paginatedEvents.map(
+                            (event) => {
+                                const status =
+                                    getStatus(
+                                        event
+                                    );
 
-                            const capacityPercentage =
-                                capacity > 0
-                                    ? Math.min(
-                                          (sold /
-                                              capacity) *
-                                              100,
-                                          100
-                                      )
-                                    : 0;
+                                const sold =
+                                    getSold(
+                                        event
+                                    );
 
-                            const cancelled =
-                                isCancelled(event);
+                                const capacity =
+                                    getCapacity(
+                                        event
+                                    );
 
-                            const isPast =
-                                status.label === "Past";
+                                const checkedIn =
+                                    getCheckedIn(
+                                        event
+                                    );
 
-                            const canCancel =
-                                !cancelled && !isPast;
+                                const remaining =
+                                    getRemaining(
+                                        event
+                                    );
 
-                            return (
-                                <article
-                                    className={`host-event-card ${
-                                        cancelled
-                                            ? "host-event-card-cancelled"
-                                            : ""
-                                    }`}
-                                    key={event.id}
-                                >
+                                const capacityPercentage =
+                                    capacity > 0
+                                        ? Math.min(
+                                              (sold /
+                                                  capacity) *
+                                                  100,
+                                              100
+                                          )
+                                        : 0;
 
-                                    {/* POSTER */}
-                                    <div className="host-event-poster-wrapper">
+                                const cancelled =
+                                    isCancelled(
+                                        event
+                                    );
 
-                                        {event.image ? (
-                                            <img
-                                                src={getImageUrl(
-                                                    event.image
-                                                )}
-                                                alt={
-                                                    event.title
-                                                }
-                                                className="host-event-poster"
-                                            />
-                                        ) : (
-                                            <FiCalendar
-                                                size={48}
-                                            />
-                                        )}
+                                const isPast =
+                                    status.label ===
+                                    "Past";
 
-                                        {cancelled && (
-                                            <div className="cancelled-poster-overlay">
-                                                <FiXCircle />
-                                                <span>
-                                                    Event Cancelled
+                                const canCancel =
+                                    !cancelled &&
+                                    !isPast;
+
+                                return (
+                                    <article
+                                        className={`host-event-card ${
+                                            cancelled
+                                                ? "host-event-card-cancelled"
+                                                : ""
+                                        }`}
+                                        key={event.id}
+                                    >
+
+                                        {/* POSTER */}
+
+                                        <div className="host-event-poster-wrapper">
+
+                                            {event.image ? (
+                                                <img
+                                                    src={getImageUrl(
+                                                        event.image
+                                                    )}
+                                                    alt={
+                                                        event.title ||
+                                                        "Event poster"
+                                                    }
+                                                    className="host-event-poster"
+                                                />
+                                            ) : (
+                                                <FiCalendar
+                                                    size={
+                                                        48
+                                                    }
+                                                />
+                                            )}
+
+                                            {cancelled && (
+                                                <div className="cancelled-poster-overlay">
+                                                    <FiXCircle />
+
+                                                    <span>
+                                                        Event
+                                                        Cancelled
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                        </div>
+
+                                        {/* TITLE */}
+
+                                        <div className="host-event-title-row">
+
+                                            <div>
+                                                <span
+                                                    className={`event-status ${status.className}`}
+                                                >
+                                                    {
+                                                        status.label
+                                                    }
                                                 </span>
+
+                                                <h3>
+                                                    {
+                                                        event.title
+                                                    }
+                                                </h3>
                                             </div>
-                                        )}
 
-                                    </div>
-
-                                    {/* TITLE */}
-                                    <div className="host-event-title-row">
-
-                                        <div>
-                                            <span
-                                                className={`event-status ${status.className}`}
-                                            >
-                                                {status.label}
-                                            </span>
-
-                                            <h3>
-                                                {event.title}
-                                            </h3>
                                         </div>
 
-                                    </div>
+                                        {/* META */}
 
-                                    {/* META */}
-                                    <div className="host-event-meta">
+                                        <div className="host-event-meta">
 
-                                        <span>
-                                            <FiCalendar />
-                                            {formatDate(event)}
-                                        </span>
-
-                                        <span>
-                                            <FiClock />
-                                            {formatTime(event)}
-                                        </span>
-
-                                        <span>
-                                            <FiMapPin />
-                                            {event.venue ||
-                                                event.location ||
-                                                "Venue not set"}
-                                        </span>
-
-                                        {event.category && (
                                             <span>
-                                                <FiTag />
-                                                {
-                                                    event.category
-                                                }
-                                            </span>
-                                        )}
-
-                                    </div>
-
-                                    {/* TYPE */}
-                                    <div className="host-event-type">
-
-                                        {Number(
-                                            event.price || 0
-                                        ) === 0 ? (
-                                            <span className="free-badge">
-                                                Free Event
-                                            </span>
-                                        ) : (
-                                            <span className="paid-badge">
-                                                Paid •{" "}
-                                                {formatCurrency(
-                                                    event.price
+                                                <FiCalendar />
+                                                {formatDate(
+                                                    event
                                                 )}
                                             </span>
-                                        )}
 
-                                    </div>
-
-                                    {/* PERFORMANCE */}
-                                    <div className="host-event-performance">
-
-                                        <div className="performance-item">
                                             <span>
-                                                Tickets Sold
-                                            </span>
-
-                                            <strong>
-                                                {sold}
-                                            </strong>
-                                        </div>
-
-                                        <div className="performance-item">
-                                            <span>
-                                                Checked In
-                                            </span>
-
-                                            <strong>
-                                                {checkedIn}
-                                            </strong>
-                                        </div>
-
-                                        <div className="performance-item">
-                                            <span>
-                                                Remaining
-                                            </span>
-
-                                            <strong>
-                                                {capacity
-                                                    ? remaining
-                                                    : "—"}
-                                            </strong>
-                                        </div>
-
-                                        <div className="performance-item">
-                                            <span>
-                                                Revenue
-                                            </span>
-
-                                            <strong>
-                                                {formatCurrency(
-                                                    getRevenue(
-                                                        event
-                                                    )
+                                                <FiClock />
+                                                {formatTime(
+                                                    event
                                                 )}
-                                            </strong>
-                                        </div>
+                                            </span>
 
-                                    </div>
+                                            <span>
+                                                <FiMapPin />
+                                                {event.venue ||
+                                                    event.location ||
+                                                    "Venue not set"}
+                                            </span>
 
-                                    {/* CAPACITY */}
-                                    {!cancelled && (
-                                        <div className="event-capacity">
-
-                                            <div className="capacity-header">
+                                            {event.category && (
                                                 <span>
-                                                    Ticket
-                                                    Capacity
+                                                    <FiTag />
+                                                    {
+                                                        event.category
+                                                    }
+                                                </span>
+                                            )}
+
+                                        </div>
+
+                                        {/* TYPE */}
+
+                                        <div className="host-event-type">
+
+                                            {getPrice(
+                                                event
+                                            ) === 0 ? (
+                                                <span className="free-badge">
+                                                    Free Event
+                                                </span>
+                                            ) : (
+                                                <span className="paid-badge">
+                                                    Paid •{" "}
+                                                    {formatCurrency(
+                                                        getPrice(
+                                                            event
+                                                        )
+                                                    )}
+                                                </span>
+                                            )}
+
+                                        </div>
+
+                                        {/* PERFORMANCE */}
+
+                                        <div className="host-event-performance">
+
+                                            <div className="performance-item">
+                                                <span>
+                                                    Tickets
+                                                    Sold
+                                                </span>
+
+                                                <strong>
+                                                    {sold}
+                                                </strong>
+                                            </div>
+
+                                            <div className="performance-item">
+                                                <span>
+                                                    Checked
+                                                    In
+                                                </span>
+
+                                                <strong>
+                                                    {
+                                                        checkedIn
+                                                    }
+                                                </strong>
+                                            </div>
+
+                                            <div className="performance-item">
+                                                <span>
+                                                    Remaining
                                                 </span>
 
                                                 <strong>
                                                     {capacity
-                                                        ? `${sold} / ${capacity}`
-                                                        : `${sold} sold`}
+                                                        ? remaining
+                                                        : "—"}
                                                 </strong>
                                             </div>
 
-                                            <div className="capacity-bar">
-                                                <div
-                                                    className="capacity-fill"
-                                                    style={{
-                                                        width: `${capacityPercentage}%`,
-                                                    }}
-                                                />
+                                            <div className="performance-item">
+                                                <span>
+                                                    Revenue
+                                                </span>
+
+                                                <strong>
+                                                    {formatCurrency(
+                                                        getRevenue(
+                                                            event
+                                                        )
+                                                    )}
+                                                </strong>
                                             </div>
 
                                         </div>
-                                    )}
 
-                                    {/* ACTIONS */}
-                                    <div className="host-event-actions">
-
-                                        <button
-                                            type="button"
-                                            className="view-event-btn"
-                                            onClick={() =>
-                                                navigate(
-                                                    `/attendees/${event.id}`
-                                                )
-                                            }
-                                        >
-                                            <FiUsers />
-                                            Attendees
-                                        </button>
+                                        {/* CAPACITY */}
 
                                         {!cancelled && (
+                                            <div className="event-capacity">
+
+                                                <div className="capacity-header">
+
+                                                    <span>
+                                                        Ticket
+                                                        Capacity
+                                                    </span>
+
+                                                    <strong>
+                                                        {capacity
+                                                            ? `${sold} / ${capacity}`
+                                                            : `${sold} sold`}
+                                                    </strong>
+
+                                                </div>
+
+                                                <div className="capacity-bar">
+                                                    <div
+                                                        className="capacity-fill"
+                                                        style={{
+                                                            width: `${capacityPercentage}%`,
+                                                        }}
+                                                    />
+                                                </div>
+
+                                            </div>
+                                        )}
+
+                                        {/* ACTIONS */}
+
+                                        <div className="host-event-actions">
+
                                             <button
                                                 type="button"
-                                                className="scan-event-btn"
+                                                className="view-event-btn"
                                                 onClick={() =>
                                                     navigate(
-                                                        `/scanner/${event.id}`
+                                                        `/attendees/${event.id}`
                                                     )
                                                 }
                                             >
-                                                <FiCheckCircle />
-                                                Scan
+                                                <FiUsers />
+                                                Attendees
                                             </button>
-                                        )}
 
-                                        <button
-                                            type="button"
-                                            className="edit-event-btn"
-                                            onClick={() =>
-                                                navigate(
-                                                    "/create-event",
-                                                    {
-                                                        state: {
-                                                            event,
-                                                        },
+                                            {!cancelled && (
+                                                <button
+                                                    type="button"
+                                                    className="scan-event-btn"
+                                                    onClick={() =>
+                                                        navigate(
+                                                            `/scanner/${event.id}`
+                                                        )
                                                     }
-                                                )
-                                            }
-                                            disabled={cancelled}
-                                        >
-                                            <FiEdit3 />
-                                            Edit
-                                        </button>
+                                                >
+                                                    <FiCheckCircle />
+                                                    Scan
+                                                </button>
+                                            )}
 
-                                        <button
-                                            type="button"
-                                            className="duplicate-event-btn"
-                                            onClick={() =>
-                                                navigate(
-                                                    "/create-event",
-                                                    {
-                                                        state: {
-                                                            duplicateEvent:
-                                                                event,
-                                                        },
-                                                    }
-                                                )
-                                            }
-                                        >
-                                            <FiCopy />
-                                            Duplicate
-                                        </button>
-
-                                        {canCancel && (
                                             <button
                                                 type="button"
-                                                className="cancel-event-btn"
+                                                className="edit-event-btn"
                                                 onClick={() =>
-                                                    handleCancel(
-                                                        event
+                                                    navigate(
+                                                        "/create-event",
+                                                        {
+                                                            state: {
+                                                                event,
+                                                            },
+                                                        }
                                                     )
                                                 }
                                                 disabled={
-                                                    cancellingEventId ===
-                                                    event.id
+                                                    cancelled
                                                 }
                                             >
-                                                <FiXCircle />
-
-                                                {cancellingEventId ===
-                                                event.id
-                                                    ? "Cancelling..."
-                                                    : "Cancel"}
+                                                <FiEdit3 />
+                                                Edit
                                             </button>
-                                        )}
 
-                                        <button
-                                            type="button"
-                                            className="delete-event-btn"
-                                            onClick={() =>
-                                                handleDelete(
-                                                    event
-                                                )
-                                            }
-                                        >
-                                            <FiTrash2 />
-                                            Delete
-                                        </button>
+                                            <button
+                                                type="button"
+                                                className="duplicate-event-btn"
+                                                onClick={() =>
+                                                    navigate(
+                                                        "/create-event",
+                                                        {
+                                                            state: {
+                                                                duplicateEvent:
+                                                                    event,
+                                                            },
+                                                        }
+                                                    )
+                                                }
+                                            >
+                                                <FiCopy />
+                                                Duplicate
+                                            </button>
 
-                                    </div>
+                                            {canCancel && (
+                                                <button
+                                                    type="button"
+                                                    className="cancel-event-btn"
+                                                    onClick={() =>
+                                                        handleCancel(
+                                                            event
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        cancellingEventId ===
+                                                        event.id
+                                                    }
+                                                >
+                                                    <FiXCircle />
 
-                                </article>
-                            );
-                        })}
+                                                    {cancellingEventId ===
+                                                    event.id
+                                                        ? "Cancelling..."
+                                                        : "Cancel"}
+                                                </button>
+                                            )}
+
+                                            <button
+                                                type="button"
+                                                className="delete-event-btn"
+                                                onClick={() =>
+                                                    handleDelete(
+                                                        event
+                                                    )
+                                                }
+                                            >
+                                                <FiTrash2 />
+                                                Delete
+                                            </button>
+
+                                        </div>
+
+                                    </article>
+                                );
+                            }
+                        )}
 
                     </div>
                 )}
@@ -1146,16 +1473,22 @@ function HostEvents() {
                 {/* =================================================
                     PAGINATION
                 ================================================= */}
-                {filteredEvents.length > EVENTS_PER_PAGE && (
+
+                {filteredEvents.length >
+                    EVENTS_PER_PAGE && (
                     <div className="host-events-pagination">
 
                         <button
                             type="button"
                             className="pagination-arrow"
-                            disabled={safeCurrentPage === 1}
+                            disabled={
+                                safeCurrentPage ===
+                                1
+                            }
                             onClick={() =>
                                 goToPage(
-                                    safeCurrentPage - 1
+                                    safeCurrentPage -
+                                        1
                                 )
                             }
                             aria-label="Previous page"
@@ -1165,23 +1498,27 @@ function HostEvents() {
 
                         <div className="pagination-pages">
 
-                            {pageNumbers.map((page) => (
-                                <button
-                                    type="button"
-                                    key={page}
-                                    className={
-                                        page ===
-                                        safeCurrentPage
-                                            ? "active"
-                                            : ""
-                                    }
-                                    onClick={() =>
-                                        goToPage(page)
-                                    }
-                                >
-                                    {page}
-                                </button>
-                            ))}
+                            {pageNumbers.map(
+                                (page) => (
+                                    <button
+                                        type="button"
+                                        key={page}
+                                        className={
+                                            page ===
+                                            safeCurrentPage
+                                                ? "active"
+                                                : ""
+                                        }
+                                        onClick={() =>
+                                            goToPage(
+                                                page
+                                            )
+                                        }
+                                    >
+                                        {page}
+                                    </button>
+                                )
+                            )}
 
                         </div>
 
@@ -1194,7 +1531,8 @@ function HostEvents() {
                             }
                             onClick={() =>
                                 goToPage(
-                                    safeCurrentPage + 1
+                                    safeCurrentPage +
+                                        1
                                 )
                             }
                             aria-label="Next page"

@@ -1282,4 +1282,126 @@
     transition: none;
   }
 }
+/* =========================================================
+   SHARE EVENT BUTTON
+========================================================= */
 
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-height: 42px;
+  padding: 0 14px;
+
+  border: 1px solid #dbe3ec;
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: #2563eb;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.share-btn:hover:not(:disabled) {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 4px 10px rgba(37, 99, 235, 0.12);
+}
+
+.share-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.share-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   SHARE TOAST
+========================================================= */
+
+.share-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  max-width: calc(100vw - 32px);
+
+  padding: 12px 16px;
+
+  background: #ffffff;
+  color: #1e293b;
+
+  border: 1px solid #dbe3ec;
+  border-radius: 12px;
+
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.14);
+
+  font-size: 14px;
+  font-weight: 600;
+
+  animation: shareToastIn 0.25s ease;
+}
+
+.share-toast svg {
+  flex-shrink: 0;
+  color: #16a34a;
+}
+
+@keyframes shareToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================================
+   MOBILE SHARE
+========================================================= */
+
+@media (max-width: 600px) {
+  .share-toast {
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+
+    justify-content: center;
+    text-align: center;
+  }
+
+  .share-btn {
+    min-height: 44px;
+    padding: 0 13px;
+  }
+}

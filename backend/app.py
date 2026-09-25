@@ -26256,49 +26256,79 @@ def get_events():
         events
     )
 
-
 # ============================================================
 # GET SINGLE EVENT
+#
+# Supports BOTH:
+#
+#   /events/3
+#   /events/siaka-festival
+#
+# Numeric IDs remain supported for backwards compatibility.
+# Slugs are used for new public/shared event URLs.
 # ============================================================
-
 @app.route(
-    "/events/<int:event_id>",
+    "/events/<event_identifier>",
     methods=["GET"]
 )
-def get_event(event_id):
-
+def get_event(event_identifier):
     events = load_json_file(
         "events.json",
         []
     )
-
+    # ========================================================
+    # NORMALIZE IDENTIFIER
+    # ========================================================
+    event_identifier = str(
+        event_identifier
+    ).strip()
+    # ========================================================
+    # FIND EVENT BY ID OR SLUG
+    # ========================================================
     for event in events:
-
-        try:
-
-            if int(
-                event.get(
-                    "id",
-                    0
-                )
-            ) == event_id:
-
-                return jsonify(
-                    event
-                )
-
-        except (
-            ValueError,
-            TypeError
+        # ----------------------------------------------------
+        # INTERNAL EVENT ID
+        # ----------------------------------------------------
+        event_id = str(
+            event.get(
+                "id",
+                ""
+            )
+        ).strip()
+        # ----------------------------------------------------
+        # PUBLIC EVENT SLUG
+        # ----------------------------------------------------
+        event_slug = str(
+            event.get(
+                "slug",
+                ""
+            )
+        ).strip().lower()
+        # ----------------------------------------------------
+        # MATCH ID
+        # ----------------------------------------------------
+        if event_id == event_identifier:
+            return jsonify(
+                event
+            )
+        # ----------------------------------------------------
+        # MATCH SLUG
+        # ----------------------------------------------------
+        if (
+            event_slug
+            and
+            event_slug == event_identifier.lower()
         ):
-
-            continue
-
+            return jsonify(
+                event
+            )
+    # ========================================================
+    # EVENT NOT FOUND
+    # ========================================================
     return jsonify({
         "success": False,
         "message": "Event not found"
     }), 404
-
 
 # ============================================================
 # FEATURE / UNFEATURE EVENT
