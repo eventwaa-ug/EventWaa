@@ -25530,6 +25530,52 @@ def google_login():
         }), 400
 
 # ============================================================
+# GET ALL PUBLIC EVENTS
+#
+# This route is public.
+# It allows the frontend to browse events without authentication.
+# Event creation remains protected separately by POST /events.
+# ============================================================
+
+@app.route(
+    "/events",
+    methods=["GET"]
+)
+def get_events():
+
+    try:
+
+        events = load_json_file(
+            "events.json",
+            []
+        )
+
+        if not isinstance(
+            events,
+            list
+        ):
+            events = []
+
+        return jsonify({
+            "success": True,
+            "events": events
+        }), 200
+
+    except Exception as e:
+
+        print(
+            "GET EVENTS ERROR:",
+            str(e)
+        )
+
+        return jsonify({
+            "success": False,
+            "message":
+                "Failed to load events."
+        }), 500
+
+
+# ============================================================
 # CREATE EVENT
 #
 # Supports:
