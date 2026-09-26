@@ -382,9 +382,9 @@ function App() {
                     <Route
                         path="host-messages"
                         element={
-                            <ProtectedRoute>
+                            <VerifiedHostRoute>
                                 <HostMessages />
-                            </ProtectedRoute>
+                            </VerifiedHostRoute>
                         }
                     />
 
@@ -417,9 +417,9 @@ function App() {
                         <Route
                             path="team-members"
                             element={
-                                <ProtectedRoute>
+                                <VerifiedHostRoute>
                                     <HostTeamMembers />
-                                </ProtectedRoute>
+                                </VerifiedHostRoute>
                             }
                         />
 
@@ -427,9 +427,9 @@ function App() {
                         <Route
                             path="host-wallet"
                             element={
-                                <ProtectedRoute>
+                                <VerifiedHostRoute>
                                     <HostWallet />
-                                </ProtectedRoute>
+                                </VerifiedHostRoute>
                             }
                         />
 
@@ -437,9 +437,9 @@ function App() {
                         <Route
                             path="host-events"
                             element={
-                                <ProtectedRoute>
+                                <VerifiedHostRoute>
                                     <HostEvents />
-                                </ProtectedRoute>
+                                </VerifiedHostRoute>
                             }
                         />
 
@@ -447,9 +447,9 @@ function App() {
                         <Route
                             path="host-refunds"
                             element={
-                                <ProtectedRoute>
+                                <VerifiedHostRoute>
                                     <HostRefunds />
-                                </ProtectedRoute>
+                                </VerifiedHostRoute>
                             }
                         />
                     </Route>
