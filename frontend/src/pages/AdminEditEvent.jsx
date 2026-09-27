@@ -1,900 +1,901 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./AdminCreateEvent.css";
+import { adminFetch } from "../utils/adminAPI";
 
-//BACKEND URL
-const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+// BACKEND URL
+const BACKEND_URL =
+    import.meta.env.VITE_API_BASE_URL;
 
 function AdminEditEvent() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    venue: "",
-    city: "",
-    category: "",
-    date: "",
-    startTime: "",
-    endTime: "",
-    capacity: "",
-    contact: "",
-    eventType: "Paid",
-  });
-
-  const [tickets, setTickets] = useState([]);
-
-  const [existingPoster, setExistingPoster] =
-    useState("");
-
-  const [poster, setPoster] =
-    useState(null);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [saving, setSaving] =
-    useState(false);
-
-  // ============================================================
-  // LOAD EVENT
-  // ============================================================
-
-  useEffect(() => {
-    fetchEvent();
-  }, [id]);
-
-  async function fetchEvent() {
-    try {
-      setLoading(true);
-
-      const response = await fetch(
-        `${BACKEND_URL}/events/${id}`
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to load event."
-        );
-      }
-
-      const data =
-        await response.json();
-
-      // ========================================================
-      // BASIC EVENT DATA
-      // ========================================================
-
-      setFormData({
-        title: data.title || "",
-        description:
-          data.description || "",
-        venue: data.venue || "",
-        city: data.city || "",
-        category:
-          data.category || "",
-        date: data.date || "",
-        startTime:
-          data.startTime || "",
-        endTime:
-          data.endTime || "",
-        capacity:
-          data.capacity || "",
-        contact:
-          data.contact || "",
-        eventType:
-          data.eventType ||
-          "Paid",
-      });
-
-      // ========================================================
-      // TICKET TYPES
-      // ========================================================
-
-      if (
-        Array.isArray(data.tickets)
-      ) {
-        setTickets(
-          data.tickets.map(
-            (ticket) => ({
-              name:
-                ticket.name || "",
-              price:
-                ticket.price ?? "",
-              quantity:
-                ticket.quantity ?? "",
-              remaining:
-                ticket.remaining ??
-                ticket.quantity ??
-                "",
-            })
-          )
-        );
-      } else {
-        setTickets([]);
-      }
-
-      // ========================================================
-      // EXISTING POSTER
-      // ========================================================
-
-      const posterPath =
-        data.eventPoster ||
-        data.image ||
-        "";
-
-      if (posterPath) {
-        if (
-          posterPath.startsWith(
-            "http://"
-          ) ||
-          posterPath.startsWith(
-            "https://"
-          )
-        ) {
-          setExistingPoster(
-            posterPath
-          );
-        } else if (
-          posterPath.startsWith("/")
-        ) {
-          setExistingPoster(
-            `${BACKEND_URL}${posterPath}`
-          );
-        } else {
-          setExistingPoster(
-            `${BACKEND_URL}/${posterPath}`
-          );
-        }
-      } else {
-        setExistingPoster("");
-      }
-
-    } catch (error) {
-      console.error(error);
-
-      alert(
-        "Unable to load this event."
-      );
-
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // ============================================================
-  // BASIC FIELD CHANGE
-  // ============================================================
-
-  function handleChange(e) {
-    const {
-      name,
-      value,
-    } = e.target;
-
-    setFormData((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
-  }
-
-  // ============================================================
-  // POSTER CHANGE
-  // ============================================================
-
-  function handlePosterChange(e) {
-    const file =
-      e.target.files?.[0] ||
-      null;
-
-    setPoster(file);
-  }
-
-  // ============================================================
-  // TICKET CHANGE
-  // ============================================================
-
-  function handleTicketChange(
-    index,
-    field,
-    value
-  ) {
-    setTickets((previous) => {
-
-      const updated = [
-        ...previous,
-      ];
-
-      updated[index] = {
-        ...updated[index],
-        [field]: value,
-      };
-
-      return updated;
-    });
-  }
-
-  // ============================================================
-  // ADD TICKET
-  // ============================================================
-
-  function addTicket() {
-    setTickets((previous) => [
-      ...previous,
-      {
-        name: "",
-        price: "",
-        quantity: "",
-        remaining: "",
-      },
-    ]);
-  }
-
-  // ============================================================
-  // REMOVE TICKET
-  // ============================================================
-
-  function removeTicket(index) {
-    if (tickets.length === 1) {
-      return;
-    }
-
-    setTickets((previous) =>
-      previous.filter(
-        (_, i) => i !== index
-      )
-    );
-  }
-
-  // ============================================================
-  // REMOVE EXISTING POSTER PREVIEW
-  //
-  // This only removes it from the edit form.
-  // The backend keeps the existing poster unless a new
-  // poster is uploaded.
-  // ============================================================
-
-  function clearPosterPreview() {
-    setExistingPoster("");
-    setPoster(null);
-  }
-
-  // ============================================================
-  // SUBMIT
-  // ============================================================
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    if (saving) {
-      return;
-    }
-
-    // ========================================================
-    // PAID EVENT VALIDATION
-    // ========================================================
-
-    if (
-      formData.eventType ===
-      "Paid"
-    ) {
-      if (tickets.length === 0) {
-        alert(
-          "A paid event must have at least one ticket type."
-        );
-
-        return;
-      }
-
-      for (
-        let i = 0;
-        i < tickets.length;
-        i++
-      ) {
-        const ticket =
-          tickets[i];
-
-        if (
-          !String(
-            ticket.name || ""
-          ).trim()
-        ) {
-          alert(
-            `Please enter a name for ticket ${i + 1}.`
-          );
-
-          return;
-        }
-
-        const price =
-          Number(
-            ticket.price
-          );
-
-        const quantity =
-          Number(
-            ticket.quantity
-          );
-
-        if (
-          Number.isNaN(
-            price
-          ) ||
-          price < 0
-        ) {
-          alert(
-            `Invalid price for ticket ${i + 1}.`
-          );
-
-          return;
-        }
-
-        if (
-          Number.isNaN(
-            quantity
-          ) ||
-          quantity <= 0
-        ) {
-          alert(
-            `Invalid quantity for ticket ${i + 1}.`
-          );
-
-          return;
-        }
-      }
-    }
-
-    try {
-      setSaving(true);
-
-      // ======================================================
-      // FORM DATA
-      //
-      // Flask uses request.form and request.files.
-      // Therefore JSON is NOT used here.
-      // ======================================================
-
-      const data =
-        new FormData();
-
-      Object.entries(
-        formData
-      ).forEach(
-        ([key, value]) => {
-          data.append(
-            key,
-            value ?? ""
-          );
-        }
-      );
-
-      // ======================================================
-      // TICKETS
-      // ======================================================
-
-      const ticketData =
-        formData.eventType ===
-        "Free"
-          ? []
-          : tickets.map(
-              (ticket) => ({
-                name: String(
-                  ticket.name || ""
-                ).trim(),
-
-                price: Number(
-                  ticket.price || 0
-                ),
-
-                quantity: Number(
-                  ticket.quantity || 0
-                ),
-
-                // Preserve current inventory information.
-                remaining:
-                  ticket.remaining !==
-                    undefined &&
-                  ticket.remaining !==
-                    ""
-                    ? Number(
-                        ticket.remaining
-                      )
-                    : Number(
-                        ticket.quantity ||
-                          0
-                      ),
-              })
+    const { id } = useParams();
+    const navigate = useNavigate();
+
+    const [formData, setFormData] =
+        useState({
+            title: "",
+            description: "",
+            venue: "",
+            city: "",
+            category: "",
+            date: "",
+            startTime: "",
+            endTime: "",
+            capacity: "",
+            contact: "",
+            eventType: "Paid",
+        });
+
+    const [tickets, setTickets] =
+        useState([]);
+
+    const [existingPoster, setExistingPoster] =
+        useState("");
+
+    const [poster, setPoster] =
+        useState(null);
+
+    const [loading, setLoading] =
+        useState(true);
+
+    const [saving, setSaving] =
+        useState(false);
+
+    // ============================================================
+    // LOAD EVENT
+    // ============================================================
+
+    useEffect(() => {
+        fetchEvent();
+    }, [id]);
+
+    async function fetchEvent() {
+        try {
+            setLoading(true);
+
+            const data =
+                await adminFetch(
+                    `/events/${id}`
+                );
+
+            // ========================================================
+            // BASIC EVENT DATA
+            // ========================================================
+
+            setFormData({
+                title:
+                    data.title || "",
+                description:
+                    data.description || "",
+                venue:
+                    data.venue || "",
+                city:
+                    data.city || "",
+                category:
+                    data.category || "",
+                date:
+                    data.date || "",
+                startTime:
+                    data.startTime || "",
+                endTime:
+                    data.endTime || "",
+                capacity:
+                    data.capacity || "",
+                contact:
+                    data.contact || "",
+                eventType:
+                    data.eventType ||
+                    "Paid",
+            });
+
+            // ========================================================
+            // TICKET TYPES
+            // ========================================================
+
+            if (
+                Array.isArray(
+                    data.tickets
+                )
+            ) {
+                setTickets(
+                    data.tickets.map(
+                        (ticket) => ({
+                            name:
+                                ticket.name || "",
+                            price:
+                                ticket.price ?? "",
+                            quantity:
+                                ticket.quantity ?? "",
+                            remaining:
+                                ticket.remaining ??
+                                ticket.quantity ??
+                                "",
+                        })
+                    )
+                );
+            } else {
+                setTickets([]);
+            }
+
+            // ========================================================
+            // EXISTING POSTER
+            // ========================================================
+
+            const posterPath =
+                data.eventPoster ||
+                data.image ||
+                "";
+
+            if (posterPath) {
+                if (
+                    posterPath.startsWith(
+                        "http://"
+                    ) ||
+                    posterPath.startsWith(
+                        "https://"
+                    )
+                ) {
+                    setExistingPoster(
+                        posterPath
+                    );
+                } else if (
+                    posterPath.startsWith("/")
+                ) {
+                    setExistingPoster(
+                        `${BACKEND_URL}${posterPath}`
+                    );
+                } else {
+                    setExistingPoster(
+                        `${BACKEND_URL}/${posterPath}`
+                    );
+                }
+            } else {
+                setExistingPoster("");
+            }
+
+        } catch (error) {
+            console.error(error);
+
+            alert(
+                error.message ||
+                "Unable to load this event."
             );
 
-      data.append(
-        "tickets",
-        JSON.stringify(
-          ticketData
-        )
-      );
-
-      // ======================================================
-      // POSTER
-      // ======================================================
-
-      if (poster) {
-        data.append(
-          "poster",
-          poster
-        );
-      }
-
-      // ======================================================
-      // SAVE
-      // ======================================================
-
-      const response =
-        await fetch(
-          `${BACKEND_URL}/events/${id}`,
-          {
-            method: "PUT",
-            body: data,
-          }
-        );
-
-      const result =
-        await response.json();
-
-      if (
-        !response.ok ||
-        !result.success
-      ) {
-        throw new Error(
-          result.message ||
-            "Failed to update event."
-        );
-      }
-
-      alert(
-        "Event updated successfully."
-      );
-
-      navigate(
-        "/admin/events"
-      );
-
-    } catch (error) {
-      console.error(
-        "Update event error:",
-        error
-      );
-
-      alert(
-        error.message ||
-          "Unable to update event."
-      );
-
-    } finally {
-      setSaving(false);
+        } finally {
+            setLoading(false);
+        }
     }
-  }
 
-  // ============================================================
-  // LOADING
-  // ============================================================
+    // ============================================================
+    // BASIC FIELD CHANGE
+    // ============================================================
 
-  if (loading) {
-    return (
-      <div className="admin-create-event">
-        <div className="create-header">
+    function handleChange(e) {
+        const {
+            name,
+            value,
+        } = e.target;
 
-          <h1>
-            Loading Event...
-          </h1>
+        setFormData((previous) => ({
+            ...previous,
+            [name]: value,
+        }));
+    }
 
-          <p>
-            Please wait while the
-            event information loads.
-          </p>
+    // ============================================================
+    // POSTER CHANGE
+    // ============================================================
 
-        </div>
-      </div>
-    );
-  }
+    function handlePosterChange(e) {
+        const file =
+            e.target.files?.[0] ||
+            null;
 
-  // ============================================================
-  // RENDER
-  // ============================================================
+        setPoster(file);
+    }
 
-  return (
-    <div className="admin-create-event">
+    // ============================================================
+    // TICKET CHANGE
+    // ============================================================
 
-      <div className="create-header">
+    function handleTicketChange(
+        index,
+        field,
+        value
+    ) {
+        setTickets((previous) => {
+            const updated = [
+                ...previous,
+            ];
 
-        <h1>
-          Edit Event
-        </h1>
+            updated[index] = {
+                ...updated[index],
+                [field]: value,
+            };
 
-        <p>
-          Update the event information,
-          ticket types and poster.
-        </p>
+            return updated;
+        });
+    }
 
-      </div>
+    // ============================================================
+    // ADD TICKET
+    // ============================================================
 
-      <form
-        className="create-event-form"
-        onSubmit={handleSubmit}
-      >
+    function addTicket() {
+        setTickets((previous) => [
+            ...previous,
+            {
+                name: "",
+                price: "",
+                quantity: "",
+                remaining: "",
+            },
+        ]);
+    }
 
-        {/* ====================================================
-            BASIC EVENT INFORMATION
-            ==================================================== */}
+    // ============================================================
+    // REMOVE TICKET
+    // ============================================================
 
-        <div className="form-grid">
+    function removeTicket(index) {
+        if (tickets.length === 1) {
+            return;
+        }
 
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={
-              handleChange
+        setTickets((previous) =>
+            previous.filter(
+                (_, i) => i !== index
+            )
+        );
+    }
+
+    // ============================================================
+    // REMOVE EXISTING POSTER PREVIEW
+    // ============================================================
+
+    function clearPosterPreview() {
+        setExistingPoster("");
+        setPoster(null);
+    }
+
+    // ============================================================
+    // SUBMIT
+    // ============================================================
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+
+        if (saving) {
+            return;
+        }
+
+        // ========================================================
+        // PAID EVENT VALIDATION
+        // ========================================================
+
+        if (
+            formData.eventType ===
+            "Paid"
+        ) {
+            if (tickets.length === 0) {
+                alert(
+                    "A paid event must have at least one ticket type."
+                );
+
+                return;
             }
-            placeholder="Event title"
-            required
-          />
 
-          <input
-            type="text"
-            name="venue"
-            value={formData.venue}
-            onChange={
-              handleChange
-            }
-            placeholder="Venue"
-            required
-          />
+            for (
+                let i = 0;
+                i < tickets.length;
+                i++
+            ) {
+                const ticket =
+                    tickets[i];
 
-          <input
-            type="text"
-            name="city"
-            value={formData.city}
-            onChange={
-              handleChange
-            }
-            placeholder="City"
-            required
-          />
+                if (
+                    !String(
+                        ticket.name || ""
+                    ).trim()
+                ) {
+                    alert(
+                        `Please enter a name for ticket ${i + 1}.`
+                    );
 
-          <input
-            type="text"
-            name="category"
-            value={
-              formData.category
-            }
-            onChange={
-              handleChange
-            }
-            placeholder="Category"
-            required
-          />
-
-          <input
-            type="date"
-            name="date"
-            value={
-              formData.date
-            }
-            onChange={
-              handleChange
-            }
-            required
-          />
-
-          <input
-            type="time"
-            name="startTime"
-            value={
-              formData.startTime
-            }
-            onChange={
-              handleChange
-            }
-            required
-          />
-
-          <input
-            type="time"
-            name="endTime"
-            value={
-              formData.endTime
-            }
-            onChange={
-              handleChange
-            }
-            required
-          />
-
-          <input
-            type="number"
-            name="capacity"
-            value={
-              formData.capacity
-            }
-            onChange={
-              handleChange
-            }
-            placeholder="Capacity"
-            min="1"
-            required
-          />
-
-        </div>
-
-        {/* ====================================================
-            DESCRIPTION
-            ==================================================== */}
-
-        <textarea
-          name="description"
-          value={
-            formData.description
-          }
-          onChange={
-            handleChange
-          }
-          placeholder="Event description"
-          rows="6"
-          required
-        />
-
-        {/* ====================================================
-            EVENT TYPE
-            ==================================================== */}
-
-        <div className="form-row">
-
-          <select
-            name="eventType"
-            value={
-              formData.eventType
-            }
-            onChange={
-              handleChange
-            }
-          >
-
-            <option value="Paid">
-              Paid event
-            </option>
-
-            <option value="Free">
-              Free event
-            </option>
-
-          </select>
-
-          <input
-            type="text"
-            name="contact"
-            value={
-              formData.contact
-            }
-            onChange={
-              handleChange
-            }
-            placeholder="Contact information"
-          />
-
-        </div>
-
-        {/* ====================================================
-            POSTER
-            ==================================================== */}
-
-        <div className="edit-poster-section">
-
-          <div className="edit-section-heading">
-
-            <h2>
-              Event Poster
-            </h2>
-
-            <p>
-              Upload a new poster or
-              keep the existing one.
-            </p>
-
-          </div>
-
-          {existingPoster && (
-            <div className="existing-poster-wrapper">
-
-              <img
-                src={existingPoster}
-                alt="Current event poster"
-                className="existing-event-poster"
-                onError={(e) => {
-                  e.currentTarget.style.display =
-                    "none";
-                }}
-              />
-
-              <button
-                type="button"
-                className="remove-poster-btn"
-                onClick={
-                  clearPosterPreview
+                    return;
                 }
-              >
-                Remove current poster
-              </button>
 
-            </div>
-          )}
+                const price =
+                    Number(
+                        ticket.price
+                    );
 
-          <input
-            type="file"
-            name="poster"
-            accept="image/*"
-            onChange={
-              handlePosterChange
+                const quantity =
+                    Number(
+                        ticket.quantity
+                    );
+
+                if (
+                    Number.isNaN(
+                        price
+                    ) ||
+                    price < 0
+                ) {
+                    alert(
+                        `Invalid price for ticket ${i + 1}.`
+                    );
+
+                    return;
+                }
+
+                if (
+                    Number.isNaN(
+                        quantity
+                    ) ||
+                    quantity <= 0
+                ) {
+                    alert(
+                        `Invalid quantity for ticket ${i + 1}.`
+                    );
+
+                    return;
+                }
             }
-          />
+        }
 
-          {poster && (
-            <p className="selected-poster-name">
-              New poster selected:{" "}
-              <strong>
-                {poster.name}
-              </strong>
-            </p>
-          )}
+        try {
+            setSaving(true);
 
-        </div>
+            // ======================================================
+            // FORM DATA
+            //
+            // Flask uses request.form and request.files.
+            // Therefore JSON is NOT used here.
+            // ======================================================
 
-        {/* ====================================================
-            TICKET TYPES
-            ==================================================== */}
+            const data =
+                new FormData();
 
-        {formData.eventType ===
-          "Paid" && (
+            Object.entries(
+                formData
+            ).forEach(
+                ([key, value]) => {
+                    data.append(
+                        key,
+                        value ?? ""
+                    );
+                }
+            );
 
-          <div className="ticket-section">
+            // ======================================================
+            // TICKETS
+            // ======================================================
 
-            <div className="ticket-header">
+            const ticketData =
+                formData.eventType ===
+                "Free"
+                    ? []
+                    : tickets.map(
+                        (ticket) => ({
+                            name: String(
+                                ticket.name || ""
+                            ).trim(),
 
-              <div>
-                <h2>
-                  Ticket Types
-                </h2>
+                            price: Number(
+                                ticket.price || 0
+                            ),
+
+                            quantity: Number(
+                                ticket.quantity || 0
+                            ),
+
+                            remaining:
+                                ticket.remaining !==
+                                    undefined &&
+                                ticket.remaining !==
+                                    ""
+                                    ? Number(
+                                        ticket.remaining
+                                    )
+                                    : Number(
+                                        ticket.quantity ||
+                                        0
+                                    ),
+                        })
+                    );
+
+            data.append(
+                "tickets",
+                JSON.stringify(
+                    ticketData
+                )
+            );
+
+            // ======================================================
+            // POSTER
+            // ======================================================
+
+            if (poster) {
+                data.append(
+                    "poster",
+                    poster
+                );
+            }
+
+            // ======================================================
+            // SAVE
+            // ======================================================
+
+            const result =
+                await adminFetch(
+                    `/events/${id}`,
+                    {
+                        method: "PUT",
+                        body: data,
+                    }
+                );
+
+            if (
+                !result.success
+            ) {
+                throw new Error(
+                    result.message ||
+                    "Failed to update event."
+                );
+            }
+
+            alert(
+                "Event updated successfully."
+            );
+
+            navigate(
+                "/admin/events"
+            );
+
+        } catch (error) {
+            console.error(
+                "Update event error:",
+                error
+            );
+
+            alert(
+                error.message ||
+                "Unable to update event."
+            );
+
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    // ============================================================
+    // LOADING
+    // ============================================================
+
+    if (loading) {
+        return (
+            <div className="admin-create-event">
+                <div className="create-header">
+
+                    <h1>
+                        Loading Event...
+                    </h1>
+
+                    <p>
+                        Please wait while the
+                        event information loads.
+                    </p>
+
+                </div>
+            </div>
+        );
+    }
+
+    // ============================================================
+    // RENDER
+    // ============================================================
+
+    return (
+        <div className="admin-create-event">
+
+            <div className="create-header">
+
+                <h1>
+                    Edit Event
+                </h1>
 
                 <p>
-                  Manage the ticket
-                  types and prices
-                  for this event.
+                    Update the event information,
+                    ticket types and poster.
                 </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={
-                  addTicket
-                }
-              >
-                + Add Ticket
-              </button>
 
             </div>
 
-            {tickets.map(
-              (
-                ticket,
-                index
-              ) => (
+            <form
+                className="create-event-form"
+                onSubmit={handleSubmit}
+            >
 
-                <div
-                  className="ticket-row"
-                  key={index}
-                >
+                {/* ====================================================
+                    BASIC EVENT INFORMATION
+                    ==================================================== */}
 
-                  <input
-                    type="text"
-                    placeholder="Ticket name"
-                    value={
-                      ticket.name
-                    }
-                    onChange={(e) =>
-                      handleTicketChange(
-                        index,
-                        "name",
-                        e.target.value
-                      )
-                    }
-                  />
+                <div className="form-grid">
 
-                  <input
-                    type="number"
-                    placeholder="Price"
-                    min="0"
-                    value={
-                      ticket.price
-                    }
-                    onChange={(e) =>
-                      handleTicketChange(
-                        index,
-                        "price",
-                        e.target.value
-                      )
-                    }
-                  />
+                    <input
+                        type="text"
+                        name="title"
+                        value={
+                            formData.title
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        placeholder="Event title"
+                        required
+                    />
 
-                  <input
-                    type="number"
-                    placeholder="Quantity"
-                    min="1"
-                    value={
-                      ticket.quantity
-                    }
-                    onChange={(e) =>
-                      handleTicketChange(
-                        index,
-                        "quantity",
-                        e.target.value
-                      )
-                    }
-                  />
+                    <input
+                        type="text"
+                        name="venue"
+                        value={
+                            formData.venue
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        placeholder="Venue"
+                        required
+                    />
 
-                  <button
-                    type="button"
-                    className="remove-ticket-btn"
-                    onClick={() =>
-                      removeTicket(
-                        index
-                      )
-                    }
-                  >
-                    Remove
-                  </button>
+                    <input
+                        type="text"
+                        name="city"
+                        value={
+                            formData.city
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        placeholder="City"
+                        required
+                    />
+
+                    <input
+                        type="text"
+                        name="category"
+                        value={
+                            formData.category
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        placeholder="Category"
+                        required
+                    />
+
+                    <input
+                        type="date"
+                        name="date"
+                        value={
+                            formData.date
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        required
+                    />
+
+                    <input
+                        type="time"
+                        name="startTime"
+                        value={
+                            formData.startTime
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        required
+                    />
+
+                    <input
+                        type="time"
+                        name="endTime"
+                        value={
+                            formData.endTime
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        required
+                    />
+
+                    <input
+                        type="number"
+                        name="capacity"
+                        value={
+                            formData.capacity
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        placeholder="Capacity"
+                        min="1"
+                        required
+                    />
 
                 </div>
 
-              )
-            )}
+                {/* ====================================================
+                    DESCRIPTION
+                    ==================================================== */}
 
-          </div>
+                <textarea
+                    name="description"
+                    value={
+                        formData.description
+                    }
+                    onChange={
+                        handleChange
+                    }
+                    placeholder="Event description"
+                    rows="6"
+                    required
+                />
 
-        )}
+                {/* ====================================================
+                    EVENT TYPE
+                    ==================================================== */}
 
-        {/* ====================================================
-            ACTIONS
-            ==================================================== */}
+                <div className="form-row">
 
-        <div className="form-actions">
+                    <select
+                        name="eventType"
+                        value={
+                            formData.eventType
+                        }
+                        onChange={
+                            handleChange
+                        }
+                    >
 
-          <button
-            type="button"
-            onClick={() =>
-              navigate(
-                "/admin/events"
-              )
-            }
-            disabled={saving}
-          >
-            Cancel
-          </button>
+                        <option value="Paid">
+                            Paid event
+                        </option>
 
-          <button
-            type="submit"
-            disabled={saving}
-          >
-            {saving
-              ? "Saving..."
-              : "Save Changes"}
-          </button>
+                        <option value="Free">
+                            Free event
+                        </option>
+
+                    </select>
+
+                    <input
+                        type="text"
+                        name="contact"
+                        value={
+                            formData.contact
+                        }
+                        onChange={
+                            handleChange
+                        }
+                        placeholder="Contact information"
+                    />
+
+                </div>
+
+                {/* ====================================================
+                    POSTER
+                    ==================================================== */}
+
+                <div className="edit-poster-section">
+
+                    <div className="edit-section-heading">
+
+                        <h2>
+                            Event Poster
+                        </h2>
+
+                        <p>
+                            Upload a new poster or
+                            keep the existing one.
+                        </p>
+
+                    </div>
+
+                    {existingPoster && (
+                        <div className="existing-poster-wrapper">
+
+                            <img
+                                src={
+                                    existingPoster
+                                }
+                                alt="Current event poster"
+                                className="existing-event-poster"
+                                onError={(e) => {
+                                    e.currentTarget.style.display =
+                                        "none";
+                                }}
+                            />
+
+                            <button
+                                type="button"
+                                className="remove-poster-btn"
+                                onClick={
+                                    clearPosterPreview
+                                }
+                            >
+                                Remove current poster
+                            </button>
+
+                        </div>
+                    )}
+
+                    <input
+                        type="file"
+                        name="poster"
+                        accept="image/*"
+                        onChange={
+                            handlePosterChange
+                        }
+                    />
+
+                    {poster && (
+                        <p className="selected-poster-name">
+                            New poster selected:{" "}
+                            <strong>
+                                {poster.name}
+                            </strong>
+                        </p>
+                    )}
+
+                </div>
+
+                {/* ====================================================
+                    TICKET TYPES
+                    ==================================================== */}
+
+                {formData.eventType ===
+                    "Paid" && (
+
+                    <div className="ticket-section">
+
+                        <div className="ticket-header">
+
+                            <div>
+                                <h2>
+                                    Ticket Types
+                                </h2>
+
+                                <p>
+                                    Manage the ticket
+                                    types and prices
+                                    for this event.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={
+                                    addTicket
+                                }
+                            >
+                                + Add Ticket
+                            </button>
+
+                        </div>
+
+                        {tickets.map(
+                            (
+                                ticket,
+                                index
+                            ) => (
+
+                                <div
+                                    className="ticket-row"
+                                    key={index}
+                                >
+
+                                    <input
+                                        type="text"
+                                        placeholder="Ticket name"
+                                        value={
+                                            ticket.name
+                                        }
+                                        onChange={(e) =>
+                                            handleTicketChange(
+                                                index,
+                                                "name",
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+
+                                    <input
+                                        type="number"
+                                        placeholder="Price"
+                                        min="0"
+                                        value={
+                                            ticket.price
+                                        }
+                                        onChange={(e) =>
+                                            handleTicketChange(
+                                                index,
+                                                "price",
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+
+                                    <input
+                                        type="number"
+                                        placeholder="Quantity"
+                                        min="1"
+                                        value={
+                                            ticket.quantity
+                                        }
+                                        onChange={(e) =>
+                                            handleTicketChange(
+                                                index,
+                                                "quantity",
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+
+                                    <button
+                                        type="button"
+                                        className="remove-ticket-btn"
+                                        onClick={() =>
+                                            removeTicket(
+                                                index
+                                            )
+                                        }
+                                    >
+                                        Remove
+                                    </button>
+
+                                </div>
+
+                            )
+                        )}
+
+                    </div>
+
+                )}
+
+                {/* ====================================================
+                    ACTIONS
+                    ==================================================== */}
+
+                <div className="form-actions">
+
+                    <button
+                        type="button"
+                        onClick={() =>
+                            navigate(
+                                "/admin/events"
+                            )
+                        }
+                        disabled={saving}
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        disabled={saving}
+                    >
+                        {saving
+                            ? "Saving..."
+                            : "Save Changes"}
+                    </button>
+
+                </div>
+
+            </form>
 
         </div>
-
-      </form>
-
-    </div>
-  );
+    );
 }
 
 export default AdminEditEvent;

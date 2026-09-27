@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import {Navigate} from "react-router-dom";
 
 import MainLayout from "./layouts/MainLayout";
 import AuthLayout from "./layouts/AuthLayout";
@@ -118,6 +119,56 @@ import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import MaintenanceGuard from "./components/MaintenanceGuard";
 import VerifiedHostRoute from "./components/VerifiedHostRoute";
 
+function NotFound() {
+    return (
+        <div
+            style={{
+                minHeight: "100vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "24px",
+                textAlign: "center",
+                fontFamily:
+                    "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                background: "#f7f8fa",
+                color: "#17181c",
+            }}
+        >
+            <div>
+                <h1
+                    style={{
+                        margin: 0,
+                        fontSize: "72px",
+                        fontWeight: 800,
+                        letterSpacing: "-3px",
+                    }}
+                >
+                    404
+                </h1>
+
+                <h2
+                    style={{
+                        margin: "12px 0 10px",
+                    }}
+                >
+                    Page Not Found
+                </h2>
+
+                <p
+                    style={{
+                        margin: 0,
+                        color: "#737780",
+                    }}
+                >
+                    The page you are looking for does not exist. 
+                    And stop looking for it, we can see you right there!
+                </p>
+            </div>
+        </div>
+    );
+}
+
 function App() {
     return (
         <MaintenanceGuard>
@@ -148,12 +199,20 @@ function App() {
                 />
 
                 {/* =====================================================
-                    ADMIN LOGIN
-                ===================================================== */}
-                <Route
-                    path="/admin/login"
-                    element={<AdminLogin />}
-                />
+                        PRIVATE ADMIN LOGIN
+                    ===================================================== */}
+                    <Route
+                        path="/eventwaa-control"
+                        element={<AdminLogin />}
+                    />
+
+                    {/* =====================================================
+                        HIDDEN PUBLIC ADMIN LOGIN
+                    ===================================================== */}
+                    <Route
+                        path="/admin/login"
+                        element={<NotFound />}
+                    />
 
                 {/* =====================================================
                     ADMIN PASSWORD RECOVERY

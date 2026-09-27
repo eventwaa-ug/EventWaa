@@ -13,16 +13,13 @@ import {
 } from "react-icons/fi";
 
 import "./AdminEvents.css";
-
+import { adminFetch } from "../utils/adminAPI";
 
 const BACKEND_URL =
     import.meta.env.VITE_API_BASE_URL || "";
 
-
 function AdminEvents() {
-
     const navigate = useNavigate();
-
 
     /* ============================================================
        STATE
@@ -46,114 +43,57 @@ function AdminEvents() {
     const [cancellingId, setCancellingId] =
         useState(null);
 
-
-    /* ============================================================
-       SAFE JSON RESPONSE
-    ============================================================ */
-
-    const parseResponse = async (
-        response
-    ) => {
-
-        try {
-
-            return await response.json();
-
-        } catch {
-
-            return {};
-
-        }
-
-    };
-
-
     /* ============================================================
        FETCH EVENTS
     ============================================================ */
 
     const fetchEvents = async () => {
-
         try {
-
             setLoading(true);
             setError("");
 
-
-            const response =
-                await fetch(
-                    `${BACKEND_URL}/admin/events`
-                );
-
-
             const data =
-                await parseResponse(
-                    response
+                await adminFetch(
+                    "/admin/events"
                 );
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    data.message ||
-                    "Failed to load events."
-                );
-
-            }
-
 
             setEvents(
                 Array.isArray(data)
                     ? data
-                    : Array.isArray(
-                          data.events
-                      )
-                    ? data.events
-                    : []
+                    : Array.isArray(data?.events)
+                        ? data.events
+                        : []
             );
-
         } catch (err) {
-
             console.error(
                 "ADMIN EVENTS LOAD ERROR:",
                 err
             );
 
-
             setError(
                 err.message ||
                 "Failed to load events."
             );
-
         } finally {
-
             setLoading(false);
-
         }
-
     };
-
 
     /* ============================================================
        INITIAL LOAD
     ============================================================ */
 
     useEffect(() => {
-
         fetchEvents();
-
     }, []);
-
 
     /* ============================================================
        SORT EVENTS
     ============================================================ */
 
     const sortedEvents = useMemo(() => {
-
         return [...events].sort(
             (a, b) => {
-
                 const dateA =
                     new Date(
                         a?.createdAt || 0
@@ -164,17 +104,13 @@ function AdminEvents() {
                         b?.createdAt || 0
                     ).getTime();
 
-
                 if (
                     Number.isFinite(dateA) &&
                     Number.isFinite(dateB) &&
                     dateA !== dateB
                 ) {
-
                     return dateB - dateA;
-
                 }
-
 
                 const idA =
                     Number(
@@ -186,47 +122,37 @@ function AdminEvents() {
                         b?.id || 0
                     );
 
-
                 return idB - idA;
-
             }
         );
-
     }, [events]);
-
 
     /* ============================================================
        FILTER EVENTS
     ============================================================ */
 
     const filteredEvents = useMemo(() => {
-
         const query =
             search
                 .trim()
                 .toLowerCase();
 
-
         return sortedEvents.filter(
             (event) => {
-
                 const title =
                     String(
                         event?.title || ""
                     ).toLowerCase();
-
 
                 const venue =
                     String(
                         event?.venue || ""
                     ).toLowerCase();
 
-
                 const city =
                     String(
                         event?.city || ""
                     ).toLowerCase();
-
 
                 const hostName =
                     String(
@@ -235,12 +161,10 @@ function AdminEvents() {
                         ""
                     ).toLowerCase();
 
-
                 const category =
                     String(
                         event?.category || ""
                     ).toLowerCase();
-
 
                 const matchesSearch =
                     !query ||
@@ -250,19 +174,14 @@ function AdminEvents() {
                     hostName.includes(query) ||
                     category.includes(query);
 
-
                 if (!matchesSearch) {
-
                     return false;
-
                 }
-
 
                 const status =
                     String(
                         event?.status || ""
                     ).toLowerCase();
-
 
                 const isCancelled =
                     status === "cancelled" ||
@@ -270,12 +189,10 @@ function AdminEvents() {
                         event?.cancelled
                     );
 
-
                 const isFeatured =
                     Boolean(
                         event?.featured
                     );
-
 
                 const tickets =
                     Array.isArray(
@@ -284,13 +201,11 @@ function AdminEvents() {
                         ? event.tickets
                         : [];
 
-
                 const isFree =
                     String(
                         event?.eventType || ""
                     ).toLowerCase() ===
                         "free" ||
-
                     (
                         tickets.length > 0 &&
                         tickets.every(
@@ -301,72 +216,52 @@ function AdminEvents() {
                         )
                     );
 
-
                 const isPaid =
                     !isFree;
-
 
                 if (
                     filter ===
                     "featured"
                 ) {
-
                     return isFeatured;
-
                 }
-
 
                 if (
                     filter ===
                     "free"
                 ) {
-
                     return isFree;
-
                 }
-
 
                 if (
                     filter ===
                     "paid"
                 ) {
-
                     return isPaid;
-
                 }
-
 
                 if (
                     filter ===
                     "cancelled"
                 ) {
-
                     return isCancelled;
-
                 }
-
 
                 if (
                     filter ===
                     "active"
                 ) {
-
                     return !isCancelled;
-
                 }
 
-
                 return true;
-
             }
         );
-
     }, [
         sortedEvents,
         search,
         filter,
     ]);
-
 
     /* ============================================================
        EVENT PRICE
@@ -375,21 +270,16 @@ function AdminEvents() {
     const getEventPrice = (
         event
     ) => {
-
         const eventType =
             String(
                 event?.eventType || ""
             ).toLowerCase();
 
-
         if (
             eventType === "free"
         ) {
-
             return "Free";
-
         }
-
 
         const tickets =
             Array.isArray(
@@ -398,11 +288,9 @@ function AdminEvents() {
                 ? event.tickets
                 : [];
 
-
         if (
             tickets.length > 0
         ) {
-
             const prices =
                 tickets
                     .map(
@@ -419,74 +307,53 @@ function AdminEvents() {
                             price >= 0
                     );
 
-
             if (
                 prices.length > 0
             ) {
-
                 const minimum =
                     Math.min(
                         ...prices
                     );
 
-
                 if (
                     minimum === 0
                 ) {
-
                     return "Free";
-
                 }
 
-
                 return `UGX ${minimum.toLocaleString()}`;
-
             }
-
         }
-
 
         if (
             event?.price !==
                 undefined &&
             event?.price !== null
         ) {
-
             const price =
                 Number(
                     event.price || 0
                 );
-
 
             if (
                 !Number.isFinite(
                     price
                 )
             ) {
-
                 return "N/A";
-
             }
-
 
             if (
                 price === 0
             ) {
-
                 return "Free";
-
             }
 
-
             return `UGX ${price.toLocaleString()}`;
-
         }
 
-
         return "N/A";
-
     };
-
 
     /* ============================================================
        POSTER URL
@@ -495,33 +362,24 @@ function AdminEvents() {
     const getPoster = (
         event
     ) => {
-
         const poster =
             event?.eventPoster ||
             event?.image ||
             event?.poster ||
             "";
 
-
         if (!poster) {
-
             return "";
-
         }
-
 
         const posterUrl =
             String(
                 poster
             ).trim();
 
-
         if (!posterUrl) {
-
             return "";
-
         }
-
 
         if (
             posterUrl.startsWith(
@@ -531,11 +389,8 @@ function AdminEvents() {
                 "https://"
             )
         ) {
-
             return posterUrl;
-
         }
-
 
         const backend =
             BACKEND_URL.replace(
@@ -543,20 +398,14 @@ function AdminEvents() {
                 ""
             );
 
-
         if (
             posterUrl.startsWith("/")
         ) {
-
             return `${backend}${posterUrl}`;
-
         }
 
-
         return `${backend}/${posterUrl}`;
-
     };
-
 
     /* ============================================================
        EVENT DATE
@@ -565,30 +414,22 @@ function AdminEvents() {
     const formatEventDate = (
         value
     ) => {
-
         if (!value) {
-
             return "N/A";
-
         }
-
 
         const date =
             new Date(value);
-
 
         if (
             Number.isNaN(
                 date.getTime()
             )
         ) {
-
             return String(
                 value
             );
-
         }
-
 
         return date.toLocaleDateString(
             undefined,
@@ -598,9 +439,7 @@ function AdminEvents() {
                 day: "numeric",
             }
         );
-
     };
-
 
     /* ============================================================
        TICKET TOTAL
@@ -609,17 +448,13 @@ function AdminEvents() {
     const getTicketCapacity = (
         event
     ) => {
-
         if (
             !Array.isArray(
                 event?.tickets
             )
         ) {
-
             return "N/A";
-
         }
-
 
         const total =
             event.tickets.reduce(
@@ -627,14 +462,12 @@ function AdminEvents() {
                     sum,
                     ticket
                 ) => {
-
                     const quantity =
                         Number(
                             ticket?.quantity ??
                             ticket?.capacity ??
                             0
                         );
-
 
                     return (
                         sum +
@@ -646,18 +479,14 @@ function AdminEvents() {
                                 : 0
                         )
                     );
-
                 },
                 0
             );
 
-
         return total > 0
             ? total.toLocaleString()
             : "N/A";
-
     };
-
 
     /* ============================================================
        SOLD TICKETS
@@ -666,28 +495,21 @@ function AdminEvents() {
     const getTicketsSold = (
         event
     ) => {
-
         const sold =
             Number(
                 event?.ticketsSold || 0
             );
-
 
         if (
             !Number.isFinite(
                 sold
             )
         ) {
-
             return "0";
-
         }
 
-
         return sold.toLocaleString();
-
     };
-
 
     /* ============================================================
        PUBLIC EVENT SHARE URL
@@ -696,53 +518,40 @@ function AdminEvents() {
     const getShareUrl = (
         event
     ) => {
-
         const eventIdentifier =
             event?.slug ||
             event?.eventSlug ||
             event?.event_id ||
             event?.id;
 
-
         return `${window.location.origin}/events/${encodeURIComponent(
             eventIdentifier
         )}`;
-
     };
-
 
     /* ============================================================
        COPY EVENT LINK
-       
-       Fallback for browsers without native sharing.
     ============================================================ */
 
     const copyEventLink = async (
         eventUrl
     ) => {
-
         try {
-
             if (
                 navigator.clipboard &&
                 window.isSecureContext
             ) {
-
                 await navigator.clipboard.writeText(
                     eventUrl
                 );
-
             } else {
-
                 const textArea =
                     document.createElement(
                         "textarea"
                     );
 
-
                 textArea.value =
                     eventUrl;
-
 
                 textArea.style.position =
                     "fixed";
@@ -750,137 +559,90 @@ function AdminEvents() {
                 textArea.style.opacity =
                     "0";
 
-
                 document.body.appendChild(
                     textArea
                 );
 
-
                 textArea.focus();
                 textArea.select();
-
 
                 document.execCommand(
                     "copy"
                 );
 
-
                 document.body.removeChild(
                     textArea
                 );
-
             }
-
 
             alert(
                 "Event link copied successfully!"
             );
-
         } catch (error) {
-
             console.error(
                 "COPY EVENT LINK ERROR:",
                 error
             );
 
-
             alert(
                 "Unable to copy the event link."
             );
-
         }
-
     };
-
 
     /* ============================================================
        SHARE EVENT
-       
-       Uses the same native EventWaa sharing behavior
-       as EventDetails.jsx.
     ============================================================ */
 
     const handleShare = async (
         event
     ) => {
-
         const eventUrl =
             getShareUrl(
                 event
             );
 
-
         const shareTitle =
             event?.title ||
             "EventWaa Event";
 
-
         const shareText =
             `Check out ${shareTitle} on EventWaa!`;
-
-
-        /*
-         * Native device/browser share sheet.
-         */
 
         if (
             typeof navigator.share ===
             "function"
         ) {
-
             try {
-
                 await navigator.share({
                     title:
                         shareTitle,
-
                     text:
                         shareText,
-
                     url:
                         eventUrl,
                 });
 
-
                 return;
-
             } catch (error) {
-
-                /*
-                 * User closed the native share
-                 * sheet. This is not an error.
-                 */
-
                 if (
                     error?.name ===
                     "AbortError"
                 ) {
-
                     return;
-
                 }
-
 
                 console.error(
                     "NATIVE EVENT SHARE ERROR:",
                     error
                 );
-
             }
-
         }
-
-
-        /*
-         * Browser fallback.
-         */
 
         await copyEventLink(
             eventUrl
         );
-
     };
-
 
     /* ============================================================
        FEATURE EVENT
@@ -889,7 +651,6 @@ function AdminEvents() {
     const handleFeature = async (
         event
     ) => {
-
         const isCancelled =
             String(
                 event?.status || ""
@@ -899,50 +660,26 @@ function AdminEvents() {
                 event?.cancelled
             );
 
-
         if (
             isCancelled
         ) {
-
             return;
-
         }
 
-
         try {
-
             setError("");
 
-
-            const response =
-                await fetch(
-                    `${BACKEND_URL}/admin/events/${event.id}/feature`,
+            const data =
+                await adminFetch(
+                    `/admin/events/${event.id}/feature`,
                     {
                         method: "PUT",
-
                         headers: {
                             "Content-Type":
                                 "application/json",
                         },
                     }
                 );
-
-
-            const data =
-                await parseResponse(
-                    response
-                );
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    data.message ||
-                    "Failed to update featured status."
-                );
-
-            }
-
 
             setEvents(
                 (currentEvents) =>
@@ -958,7 +695,6 @@ function AdminEvents() {
                             )
                                 ? {
                                       ...currentEvent,
-
                                       featured:
                                           data.featured ??
                                           !Boolean(
@@ -968,24 +704,18 @@ function AdminEvents() {
                                 : currentEvent
                     )
             );
-
         } catch (err) {
-
             console.error(
                 "FEATURE EVENT ERROR:",
                 err
             );
 
-
             alert(
                 err.message ||
                 "Failed to update featured status."
             );
-
         }
-
     };
-
 
     /* ============================================================
        DELETE EVENT
@@ -994,49 +724,24 @@ function AdminEvents() {
     const handleDelete = async (
         event
     ) => {
-
         const confirmed =
             window.confirm(
                 `Are you sure you want to delete "${event?.title || "this event"}"?\n\nThis action is different from cancellation.`
             );
 
-
         if (!confirmed) {
-
             return;
-
         }
 
-
         try {
-
             setError("");
 
-
-            const response =
-                await fetch(
-                    `${BACKEND_URL}/events/${event.id}`,
-                    {
-                        method: "DELETE",
-                    }
-                );
-
-
-            const data =
-                await parseResponse(
-                    response
-                );
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    data.message ||
-                    "Failed to delete event."
-                );
-
-            }
-
+            await adminFetch(
+                `/events/${event.id}`,
+                {
+                    method: "DELETE",
+                }
+            );
 
             setEvents(
                 (currentEvents) =>
@@ -1052,24 +757,18 @@ function AdminEvents() {
                             )
                     )
             );
-
         } catch (err) {
-
             console.error(
                 "DELETE EVENT ERROR:",
                 err
             );
 
-
             alert(
                 err.message ||
                 "Failed to delete event."
             );
-
         }
-
     };
-
 
     /* ============================================================
        CANCEL EVENT
@@ -1078,7 +777,6 @@ function AdminEvents() {
     const handleCancel = async (
         event
     ) => {
-
         const alreadyCancelled =
             String(
                 event?.status || ""
@@ -1088,15 +786,11 @@ function AdminEvents() {
                 event?.cancelled
             );
 
-
         if (
             alreadyCancelled
         ) {
-
             return;
-
         }
-
 
         if (
             String(
@@ -1106,24 +800,17 @@ function AdminEvents() {
                 event?.id
             )
         ) {
-
             return;
-
         }
-
 
         const firstConfirmation =
             window.confirm(
                 `Cancel "${event?.title || "this event"}"?\n\nThis will cancel the event, invalidate its tickets/passes, and process eligible refunds.`
             );
 
-
         if (!firstConfirmation) {
-
             return;
-
         }
-
 
         const reasonInput =
             window.prompt(
@@ -1131,78 +818,40 @@ function AdminEvents() {
                 "Event cancelled by EventWaa administration."
             );
 
-
         if (
             reasonInput ===
             null
         ) {
-
             return;
-
         }
-
 
         const reason =
             reasonInput.trim();
 
-
         if (!reason) {
-
             alert(
                 "A cancellation reason is required."
             );
 
             return;
-
         }
-
-
-        const adminToken =
-            localStorage.getItem(
-                "eventwaa_admin_token"
-            );
-
-
-        if (!adminToken) {
-
-            alert(
-                "Your admin session has expired. Please log in again."
-            );
-
-
-            navigate(
-                "/admin/login"
-            );
-
-
-            return;
-
-        }
-
 
         try {
-
             setCancellingId(
                 event.id
             );
 
             setError("");
 
-
-            const response =
-                await fetch(
-                    `${BACKEND_URL}/admin/events/${event.id}/cancel`,
+            const data =
+                await adminFetch(
+                    `/admin/events/${event.id}/cancel`,
                     {
                         method: "POST",
-
                         headers: {
                             "Content-Type":
                                 "application/json",
-
-                            Authorization:
-                                `Bearer ${adminToken}`,
                         },
-
                         body:
                             JSON.stringify({
                                 cancellationReason:
@@ -1210,24 +859,6 @@ function AdminEvents() {
                             }),
                     }
                 );
-
-
-            const data =
-                await parseResponse(
-                    response
-                );
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    data.message ||
-                    data.refundError?.message ||
-                    "Failed to cancel event."
-                );
-
-            }
-
 
             setEvents(
                 (currentEvents) =>
@@ -1243,26 +874,20 @@ function AdminEvents() {
                             )
                                 ? {
                                       ...currentEvent,
-
                                       status:
                                           "cancelled",
-
                                       cancelled:
                                           true,
-
                                       cancelledAt:
                                           new Date().toISOString(),
-
                                       cancelledBy:
                                           "admin",
-
                                       cancellationReason:
                                           reason,
                                   }
                                 : currentEvent
                     )
             );
-
 
             alert(
                 `Event cancelled successfully.\n\nPaid refunds processed: ${
@@ -1277,75 +902,54 @@ function AdminEvents() {
                     )
                 }`
             );
-
         } catch (err) {
-
             console.error(
                 "CANCEL EVENT ERROR:",
                 err
             );
 
-
             alert(
                 err.message ||
                 "Failed to cancel event."
             );
-
         } finally {
-
             setCancellingId(
                 null
             );
-
         }
-
     };
-
 
     /* ============================================================
        LOADING
     ============================================================ */
 
     if (loading) {
-
         return (
-
             <div className="admin-events">
-
                 <div className="admin-events-loading">
-
                     <div className="admin-events-spinner" />
 
                     <p>
                         Loading events...
                     </p>
-
                 </div>
-
             </div>
-
         );
-
     }
-
 
     /* ============================================================
        PAGE
     ============================================================ */
 
     return (
-
         <div className="admin-events">
-
 
             {/* ====================================================
                 HEADER
             ==================================================== */}
 
             <div className="admin-events-header">
-
                 <div>
-
                     <h1>
                         Events
                     </h1>
@@ -1354,9 +958,7 @@ function AdminEvents() {
                         Manage all EventWaa
                         events.
                     </p>
-
                 </div>
-
 
                 <button
                     type="button"
@@ -1367,41 +969,30 @@ function AdminEvents() {
                         )
                     }
                 >
-
                     + Create Event
-
                 </button>
-
             </div>
-
 
             {/* ====================================================
                 ERROR
             ==================================================== */}
 
             {error && (
-
                 <div className="admin-events-error">
-
                     <FiXCircle />
 
                     <span>
                         {error}
                     </span>
-
                 </div>
-
             )}
-
 
             {/* ====================================================
                 FILTER BAR
             ==================================================== */}
 
             <div className="admin-events-toolbar">
-
                 <div className="admin-events-search">
-
                     <FiSearch />
 
                     <input
@@ -1414,9 +1005,7 @@ function AdminEvents() {
                             )
                         }
                     />
-
                 </div>
-
 
                 <div className="admin-events-filters">
 
@@ -1436,7 +1025,6 @@ function AdminEvents() {
                         All
                     </button>
 
-
                     <button
                         type="button"
                         className={
@@ -1452,7 +1040,6 @@ function AdminEvents() {
                     >
                         Active
                     </button>
-
 
                     <button
                         type="button"
@@ -1470,7 +1057,6 @@ function AdminEvents() {
                         Featured
                     </button>
 
-
                     <button
                         type="button"
                         className={
@@ -1487,7 +1073,6 @@ function AdminEvents() {
                         Free
                     </button>
 
-
                     <button
                         type="button"
                         className={
@@ -1503,7 +1088,6 @@ function AdminEvents() {
                     >
                         Paid
                     </button>
-
 
                     <button
                         type="button"
@@ -1522,34 +1106,26 @@ function AdminEvents() {
                     </button>
 
                 </div>
-
             </div>
-
 
             {/* ====================================================
                 RESULT COUNT
             ==================================================== */}
 
             <div className="admin-events-count">
-
                 {filteredEvents.length}{" "}
-
                 event
                 {filteredEvents.length !== 1
                     ? "s"
                     : ""}
-
             </div>
-
 
             {/* ====================================================
                 EMPTY STATE
             ==================================================== */}
 
             {filteredEvents.length === 0 ? (
-
                 <div className="admin-events-empty">
-
                     <FiCalendar />
 
                     <h3>
@@ -1561,21 +1137,16 @@ function AdminEvents() {
                             ? "Try a different search."
                             : "There are no events matching this filter."}
                     </p>
-
                 </div>
-
             ) : (
-
                 <div className="admin-events-grid">
 
                     {filteredEvents.map(
                         (event) => {
-
                             const poster =
                                 getPoster(
                                     event
                                 );
-
 
                             const isCancelled =
                                 String(
@@ -1587,7 +1158,6 @@ function AdminEvents() {
                                     event?.cancelled
                                 );
 
-
                             const isCancelling =
                                 String(
                                     cancellingId
@@ -1596,12 +1166,10 @@ function AdminEvents() {
                                     event?.id
                                 );
 
-
                             const hostName =
                                 event?.hostName ||
                                 event?.organizerName ||
                                 "EventWaa";
-
 
                             const eventType =
                                 String(
@@ -1609,9 +1177,7 @@ function AdminEvents() {
                                     ""
                                 ).toLowerCase();
 
-
                             return (
-
                                 <div
                                     className={
                                         `admin-event-card ${
@@ -1625,7 +1191,6 @@ function AdminEvents() {
                                     }
                                 >
 
-
                                     {/* =================================
                                         POSTER
                                     ================================= */}
@@ -1633,7 +1198,6 @@ function AdminEvents() {
                                     <div className="admin-poster-wrapper">
 
                                         {poster ? (
-
                                             <img
                                                 src={
                                                     poster
@@ -1646,59 +1210,37 @@ function AdminEvents() {
                                                 onError={(
                                                     e
                                                 ) => {
-
                                                     e.currentTarget.style.display =
                                                         "none";
-
                                                 }}
                                             />
-
                                         ) : (
-
                                             <div className="admin-event-poster-placeholder">
-
                                                 <FiCalendar />
-
                                             </div>
-
                                         )}
 
-
                                         <div className="event-type-overlay">
-
                                             {eventType ===
                                             "free"
                                                 ? "FREE"
                                                 : "PAID"}
-
                                         </div>
 
-
                                         {event?.featured && (
-
                                             <div className="featured-overlay">
-
                                                 <FiStar />
-
                                                 Featured
-
                                             </div>
-
                                         )}
 
-
                                         {isCancelled && (
-
                                             <div className="cancelled-overlay">
-
                                                 CANCELLED
-
                                             </div>
-
                                         )}
 
                                     </div>
-
 
                                     {/* =================================
                                         CONTENT
@@ -1706,48 +1248,32 @@ function AdminEvents() {
 
                                     <div className="admin-event-card-content">
 
-
                                         <div className="admin-event-title-row">
 
                                             <div>
-
                                                 <h2>
-
                                                     {event?.title ||
                                                         "Untitled Event"}
-
                                                 </h2>
 
                                                 <span className="admin-event-id">
-
                                                     ID:{" "}
-
                                                     {event?.id ??
                                                         "N/A"}
-
                                                 </span>
-
                                             </div>
 
-
                                             {event?.adminEvent && (
-
                                                 <span className="admin-official-badge">
-
                                                     EventWaa
-
                                                 </span>
-
                                             )}
 
                                         </div>
 
-
                                         <div className="admin-event-details">
 
-
                                             <div>
-
                                                 <strong>
                                                     Host
                                                 </strong>
@@ -1755,12 +1281,9 @@ function AdminEvents() {
                                                 <span>
                                                     {hostName}
                                                 </span>
-
                                             </div>
 
-
                                             <div>
-
                                                 <strong>
                                                     Venue
                                                 </strong>
@@ -1769,12 +1292,9 @@ function AdminEvents() {
                                                     {event?.venue ||
                                                         "N/A"}
                                                 </span>
-
                                             </div>
 
-
                                             <div>
-
                                                 <strong>
                                                     City
                                                 </strong>
@@ -1783,12 +1303,9 @@ function AdminEvents() {
                                                     {event?.city ||
                                                         "N/A"}
                                                 </span>
-
                                             </div>
 
-
                                             <div>
-
                                                 <strong>
                                                     Date
                                                 </strong>
@@ -1798,12 +1315,9 @@ function AdminEvents() {
                                                         event?.date
                                                     )}
                                                 </span>
-
                                             </div>
 
-
                                             <div>
-
                                                 <strong>
                                                     Category
                                                 </strong>
@@ -1812,12 +1326,9 @@ function AdminEvents() {
                                                     {event?.category ||
                                                         "N/A"}
                                                 </span>
-
                                             </div>
 
-
                                             <div>
-
                                                 <strong>
                                                     Price
                                                 </strong>
@@ -1827,12 +1338,9 @@ function AdminEvents() {
                                                         event
                                                     )}
                                                 </span>
-
                                             </div>
 
-
                                             <div>
-
                                                 <strong>
                                                     Tickets
                                                 </strong>
@@ -1842,12 +1350,9 @@ function AdminEvents() {
                                                         event
                                                     )}
                                                 </span>
-
                                             </div>
 
-
                                             <div>
-
                                                 <strong>
                                                     Sold
                                                 </strong>
@@ -1857,18 +1362,15 @@ function AdminEvents() {
                                                         event
                                                     )}
                                                 </span>
-
                                             </div>
 
                                         </div>
-
 
                                         {/* =================================
                                             ACTIONS
                                         ================================= */}
 
                                         <div className="admin-event-actions">
-
 
                                             {/* EDIT */}
 
@@ -1881,13 +1383,9 @@ function AdminEvents() {
                                                     )
                                                 }
                                             >
-
                                                 <FiEdit />
-
                                                 Edit
-
                                             </button>
-
 
                                             {/* FEATURE */}
 
@@ -1907,15 +1405,12 @@ function AdminEvents() {
                                                     isCancelled
                                                 }
                                             >
-
                                                 <FiStar />
 
                                                 {event?.featured
                                                     ? "Featured"
                                                     : "Feature"}
-
                                             </button>
-
 
                                             {/* SHARE */}
 
@@ -1928,18 +1423,13 @@ function AdminEvents() {
                                                     )
                                                 }
                                             >
-
                                                 <FiShare2 />
-
                                                 Share
-
                                             </button>
-
 
                                             {/* CANCEL */}
 
                                             {!isCancelled ? (
-
                                                 <button
                                                     type="button"
                                                     className="cancel-btn"
@@ -1952,31 +1442,22 @@ function AdminEvents() {
                                                         isCancelling
                                                     }
                                                 >
-
                                                     <FiXCircle />
 
                                                     {isCancelling
                                                         ? "Cancelling..."
                                                         : "Cancel"}
-
                                                 </button>
-
                                             ) : (
-
                                                 <button
                                                     type="button"
                                                     className="cancelled-btn"
                                                     disabled
                                                 >
-
                                                     <FiCheck />
-
                                                     Cancelled
-
                                                 </button>
-
                                             )}
-
 
                                             {/* DELETE */}
 
@@ -1989,11 +1470,8 @@ function AdminEvents() {
                                                     )
                                                 }
                                             >
-
                                                 <FiTrash2 />
-
                                                 Delete
-
                                             </button>
 
                                         </div>
@@ -2001,21 +1479,15 @@ function AdminEvents() {
                                     </div>
 
                                 </div>
-
                             );
-
                         }
                     )}
 
                 </div>
-
             )}
 
         </div>
-
     );
-
 }
-
 
 export default AdminEvents;

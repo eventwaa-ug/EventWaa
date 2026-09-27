@@ -7,7 +7,7 @@ import {
   FiCalendar
 } from "react-icons/fi";
 import "./AdminScan.css";
-const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+import { adminFetch } from "../utils/adminAPI";
 
 function AdminScan() {
   const navigate = useNavigate();
@@ -31,25 +31,19 @@ function AdminScan() {
       setLoading(true);
       setError("");
 
-      const response = await fetch(
-        `${BACKEND_URL}/admin/events`
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Unable to load events (${response.status})`
+      const data =
+        await adminFetch(
+          "/admin/events"
         );
-      }
-
-      const data = await response.json();
 
       if (Array.isArray(data)) {
         setEvents(data);
-      } else if (Array.isArray(data.events)) {
+      } else if (Array.isArray(data?.events)) {
         setEvents(data.events);
       } else {
         setEvents([]);
       }
+
     } catch (error) {
       console.error(
         "ADMIN SCAN EVENTS ERROR:",
@@ -57,8 +51,10 @@ function AdminScan() {
       );
 
       setError(
+        error.message ||
         "Unable to load events. Please try again."
       );
+
     } finally {
       setLoading(false);
     }
@@ -69,6 +65,9 @@ function AdminScan() {
   // ============================================================
 
   function getPosterUrl(event) {
+    const BACKEND_URL =
+      import.meta.env.VITE_API_BASE_URL;
+
     const poster =
       event?.eventPoster ||
       event?.image ||
@@ -212,17 +211,9 @@ function AdminScan() {
         return false;
       }
 
-      // --------------------------------------------------------
-      // ALL
-      // --------------------------------------------------------
-
       if (filter === "all") {
         return true;
       }
-
-      // --------------------------------------------------------
-      // PAID
-      // --------------------------------------------------------
 
       if (filter === "paid") {
         return (
@@ -231,10 +222,6 @@ function AdminScan() {
         );
       }
 
-      // --------------------------------------------------------
-      // FREE
-      // --------------------------------------------------------
-
       if (filter === "free") {
         return (
           String(event?.eventType || "").toLowerCase() ===
@@ -242,25 +229,13 @@ function AdminScan() {
         );
       }
 
-      // --------------------------------------------------------
-      // FEATURED
-      // --------------------------------------------------------
-
       if (filter === "featured") {
         return event?.featured === true;
       }
 
-      // --------------------------------------------------------
-      // ADMIN EVENTS
-      // --------------------------------------------------------
-
       if (filter === "admin") {
         return event?.adminEvent === true;
       }
-
-      // --------------------------------------------------------
-      // HOST EVENTS
-      // --------------------------------------------------------
 
       if (filter === "host") {
         return event?.adminEvent !== true;
@@ -324,10 +299,6 @@ function AdminScan() {
   return (
     <div className="admin-scan-page">
 
-      {/* ======================================================
-          HEADER
-          ====================================================== */}
-
       <div className="admin-scan-header">
 
         <div className="admin-scan-header-text">
@@ -353,11 +324,6 @@ function AdminScan() {
 
       </div>
 
-
-      {/* ======================================================
-          SEARCH + FILTER
-          ====================================================== */}
-
       <div className="admin-scan-controls">
 
         <div className="admin-scan-search">
@@ -381,7 +347,6 @@ function AdminScan() {
             </button>
           )}
         </div>
-
 
         <select
           value={filter}
@@ -417,11 +382,6 @@ function AdminScan() {
 
       </div>
 
-
-      {/* ======================================================
-          RESULTS BAR
-          ====================================================== */}
-
       <div className="admin-scan-results">
 
         <div>
@@ -449,11 +409,6 @@ function AdminScan() {
         )}
 
       </div>
-
-
-      {/* ======================================================
-          EMPTY STATE
-          ====================================================== */}
 
       {filteredEvents.length === 0 ? (
 
@@ -512,10 +467,6 @@ function AdminScan() {
                 key={event.id}
               >
 
-                {/* ==================================================
-                    POSTER
-                    ================================================== */}
-
                 <div className="admin-scan-poster">
 
                   {posterUrl ? (
@@ -545,7 +496,6 @@ function AdminScan() {
 
                   ) : null}
 
-
                   <div
                     className="admin-scan-poster-fallback"
                     style={{
@@ -563,7 +513,6 @@ function AdminScan() {
                     <small>No poster available</small>
                   </div>
 
-
                   {event.featured && (
                     <span className="admin-scan-featured">
                       ★ Featured
@@ -571,11 +520,6 @@ function AdminScan() {
                   )}
 
                 </div>
-
-
-                {/* ==================================================
-                    EVENT INFORMATION
-                    ================================================== */}
 
                 <div className="admin-scan-card-content">
 
@@ -613,7 +557,6 @@ function AdminScan() {
 
                   </div>
 
-
                   <div className="admin-scan-info">
 
                     <div>
@@ -628,7 +571,6 @@ function AdminScan() {
                       </strong>
                     </div>
 
-
                     <div>
                       <span>
                         Venue
@@ -640,7 +582,6 @@ function AdminScan() {
                       </strong>
                     </div>
 
-
                     <div>
                       <span>
                         Date
@@ -651,7 +592,6 @@ function AdminScan() {
                           "Not specified"}
                       </strong>
                     </div>
-
 
                     <div>
                       <span>
@@ -665,11 +605,6 @@ function AdminScan() {
 
                   </div>
 
-
-                  {/* ==================================================
-                      ATTENDANCE
-                      ================================================== */}
-
                   <div className="admin-scan-attendance">
 
                     <div>
@@ -682,7 +617,6 @@ function AdminScan() {
                       </strong>
                     </div>
 
-
                     <div>
                       <span>
                         ✅ Sold / Used
@@ -692,7 +626,6 @@ function AdminScan() {
                         {ticketsSold.toLocaleString()}
                       </strong>
                     </div>
-
 
                     <div>
                       <span>
@@ -705,11 +638,6 @@ function AdminScan() {
                     </div>
 
                   </div>
-
-
-                  {/* ==================================================
-                      SELECT BUTTON
-                      ================================================== */}
 
                   <button
                     className="select-event-scan-btn"

@@ -1,23 +1,40 @@
-const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+const BACKEND_URL =
+    import.meta.env.VITE_API_BASE_URL;
 
 export async function adminFetch(
     endpoint,
     options = {}
 ) {
-    const token = localStorage.getItem(
-        "eventwaa_admin_token"
-    );
+    const localToken =
+        localStorage.getItem(
+            "eventwaa_admin_token"
+        );
+
+    const sessionToken =
+        sessionStorage.getItem(
+            "eventwaa_admin_token"
+        );
+
+    const token =
+        localToken || sessionToken;
 
     if (!token) {
+        window.location.href =
+            "/admin/login";
+
         throw new Error(
             "Admin session not found. Please login again."
         );
     }
 
-    const headers = {
-        ...(options.headers || {}),
-        Authorization: `Bearer ${token}`,
-    };
+    const headers = new Headers(
+        options.headers || {}
+    );
+
+    headers.set(
+        "Authorization",
+        `Bearer ${token}`
+    );
 
     const response = await fetch(
         `${BACKEND_URL}${endpoint}`,
@@ -35,10 +52,6 @@ export async function adminFetch(
         data = {};
     }
 
-    // =====================================================
-    // ADMIN SESSION EXPIRED / INVALID
-    // =====================================================
-
     if (response.status === 401) {
 
         localStorage.removeItem(
@@ -49,16 +62,24 @@ export async function adminFetch(
             "eventwaa_admin"
         );
 
+        sessionStorage.removeItem(
+            "eventwaa_admin_token"
+        );
+
+        sessionStorage.removeItem(
+            "eventwaa_admin"
+        );
+
         window.location.href =
             "/admin/login";
 
         throw new Error(
+            data.message ||
             "Admin session expired. Please login again."
         );
     }
 
     if (!response.ok) {
-
         throw new Error(
             data.message ||
             "Admin request failed."

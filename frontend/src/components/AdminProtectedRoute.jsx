@@ -31,6 +31,7 @@ function AdminNotFound() {
                 <p>
                     The page you are looking for
                     does not exist.
+                    And stop looking for it, we can see you right there!
                 </p>
             </div>
         </div>

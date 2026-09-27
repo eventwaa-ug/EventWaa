@@ -1,401 +1,329 @@
 import { useEffect, useState } from "react";
 import "./AdminUsers.css";
+import { adminFetch } from "../utils/adminAPI";
+
+/* =========================================================
+   ADMIN USERS
+========================================================= */
+
+function AdminUsers() {
+
+    const [users, setUsers] =
+        useState([]);
+
+    const [search, setSearch] =
+        useState("");
+
     /* =========================================================
-       BACKEND
+       LOAD USERS
     ========================================================= */
 
-    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
-
-function AdminUsers(){
-
-    const [users,setUsers] = useState([]);
-
-    const [search,setSearch] = useState("");
-
-
-
-    useEffect(()=>{
+    useEffect(() => {
 
         loadUsers();
 
-    },[]);
+    }, []);
 
+    const loadUsers = async () => {
 
+        try {
 
-    const loadUsers = ()=>{
+            const data =
+                await adminFetch(
+                    "/admin/users"
+                );
 
-        fetch(
-            `${BACKEND_URL}/admin/users`
-        )
+            setUsers(
+                Array.isArray(data)
+                    ? data
+                    : Array.isArray(data?.users)
+                        ? data.users
+                        : []
+            );
 
-        .then(res=>res.json())
+        } catch (error) {
 
-        .then(data=>{
+            console.error(
+                "ADMIN USERS LOAD ERROR:",
+                error
+            );
 
-            setUsers(data);
+            setUsers([]);
 
-        });
-
-    };
-
-
-
-    const updateUser = async(user)=>{
-
-
-        await fetch(
-            `${BACKEND_URL}/admin/users/${user.id}`,
-            {
-
-                method:"PUT",
-
-                headers:{
-
-                    "Content-Type":"application/json"
-
-                },
-
-
-                body:JSON.stringify({
-
-                    role:user.role,
-
-                    status:user.status
-
-                })
-
-            }
-
-        );
-
-
-        alert("User updated successfully");
-
-
-        loadUsers();
-
+        }
 
     };
 
+    /* =========================================================
+       UPDATE USER
+    ========================================================= */
 
+    const updateUser = async (user) => {
 
+        try {
 
-    const changeRole = (id,role)=>{
-
-
-        setUsers(prev=>
-
-            prev.map(user=>
-
-                user.id===id
-
-                ?
-
+            await adminFetch(
+                `/admin/users/${user.id}`,
                 {
-                    ...user,
-                    role:role
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                    },
+
+                    body: JSON.stringify({
+                        role: user.role,
+                        status: user.status,
+                    }),
                 }
+            );
 
-                :
+            alert(
+                "User updated successfully"
+            );
 
-                user
+            loadUsers();
 
-            )
+        } catch (error) {
 
-        );
+            console.error(
+                "ADMIN USER UPDATE ERROR:",
+                error
+            );
 
+            alert(
+                error.message ||
+                "Failed to update user."
+            );
+
+        }
 
     };
 
+    /* =========================================================
+       CHANGE ROLE
+    ========================================================= */
 
+    const changeRole = (
+        id,
+        role
+    ) => {
 
-
-
-    const toggleStatus=(id)=>{
-
-
-        setUsers(prev=>
-
-            prev.map(user=>
-
-                user.id===id
-
-                ?
-
-                {
-
-                    ...user,
-
-                    status:
-                    user.status==="suspended"
-
-                    ?
-
-                    "active"
-
-                    :
-
-                    "suspended"
-
-                }
-
-                :
-
-                user
-
+        setUsers(prev =>
+            prev.map(user =>
+                user.id === id
+                    ? {
+                        ...user,
+                        role: role,
+                    }
+                    : user
             )
-
         );
-
 
     };
 
+    /* =========================================================
+       TOGGLE STATUS
+    ========================================================= */
 
+    const toggleStatus = (
+        id
+    ) => {
 
+        setUsers(prev =>
+            prev.map(user =>
+                user.id === id
+                    ? {
+                        ...user,
+                        status:
+                            user.status ===
+                            "suspended"
+                                ? "active"
+                                : "suspended",
+                    }
+                    : user
+            )
+        );
 
+    };
 
-    const filteredUsers = users.filter(user=>
+    /* =========================================================
+       FILTER USERS
+    ========================================================= */
 
+    const filteredUsers =
+        users.filter(user =>
 
-        user.name
-        ?.toLowerCase()
-        .includes(search.toLowerCase())
+            user.name
+                ?.toLowerCase()
+                .includes(
+                    search.toLowerCase()
+                )
 
+            ||
 
-        ||
+            user.email
+                ?.toLowerCase()
+                .includes(
+                    search.toLowerCase()
+                )
 
-        user.email
-        ?.toLowerCase()
-        .includes(search.toLowerCase())
+        );
 
+    /* =========================================================
+       RENDER
+    ========================================================= */
 
-    );
-
-
-
-
-    return(
+    return (
 
         <div className="admin-users">
-
 
             <h1>
                 Users Management 👥
             </h1>
 
-
-
-
             <input
-
-            className="user-search"
-
-            placeholder="Search users..."
-
-            value={search}
-
-            onChange={(e)=>setSearch(e.target.value)}
-
+                className="user-search"
+                placeholder="Search users..."
+                value={search}
+                onChange={(e) =>
+                    setSearch(
+                        e.target.value
+                    )
+                }
             />
-
-
-
-
-
 
             <div className="users-grid">
 
+                {
+                    filteredUsers.map(
+                        user => (
 
-            {
-                filteredUsers.map(user=>(
+                        <div
+                            className="user-card"
+                            key={user.id}
+                        >
 
+                            <h2>
+                                {user.name}
+                            </h2>
 
-                    <div
+                            <p>
+                                {user.email}
+                            </p>
 
-                    className="user-card"
+                            <p>
 
-                    key={user.id}
+                                Role:
 
-                    >
+                                <select
+                                    value={
+                                        user.role ||
+                                        "user"
+                                    }
+                                    onChange={(e) =>
+                                        changeRole(
+                                            user.id,
+                                            e.target.value
+                                        )
+                                    }
+                                >
 
+                                    <option value="user">
+                                        User
+                                    </option>
 
+                                    <option value="host">
+                                        Host
+                                    </option>
 
-                    <h2>
-                        {user.name}
-                    </h2>
+                                    <option value="admin">
+                                        Admin
+                                    </option>
 
+                                </select>
 
+                            </p>
 
-                    <p>
-                        {user.email}
-                    </p>
+                            {
+                                user.verifiedHost &&
 
+                                <strong className="verified-user">
 
+                                    ✅ Verified Host
 
+                                </strong>
+                            }
 
-                    <p>
+                            <p>
 
-                    Role:
+                                Status:
 
-                    <select
+                                <span
+                                    className={
+                                        user.status ===
+                                        "suspended"
 
-                    value={user.role || "user"}
+                                            ? "status suspended"
 
-                    onChange={(e)=>
+                                            : "status active"
+                                    }
+                                >
 
-                    changeRole(
-                        user.id,
-                        e.target.value
-                    )
+                                    {
+                                        user.status ||
+                                        "active"
+                                    }
 
-                    }
+                                </span>
 
-                    >
+                            </p>
 
-                    <option value="user">
-                        User
-                    </option>
+                            <div className="user-actions">
 
+                                <button
+                                    className="save-user"
+                                    onClick={() =>
+                                        updateUser(user)
+                                    }
+                                >
+                                    Save Changes
+                                </button>
 
-                    <option value="host">
-                        Host
-                    </option>
+                                <button
+                                    className="suspend-user"
+                                    onClick={() =>
+                                        toggleStatus(
+                                            user.id
+                                        )
+                                    }
+                                >
 
+                                    {
+                                        user.status ===
+                                        "suspended"
 
-                    <option value="admin">
-                        Admin
-                    </option>
+                                            ? "Activate"
 
+                                            : "Suspend"
+                                    }
 
-                    </select>
+                                </button>
 
+                            </div>
 
-                    </p>
+                        </div>
 
-
-
-
-
-                    {
-
-                    user.verifiedHost &&
-
-                    <strong className="verified-user">
-
-                        ✅ Verified Host
-
-                    </strong>
-
-                    }
-
-
-
-
-
-                    <p>
-
-                    Status:
-
-                    <span
-
-                    className={
-                    user.status==="suspended"
-
-                    ?
-
-                    "status suspended"
-
-                    :
-
-                    "status active"
-                    }
-
-                    >
-
-                    {
-                    user.status || "active"
-                    }
-
-                    </span>
-
-
-                    </p>
-
-
-
-
-
-
-                    <div className="user-actions">
-
-
-                    <button
-
-                    className="save-user"
-
-                    onClick={()=>
-                    updateUser(user)
-                    }
-
-                    >
-
-                    Save Changes
-
-                    </button>
-
-
-
-
-
-                    <button
-
-                    className="suspend-user"
-
-                    onClick={()=>
-                    toggleStatus(user.id)
-                    }
-
-                    >
-
-                    {
-
-                    user.status==="suspended"
-
-                    ?
-
-                    "Activate"
-
-                    :
-
-                    "Suspend"
-
-                    }
-
-
-                    </button>
-
-
-                    </div>
-
-
-
-
-                    </div>
-
-
-                ))
-            }
-
+                    ))
+                }
 
             </div>
-
-
 
         </div>
 
     );
 
 }
-
 
 export default AdminUsers;

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminSettings.css";
 import { usePlatformSettings } from "../context/PlatformSettingsContext.jsx";
+import { adminFetch } from "../utils/adminAPI";
 import {
   FiSettings,
   FiLogOut,
@@ -14,8 +15,8 @@ import {
   FiShield,
 } from "react-icons/fi";
 
-// BACKEND URL
-const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+const BACKEND_URL =
+  import.meta.env.VITE_API_BASE_URL;
 
 const DEFAULT_SETTINGS = {
   platformName: "EventWaa",
@@ -45,6 +46,7 @@ const DEFAULT_SETTINGS = {
 
 function AdminSettings() {
   const navigate = useNavigate();
+
   const { refreshSettings } =
     usePlatformSettings();
 
@@ -62,6 +64,10 @@ function AdminSettings() {
 
   /* ============================================================
      LOAD SETTINGS
+
+     IMPORTANT:
+     GET /admin/settings is intentionally public.
+     PlatformSettingsContext also uses this endpoint.
   ============================================================ */
 
   useEffect(() => {
@@ -112,11 +118,6 @@ function AdminSettings() {
   ============================================================ */
 
   const handleAdminLogout = () => {
-    /*
-     * Remove the admin authentication token
-     * from both possible browser storage locations.
-     */
-
     localStorage.removeItem(
       "eventwaa_admin_token"
     );
@@ -125,10 +126,6 @@ function AdminSettings() {
       "eventwaa_admin_token"
     );
 
-    /*
-     * Remove stored admin information as well.
-     */
-
     localStorage.removeItem(
       "eventwaa_admin_data"
     );
@@ -136,11 +133,6 @@ function AdminSettings() {
     sessionStorage.removeItem(
       "eventwaa_admin_data"
     );
-
-    /*
-     * Send the administrator back to
-     * the admin login page.
-     */
 
     navigate(
       "/admin/login",
@@ -192,6 +184,8 @@ function AdminSettings() {
 
   /* ============================================================
      UPLOAD PLATFORM LOGO
+
+     Protected admin action.
   ============================================================ */
 
   const uploadLogo = async (
@@ -206,17 +200,14 @@ function AdminSettings() {
         file
       );
 
-      const response =
-        await fetch(
-          `${BACKEND_URL}/admin/upload-logo`,
+      const result =
+        await adminFetch(
+          "/admin/upload-logo",
           {
             method: "POST",
             body: formData,
           }
         );
-
-      const result =
-        await response.json();
 
       if (result.success) {
         setSettings(
@@ -240,6 +231,8 @@ function AdminSettings() {
 
   /* ============================================================
      SAVE SETTINGS
+
+     Protected admin action.
   ============================================================ */
 
   const saveSettings = async () => {
@@ -337,9 +330,9 @@ function AdminSettings() {
           ),
       };
 
-      const response =
-        await fetch(
-          `${BACKEND_URL}/admin/settings`,
+      const result =
+        await adminFetch(
+          "/admin/settings",
           {
             method: "PUT",
 
@@ -355,13 +348,7 @@ function AdminSettings() {
           }
         );
 
-      const result =
-        await response.json();
-
-      if (
-        !response.ok ||
-        !result.success
-      ) {
+      if (!result.success) {
         throw new Error(
           result.message ||
           "Failed to save settings."
@@ -429,10 +416,6 @@ function AdminSettings() {
   return (
     <div className="admin-settings">
 
-      {/* ========================================================
-          HEADER
-      ======================================================== */}
-
       <div className="settings-header">
         <div className="settings-header-content">
 
@@ -447,10 +430,6 @@ function AdminSettings() {
             </p>
           </div>
 
-          {/* ====================================================
-              LOGOUT
-          ==================================================== */}
-
           <button
             type="button"
             className="admin-logout-button"
@@ -463,19 +442,11 @@ function AdminSettings() {
         </div>
       </div>
 
-      {/* ========================================================
-          ERROR
-      ======================================================== */}
-
       {error && (
         <div className="settings-error">
           {error}
         </div>
       )}
-
-      {/* ========================================================
-          SETTINGS GRID
-      ======================================================== */}
 
       <div className="settings-grid">
 
@@ -512,7 +483,9 @@ function AdminSettings() {
             accept="image/*"
             onChange={(e) => {
               if (e.target.files[0]) {
-                uploadLogo(e.target.files[0]);
+                uploadLogo(
+                  e.target.files[0]
+                );
               }
             }}
           />
@@ -521,7 +494,9 @@ function AdminSettings() {
             <div className="logo-preview">
 
               <img
-                src={settings.platformLogo}
+                src={
+                  settings.platformLogo
+                }
                 alt="Platform Logo"
                 className="preview-image"
               />
@@ -531,8 +506,8 @@ function AdminSettings() {
                 className="remove-logo"
                 onClick={async () => {
                   try {
-                    await fetch(
-                      `${BACKEND_URL}/admin/remove-logo`,
+                    await adminFetch(
+                      "/admin/remove-logo",
                       {
                         method: "DELETE",
                       }
@@ -563,7 +538,9 @@ function AdminSettings() {
 
           <Toggle
             title="Maintenance Mode"
-            value={settings.maintenanceMode}
+            value={
+              settings.maintenanceMode
+            }
             action={() =>
               handleToggle(
                 "maintenanceMode"
@@ -586,7 +563,9 @@ function AdminSettings() {
 
           <Toggle
             title="Allow New Registrations"
-            value={settings.allowRegistration}
+            value={
+              settings.allowRegistration
+            }
             action={() =>
               handleToggle(
                 "allowRegistration"
@@ -596,7 +575,9 @@ function AdminSettings() {
 
           <Toggle
             title="Email Verification"
-            value={settings.emailVerification}
+            value={
+              settings.emailVerification
+            }
             action={() =>
               handleToggle(
                 "emailVerification"
@@ -619,7 +600,9 @@ function AdminSettings() {
 
           <Toggle
             title="Require Host Verification"
-            value={settings.hostVerification}
+            value={
+              settings.hostVerification
+            }
             action={() =>
               handleToggle(
                 "hostVerification"
@@ -629,7 +612,9 @@ function AdminSettings() {
 
           <Toggle
             title="Allow Community Hosts"
-            value={settings.communityHosts}
+            value={
+              settings.communityHosts
+            }
             action={() =>
               handleToggle(
                 "communityHosts"
@@ -639,7 +624,9 @@ function AdminSettings() {
 
           <Toggle
             title="Auto Approve Hosts"
-            value={settings.autoApproveHosts}
+            value={
+              settings.autoApproveHosts
+            }
             action={() =>
               handleToggle(
                 "autoApproveHosts"
@@ -752,7 +739,9 @@ function AdminSettings() {
 
           <Toggle
             title="Allow Hosts to Issue Refunds"
-            value={settings.hostRefunds}
+            value={
+              settings.hostRefunds
+            }
             action={() =>
               handleToggle(
                 "hostRefunds"
@@ -762,7 +751,9 @@ function AdminSettings() {
 
           <Toggle
             title="Automatically Approve Refunds"
-            value={settings.autoRefundApproval}
+            value={
+              settings.autoRefundApproval
+            }
             action={() =>
               handleToggle(
                 "autoRefundApproval"
@@ -826,7 +817,9 @@ function AdminSettings() {
 
           <Toggle
             title="Booking Notifications"
-            value={settings.bookingNotifications}
+            value={
+              settings.bookingNotifications
+            }
             action={() =>
               handleToggle(
                 "bookingNotifications"
@@ -836,7 +829,9 @@ function AdminSettings() {
 
           <Toggle
             title="Email Notifications"
-            value={settings.emailNotifications}
+            value={
+              settings.emailNotifications
+            }
             action={() =>
               handleToggle(
                 "emailNotifications"
@@ -859,7 +854,9 @@ function AdminSettings() {
 
           <Toggle
             title="Two Factor Authentication"
-            value={settings.twoFactor}
+            value={
+              settings.twoFactor
+            }
             action={() =>
               handleToggle(
                 "twoFactor"
@@ -870,10 +867,6 @@ function AdminSettings() {
         </div>
 
       </div>
-
-      {/* ========================================================
-          SAVE SETTINGS
-      ======================================================== */}
 
       <button
         className="save-settings"

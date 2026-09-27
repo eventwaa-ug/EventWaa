@@ -1,30 +1,211 @@
 import { useState } from "react";
-import {Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, ShieldCheck, LockKeyhole, ArrowLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+    Eye,
+    EyeOff,
+    ShieldCheck,
+    LockKeyhole,
+    ArrowLeft
+} from "lucide-react";
+import {
+    FiLock
+} from "react-icons/fi";
 import { usePlatformSettings } from "../context/PlatformSettingsContext.jsx";
+import { useAuth } from "../context/AuthContext";
 import "../styles/AdminLogin.css";
-const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
-function AdminLogin() {
+
+const BACKEND_URL =
+    import.meta.env.VITE_API_BASE_URL;
+
+
+// ============================================================
+// ADMIN LOGIN 404 PAGE
+// ============================================================
+
+function AdminLoginNotFound() {
+
     const navigate = useNavigate();
 
-    const { settings } = usePlatformSettings();
+    return (
+        <div
+            style={{
+                minHeight: "100vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "24px",
+                textAlign: "center",
+                fontFamily:
+                    "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                background: "#f7f8fa",
+                color: "#17181c",
+            }}
+        >
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+            <div>
 
-    const [showPassword, setShowPassword] = useState(false);
+                <div
+                    style={{
+                        width: "64px",
+                        height: "64px",
+                        margin: "0 auto 22px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: "18px",
+                        background: "#fff4eb",
+                        color: "#ff6b00",
+                        border: "1px solid #ffdcca",
+                    }}
+                >
+                    <FiLock size={28} />
+                </div>
 
-    const [keepSignedIn, setKeepSignedIn] = useState(false);
 
-    const [loading, setLoading] = useState(false);
+                <h1
+                    style={{
+                        margin: 0,
+                        fontSize: "72px",
+                        fontWeight: 800,
+                        letterSpacing: "-3px",
+                        lineHeight: 1,
+                    }}
+                >
+                    404
+                </h1>
 
-    const [error, setError] = useState("");
 
-    const [success, setSuccess] = useState("");
+                <h2
+                    style={{
+                        margin: "12px 0 10px",
+                        fontSize: "24px",
+                        fontWeight: 700,
+                        lineHeight: 1.3,
+                    }}
+                >
+                    Page Not Found
+                </h2>
 
-    // =========================================================
+
+                <p
+                    style={{
+                        margin: 0,
+                        color: "#737780",
+                        fontSize: "15px",
+                        lineHeight: 1.6,
+                    }}
+                >
+                    The page you are looking for
+                    does not exist.
+                </p>
+
+
+                <button
+                    type="button"
+                    onClick={() => navigate("/")}
+                    style={{
+                        marginTop: "24px",
+                        minHeight: "44px",
+                        padding: "0 18px",
+                        border: "1px solid #e8e9ec",
+                        borderRadius: "10px",
+                        background: "#ffffff",
+                        color: "#3f4248",
+                        fontFamily: "inherit",
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                    }}
+                >
+                    Back to EventWaa
+                </button>
+
+            </div>
+
+        </div>
+    );
+}
+
+
+// ============================================================
+// ADMIN LOGIN
+// ============================================================
+
+function AdminLogin() {
+
+    const navigate = useNavigate();
+
+    // ========================================================
+    // AUTH
+    // ========================================================
+
+    const { user } = useAuth();
+
+    const { settings } =
+        usePlatformSettings();
+
+
+    // ========================================================
+    // FORM STATE
+    // ========================================================
+
+    const [email, setEmail] =
+        useState("");
+
+    const [password, setPassword] =
+        useState("");
+
+    const [showPassword, setShowPassword] =
+        useState(false);
+
+    const [keepSignedIn, setKeepSignedIn] =
+        useState(false);
+
+    const [loading, setLoading] =
+        useState(false);
+
+    const [error, setError] =
+        useState("");
+
+    const [success, setSuccess] =
+        useState("");
+
+
+    // ========================================================
+    // NORMAL USER ACCESS CHECK
+    // ========================================================
+
+    const isLoggedInUser =
+        Boolean(user);
+
+    const isAdmin =
+        user?.role === "admin";
+
+
+    /*
+     * IMPORTANT:
+     *
+     * A normal EventWaa user, buyer, host or verified host
+     * should not be shown the admin login form.
+     *
+     * All hooks have already been called above, so this
+     * conditional return does not violate React's Rules
+     * of Hooks.
+     */
+
+    if (
+        isLoggedInUser &&
+        !isAdmin
+    ) {
+        return (
+            <AdminLoginNotFound />
+        );
+    }
+
+
+    // ========================================================
     // HANDLE LOGIN
-    // =========================================================
+    // ========================================================
 
     const handleSubmit = async (e) => {
 
@@ -34,11 +215,14 @@ function AdminLogin() {
         setSuccess("");
 
 
-        // -----------------------------------------------------
+        // ----------------------------------------------------
         // BASIC VALIDATION
-        // -----------------------------------------------------
+        // ----------------------------------------------------
 
-        if (!email.trim() || !password) {
+        if (
+            !email.trim() ||
+            !password
+        ) {
 
             setError(
                 "Please enter your admin email and password."
@@ -53,36 +237,42 @@ function AdminLogin() {
             setLoading(true);
 
 
-            // -------------------------------------------------
+            // ------------------------------------------------
             // ADMIN LOGIN REQUEST
-            // -------------------------------------------------
+            // ------------------------------------------------
 
-            const response = await fetch(
-                `${BACKEND_URL}/admin/login`,
-                {
-                    method: "POST",
+            const response =
+                await fetch(
+                    `${BACKEND_URL}/admin/login`,
+                    {
+                        method: "POST",
 
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
 
-                    body: JSON.stringify({
-                        email: email.trim(),
-                        password: password
-                    })
-                }
-            );
+                        body: JSON.stringify({
+                            email:
+                                email.trim(),
+
+                            password:
+                                password
+                        })
+                    }
+                );
 
 
-            // -------------------------------------------------
+            // ------------------------------------------------
             // SAFELY READ RESPONSE
-            // -------------------------------------------------
+            // ------------------------------------------------
 
             let data = {};
 
             try {
 
-                data = await response.json();
+                data =
+                    await response.json();
 
             } catch (jsonError) {
 
@@ -97,11 +287,14 @@ function AdminLogin() {
             }
 
 
-            // -------------------------------------------------
+            // ------------------------------------------------
             // LOGIN FAILED
-            // -------------------------------------------------
+            // ------------------------------------------------
 
-            if (!response.ok || !data.success) {
+            if (
+                !response.ok ||
+                !data.success
+            ) {
 
                 throw new Error(
                     data.message ||
@@ -110,11 +303,14 @@ function AdminLogin() {
             }
 
 
-            // -------------------------------------------------
+            // ------------------------------------------------
             // LOGIN SUCCESSFUL
-            // -------------------------------------------------
+            // ------------------------------------------------
 
-            if (!data.token || !data.admin) {
+            if (
+                !data.token ||
+                !data.admin
+            ) {
 
                 throw new Error(
                     "Admin authentication response is incomplete."
@@ -122,9 +318,10 @@ function AdminLogin() {
             }
 
 
-            // -------------------------------------------------
+            // ------------------------------------------------
             // STORE ADMIN TOKEN
-            // -------------------------------------------------
+            // ------------------------------------------------
+
             if (keepSignedIn) {
 
                 localStorage.setItem(
@@ -146,19 +343,20 @@ function AdminLogin() {
                 localStorage.removeItem(
                     "eventwaa_admin_token"
                 );
-
             }
 
 
-            // -------------------------------------------------
+            // ------------------------------------------------
             // STORE ADMIN INFORMATION
-            // -------------------------------------------------
+            // ------------------------------------------------
 
             if (keepSignedIn) {
 
                 localStorage.setItem(
                     "eventwaa_admin",
-                    JSON.stringify(data.admin)
+                    JSON.stringify(
+                        data.admin
+                    )
                 );
 
                 sessionStorage.removeItem(
@@ -169,27 +367,29 @@ function AdminLogin() {
 
                 sessionStorage.setItem(
                     "eventwaa_admin",
-                    JSON.stringify(data.admin)
+                    JSON.stringify(
+                        data.admin
+                    )
                 );
 
                 localStorage.removeItem(
                     "eventwaa_admin"
                 );
-
             }
 
-            // -------------------------------------------------
+
+            // ------------------------------------------------
             // SUCCESS MESSAGE
-            // -------------------------------------------------
+            // ------------------------------------------------
 
             setSuccess(
                 "Authentication successful. Opening admin dashboard..."
             );
 
 
-            // -------------------------------------------------
+            // ------------------------------------------------
             // GO TO ADMIN DASHBOARD
-            // -------------------------------------------------
+            // ------------------------------------------------
 
             setTimeout(() => {
 
@@ -204,7 +404,6 @@ function AdminLogin() {
                 "ADMIN LOGIN ERROR:",
                 error
             );
-
 
             setError(
                 error.message ||
@@ -221,9 +420,9 @@ function AdminLogin() {
     };
 
 
-    // =========================================================
+    // ========================================================
     // BACK TO WEBSITE
-    // =========================================================
+    // ========================================================
 
     const handleBackToWebsite = () => {
 
@@ -232,22 +431,27 @@ function AdminLogin() {
     };
 
 
-    // =========================================================
+    // ========================================================
     // PLATFORM NAME
-    // =========================================================
+    // ========================================================
 
     const platformName =
         settings?.platformName ||
         "EventWaa";
 
 
-    // =========================================================
+    // ========================================================
     // PLATFORM LOGO
-    // =========================================================
+    // ========================================================
 
     const platformLogo =
-        settings?.platformLogo || "";
+        settings?.platformLogo ||
+        "";
 
+
+    // ========================================================
+    // RENDER
+    // ========================================================
 
     return (
 
@@ -258,9 +462,19 @@ function AdminLogin() {
                 BACKGROUND DECORATION
             ================================================= */}
 
-            <div className="admin-background-glow admin-glow-one"></div>
+            <div
+                className="
+                    admin-background-glow
+                    admin-glow-one
+                "
+            />
 
-            <div className="admin-background-glow admin-glow-two"></div>
+            <div
+                className="
+                    admin-background-glow
+                    admin-glow-two
+                "
+            />
 
 
             {/* =================================================
@@ -286,37 +500,56 @@ function AdminLogin() {
                 MAIN CONTAINER
             ================================================= */}
 
-            <main className="admin-login-container">
+            <main
+                className="
+                    admin-login-container
+                "
+            >
 
 
                 {/* =================================================
                     LEFT BRANDING PANEL
                 ================================================= */}
 
-                <section className="admin-brand-panel">
+                <section
+                    className="
+                        admin-brand-panel
+                    "
+                >
 
-
-                    <div className="admin-brand-content">
+                    <div
+                        className="
+                            admin-brand-content
+                        "
+                    >
 
 
                         {/* PLATFORM LOGO */}
 
-                        <div className="admin-logo-wrapper">
+                        <div
+                            className="
+                                admin-logo-wrapper
+                            "
+                        >
 
                             {platformLogo ? (
 
                                 <img
                                     src={platformLogo}
                                     alt={platformName}
-                                    className="admin-platform-logo"
+                                    className="
+                                        admin-platform-logo
+                                    "
                                 />
 
                             ) : (
 
-                                <div className="admin-text-logo">
-
+                                <div
+                                    className="
+                                        admin-text-logo
+                                    "
+                                >
                                     {platformName}
-
                                 </div>
 
                             )}
@@ -326,7 +559,11 @@ function AdminLogin() {
 
                         {/* BRAND TITLE */}
 
-                        <span className="admin-eyebrow">
+                        <span
+                            className="
+                                admin-eyebrow
+                            "
+                        >
                             ADMINISTRATION PORTAL
                         </span>
 
@@ -338,25 +575,41 @@ function AdminLogin() {
                         </h1>
 
 
-                        <p className="admin-brand-description">
-
+                        <p
+                            className="
+                                admin-brand-description
+                            "
+                        >
                             Securely manage events, hosts, users,
                             payments, withdrawals and the entire
                             EventWaa platform from one place.
-
                         </p>
-                         
+
 
                         {/* SECURITY FEATURES */}
 
-                        <div className="admin-security-features">
+                        <div
+                            className="
+                                admin-security-features
+                            "
+                        >
 
 
-                            <div className="admin-security-feature">
+                            <div
+                                className="
+                                    admin-security-feature
+                                "
+                            >
 
-                                <div className="security-feature-icon">
+                                <div
+                                    className="
+                                        security-feature-icon
+                                    "
+                                >
 
-                                    <ShieldCheck size={20} />
+                                    <ShieldCheck
+                                        size={20}
+                                    />
 
                                 </div>
 
@@ -375,11 +628,21 @@ function AdminLogin() {
                             </div>
 
 
-                            <div className="admin-security-feature">
+                            <div
+                                className="
+                                    admin-security-feature
+                                "
+                            >
 
-                                <div className="security-feature-icon">
+                                <div
+                                    className="
+                                        security-feature-icon
+                                    "
+                                >
 
-                                    <LockKeyhole size={20} />
+                                    <LockKeyhole
+                                        size={20}
+                                    />
 
                                 </div>
 
@@ -400,16 +663,20 @@ function AdminLogin() {
 
                         </div>
 
-
                     </div>
 
 
                     {/* BRAND PANEL FOOTER */}
 
-                    <div className="admin-brand-footer">
+                    <div
+                        className="
+                            admin-brand-footer
+                        "
+                    >
 
                         <span>
-                            © {new Date().getFullYear()} {platformName}
+                            ©️ {new Date().getFullYear()}{" "}
+                            {platformName}
                         </span>
 
                         <span>
@@ -418,27 +685,40 @@ function AdminLogin() {
 
                     </div>
 
-
                 </section>
-
 
 
                 {/* =================================================
                     LOGIN PANEL
                 ================================================= */}
 
-                <section className="admin-login-panel">
+                <section
+                    className="
+                        admin-login-panel
+                    "
+                >
 
-
-                    <div className="admin-login-card">
+                    <div
+                        className="
+                            admin-login-card
+                        "
+                    >
 
 
                         {/* LOGIN HEADER */}
 
-                        <div className="admin-login-header">
+                        <div
+                            className="
+                                admin-login-header
+                            "
+                        >
 
 
-                            <div className="admin-mobile-logo">
+                            <div
+                                className="
+                                    admin-mobile-logo
+                                "
+                            >
 
                                 {platformLogo ? (
 
@@ -458,14 +738,24 @@ function AdminLogin() {
                             </div>
 
 
-                            <div className="admin-login-icon">
+                            <div
+                                className="
+                                    admin-login-icon
+                                "
+                            >
 
-                                <LockKeyhole size={23} />
+                                <LockKeyhole
+                                    size={23}
+                                />
 
                             </div>
 
 
-                            <span className="admin-form-eyebrow">
+                            <span
+                                className="
+                                    admin-form-eyebrow
+                                "
+                            >
                                 SECURE ADMIN ACCESS
                             </span>
 
@@ -480,7 +770,6 @@ function AdminLogin() {
                                 administration dashboard.
                             </p>
 
-
                         </div>
 
 
@@ -491,11 +780,18 @@ function AdminLogin() {
                         {error && (
 
                             <div
-                                className="admin-login-alert admin-error-alert"
+                                className="
+                                    admin-login-alert
+                                    admin-error-alert
+                                "
                                 role="alert"
                             >
 
-                                <div className="alert-icon">
+                                <div
+                                    className="
+                                        alert-icon
+                                    "
+                                >
                                     !
                                 </div>
 
@@ -523,11 +819,18 @@ function AdminLogin() {
                         {success && (
 
                             <div
-                                className="admin-login-alert admin-success-alert"
+                                className="
+                                    admin-login-alert
+                                    admin-success-alert
+                                "
                                 role="status"
                             >
 
-                                <div className="alert-icon">
+                                <div
+                                    className="
+                                        alert-icon
+                                    "
+                                >
                                     ✓
                                 </div>
 
@@ -553,16 +856,24 @@ function AdminLogin() {
                         ================================================= */}
 
                         <form
-                            className="admin-login-form"
+                            className="
+                                admin-login-form
+                            "
                             onSubmit={handleSubmit}
                         >
 
 
                             {/* EMAIL */}
 
-                            <div className="admin-input-group">
+                            <div
+                                className="
+                                    admin-input-group
+                                "
+                            >
 
-                                <label htmlFor="admin-email">
+                                <label
+                                    htmlFor="admin-email"
+                                >
                                     Admin email
                                 </label>
 
@@ -571,7 +882,9 @@ function AdminLogin() {
                                     type="email"
                                     value={email}
                                     onChange={(e) =>
-                                        setEmail(e.target.value)
+                                        setEmail(
+                                            e.target.value
+                                        )
                                     }
                                     placeholder="Enter your admin email"
                                     autoComplete="username"
@@ -584,18 +897,32 @@ function AdminLogin() {
 
                             {/* PASSWORD */}
 
-                            <div className="admin-input-group">
+                            <div
+                                className="
+                                    admin-input-group
+                                "
+                            >
 
-                                <div className="admin-password-label-row">
+                                <div
+                                    className="
+                                        admin-password-label-row
+                                    "
+                                >
 
-                                    <label htmlFor="admin-password">
+                                    <label
+                                        htmlFor="admin-password"
+                                    >
                                         Password
                                     </label>
 
                                 </div>
 
 
-                                <div className="admin-password-wrapper">
+                                <div
+                                    className="
+                                        admin-password-wrapper
+                                    "
+                                >
 
                                     <input
                                         id="admin-password"
@@ -617,11 +944,13 @@ function AdminLogin() {
                                     />
 
 
-                                    {/* FISH EYE */}
+                                    {/* PASSWORD VISIBILITY */}
 
                                     <button
                                         type="button"
-                                        className="admin-password-toggle"
+                                        className="
+                                            admin-password-toggle
+                                        "
                                         onClick={() =>
                                             setShowPassword(
                                                 !showPassword
@@ -637,11 +966,15 @@ function AdminLogin() {
 
                                         {showPassword ? (
 
-                                            <EyeOff size={20} />
+                                            <EyeOff
+                                                size={20}
+                                            />
 
                                         ) : (
 
-                                            <Eye size={20} />
+                                            <Eye
+                                                size={20}
+                                            />
 
                                         )}
 
@@ -651,8 +984,18 @@ function AdminLogin() {
 
                             </div>
 
-                            <div className="admin-forgot-password"> 
-                                <Link to="/admin/forgot-password">
+
+                            {/* FORGOT PASSWORD */}
+
+                            <div
+                                className="
+                                    admin-forgot-password
+                                "
+                            >
+
+                                <Link
+                                    to="/admin/forgot-password"
+                                >
                                     Forgot admin password?
                                 </Link>
 
@@ -663,19 +1006,29 @@ function AdminLogin() {
                                 KEEP ME SIGNED IN
                             ================================================= */}
 
-                            <div className="admin-remember-row">
+                            <div
+                                className="
+                                    admin-remember-row
+                                "
+                            >
 
                                 <label
                                     htmlFor="admin-remember"
-                                    className="admin-remember-label"
+                                    className="
+                                        admin-remember-label
+                                    "
                                 >
 
                                     <input
                                         id="admin-remember"
                                         type="checkbox"
-                                        checked={keepSignedIn}
+                                        checked={
+                                            keepSignedIn
+                                        }
                                         onChange={(e) =>
-                                            setKeepSignedIn(e.target.checked)
+                                            setKeepSignedIn(
+                                                e.target.checked
+                                            )
                                         }
                                         disabled={loading}
                                     />
@@ -686,7 +1039,11 @@ function AdminLogin() {
 
                                 </label>
 
-                                <span className="admin-remember-help">
+                                <span
+                                    className="
+                                        admin-remember-help
+                                    "
+                                >
                                     On this device
                                 </span>
 
@@ -695,17 +1052,21 @@ function AdminLogin() {
 
                             {/* SECURITY NOTICE */}
 
-                            <div className="admin-security-notice">
+                            <div
+                                className="
+                                    admin-security-notice
+                                "
+                            >
 
-                                <ShieldCheck size={18} />
+                                <ShieldCheck
+                                    size={18}
+                                />
 
                                 <p>
-
                                     This area is restricted to
                                     authorized EventWaa administrators.
                                     Failed access attempts may be
                                     monitored for security.
-
                                 </p>
 
                             </div>
@@ -715,7 +1076,9 @@ function AdminLogin() {
 
                             <button
                                 type="submit"
-                                className="admin-login-button"
+                                className="
+                                    admin-login-button
+                                "
                                 disabled={loading}
                             >
 
@@ -723,7 +1086,11 @@ function AdminLogin() {
 
                                     <>
 
-                                        <span className="admin-button-spinner"></span>
+                                        <span
+                                            className="
+                                                admin-button-spinner
+                                            "
+                                        />
 
                                         <span>
                                             Authenticating...
@@ -735,7 +1102,9 @@ function AdminLogin() {
 
                                     <>
 
-                                        <LockKeyhole size={18} />
+                                        <LockKeyhole
+                                            size={18}
+                                        />
 
                                         <span>
                                             Sign in to Admin
@@ -755,10 +1124,14 @@ function AdminLogin() {
                             FOOTER
                         ================================================= */}
 
-                        <div className="admin-login-footer">
+                        <div
+                            className="
+                                admin-login-footer
+                            "
+                        >
 
                             <span>
-                                🔒 Secure EventWaa Administration
+                                <FiLock size={28} /> Secure EventWaa Administration
                             </span>
 
                         </div>
@@ -766,16 +1139,12 @@ function AdminLogin() {
 
                     </div>
 
-
                 </section>
-
 
             </main>
 
         </div>
-
     );
-
 }
 
 

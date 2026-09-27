@@ -16,8 +16,7 @@ import {
     RefreshCcw,
     ScanLine,
 } from "lucide-react";
-
-const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+import { adminFetch } from "../utils/adminAPI";
 
 function AdminHome() {
     const navigate = useNavigate();
@@ -52,13 +51,25 @@ function AdminHome() {
        LOAD NOTIFICATIONS
     ============================================================ */
 
-    const loadNotifications = () => {
-        fetch(`${BACKEND_URL}/admin/notifications`)
-            .then((res) => res.json())
-            .then((data) => {
-                setAdminNotifications(Array.isArray(data) ? data : []);
-            })
-            .catch((err) => console.log(err));
+    const loadNotifications = async () => {
+        try {
+            const data = await adminFetch(
+                "/admin/notifications"
+            );
+
+            setAdminNotifications(
+                Array.isArray(data)
+                    ? data
+                    : Array.isArray(data?.notifications)
+                        ? data.notifications
+                        : []
+            );
+        } catch (err) {
+            console.log(
+                "ADMIN NOTIFICATIONS LOAD ERROR:",
+                err
+            );
+        }
     };
 
     /* ============================================================
@@ -71,37 +82,47 @@ function AdminHome() {
                USERS
             ==================================================== */
 
-            const usersRes = await fetch(`${BACKEND_URL}/users`);
-            const usersData = await usersRes.json();
+            const usersData = await adminFetch(
+                "/users"
+            );
 
             const users = Array.isArray(usersData)
                 ? usersData
-                : [];
+                : Array.isArray(usersData?.users)
+                    ? usersData.users
+                    : [];
 
             /* ====================================================
                EVENTS
             ==================================================== */
 
-            const eventsRes = await fetch(`${BACKEND_URL}/events`);
-            const eventsData = await eventsRes.json();
+            const eventsData = await adminFetch(
+                "/events"
+            );
 
             const events = Array.isArray(eventsData)
                 ? eventsData
-                : [];
+                : Array.isArray(eventsData?.events)
+                    ? eventsData.events
+                    : [];
 
             /* ====================================================
                HOST APPLICATIONS
             ==================================================== */
 
-            const hostRes = await fetch(
-                `${BACKEND_URL}/host-applications`
-            );
+            const applicationsData =
+                await adminFetch(
+                    "/host-applications"
+                );
 
-            const applicationsData = await hostRes.json();
-
-            const applications = Array.isArray(applicationsData)
-                ? applicationsData
-                : [];
+            const applications =
+                Array.isArray(applicationsData)
+                    ? applicationsData
+                    : Array.isArray(
+                        applicationsData?.applications
+                    )
+                        ? applicationsData.applications
+                        : [];
 
             /* ====================================================
                TOTAL TICKETS SOLD
@@ -109,10 +130,15 @@ function AdminHome() {
 
             const totalTicketsSold = events.reduce(
                 (total, event) => {
-                    const sold = Number(event?.ticketsSold);
+                    const sold = Number(
+                        event?.ticketsSold
+                    );
 
                     if (Number.isFinite(sold)) {
-                        return total + Math.max(sold, 0);
+                        return (
+                            total +
+                            Math.max(sold, 0)
+                        );
                     }
 
                     return total;
@@ -129,14 +155,17 @@ function AdminHome() {
                 events: events.length,
 
                 pendingHosts: applications.filter(
-                    (app) => app.status === "pending"
+                    (app) =>
+                        app.status === "pending"
                 ).length,
 
                 verifiedHosts: users.filter(
-                    (user) => user.verifiedHost
+                    (user) =>
+                        user.verifiedHost
                 ).length,
 
-                ticketsSold: totalTicketsSold,
+                ticketsSold:
+                    totalTicketsSold,
             });
         } catch (error) {
             console.log(
@@ -184,12 +213,16 @@ function AdminHome() {
                     type="button"
                     className="admin-notification-button"
                     onClick={() =>
-                        navigate("/admin/notifications")
+                        navigate(
+                            "/admin/notifications"
+                        )
                     }
                 >
                     <Bell size={21} />
 
-                    <span>Notifications</span>
+                    <span>
+                        Notifications
+                    </span>
 
                     {unreadCount > 0 && (
                         <span className="notification-badge">
@@ -205,7 +238,9 @@ function AdminHome() {
 
             <div className="admin-section-heading">
                 <div>
-                    <h2>Platform Overview</h2>
+                    <h2>
+                        Platform Overview
+                    </h2>
 
                     <p>
                         Current activity across EventWaa.
@@ -244,7 +279,9 @@ function AdminHome() {
 
                     <h3>{stats.users}</h3>
 
-                    <p>Registered users</p>
+                    <p>
+                        Registered users
+                    </p>
                 </div>
 
                 <div className="dashboard-card">
@@ -260,7 +297,9 @@ function AdminHome() {
 
                     <h3>{stats.events}</h3>
 
-                    <p>Events on platform</p>
+                    <p>
+                        Events on platform
+                    </p>
                 </div>
 
                 <div className="dashboard-card">
@@ -274,9 +313,13 @@ function AdminHome() {
                         </span>
                     </div>
 
-                    <h3>{stats.ticketsSold}</h3>
+                    <h3>
+                        {stats.ticketsSold}
+                    </h3>
 
-                    <p>Tickets sold across platform</p>
+                    <p>
+                        Tickets sold across platform
+                    </p>
                 </div>
 
                 <div className="dashboard-card">
@@ -290,9 +333,13 @@ function AdminHome() {
                         </span>
                     </div>
 
-                    <h3>{stats.pendingHosts}</h3>
+                    <h3>
+                        {stats.pendingHosts}
+                    </h3>
 
-                    <p>Awaiting verification</p>
+                    <p>
+                        Awaiting verification
+                    </p>
                 </div>
 
                 <div className="dashboard-card">
@@ -306,9 +353,13 @@ function AdminHome() {
                         </span>
                     </div>
 
-                    <h3>{stats.verifiedHosts}</h3>
+                    <h3>
+                        {stats.verifiedHosts}
+                    </h3>
 
-                    <p>Verified organizers</p>
+                    <p>
+                        Verified organizers
+                    </p>
                 </div>
             </div>
 
@@ -318,7 +369,9 @@ function AdminHome() {
 
             <div className="admin-section-heading tools-heading">
                 <div>
-                    <h2>Administration</h2>
+                    <h2>
+                        Administration
+                    </h2>
 
                     <p>
                         Quick access to important platform controls.
@@ -332,7 +385,9 @@ function AdminHome() {
                     type="button"
                     className="admin-tool-card"
                     onClick={() =>
-                        navigate("/admin/ticket-lookup")
+                        navigate(
+                            "/admin/ticket-lookup"
+                        )
                     }
                 >
                     <div className="admin-tool-icon">
@@ -340,7 +395,9 @@ function AdminHome() {
                     </div>
 
                     <div className="admin-tool-content">
-                        <h3>Ticket Management</h3>
+                        <h3>
+                            Ticket Management
+                        </h3>
 
                         <p>
                             Search tickets, verify ticket
@@ -366,7 +423,9 @@ function AdminHome() {
                     </div>
 
                     <div className="admin-tool-content">
-                        <h3>Ticket Scanner</h3>
+                        <h3>
+                            Ticket Scanner
+                        </h3>
 
                         <p>
                             Scan EventWaa tickets and
@@ -392,7 +451,9 @@ function AdminHome() {
                     </div>
 
                     <div className="admin-tool-content">
-                        <h3>User Management</h3>
+                        <h3>
+                            User Management
+                        </h3>
 
                         <p>
                             View registered users and
@@ -418,7 +479,9 @@ function AdminHome() {
                     </div>
 
                     <div className="admin-tool-content">
-                        <h3>Event Management</h3>
+                        <h3>
+                            Event Management
+                        </h3>
 
                         <p>
                             Review, approve and manage
@@ -436,7 +499,9 @@ function AdminHome() {
                     type="button"
                     className="admin-tool-card"
                     onClick={() =>
-                        navigate("/admin/host-applications")
+                        navigate(
+                            "/admin/host-applications"
+                        )
                     }
                 >
                     <div className="admin-tool-icon">
@@ -444,7 +509,9 @@ function AdminHome() {
                     </div>
 
                     <div className="admin-tool-content">
-                        <h3>Host Verification</h3>
+                        <h3>
+                            Host Verification
+                        </h3>
 
                         <p>
                             Review applications and
@@ -470,7 +537,9 @@ function AdminHome() {
                     </div>
 
                     <div className="admin-tool-content">
-                        <h3>Revenue & Reports</h3>
+                        <h3>
+                            Revenue & Reports
+                        </h3>
 
                         <p>
                             Monitor platform revenue,
@@ -496,7 +565,9 @@ function AdminHome() {
                     </div>
 
                     <div className="admin-tool-content">
-                        <h3>Platform Wallet</h3>
+                        <h3>
+                            Platform Wallet
+                        </h3>
 
                         <p>
                             Monitor EventWaa wallet
