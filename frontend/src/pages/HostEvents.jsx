@@ -46,7 +46,10 @@ function HostEvents() {
     const [sortBy, setSortBy] = useState("soonest");
     const [currentPage, setCurrentPage] = useState(1);
     const [cancellingEventId, setCancellingEventId] =
-        useState(null);
+    useState(null);
+
+    const [deletingEventId, setDeletingEventId] =
+    useState(null);
 
     /*
      * =========================================================
@@ -499,27 +502,35 @@ function HostEvents() {
      */
 
     const handleDelete = async (event) => {
-        if (!event?.id) return;
+    if (!event?.id) return;
 
-        const confirmed = window.confirm(
-            `Are you sure you want to delete "${event.title}"? This action cannot be undone.`
+    if (deletingEventId !== null) {
+        return;
+    }
+
+    const confirmed = window.confirm(
+        `Are you sure you want to delete "${event.title}"? This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    setDeletingEventId(event.id);
+
+    try {
+        await deleteEvent(event.id);
+    } catch (error) {
+        console.error(
+            "Failed to delete event:",
+            error
         );
 
-        if (!confirmed) return;
-
-        try {
-            await deleteEvent(event.id);
-        } catch (error) {
-            console.error(
-                "Failed to delete event:",
-                error
-            );
-
-            alert(
-                "Failed to delete event. Please try again."
-            );
-        }
-    };
+        alert(
+            "Failed to delete event. Please try again."
+        );
+    } finally {
+        setDeletingEventId(null);
+    }
+};
 
     /*
      * =========================================================
@@ -529,6 +540,10 @@ function HostEvents() {
 
     const handleCancel = async (event) => {
         if (!event?.id) return;
+        
+        if (cancellingEventId !== null) {
+            return;
+        }
 
         if (isCancelled(event)) {
             return;
@@ -1451,13 +1466,17 @@ function HostEvents() {
                                                 type="button"
                                                 className="delete-event-btn"
                                                 onClick={() =>
-                                                    handleDelete(
-                                                        event
-                                                    )
+                                                    handleDelete(event)
+                                                }
+                                                disabled={
+                                                    deletingEventId === event.id
                                                 }
                                             >
                                                 <FiTrash2 />
-                                                Delete
+
+                                                {deletingEventId === event.id
+                                                    ? "Deleting..."
+                                                    : "Delete"}
                                             </button>
 
                                         </div>

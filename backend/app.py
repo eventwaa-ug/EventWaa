@@ -27740,16 +27740,28 @@ def process_event_cancellation(
                 original_amount
             )
         else:
+            #if ticket bought when commission is 10%, later changed to 20%,and event is cancelled
+            #it should reverse the original amoount
             host_original_amount = int(
                 round(
-                    original_amount
-                    -
-                    (
-                        original_amount
-                        *
-                        commission_percent
-                        /
-                        100
+                    float(
+                        booking.get(
+                            "hostAmount",
+                            0
+                        )
+                        or 0
+                    )
+                )
+            )
+
+            platform_reversal = int(
+                round(
+                    float(
+                        booking.get(
+                            "commissionAmount",
+                            0
+                        )
+                        or 0
                     )
                 )
             )
@@ -28075,56 +28087,103 @@ def process_event_cancellation(
                 )
             continue
         # ====================================================
-        # FIND EXISTING PENDING REFUND
+        # FIND EXISTING CANCELLATION REFUND
+        #
+        # IMPORTANT:
+        # Cancellation refunds are automatic.
+        # They must NEVER enter normal host review.
+        #
+        # Search by booking + cancellation source,
+        # regardless of whether an old attempt was:
+        # pending, rejected, approved, processing, etc.
         # ====================================================
         existing_refund = next(
             (
                 r
                 for r in refunds
                 if str(
-                    r.get(
-                        "bookingId"
+                    r.get("bookingId")
+                ) == str(
+                    booking.get("id")
+                )
+                and (
+                    str(
+                        r.get("source", "")
+                    ).lower()
+                    == "event_cancellation"
+                    or bool(
+                        r.get("cancellation", False)
                     )
                 )
-                == str(
-                    booking.get(
-                        "id"
-                    )
-                )
-                and str(
-                    r.get(
-                        "status",
-                        ""
-                    )
-                ).lower()
-                == "pending"
             ),
             None
         )
+        # ====================================================
+        # PREPARE AUTOMATIC CANCELLATION REFUND
+        # ====================================================
         if existing_refund:
+
             refund = existing_refund
+
+            # ------------------------------------------------
+            # If this cancellation refund was already
+            # successfully completed, do not process it again.
+            # ------------------------------------------------
+            if str(
+                refund.get(
+                    "status",
+                    ""
+                )
+            ).lower() == "refunded":
+
+                already_refunded += 1
+
+                booking["refundStatus"] = "refunded"
+                booking["refundId"] = refund.get("id")
+
+                continue
+
+            # ------------------------------------------------
+            # Cancellation refunds NEVER wait for host review.
+            # ------------------------------------------------
             refund["source"] = (
                 "event_cancellation"
             )
+
+            refund["cancellation"] = True
+
+            refund["status"] = (
+                "approved"
+            )
+
             refund["reason"] = (
                 cancellation_reason
             )
+
             refund["refundFeePercent"] = 0
             refund["refundFee"] = 0
+
             refund["amount"] = (
                 original_amount
             )
+
             refund["refundAmount"] = (
                 original_amount
             )
-            refund["cancellation"] = True
-            refund["requestedAt"] = (
-                refund.get(
-                    "requestedAt",
-                    datetime.now().isoformat()
-                )
+
+            refund["reviewedBy"] = (
+                cancelled_by
             )
+
+            refund["reviewedAt"] = (
+                datetime.now().isoformat()
+            )
+
         else:
+
+            # ------------------------------------------------
+            # CREATE ONE AUTOMATIC CANCELLATION REFUND
+            # ------------------------------------------------
             refund_ids = [
                 int(
                     r.get("id")
@@ -28137,52 +28196,87 @@ def process_event_cancellation(
                     )
                 ).isdigit()
             ]
+
             next_refund_id = (
                 max(refund_ids) + 1
                 if refund_ids
                 else 1
             )
+
             refund = {
                 "id":
                     next_refund_id,
+
                 "bookingId":
                     booking.get("id"),
+
                 "eventId":
                     event.get("id"),
+
                 "eventTitle":
                     event.get("title"),
+
                 "buyer":
                     booking.get("buyer"),
+
                 "quantity":
                     booking.get(
                         "quantity",
                         0
                     ),
+
                 "originalAmount":
                     original_amount,
+
                 "refundFeePercent":
                     0,
+
                 "refundFee":
                     0,
+
                 "amount":
                     original_amount,
+
                 "refundAmount":
                     original_amount,
+
                 "hostId":
                     host_id,
+
                 "hostEmail":
                     event_host_email,
+
+                # --------------------------------------------
+                # CRITICAL
+                # --------------------------------------------
                 "source":
                     "event_cancellation",
+
+                "cancellation":
+                    True,
+
+                # --------------------------------------------
+                # CRITICAL
+                #
+                # Do NOT use "pending".
+                # This refund is automatically approved.
+                # --------------------------------------------
                 "status":
-                    "pending",
+                    "approved",
+
                 "reason":
                     cancellation_reason,
+
                 "requestedAt":
                     datetime.now().isoformat(),
-                "cancellation":
-                    True
+
+                "approvedAt":
+                    datetime.now().isoformat(),
+
+                "approvedBy":
+                    cancelled_by
             }
+
             refunds.append(
                 refund
             )

@@ -58,6 +58,9 @@ function Dashboard() {
   const [cancellingEvent, setCancellingEvent] =
     useState(false);
 
+  const [deletingEvent, setDeletingEvent] =
+    useState(false);
+
   /* =========================================================
      SHARE STATE
   ========================================================= */
@@ -408,6 +411,44 @@ function Dashboard() {
     (booking) =>
       booking?.refundStatus !==
       "refunded";
+  
+  const handleDeleteEvent = async () => {
+    if (deletingEvent) {
+        return;
+    }
+
+    if (!currentEvent) {
+        return;
+    }
+
+    const confirmed =
+        window.confirm(
+            `Are you sure you want to delete "${currentEvent.title}"? This action cannot be undone.`
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    setDeletingEvent(true);
+
+    try {
+        await deleteEvent(
+            currentEvent.id
+        );
+    } catch (error) {
+        console.error(
+            "Failed to delete event:",
+            error
+        );
+
+        window.alert(
+            "Failed to delete event. Please try again."
+        );
+    } finally {
+        setDeletingEvent(false);
+    }
+};
 
   /* =========================================================
      CANCEL EVENT
@@ -415,6 +456,11 @@ function Dashboard() {
 
   const handleCancelEvent =
     async () => {
+
+      if (cancellingEvent) {
+        return;
+      }
+
       if (!currentEvent) {
         return;
       }
@@ -1828,22 +1874,17 @@ function Dashboard() {
                 {/* DELETE */}
 
                 <button
-                  className="delete-btn"
-                  onClick={() =>
-                    deleteEvent(
-                      currentEvent.id
-                    )
-                  }
+                    className="delete-btn"
+                    onClick={handleDeleteEvent}
+                    disabled={deletingEvent}
                 >
+                    <Trash2 size={17} />
 
-                  <Trash2
-                    size={17}
-                  />
-
-                  <span>
-                    Delete
-                  </span>
-
+                    <span>
+                        {deletingEvent
+                            ? "Deleting..."
+                            : "Delete"}
+                    </span>
                 </button>
 
               </div>
