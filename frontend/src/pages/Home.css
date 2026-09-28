@@ -1,127 +1,265 @@
+/* ============================================================
+HOME PAGE
+============================================================ */
+
+section {
+overflow: hidden;
+}
+
+/* ============================================================
+FEATURED / EVENT SECTIONS
+============================================================ */
+
 .featured-events {
-    padding: 80px 8%;
+padding: 72px 8%;
 }
+
 .section-header {
-    text-align: center;
-    margin-bottom: 40px;
+text-align: center;
+max-width: 720px;
+margin: 0 auto 38px;
 }
+
 .section-header h2 {
-    font-size: 2.3rem;
-    margin-bottom: 10px;
+margin: 0 0 10px;
+color: #111827;
+font-size: 2.25rem;
+line-height: 1.2;
+font-weight: 750;
+letter-spacing: -0.02em;
 }
+
 .section-header p {
-    color: #666;
+margin: 0;
+color: #6b7280;
+font-size: 1rem;
+line-height: 1.6;
 }
+
+/* ============================================================
+VIEW ALL
+============================================================ */
+
 .view-all {
-    text-align: center;
-    margin-top: 40px;
+text-align: center;
+margin-top: 36px;
 }
+
 .view-all-btn {
-    padding: 14ppx 28px;
-    display: inline-block;
-    background: #2563eb;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    transition: 0.3s;
+display: inline-flex;
+align-items: center;
+justify-content: center;
+padding: 12px 22px;
+background: #2563eb;
+color: #ffffff;
+text-decoration: none;
+border: 1px solid #2563eb;
+border-radius: 10px;
+font-size: 14px;
+font-weight: 700;
+transition:
+background 0.2s ease,
+border-color 0.2s ease,
+transform 0.2s ease,
+box-shadow 0.2s ease;
 }
+
 .view-all-btn:hover {
-    background: #1d4ed8;
+background: #1d4ed8;
+border-color: #1d4ed8;
+transform: translateY(-1px);
+box-shadow: 0 6px 16px rgba(37, 99, 235, 0.18);
 }
+
+/* ============================================================
+CALL TO ACTION
+============================================================ */
 
 .cta-section {
-    background: linear-gradient(
-        135deg,
-        #2563eb,
-        #1d4ed8
-    );
-    color: white;
-    text-align: center;
-    padding: 100px 20px;
-    border-radius: 8px;
-    margin-bottom: 40px;
+margin: 48px 8%;
+padding: 72px 30px;
+background: linear-gradient(
+135deg,
+#2563eb,
+#1d4ed8
+);
+color: #ffffff;
+text-align: center;
+border-radius: 20px;
+overflow: hidden;
+}
+
+.cta-section h2 {
+margin: 0 0 14px;
+color: #ffffff;
+font-size: 2.5rem;
+line-height: 1.2;
+font-weight: 750;
+letter-spacing: -0.02em;
+}
+
+.cta-section p {
+max-width: 650px;
+margin: 0 auto 28px;
+color: rgba(255, 255, 255, 0.88);
+line-height: 1.6;
+font-size: 1rem;
+}
+
+/* ============================================================
+CTA BUTTONS
+============================================================ */
+
+.cta-buttons {
+display: flex;
+justify-content: center;
+align-items: center;
+gap: 12px;
+flex-wrap: wrap;
+}
+
+.primary-btn,
+.secondary-btn {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+min-height: 46px;
+padding: 0 22px;
+border-radius: 10px;
+font-size: 14px;
+font-weight: 700;
+cursor: pointer;
+transition:
+background 0.2s ease,
+color 0.2s ease,
+border-color 0.2s ease,
+transform 0.2s ease,
+box-shadow 0.2s ease;
+}
+
+/* ============================================================
+PRIMARY CTA
+============================================================ */
+
+.primary-btn {
+background: #ffffff;
+color: #2563eb;
+border: 1px solid #ffffff;
+}
+
+.primary-btn:hover {
+background: #f8fafc;
+color: #1d4ed8;
+transform: translateY(-1px);
+box-shadow: 0 7px 18px rgba(0, 0, 0, 0.16);
+}
+
+/* ============================================================
+SECONDARY CTA
+============================================================ */
+
+.secondary-btn {
+background: transparent;
+color: #ffffff;
+border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.secondary-btn:hover {
+background: rgba(255, 255, 255, 0.12);
+border-color: #ffffff;
+color: #ffffff;
+transform: translateY(-1px);
+box-shadow: 0 7px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* ============================================================
+TABLET
+============================================================ */
+
+@media (max-width: 768px) {
+
+.featured-events {
+    padding: 58px 20px;
+}
+.section-header {
+    margin-bottom: 30px;
+}
+.section-header h2 {
+    font-size: 1.9rem;
+}
+.section-header p {
+    font-size: 0.95rem;
+}
+.cta-section {
+    margin: 35px 20px;
+    padding: 55px 22px;
+    border-radius: 16px;
 }
 .cta-section h2 {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 3rem;
-    font-weight: 700;
+    font-size: 2rem;
 }
 .cta-section p {
-    max-width: 700px;
-    margin: 0 auto 35px;
-    line-height: 1.7;
+    font-size: 0.95rem;
 }
 .cta-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
+    gap: 10px;
 }
-.primary-btn {
-    background: white;
-    color: #2563eb;
-    padding: 14px 28px;
-    border: 2px solid #2563eb;
-    border-radius: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
-.primary-btn:hover {
-    color: white;
-    background: blue;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-}
+.primary-btn,
 .secondary-btn {
-    background: white;
-    color: #2563eb;
-    padding: 14px 28px;
-    border: 2px solid #2563eb;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
-
-}
-.secondary-btn:hover {
-    color: white;
-    background: #d85c45;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-}
-@media (max-width:768px){
-     .section-header h2{
-        font-size: 2rem;
-     }
-     .section-header p{
-        font-size: 2rem;
-     }
+    min-height: 44px;
+    padding: 0 18px;
 }
 section {
-
-    overflow:hidden;
+    margin-bottom: 20px;
+}
 
 }
 
+/* ============================================================
+MOBILE
+============================================================ */
 
+@media (max-width: 480px) {
 
-@media(max-width:768px){
-
-
-.hero {
-
-    padding:60px 20px;
-
+.featured-events {
+    padding: 48px 15px;
+}
+.section-header {
+    margin-bottom: 26px;
+}
+.section-header h2 {
+    font-size: 1.7rem;
+}
+.section-header p {
+    font-size: 0.9rem;
+}
+.view-all {
+    margin-top: 28px;
+}
+.view-all-btn {
+    width: 100%;
+    box-sizing: border-box;
+}
+.cta-section {
+    margin: 28px 12px;
+    padding: 44px 18px;
+    border-radius: 14px;
+}
+.cta-section h2 {
+    font-size: 1.75rem;
+}
+.cta-section p {
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+}
+.cta-buttons {
+    flex-direction: column;
+    width: 100%;
+}
+.primary-btn,
+.secondary-btn {
+    width: 100%;
+    box-sizing: border-box;
 }
 
-
-
-section {
-
-    margin-bottom:20px;
-
-}
-
-
-}
+} 

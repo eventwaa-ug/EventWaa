@@ -2,7 +2,7 @@ import "./Hero.css";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { FaArrowRight, FaMicrophone } from "react-icons/fa";
+import { FaMicrophone } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import { canCreateEvent } from "../utils/hostAccess";
 function Hero({ handleExploreEvents }) {
@@ -92,9 +92,7 @@ function Hero({ handleExploreEvents }) {
                         <span>
                             Explore Events
                         </span>
-                        <FaArrowRight
-                            className="hero-button-icon"
-                        />
+                      
                     </button>
                     {/* ==================================================
                         HOST
@@ -114,9 +112,7 @@ function Hero({ handleExploreEvents }) {
                                     : "Become a Host"
                             }
                         </span>
-                        <FaArrowRight
-                            className="hero-button-icon"
-                        />
+                       
                     </button>
                 </div>
             </div>

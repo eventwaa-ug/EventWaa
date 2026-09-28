@@ -16802,6 +16802,28 @@ def process_verified_payment(
 #
 # PROVIDER-SPECIFIC VERIFICATION MUST HAPPEN BEFORE THIS
 # FUNCTION IS CALLED.
+#
+# IMPORTANT ACCOUNTING RULE:
+#
+# The exact financial values used at the time of purchase are
+# stored on the booking:
+#
+# - commissionPercent
+# - commissionAmount
+# - hostAmount
+# - serviceFee
+# - eventWaaAmount
+#
+# Refunds/cancellations MUST use these original values rather
+# than recalculating them using today's commission setting.
+#
+# OFFICIAL EVENTWAA EVENTS:
+#
+# - adminEvent = true
+# - EventWaa funds the ticket subtotal
+# - no host wallet is required
+# - EventWaa receives the ticket subtotal + service fee
+# - service fee remains EventWaa money
 # ============================================================
 
 def complete_verified_eventwaa_payment(
@@ -16846,7 +16868,7 @@ def complete_verified_eventwaa_payment(
     # - PesaPal callback
     # - PesaPal IPN
     #
-    # We always work against the payment stored in JSON.
+    # Always work against the payment stored in JSON.
     # ========================================================
 
     tx_ref = str(
@@ -16900,15 +16922,26 @@ def complete_verified_eventwaa_payment(
     # ========================================================
     # PROVIDER TRANSACTION ID
     #
-    # For Flutterwave this is the Flutterwave transaction ID.
+    # Flutterwave:
+    #   Flutterwave transaction ID
     #
-    # For PesaPal this will be the PesaPal
-    # order tracking ID.
+    # PesaPal:
+    #   PesaPal order tracking ID
     # ========================================================
 
     transaction_id = str(
         transaction_id
+        or
+        ""
     ).strip()
+
+    if not transaction_id:
+
+        return {
+            "success": False,
+            "message":
+                "Payment transaction ID is missing."
+        }, 400
 
     # ========================================================
     # CHECK TRANSACTION ID AGAINST PAYMENTS
@@ -16959,9 +16992,10 @@ def complete_verified_eventwaa_payment(
                     existing_payment
             }, 200
 
-        # A transaction ID belonging to a different
-        # EventWaa payment is suspicious and must not
-        # be reused.
+        # ----------------------------------------------------
+        # A transaction ID belonging to another EventWaa
+        # payment must never be reused.
+        # ----------------------------------------------------
 
         if str(
             existing_payment.get(
@@ -17038,16 +17072,35 @@ def complete_verified_eventwaa_payment(
         }, 404
 
     # ========================================================
+    # IDENTIFY OFFICIAL EVENTWAA EVENT
+    #
+    # Official events:
+    #
+    # - adminEvent = true
+    # - EventWaa is the financial owner
+    # - no host wallet is required
+    #
+    # Keep this compatible with the existing event structure.
+    # ========================================================
+
+    is_official_event = (
+        str(
+            event.get(
+                "adminEvent",
+                False
+            )
+        ).strip().lower()
+        == "true"
+    )
+
+    # ========================================================
     # BLOCK PAYMENT FULFILLMENT FOR CANCELLED EVENTS
     #
-    # IMPORTANT:
+    # A customer may have started payment while the event was
+    # active and the event may then be cancelled before
+    # verification.
     #
-    # A customer may have started payment while the event
-    # was active. The host can then cancel the event before
-    # the payment is verified.
-    #
-    # Never create a booking or ticket for that cancelled
-    # event.
+    # Never create a booking for a cancelled event.
     # ========================================================
 
     if str(
@@ -17270,7 +17323,8 @@ def complete_verified_eventwaa_payment(
         paid_amount = int(
             float(
                 paid_amount
-                or 0
+                or
+                0
             )
         )
 
@@ -17296,6 +17350,147 @@ def complete_verified_eventwaa_payment(
         }, 400
 
     # ========================================================
+    # CALCULATE TICKET SUBTOTAL
+    # ========================================================
+
+    ticket_subtotal = int(
+        payment.get(
+            "subtotal",
+            0
+        )
+        or
+        0
+    )
+
+    if ticket_subtotal <= 0:
+
+        return {
+            "success": False,
+            "message":
+                "Invalid ticket subtotal."
+        }, 400
+
+    # ========================================================
+    # SERVICE FEE
+    #
+    # EventWaa retains the service fee.
+    # It is NOT part of the host earning.
+    # ========================================================
+
+    service_fee_amount = int(
+        payment.get(
+            "serviceFee",
+            0
+        )
+        or
+        0
+    )
+
+    # ========================================================
+    # LOAD PLATFORM SETTINGS
+    #
+    # IMPORTANT:
+    #
+    # Do NOT hard-code the commission percentage.
+    #
+    # The percentage used at purchase time is stored on the
+    # booking so future refunds/cancellations can use the
+    # original accounting.
+    # ========================================================
+
+    settings = load_admin_settings()
+
+    try:
+
+        commission_percent = float(
+            settings.get(
+                "commission",
+                10
+            )
+            or
+            0
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        commission_percent = 10.0
+
+    commission_percent = max(
+        0,
+        min(
+            100,
+            commission_percent
+        )
+    )
+
+    # ========================================================
+    # CALCULATE ORIGINAL FINANCIAL SPLIT
+    #
+    # NORMAL HOST EVENT:
+    #
+    # Ticket subtotal
+    #       ↓
+    # Commission + Host earning
+    #
+    # EventWaa:
+    #   commission + service fee
+    #
+    # Host:
+    #   subtotal - commission
+    #
+    # OFFICIAL EVENTWAA EVENT:
+    #
+    # EventWaa owns the event.
+    #
+    # EventWaa:
+    #   full ticket subtotal + service fee
+    #
+    # Host:
+    #   0
+    # ========================================================
+
+    if is_official_event:
+
+        commission_amount = 0
+
+        host_amount = 0
+
+        eventwaa_ticket_amount = (
+            ticket_subtotal
+        )
+
+    else:
+
+        commission_amount = int(
+            round(
+                ticket_subtotal
+                *
+                commission_percent
+                /
+                100
+            )
+        )
+
+        host_amount = (
+            ticket_subtotal
+            -
+            commission_amount
+        )
+
+        eventwaa_ticket_amount = (
+            commission_amount
+        )
+
+    eventwaa_earning = (
+        eventwaa_ticket_amount
+        +
+        service_fee_amount
+    )
+
+    # ========================================================
     # CREATE BOOKING ID
     # ========================================================
 
@@ -17318,7 +17513,8 @@ def complete_verified_eventwaa_payment(
             ],
             default=0
         )
-        + 1
+        +
+        1
     )
 
     # ========================================================
@@ -17385,7 +17581,6 @@ def complete_verified_eventwaa_payment(
 
             "createdAt":
                 now
-
         }
 
         tickets.append(
@@ -17394,6 +17589,13 @@ def complete_verified_eventwaa_payment(
 
     # ========================================================
     # CREATE BOOKING
+    #
+    # IMPORTANT:
+    #
+    # Store the original accounting values.
+    #
+    # Future cancellation/refund code should use these
+    # fields instead of recalculating from current settings.
     # ========================================================
 
     booking = {
@@ -17441,6 +17643,9 @@ def complete_verified_eventwaa_payment(
                 ""
             ),
 
+        "adminEvent":
+            is_official_event,
+
         # ====================================================
         # BUYER
         # ====================================================
@@ -17464,29 +17669,18 @@ def complete_verified_eventwaa_payment(
                     "ticketPrice",
                     0
                 )
-                or 0
+                or
+                0
             ),
 
         "quantity":
             quantity,
 
         "subtotal":
-            int(
-                payment.get(
-                    "subtotal",
-                    0
-                )
-                or 0
-            ),
+            ticket_subtotal,
 
         "serviceFee":
-            int(
-                payment.get(
-                    "serviceFee",
-                    0
-                )
-                or 0
-            ),
+            service_fee_amount,
 
         "serviceFeePercent":
             float(
@@ -17494,6 +17688,8 @@ def complete_verified_eventwaa_payment(
                     "serviceFeePercent",
                     5
                 )
+                or
+                0
             ),
 
         "customerTotal":
@@ -17502,7 +17698,8 @@ def complete_verified_eventwaa_payment(
                     "amount",
                     0
                 )
-                or 0
+                or
+                0
             ),
 
         "totalPrice":
@@ -17511,10 +17708,36 @@ def complete_verified_eventwaa_payment(
                     "ticketPrice",
                     0
                 )
-                or 0
+                or
+                0
             )
             *
             quantity,
+
+        # ====================================================
+        # ORIGINAL ACCOUNTING
+        #
+        # THESE VALUES MUST NOT BE RECALCULATED DURING
+        # FUTURE REFUNDS/CANCELLATIONS.
+        # ====================================================
+
+        "commissionPercent":
+            commission_percent,
+
+        "commissionAmount":
+            commission_amount,
+
+        "hostAmount":
+            host_amount,
+
+        "eventWaaTicketAmount":
+            eventwaa_ticket_amount,
+
+        "eventWaaAmount":
+            eventwaa_earning,
+
+        "serviceFeeRetained":
+            True,
 
         # ====================================================
         # PAYMENT INFORMATION
@@ -17575,26 +17798,6 @@ def complete_verified_eventwaa_payment(
     )
 
     # ========================================================
-    # CALCULATE TICKET SUBTOTAL
-    # ========================================================
-
-    ticket_subtotal = int(
-        payment.get(
-            "subtotal",
-            0
-        )
-        or 0
-    )
-
-    if ticket_subtotal <= 0:
-
-        return {
-            "success": False,
-            "message":
-                "Invalid ticket subtotal."
-        }, 400
-
-    # ========================================================
     # UPDATE EVENT INVENTORY
     # ========================================================
 
@@ -17610,7 +17813,8 @@ def complete_verified_eventwaa_payment(
                 "ticketsSold",
                 0
             )
-            or 0
+            or
+            0
         )
         +
         quantity
@@ -17622,7 +17826,8 @@ def complete_verified_eventwaa_payment(
                 "revenue",
                 0
             )
-            or 0
+            or
+            0
         )
         +
         ticket_subtotal
@@ -17631,10 +17836,7 @@ def complete_verified_eventwaa_payment(
     # ========================================================
     # HOST WALLET
     #
-    # 10% EventWaa commission
-    # 90% host earning
-    #
-    # Service fee remains EventWaa money.
+    # OFFICIAL EVENTWAA EVENTS DO NOT REQUIRE A HOST WALLET.
     # ========================================================
 
     wallets = load_host_wallets()
@@ -17643,35 +17845,14 @@ def complete_verified_eventwaa_payment(
         "hostId"
     )
 
-    try:
-
-        host_id = int(
-            host_id
-        )
-
-    except (
-        TypeError,
-        ValueError
-    ):
-
-        return {
-            "success": False,
-            "message": (
-                "Event host ID is invalid."
-            )
-        }, 400
-
     host_wallet = None
 
-    for wallet in wallets:
+    if not is_official_event:
 
         try:
 
-            wallet_host_id = int(
-                wallet.get(
-                    "hostId",
-                    0
-                )
+            host_id = int(
+                host_id
             )
 
         except (
@@ -17679,71 +17860,80 @@ def complete_verified_eventwaa_payment(
             ValueError
         ):
 
-            wallet_host_id = 0
+            return {
+                "success": False,
+                "message": (
+                    "Event host ID is invalid."
+                )
+            }, 400
 
-        if wallet_host_id == host_id:
+        # ----------------------------------------------------
+        # FIND HOST WALLET
+        # ----------------------------------------------------
 
-            host_wallet = wallet
+        for wallet in wallets:
 
-            break
+            try:
 
-    if not host_wallet:
+                wallet_host_id = int(
+                    wallet.get(
+                        "hostId",
+                        0
+                    )
+                )
 
-        host_wallet = {
+            except (
+                TypeError,
+                ValueError
+            ):
 
-            "hostId":
-                host_id,
+                wallet_host_id = 0
 
-            "availableBalance":
-                0,
+            if wallet_host_id == host_id:
 
-            "pendingPayouts":
-                0,
+                host_wallet = wallet
 
-            "totalEarned":
-                0,
+                break
 
-            "totalWithdrawn":
-                0,
+        # ----------------------------------------------------
+        # CREATE HOST WALLET IF NEEDED
+        # ----------------------------------------------------
 
-            "withdrawals":
-                [],
+        if not host_wallet:
 
-            "scheduledPayouts":
-                [],
+            host_wallet = {
 
-            "transactions":
-                [],
+                "hostId":
+                    host_id,
 
-            "refunds":
-                0
-        }
+                "availableBalance":
+                    0,
 
-        wallets.append(
-            host_wallet
-        )
+                "pendingPayouts":
+                    0,
 
-    # ========================================================
-    # HOST COMMISSION
-    # ========================================================
+                "totalEarned":
+                    0,
 
-    commission_percent = 10.0
+                "totalWithdrawn":
+                    0,
 
-    commission = int(
-        round(
-            ticket_subtotal
-            *
-            commission_percent
-            /
-            100
-        )
-    )
+                "withdrawals":
+                    [],
 
-    host_earning = (
-        ticket_subtotal
-        -
-        commission
-    )
+                "scheduledPayouts":
+                    [],
+
+                "transactions":
+                    [],
+
+                "refunds":
+                    0
+            }
+
+            wallets.append(
+                host_wallet
+            )
 
     # ========================================================
     # EVENTWAA ADMIN WALLET
@@ -17751,26 +17941,14 @@ def complete_verified_eventwaa_payment(
 
     admin_wallet = load_wallet()
 
-    service_fee_amount = int(
-        payment.get(
-            "serviceFee",
-            0
-        )
-        or 0
-    )
-
-    # EventWaa keeps:
-    #
-    # commission + service fee
-
-    eventwaa_earning = (
-        commission
-        +
-        service_fee_amount
-    )
-
     # ========================================================
-    # UPDATE EVENTWAA AVAILABLE BALANCE
+    # ADD EVENTWAA MONEY
+    #
+    # Normal event:
+    #   commission + service fee
+    #
+    # Official EventWaa event:
+    #   full ticket subtotal + service fee
     # ========================================================
 
     admin_wallet["availableBalance"] = (
@@ -17780,7 +17958,8 @@ def complete_verified_eventwaa_payment(
                 "availableBalance",
                 0
             )
-            or 0
+            or
+            0
         )
         +
         eventwaa_earning
@@ -17797,10 +17976,11 @@ def complete_verified_eventwaa_payment(
                 "totalCommission",
                 0
             )
-            or 0
+            or
+            0
         )
         +
-        commission
+        commission_amount
     )
 
     # ========================================================
@@ -17814,7 +17994,8 @@ def complete_verified_eventwaa_payment(
                 "totalServiceFees",
                 0
             )
-            or 0
+            or
+            0
         )
         +
         service_fee_amount
@@ -17831,7 +18012,8 @@ def complete_verified_eventwaa_payment(
                 "totalRevenue",
                 0
             )
-            or 0
+            or
+            0
         )
         +
         eventwaa_earning
@@ -17881,7 +18063,7 @@ def complete_verified_eventwaa_payment(
                 ticket_subtotal,
 
             "commission":
-                commission,
+                commission_amount,
 
             "commissionPercent":
                 commission_percent,
@@ -17898,12 +18080,15 @@ def complete_verified_eventwaa_payment(
                         "amount",
                         0
                     )
-                    or 0
+                    or
+                    0
                 ),
+
+            "adminEvent":
+                is_official_event,
 
             "date":
                 now
-
         }
     )
 
@@ -17913,36 +18098,102 @@ def complete_verified_eventwaa_payment(
 
     # ========================================================
     # ADD HOST AVAILABLE BALANCE
+    #
+    # Official EventWaa events have no host earning.
     # ========================================================
 
-    host_wallet["availableBalance"] = (
+    if not is_official_event:
 
-        int(
-            host_wallet.get(
-                "availableBalance",
+        host_wallet["availableBalance"] = (
+
+            int(
+                host_wallet.get(
+                    "availableBalance",
+                    0
+                )
+                or
                 0
             )
-            or 0
+            +
+            host_amount
         )
-        +
-        host_earning
-    )
 
-    host_wallet["totalEarned"] = (
+        host_wallet["totalEarned"] = (
 
-        int(
-            host_wallet.get(
-                "totalEarned",
+            int(
+                host_wallet.get(
+                    "totalEarned",
+                    0
+                )
+                or
                 0
             )
-            or 0
+            +
+            host_amount
         )
-        +
-        host_earning
-    )
+
+        # ====================================================
+        # HOST WALLET TRANSACTION HISTORY
+        # ====================================================
+
+        host_wallet.setdefault(
+            "transactions",
+            []
+        )
+
+        host_wallet["transactions"].insert(
+
+            0,
+
+            {
+
+                "type":
+                    "sale",
+
+                "eventId":
+                    event.get(
+                        "id"
+                    ),
+
+                "eventTitle":
+                    event.get(
+                        "title",
+                        ""
+                    ),
+
+                "transactionId":
+                    transaction_id,
+
+                "txRef":
+                    payment.get(
+                        "txRef"
+                    ),
+
+                "paymentProvider":
+                    provider,
+
+                "ticketSubtotal":
+                    ticket_subtotal,
+
+                "commission":
+                    commission_amount,
+
+                "commissionPercent":
+                    commission_percent,
+
+                "amount":
+                    host_amount,
+
+                "date":
+                    now
+            }
+        )
 
     # ========================================================
-    # SAVE HOST WALLET
+    # SAVE HOST WALLETS
+    #
+    # Saving is harmless for official events because wallets
+    # remains the existing wallet list.
     # ========================================================
 
     save_host_wallets(

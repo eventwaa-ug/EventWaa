@@ -355,10 +355,7 @@ function EventCard({ event }) {
                             : "View Tickets"}
                     </span>
 
-                    <span className="view-arrow">
-                        →
-                    </span>
-
+                   
                 </Link>
 
 

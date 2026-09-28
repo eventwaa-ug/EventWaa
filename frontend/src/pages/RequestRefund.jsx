@@ -3,6 +3,18 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { useState } from "react";
+import {
+  FiCalendar,
+  FiCheckCircle,
+  FiCreditCard,
+  FiInfo,
+  FiMapPin,
+  FiRefreshCw,
+  FiTag,
+  FiUser,
+  FiAlertCircle,
+  FiClock,
+} from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
 import "../styles/RequestRefund.css";
 const BACKEND_URL =
@@ -17,8 +29,7 @@ function RequestRefund() {
   // New Tickets.jsx sends:
   // state: { ticket: booking }
   //
-  // The booking fallback keeps this page compatible with the
-  // previous navigation structure.
+  // Keep booking fallback for compatibility.
   // ============================================================
   const ticket =
     location.state?.ticket ||
@@ -40,16 +51,15 @@ function RequestRefund() {
       <div className="refund-page">
         <div className="refund-empty">
           <div className="refund-empty-icon">
-            🎟️
           </div>
           <h2>
             Ticket not found
           </h2>
           <p>
-            We couldn't find the ticket
-            you want to refund.
+            We couldn't find this ticket.
           </p>
           <button
+            type="button"
             onClick={() =>
               navigate("/tickets")
             }
@@ -97,31 +107,26 @@ function RequestRefund() {
   const alreadyRefunded =
     ticketStatus === "refunded" ||
     refundStatus === "refunded";
-  const refundPending = [
+  const pendingStatuses = [
     "refund_pending",
     "pending_refund",
     "pending",
     "provider_pending",
     "manual_review",
-  ].includes(
-    ticketStatus
-  ) ||
-    [
-      "refund_pending",
-      "pending_refund",
-      "pending",
-      "provider_pending",
-      "manual_review",
-    ].includes(
+  ];
+  const refundPending =
+    pendingStatuses.includes(
+      ticketStatus
+    ) ||
+    pendingStatuses.includes(
       refundStatus
     );
   // ============================================================
   // BOOKING ID
   //
-  // Prefer a real parent booking ID.
+  // Prefer the actual parent booking ID.
   //
-  // Do NOT automatically use ticketId as bookingId here because
-  // they represent different concepts in the newer ticket model.
+  // Do NOT automatically use ticketId as bookingId.
   // ============================================================
   const bookingId =
     ticket.bookingId ||
@@ -218,7 +223,7 @@ function RequestRefund() {
       {/* ======================================================
           HEADER
       ====================================================== */}
-      <div className="refund-header">
+      <header className="refund-header">
         <button
           className="refund-back-button"
           onClick={() =>
@@ -226,32 +231,35 @@ function RequestRefund() {
           }
           type="button"
           disabled={submitting}
+          aria-label="Go back"
         >
-          ←
+          X
         </button>
-        <div>
+        <div className="refund-header-content">
+          <div className="refund-eyebrow">
+            <FiRefreshCw />
+            Refund
+          </div>
           <h1>
-            Request Refund
+            Request a refund
           </h1>
           <p>
-            Submit a refund request for
-            your ticket.
+            Review your ticket and submit your request.
           </p>
         </div>
-      </div>
+      </header>
       {/* ======================================================
           CONTENT
       ====================================================== */}
-      <div className="refund-container">
+      <main className="refund-container">
         {/* ====================================================
             TICKET INFORMATION
         ==================================================== */}
-        <div className="refund-ticket-card">
+        <section className="refund-ticket-card">
           <div className="refund-ticket-icon">
-            🎟️
           </div>
           <div className="refund-ticket-info">
-            <span>
+            <span className="refund-ticket-label">
               EVENT
             </span>
             <h2>
@@ -260,66 +268,90 @@ function RequestRefund() {
                 "Event"}
             </h2>
             <div className="refund-ticket-details">
-              <p>
-                📅{" "}
-                {ticket.eventDate ||
-                  ticket.date ||
-                  "Date unavailable"}
-              </p>
-              <p>
-                📍{" "}
-                {ticket.venue ||
-                  ticket.eventVenue ||
-                  ticket.location ||
-                  "Venue unavailable"}
-              </p>
-              <p>
-                🎟️{" "}
-                {ticket.ticketType ||
-                  "Regular"}
-              </p>
-              <p>
-                👥{" "}
-                {ticket.quantity ||
-                  ticket.tickets?.length ||
-                  1}{" "}
-                ticket(s)
-              </p>
+              <div className="refund-detail">
+                <FiCalendar />
+                <span>
+                  {ticket.eventDate ||
+                    ticket.date ||
+                    "Date unavailable"}
+                </span>
+              </div>
+              <div className="refund-detail">
+                <FiMapPin />
+                <span>
+                  {ticket.venue ||
+                    ticket.eventVenue ||
+                    ticket.location ||
+                    "Venue unavailable"}
+                </span>
+              </div>
+              <div className="refund-detail">
+                <FiTag />
+                <span>
+                  {ticket.ticketType ||
+                    "Regular"}
+                </span>
+              </div>
+              <div className="refund-detail">
+                <FiUser />
+                <span>
+                  {ticket.quantity ||
+                    ticket.tickets?.length ||
+                    1}{" "}
+                  ticket(s)
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
         {/* ====================================================
-            REFUND STATUS WARNINGS
+            STATUS
         ==================================================== */}
         {alreadyRefunded && (
-          <div className="refund-warning success">
-            <strong>
-              This ticket has already been refunded.
-            </strong>
+          <div className="refund-status refund-status-success">
+            <div className="refund-status-icon">
+              <FiCheckCircle />
+            </div>
+            <div>
+              <strong>
+                Already refunded
+              </strong>
+              <span>
+                This ticket has already been refunded.
+              </span>
+            </div>
           </div>
         )}
         {refundPending && (
-          <div className="refund-warning pending">
-            <strong>
-              Refund request already submitted.
-            </strong>
-            <span>
-              Your refund request is
-              currently being processed.
-            </span>
+          <div className="refund-status refund-status-pending">
+            <div className="refund-status-icon">
+              <FiClock />
+            </div>
+            <div>
+              <strong>
+                Refund pending
+              </strong>
+              <span>
+                Your refund request is being processed.
+              </span>
+            </div>
           </div>
         )}
         {eventHasPassed &&
           !alreadyRefunded &&
           !refundPending && (
-            <div className="refund-warning">
-              <strong>
-                Refund unavailable
-              </strong>
-              <span>
-                This event has already
-                taken place.
-              </span>
+            <div className="refund-status refund-status-warning">
+              <div className="refund-status-icon">
+                <FiAlertCircle />
+              </div>
+              <div>
+                <strong>
+                  Refund unavailable
+                </strong>
+                <span>
+                  This event has already taken place.
+                </span>
+              </div>
             </div>
           )}
         {/* ====================================================
@@ -335,24 +367,27 @@ function RequestRefund() {
               }
             >
               <div className="refund-form-header">
-                <h2>
-                  Why are you requesting
-                  a refund?
-                </h2>
-                <p>
-                  Select the reason that
-                  best describes your
-                  request.
-                </p>
+                <div>
+                  <span className="refund-section-label">
+                    REFUND REQUEST
+                  </span>
+                  <h2>
+                    Tell us why
+                  </h2>
+                </div>
+                <div className="refund-form-icon">
+                  <FiRefreshCw />
+                </div>
               </div>
               {/* =================================================
                   REASON
               ================================================= */}
               <div className="refund-field">
-                <label>
-                  Refund reason
+                <label htmlFor="refund-reason">
+                  Reason
                 </label>
                 <select
+                  id="refund-reason"
                   value={reason}
                   onChange={(e) =>
                     setReason(
@@ -388,21 +423,24 @@ function RequestRefund() {
                   DETAILS
               ================================================= */}
               <div className="refund-field">
-                <label>
-                  Additional details
+                <label htmlFor="refund-details">
                   <span>
-                    Optional
+                    Details
                   </span>
+                  <small>
+                    Optional
+                  </small>
                 </label>
                 <textarea
+                  id="refund-details"
                   value={details}
                   onChange={(e) =>
                     setDetails(
                       e.target.value
                     )
                   }
-                  placeholder="Tell us anything else that may help with your refund request..."
-                  rows="5"
+                  placeholder="Add any extra details..."
+                  rows="4"
                   disabled={submitting}
                 />
               </div>
@@ -410,41 +448,25 @@ function RequestRefund() {
                   REFUND AMOUNT
               ================================================= */}
               <div className="refund-amount-card">
-                <span>
-                  Amount paid
-                </span>
-                <strong>
-                  UGX{" "}
-                  {amountPaid.toLocaleString()}
-                </strong>
-                <hr />
-                <div className="refund-policy">
-                  <p>
+                <div className="refund-amount-top">
+                  <div className="refund-amount-icon">
+                    <FiCreditCard />
+                  </div>
+                  <div>
+                    <span>
+                      Amount paid
+                    </span>
                     <strong>
-                      Refund information
+                      UGX{" "}
+                      {amountPaid.toLocaleString()}
                     </strong>
-                  </p>
-                  <p>
-                    Your refund request will
-                    be reviewed and processed
-                    according to EventWaa's
-                    current refund rules.
-                  </p>
-                  <p>
-                    The final refundable amount
-                    is determined by the
-                    backend using the booking's
-                    stored payment and refund
-                    information.
-                  </p>
-                  <p>
-                    If the event is cancelled
-                    by the host, cancellation
-                    refunds are handled
-                    separately according to
-                    EventWaa's event-cancellation
-                    refund process.
-                  </p>
+                  </div>
+                </div>
+                <div className="refund-amount-note">
+                  <FiInfo />
+                  <span>
+                    Final refund amount is determined after review.
+                  </span>
                 </div>
               </div>
               {/* =================================================
@@ -452,7 +474,10 @@ function RequestRefund() {
               ================================================= */}
               {error && (
                 <div className="refund-error">
-                  {error}
+                  <FiAlertCircle />
+                  <span>
+                    {error}
+                  </span>
                 </div>
               )}
               {/* =================================================
@@ -474,14 +499,22 @@ function RequestRefund() {
                   className="refund-submit-btn"
                   disabled={submitting}
                 >
-                  {submitting
-                    ? "Submitting..."
-                    : "Submit Refund Request"}
+                  {submitting ? (
+                    <>
+                      <FiRefreshCw className="refund-spinner" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <FiRefreshCw />
+                      Submit request
+                    </>
+                  )}
                 </button>
               </div>
             </form>
           )}
-      </div>
+      </main>
     </div>
   );
 }
