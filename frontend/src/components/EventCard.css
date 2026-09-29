@@ -1,209 +1,501 @@
 /* ============================================================
-   EVENT CARD - Round 24px + Orange Brand
+   EVENTWAA — EVENT CARD
+   Modern • Clean • Responsive • Orange Brand
 ============================================================ */
+
 .event-card {
-    background: #ffffff;
-    border-radius: 24px;
-    overflow: hidden;
-    border: 1.5px solid #F3F4F6;
-    transition: all 0.3s ease;
     width: 100%;
     min-width: 0;
-    box-shadow: 0 4px 12px rgba(17,24,39,0.04);
+    background: #ffffff;
+    border: 1px solid #E5E7EB;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(17, 24, 39, 0.045);
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
 }
 
 .event-card:hover {
-    transform: translateY(-6px);
+    transform: translateY(-5px);
     border-color: #FFD7B8;
-    box-shadow: 0 20px 40px rgba(17,24,39,0.08), 0 8px 16px rgba(255,107,0,0.08);
+    box-shadow:
+        0 18px 38px rgba(17, 24, 39, 0.08),
+        0 6px 16px rgba(255, 107, 0, 0.07);
 }
 
-/* IMAGE - ROUND TOP */
+/* ============================================================
+   EVENT IMAGE
+============================================================ */
+
 .event-image-wrapper {
     position: relative;
     width: 100%;
-    background: #F9FAFB;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: #F8F9FA;
     border-radius: 24px 24px 0 0;
 }
 
 .event-image {
     display: block;
     width: 100%;
+    max-width: 100%;
     height: auto;
     object-fit: contain;
-    max-width: 100%;
-    transition: transform 0.4s ease;
+    transition: transform 0.35s ease;
 }
 
 .event-card:hover .event-image {
-    transform: scale(1.03);
+    transform: scale(1.025);
 }
+
+/* ============================================================
+   EVENT TYPE BADGE
+============================================================ */
 
 .event-type {
     position: absolute;
     top: 12px;
     left: 12px;
-    padding: 7px 12px;
-    border-radius: 999px;
-    font-size: 0.76rem;
-    font-weight: 800;
     z-index: 5;
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 6px 11px;
+    border-radius: 999px;
+
+    font-size: 0.74rem;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
 }
 
+/* Free */
 .event-type.free {
-    background: #ECFDF5;
-    color: #065F46;
+    background: rgba(236, 253, 245, 0.96);
+    color: #047857;
     border: 1px solid #A7F3D0;
 }
 
+/* Paid — EventWaa orange */
 .event-type.paid {
-    background: #FFF1E6;
-    color: #FF6B00;
+    background: rgba(255, 241, 230, 0.97);
+    color: #E85D00;
     border: 1px solid #FFD7B8;
 }
+
+/* Cancelled */
+.event-type.cancelled {
+    background: rgba(254, 242, 242, 0.97);
+    color: #991B1B;
+    border: 1px solid #FECACA;
+}
+
+/* ============================================================
+   VERIFIED HOST
+============================================================ */
 
 .verified-host {
     position: absolute;
     top: 12px;
     right: 12px;
-    background: rgba(255,255,255,0.95);
-    padding: 6px 12px;
-    border-radius: 999px;
-    font-size: 0.76rem;
-    font-weight: 700;
     z-index: 5;
-    border: 1px solid #F3F4F6;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 6px 11px;
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.96);
+    color: #374151;
+
+    border: 1px solid rgba(229, 231, 235, 0.9);
+
+    font-size: 0.74rem;
+    line-height: 1;
+    font-weight: 700;
+
+    box-shadow: 0 4px 12px rgba(17, 24, 39, 0.08);
+
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
 }
 
-/* FAVORITE - ROUND */
+/* ============================================================
+   FAVORITE BUTTON
+============================================================ */
+
 .favorite-button {
     position: absolute;
     top: 12px;
     right: 12px;
+    z-index: 10;
+
     width: 42px;
     height: 42px;
-    border: none;
-    border-radius: 999px;
-    background: #111827;
-    color: white;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+
+    background: #111827;
+    color: #ffffff;
+
     font-size: 20px;
+    line-height: 1;
+
     cursor: pointer;
-    z-index: 10;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
-    transition: all 0.2s ease;
+
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.18);
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .favorite-button:hover {
-    transform: scale(1.1);
+    transform: scale(1.07);
     background: #FF6B00;
+    box-shadow: 0 7px 18px rgba(255, 107, 0, 0.25);
 }
 
-.favorite-button:active { transform: scale(0.96); }
-.favorite-active { background: #ffffff; color: #FF6B00; }
+.favorite-button:active {
+    transform: scale(0.94);
+}
 
-/* CONTENT */
+.favorite-button:focus-visible {
+    outline: 3px solid rgba(255, 107, 0, 0.25);
+    outline-offset: 3px;
+}
+
+/* Active favorite */
+.favorite-active {
+    background: #ffffff;
+    color: #FF6B00;
+    border-color: #FFD7B8;
+}
+
+.favorite-active:hover {
+    background: #FFF7F0;
+    color: #E85D00;
+}
+
+/* ============================================================
+   CARD CONTENT
+============================================================ */
+
 .event-card-content {
-    padding: 18px 18px 16px;
+    padding: 18px 18px 17px;
 }
 
 .event-card-content h3 {
     margin: 0 0 10px;
-    font-size: 1.08rem;
+
+    color: #111827;
+
+    font-size: 1.06rem;
     line-height: 1.35;
     font-weight: 800;
-    color: #111827;
+
     letter-spacing: -0.2px;
+
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
 }
+
+/* ============================================================
+   LOCATION + DATE
+============================================================ */
 
 .event-location,
 .event-date {
-    color: #6B7280;
-    margin: 6px 0;
-    font-size: 0.88rem;
-    line-height: 1.45;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
+
+    margin: 7px 0;
+
+    color: #6B7280;
+
+    font-size: 0.86rem;
+    line-height: 1.45;
 }
+
+.event-location svg,
+.event-date svg {
+    flex: 0 0 auto;
+}
+
+/* ============================================================
+   PRICE
+============================================================ */
 
 .event-price {
-    margin: 12px 0 14px;
-    font-size: 0.98rem;
-    font-weight: 800;
+    margin: 13px 0 14px;
+
     color: #FF6B00;
+
+    font-size: 0.96rem;
+    line-height: 1.3;
+    font-weight: 800;
 }
 
-/* VIEW DETAILS - PILL ORANGE */
+.event-price.cancelled {
+    color: #991B1B;
+}
+
+/* ============================================================
+   VIEW DETAILS BUTTON
+============================================================ */
+
 .view-details-btn {
+    width: 100%;
+    box-sizing: border-box;
+
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 7px;
-    width: 100%;
-    box-sizing: border-box;
-    text-align: center;
+
+    padding: 11px 16px;
+
     background: #111827;
     color: #ffffff;
-    text-decoration: none;
-    padding: 12px 16px;
+
+    border: 1px solid #111827;
     border-radius: 999px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    transition: all 0.22s ease;
+
+    text-align: center;
+    text-decoration: none;
+
+    font-size: 0.88rem;
+    line-height: 1.2;
+    font-weight: 750;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .view-details-btn:hover {
     background: #FF6B00;
+    border-color: #FF6B00;
+    color: #ffffff;
+
     transform: translateY(-2px);
-    box-shadow: 0 8px 18px rgba(255,107,0,0.25);
+
+    box-shadow: 0 8px 18px rgba(255, 107, 0, 0.22);
 }
+
+.view-details-btn:active {
+    transform: translateY(0);
+}
+
+.view-details-btn:focus-visible {
+    outline: 3px solid rgba(255, 107, 0, 0.25);
+    outline-offset: 3px;
+}
+
+/* ============================================================
+   CANCELLED CARD
+============================================================ */
+
+.event-card-cancelled {
+    opacity: 0.94;
+}
+
+.event-card-cancelled .event-image {
+    filter: saturate(0.8);
+}
+
+/* ============================================================
+   TABLET
+============================================================ */
 
 @media (max-width: 768px) {
-    .event-card { border-radius: 20px; }
-    .event-image-wrapper { border-radius: 20px 20px 0 0; }
-    .event-card-content { padding: 16px; }
-    .event-card-content h3 { font-size: 1.03rem; }
+
+    .event-card {
+        border-radius: 20px;
+    }
+
+    .event-image-wrapper {
+        border-radius: 20px 20px 0 0;
+    }
+
+    .event-card-content {
+        padding: 16px;
+    }
+
+    .event-card-content h3 {
+        font-size: 1.02rem;
+    }
+
+    .event-location,
+    .event-date {
+        font-size: 0.85rem;
+    }
 }
 
+/* ============================================================
+   MOBILE
+============================================================ */
+
 @media (max-width: 480px) {
+
     .event-card {
         width: 100%;
         margin: 0 auto;
-        border-radius: 20px;
+        border-radius: 19px;
     }
-    .event-image-wrapper { width: 100%; border-radius: 20px 20px 0 0; }
-    .event-card-content { padding: 14px; }
-    .event-card-content h3 { font-size: 1rem; }
-    .event-location, .event-date { font-size: 0.84rem; }
-    .event-price { font-size: 0.92rem; }
-    .favorite-button { width: 38px; height: 38px; top: 10px; right: 10px; }
-    .event-type { top: 10px; left: 10px; padding: 6px 10px; font-size: 0.72rem; }
-    .verified-host { top: 10px; right: 10px; padding: 5px 10px; font-size: 0.72rem; }
-    .view-details-btn { padding: 11px; font-size: 0.86rem; }
+
+    .event-image-wrapper {
+        width: 100%;
+        border-radius: 19px 19px 0 0;
+    }
+
+    .event-card-content {
+        padding: 14px;
+    }
+
+    .event-card-content h3 {
+        margin-bottom: 9px;
+        font-size: 0.99rem;
+    }
+
+    .event-location,
+    .event-date {
+        margin: 6px 0;
+        font-size: 0.82rem;
+    }
+
+    .event-price {
+        margin: 11px 0 13px;
+        font-size: 0.91rem;
+    }
+
+    .favorite-button {
+        top: 10px;
+        right: 10px;
+
+        width: 38px;
+        height: 38px;
+
+        font-size: 18px;
+    }
+
+    .event-type {
+        top: 10px;
+        left: 10px;
+
+        padding: 6px 9px;
+        font-size: 0.71rem;
+    }
+
+    .verified-host {
+        top: 10px;
+        right: 10px;
+
+        padding: 5px 9px;
+        font-size: 0.7rem;
+    }
+
+    .view-details-btn {
+        min-height: 42px;
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
 }
+
+/* ============================================================
+   VERY SMALL PHONES
+============================================================ */
 
 @media (max-width: 360px) {
-    .event-card { border-radius: 18px; }
-    .event-image-wrapper { border-radius: 18px 18px 0 0; }
-    .event-card-content { padding: 13px; }
+
+    .event-card {
+        border-radius: 17px;
+    }
+
+    .event-image-wrapper {
+        border-radius: 17px 17px 0 0;
+    }
+
+    .event-card-content {
+        padding: 13px;
+    }
+
+    .event-card-content h3 {
+        font-size: 0.96rem;
+    }
+
+    .event-location,
+    .event-date {
+        font-size: 0.79rem;
+    }
+
+    .event-price {
+        font-size: 0.88rem;
+    }
 }
 
-.event-card-cancelled { opacity: 0.94; }
-.event-type.cancelled {
-    background: #FEF2F2;
-    color: #991B1B;
-    border: 1px solid #FECACA;
+/* ============================================================
+   REDUCED MOTION
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .event-card,
+    .event-image,
+    .favorite-button,
+    .view-details-btn {
+        transition: none;
+    }
+
+    .event-card:hover,
+    .event-card:hover .event-image,
+    .favorite-button:hover,
+    .view-details-btn:hover {
+        transform: none;
+    }
 }
-.event-price.cancelled { color: #991B1B; }
+
+/* ============================================================
+   PRINT
+============================================================ */
+
+@media print {
+
+    .event-card {
+        box-shadow: none;
+        border: 1px solid #D1D5DB;
+        break-inside: avoid;
+    }
+
+    .favorite-button,
+    .view-details-btn {
+        box-shadow: none;
+    }
+}

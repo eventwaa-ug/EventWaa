@@ -9,6 +9,7 @@ import {
     FiShare2,
     FiStar,
     FiTrash2,
+    FiX,
     FiXCircle,
 } from "react-icons/fi";
 
@@ -42,6 +43,14 @@ function AdminEvents() {
 
     const [cancellingId, setCancellingId] =
         useState(null);
+
+    const [cancelModalEvent, setCancelModalEvent] =
+        useState(null);
+
+    const [cancelReason, setCancelReason] =
+        useState(
+            "Event cancelled by EventWaa administration."
+        );
 
     /* ============================================================
        FETCH EVENTS
@@ -771,10 +780,10 @@ function AdminEvents() {
     };
 
     /* ============================================================
-       CANCEL EVENT
+       OPEN CANCEL MODAL
     ============================================================ */
 
-    const handleCancel = async (
+    const handleCancel = (
         event
     ) => {
         const alreadyCancelled =
@@ -793,48 +802,47 @@ function AdminEvents() {
         }
 
         if (
-            String(
-                cancellingId
-            ) ===
-            String(
-                event?.id
-            )
+            cancellingId !== null
         ) {
             return;
         }
 
-        const firstConfirmation =
-            window.confirm(
-                `Cancel "${event?.title || "this event"}"?\n\nThis will cancel the event, invalidate its tickets/passes, and process eligible refunds.`
-            );
+        setError("");
 
-        if (!firstConfirmation) {
-            return;
-        }
+        setCancelReason(
+            "Event cancelled by EventWaa administration."
+        );
 
-        const reasonInput =
-            window.prompt(
-                "Enter the reason for cancelling this event:",
-                "Event cancelled by EventWaa administration."
-            );
+        setCancelModalEvent(
+            event
+        );
+    };
 
+    /* ============================================================
+       CONFIRM EVENT CANCELLATION
+    ============================================================ */
+
+    const confirmCancel = async () => {
         if (
-            reasonInput ===
-            null
+            !cancelModalEvent ||
+            cancellingId !== null
         ) {
             return;
         }
 
         const reason =
-            reasonInput.trim();
+            cancelReason.trim();
 
         if (!reason) {
-            alert(
+            setError(
                 "A cancellation reason is required."
             );
 
             return;
         }
+
+        const event =
+            cancelModalEvent;
 
         try {
             setCancellingId(
@@ -889,15 +897,23 @@ function AdminEvents() {
                     )
             );
 
+            setCancelModalEvent(
+                null
+            );
+
+            setCancelReason(
+                ""
+            );
+
             alert(
                 `Event cancelled successfully.\n\nPaid refunds processed: ${
                     Number(
-                        data.processedRefunds ||
+                        data?.processedRefunds ||
                         0
                     )
                 }\nFree passes cancelled: ${
                     Number(
-                        data.freeBookingsCancelled ||
+                        data?.freeBookingsCancelled ||
                         0
                     )
                 }`
@@ -908,7 +924,7 @@ function AdminEvents() {
                 err
             );
 
-            alert(
+            setError(
                 err.message ||
                 "Failed to cancel event."
             );
@@ -917,6 +933,26 @@ function AdminEvents() {
                 null
             );
         }
+    };
+
+    /* ============================================================
+       CLOSE CANCEL MODAL
+    ============================================================ */
+
+    const closeCancelModal = () => {
+        if (
+            cancellingId !== null
+        ) {
+            return;
+        }
+
+        setCancelModalEvent(
+            null
+        );
+
+        setCancelReason(
+            ""
+        );
     };
 
     /* ============================================================
@@ -965,7 +1001,7 @@ function AdminEvents() {
                     className="admin-events-create-btn"
                     onClick={() =>
                         navigate(
-                            "/admin/events/create"
+                            "/admin/create-event"
                         )
                     }
                 >
@@ -1483,6 +1519,152 @@ function AdminEvents() {
                         }
                     )}
 
+                </div>
+            )}
+
+            {/* ====================================================
+                CANCEL EVENT MODAL
+            ==================================================== */}
+
+            {cancelModalEvent && (
+                <div
+                    className="admin-cancel-modal-backdrop"
+                    onMouseDown={(event) => {
+                        if (
+                            event.target ===
+                            event.currentTarget
+                        ) {
+                            closeCancelModal();
+                        }
+                    }}
+                >
+                    <div
+                        className="admin-cancel-modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="admin-cancel-modal-title"
+                    >
+
+                        {/* =========================================
+                            MODAL HEADER
+                        ========================================= */}
+
+                        <div className="admin-cancel-modal-header">
+
+                            <div className="admin-cancel-modal-icon">
+                                <FiXCircle />
+                            </div>
+
+                            <button
+                                type="button"
+                                className="admin-cancel-modal-close"
+                                onClick={
+                                    closeCancelModal
+                                }
+                                disabled={
+                                    cancellingId !== null
+                                }
+                                aria-label="Close cancellation dialog"
+                            >
+                                <FiX />
+                            </button>
+
+                        </div>
+
+                        {/* =========================================
+                            MODAL CONTENT
+                        ========================================= */}
+
+                        <div className="admin-cancel-modal-content">
+
+                            <h2 id="admin-cancel-modal-title">
+                                Cancel event?
+                            </h2>
+
+                            <p className="admin-cancel-event-name">
+                                {cancelModalEvent?.title ||
+                                    "Untitled Event"}
+                            </p>
+
+                            <p className="admin-cancel-modal-description">
+                                Cancelling this event will
+                                invalidate its tickets and
+                                passes and process eligible
+                                refunds.
+                            </p>
+
+                            <label
+                                htmlFor="admin-cancel-reason"
+                                className="admin-cancel-reason-label"
+                            >
+                                Cancellation reason
+                            </label>
+
+                            <textarea
+                                id="admin-cancel-reason"
+                                className="admin-cancel-reason-input"
+                                value={
+                                    cancelReason
+                                }
+                                onChange={(e) =>
+                                    setCancelReason(
+                                        e.target.value
+                                    )
+                                }
+                                placeholder="Enter the reason for cancelling this event..."
+                                rows={4}
+                                disabled={
+                                    cancellingId !== null
+                                }
+                                maxLength={500}
+                            />
+
+                            <div className="admin-cancel-character-count">
+                                {cancelReason.length}/500
+                            </div>
+
+                        </div>
+
+                        {/* =========================================
+                            MODAL ACTIONS
+                        ========================================= */}
+
+                        <div className="admin-cancel-modal-actions">
+
+                            <button
+                                type="button"
+                                className="admin-cancel-modal-secondary"
+                                onClick={
+                                    closeCancelModal
+                                }
+                                disabled={
+                                    cancellingId !== null
+                                }
+                            >
+                                Keep Event
+                            </button>
+
+                            <button
+                                type="button"
+                                className="admin-cancel-modal-danger"
+                                onClick={
+                                    confirmCancel
+                                }
+                                disabled={
+                                    cancellingId !== null ||
+                                    !cancelReason.trim()
+                                }
+                            >
+                                <FiXCircle />
+
+                                {cancellingId !== null
+                                    ? "Cancelling..."
+                                    : "Cancel Event"}
+                            </button>
+
+                        </div>
+
+                    </div>
                 </div>
             )}
 

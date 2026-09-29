@@ -1,234 +1,672 @@
 /* ============================================================
-   FREE EVENTS - Round + Orange Brand
+   EVENTWAA — FREE EVENTS
+   Modern UI + Orange Brand
 ============================================================ */
+
 .free-events {
-  width: 100%;
-  padding: 72px 8%;
-  background: #ffffff;
-  box-sizing: border-box;
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 72px 7% 78px;
+
+    background: #ffffff;
 }
+
+/* ============================================================
+   HEADER
+============================================================ */
 
 .free-section-header {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto 34px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 30px;
+    width: 100%;
+    max-width: 1200px;
+
+    margin: 0 auto 36px;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 28px;
 }
+
+/* ============================================================
+   HEADER CONTENT
+============================================================ */
 
 .free-header-content {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    gap: 8px;
+
+    padding-left: 14px;
 }
+
+/* ============================================================
+   ORANGE ACCENT LINE
+============================================================ */
+
+.free-header-content::before {
+    content: "";
+
+    position: absolute;
+
+    top: 2px;
+    left: 0;
+
+    width: 3px;
+    height: calc(100% - 4px);
+
+    border-radius: 999px;
+
+    background: #ff6b00;
+}
+
+/* ============================================================
+   BADGE
+============================================================ */
 
 .free-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  width: fit-content;
-  margin-bottom: 12px;
-  padding: 7px 14px;
-  border-radius: 999px;
-  background: #FFF1E6;
-  color: #FF6B00;
-  border: 1px solid #FFD7B8;
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1;
+    display: inline-flex;
+    align-items: center;
+
+    gap: 7px;
+
+    width: fit-content;
+
+    padding: 7px 13px;
+
+    border-radius: 999px;
+
+    background: #fff3eb;
+
+    border: 1px solid #ffd8bf;
+
+    color: #ff6b00;
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    line-height: 1;
 }
+
+.free-badge svg {
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   TITLE
+============================================================ */
 
 .free-header-content h2 {
-  margin: 0 0 8px;
-  color: #111827;
-  font-size: 2.15rem;
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.7px;
+    margin: 0;
+
+    color: #111111;
+
+    font-size: 2.15rem;
+
+    line-height: 1.18;
+
+    font-weight: 800;
+
+    letter-spacing: -0.7px;
 }
+
+/* ============================================================
+   DESCRIPTION
+============================================================ */
 
 .free-header-content p {
-  margin: 0;
-  max-width: 600px;
-  color: #6B7280;
-  font-size: 1rem;
-  line-height: 1.6;
+    max-width: 600px;
+
+    margin: 0;
+
+    color: #707070;
+
+    font-size: 1rem;
+
+    line-height: 1.6;
 }
 
-/* SEE ALL - PILL */
+/* ============================================================
+   SEE ALL
+============================================================ */
+
 .free-see-all {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-  padding: 10px 16px;
-  border-radius: 999px;
-  color: #111827;
-  background: #F3F4F6;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 700;
-  transition: all 0.22s ease;
+    display: inline-flex;
+    align-items: center;
+
+    gap: 6px;
+
+    min-height: 40px;
+
+    padding: 0 15px;
+
+    flex-shrink: 0;
+
+    box-sizing: border-box;
+
+    border-radius: 999px;
+
+    background: #f3f3f3;
+
+    border: 1px solid #e5e5e5;
+
+    color: #222222;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        gap 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .free-see-all:hover {
-  background: #111827;
-  color: white;
-  transform: translateX(3px);
+    background: #222222;
+
+    border-color: #222222;
+
+    color: #ffffff;
+
+    gap: 9px;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 5px 14px rgba(0, 0, 0, 0.10);
 }
 
-/* SLIDER */
+.free-see-all:focus-visible {
+    outline: 2px solid #ff6b00;
+
+    outline-offset: 3px;
+}
+
+/* ============================================================
+   SLIDER
+============================================================ */
+
 .free-events-slider {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  overflow-x: auto;
-  overflow-y: visible;
-  padding: 5px 4px 18px;
-  box-sizing: border-box;
-  scroll-behavior: smooth;
-  scroll-snap-type: x mandatory;
+    width: 100%;
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    box-sizing: border-box;
+
+    overflow-x: auto;
+    overflow-y: visible;
+
+    padding: 5px 3px 18px;
+
+    scroll-behavior: smooth;
+
+    scroll-snap-type: x mandatory;
+
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
-.free-events-slider::-webkit-scrollbar { display: none; }
+.free-events-slider::-webkit-scrollbar {
+    display: none;
+}
+
+/* ============================================================
+   TRACK
+============================================================ */
 
 .free-events-track {
-  display: flex;
-  align-items: stretch;
-  gap: 22px;
-  width: max-content;
+    display: flex;
+    align-items: stretch;
+
+    gap: 20px;
+
+    width: max-content;
 }
 
-/* SLIDE - ROUND */
+/* ============================================================
+   EVENT SLIDE
+============================================================ */
+
 .free-event-slide {
-  width: 285px;
-  flex: 0 0 285px;
-  scroll-snap-align: start;
-  box-sizing: border-box;
-  border-radius: 24px;
-  overflow: hidden;
-  transition: transform 0.3s ease;
+    width: 285px;
+
+    flex: 0 0 285px;
+
+    min-width: 0;
+
+    box-sizing: border-box;
+
+    scroll-snap-align: start;
+
+    border-radius: 22px;
+
+    overflow: hidden;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e5e5;
+
+    box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.035);
+
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
 }
 
 .free-event-slide:hover {
-  transform: translateY(-4px);
+    transform: translateY(-5px);
+
+    border-color: #d1d1d1;
+
+    box-shadow:
+        0 16px 34px rgba(0, 0, 0, 0.09);
 }
+
+/* ============================================================
+   INNER EVENT CARD
+============================================================ */
 
 .free-event-slide > * {
-  border-radius: 24px !important;
-  overflow: hidden;
+    border-radius: 22px !important;
+
+    overflow: hidden;
 }
 
-/* EMPTY - ROUND */
-.free-events-empty {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 48px 25px;
-  box-sizing: border-box;
-  text-align: center;
-  background: #FFFBF5;
-  border: 1.5px dashed #E5E7EB;
-  border-radius: 24px;
+.free-event-slide img {
+    border-radius: 22px 22px 0 0 !important;
 }
+
+/* ============================================================
+   EMPTY STATE
+============================================================ */
+
+.free-events-empty {
+    width: 100%;
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    box-sizing: border-box;
+
+    padding: 54px 28px;
+
+    text-align: center;
+
+    background: #fafafa;
+
+    border: 1px dashed #dcdcdc;
+
+    border-radius: 22px;
+
+    box-shadow:
+        0 4px 18px rgba(0, 0, 0, 0.035);
+}
+
+/* ============================================================
+   EMPTY ICON
+============================================================ */
 
 .free-empty-icon {
-  width: 58px;
-  height: 58px;
-  margin: 0 auto 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: #FFF1E6;
-  color: #FF6B00;
+    width: 62px;
+    height: 62px;
+
+    margin: 0 auto 17px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 999px;
+
+    background: #fff3eb;
+
+    color: #ff6b00;
 }
+
+/* ============================================================
+   EMPTY TITLE
+============================================================ */
 
 .free-events-empty h3 {
-  margin: 0 0 8px;
-  color: #111827;
-  font-size: 1.2rem;
-  font-weight: 700;
+    margin: 0 0 9px;
+
+    color: #171717;
+
+    font-size: 1.25rem;
+
+    line-height: 1.3;
+
+    font-weight: 700;
 }
+
+/* ============================================================
+   EMPTY DESCRIPTION
+============================================================ */
 
 .free-events-empty p {
-  max-width: 480px;
-  margin: 0 auto 22px;
-  color: #6B7280;
-  font-size: 0.95rem;
-  line-height: 1.6;
+    max-width: 500px;
+
+    margin: 0 auto 23px;
+
+    color: #707070;
+
+    font-size: 0.96rem;
+
+    line-height: 1.6;
 }
 
+/* ============================================================
+   BROWSE BUTTON
+============================================================ */
+
 .free-browse-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 22px;
-  border-radius: 999px;
-  background: #FF6B00;
-  color: #ffffff;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 800;
-  transition: all 0.22s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    min-height: 44px;
+
+    padding: 0 21px;
+
+    box-sizing: border-box;
+
+    border-radius: 999px;
+
+    background: #ff6b00;
+
+    border: 1px solid #ff6b00;
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    font-weight: 800;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .free-browse-btn:hover {
-  background: #E65E00;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(255,107,0,0.25);
+    background: #e85f00;
+
+    border-color: #e85f00;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 20px rgba(255, 107, 0, 0.22);
 }
 
-@media (max-width: 992px) {
-  .free-events { padding: 65px 5%; }
-  .free-section-header { margin-bottom: 30px; }
-  .free-header-content h2 { font-size: 1.95rem; }
-  .free-event-slide { width: 270px; flex-basis: 270px; }
+.free-browse-btn:focus-visible {
+    outline: 2px solid #ff6b00;
+
+    outline-offset: 3px;
 }
+
+/* ============================================================
+   TABLET
+============================================================ */
+
+@media (max-width: 1024px) {
+
+    .free-events {
+        padding: 65px 5% 70px;
+    }
+
+    .free-section-header {
+        margin-bottom: 32px;
+    }
+
+    .free-header-content h2 {
+        font-size: 2rem;
+    }
+
+    .free-event-slide {
+        width: 275px;
+
+        flex-basis: 275px;
+    }
+}
+
+/* ============================================================
+   MOBILE
+============================================================ */
 
 @media (max-width: 768px) {
-  .free-events { padding: 55px 20px; }
-  .free-section-header {
-    align-items: flex-start;
-    margin-bottom: 25px;
-    gap: 14px;
-  }
-  .free-header-content h2 { font-size: 1.75rem; }
-  .free-header-content p { font-size: 0.94rem; }
-  .free-see-all { font-size: 13px; }
-  .free-events-slider {
-    margin: 0 -20px;
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-  .free-events-track { gap: 16px; }
-  .free-event-slide {
-    width: 78vw;
-    max-width: 285px;
-    flex-basis: 78vw;
-    border-radius: 20px;
-  }
-  .free-events-empty { padding: 40px 20px; border-radius: 20px; }
+
+    .free-events {
+        padding: 55px 20px 60px;
+    }
+
+    .free-section-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 17px;
+
+        margin-bottom: 28px;
+    }
+
+    .free-header-content {
+        width: 100%;
+    }
+
+    .free-header-content h2 {
+        font-size: 1.8rem;
+    }
+
+    .free-header-content p {
+        font-size: 0.95rem;
+    }
+
+    /* ========================================================
+       MOBILE ACTION
+    ======================================================== */
+
+    .free-see-all {
+        min-height: 38px;
+
+        font-size: 13px;
+    }
+
+    /* ========================================================
+       MOBILE SLIDER
+    ======================================================== */
+
+    .free-events-slider {
+        width: auto;
+
+        margin-left: -20px;
+        margin-right: -20px;
+
+        padding-left: 20px;
+        padding-right: 20px;
+
+        padding-bottom: 14px;
+    }
+
+    .free-events-track {
+        gap: 14px;
+    }
+
+    .free-event-slide {
+        width: 82vw;
+
+        max-width: 360px;
+
+        flex: 0 0 82vw;
+
+        border-radius: 20px;
+    }
+
+    .free-event-slide > * {
+        border-radius: 20px !important;
+    }
+
+    .free-event-slide img {
+        border-radius: 20px 20px 0 0 !important;
+    }
+
+    .free-event-slide:hover {
+        transform: none;
+
+        box-shadow:
+            0 3px 10px rgba(0, 0, 0, 0.035);
+    }
+
+    .free-events-empty {
+        padding: 42px 20px;
+
+        border-radius: 20px;
+    }
 }
 
-@media (max-width: 420px) {
-  .free-events { padding: 48px 16px; }
-  .free-section-header { margin-bottom: 22px; }
-  .free-header-content h2 { font-size: 1.6rem; }
-  .free-header-content p { font-size: 0.9rem; }
-  .free-badge { font-size: 12px; padding: 6px 12px; }
-  .free-events-slider {
-    margin: 0 -16px;
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-  .free-event-slide {
-    width: 82vw;
-    max-width: 275px;
-    flex-basis: 82vw;
-    border-radius: 20px;
-  }
+/* ============================================================
+   SMALL MOBILE
+============================================================ */
+
+@media (max-width: 480px) {
+
+    .free-events {
+        padding: 48px 16px 55px;
+    }
+
+    .free-section-header {
+        gap: 15px;
+
+        margin-bottom: 25px;
+    }
+
+    .free-header-content {
+        padding-left: 11px;
+    }
+
+    .free-header-content::before {
+        width: 2px;
+    }
+
+    .free-badge {
+        padding: 6px 12px;
+
+        font-size: 12px;
+    }
+
+    .free-header-content h2 {
+        font-size: 1.6rem;
+    }
+
+    .free-header-content p {
+        font-size: 0.92rem;
+    }
+
+    .free-events-slider {
+        margin-left: -16px;
+        margin-right: -16px;
+
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .free-event-slide {
+        width: 88vw;
+
+        max-width: 320px;
+
+        flex-basis: 88vw;
+    }
+
+    .free-events-empty {
+        padding: 38px 18px;
+
+        border-radius: 20px;
+    }
+
+    .free-empty-icon {
+        width: 56px;
+        height: 56px;
+    }
+
+    .free-events-empty h3 {
+        font-size: 1.15rem;
+    }
+
+    .free-events-empty p {
+        font-size: 0.9rem;
+    }
+}
+
+/* ============================================================
+   VERY SMALL PHONES
+============================================================ */
+
+@media (max-width: 360px) {
+
+    .free-events {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .free-events-slider {
+        margin-left: -14px;
+        margin-right: -14px;
+
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .free-header-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .free-event-slide {
+        width: 91vw;
+
+        flex-basis: 91vw;
+    }
+}
+
+/* ============================================================
+   REDUCED MOTION
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .free-events-slider {
+        scroll-behavior: auto;
+    }
+
+    .free-event-slide,
+    .free-see-all,
+    .free-browse-btn {
+        transition: none;
+    }
+
+    .free-event-slide:hover,
+    .free-see-all:hover,
+    .free-browse-btn:hover {
+        transform: none;
+    }
 }

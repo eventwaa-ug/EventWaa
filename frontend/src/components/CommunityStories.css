@@ -1,13 +1,16 @@
 /* ============================================================
    EVENTWAA — COMMUNITY STORIES
-   Premium / Modern / Eventbrite-inspired
+   Modern / Clean / Orange Brand
 ============================================================ */
 
 .community {
-  width: 100%;
-  padding: 90px 20px;
-  background: #f7f7f5;
-  box-sizing: border-box;
+    width: 100%;
+
+    padding: 78px 20px 84px;
+
+    background: #ffffff;
+
+    box-sizing: border-box;
 }
 
 
@@ -16,42 +19,98 @@
 ============================================================ */
 
 .community-header {
-  max-width: 760px;
-  margin: 0 auto 52px;
-  text-align: center;
+    position: relative;
+
+    width: 100%;
+    max-width: 760px;
+
+    margin: 0 auto 44px;
+
+    padding-left: 14px;
+
+    box-sizing: border-box;
+
+    text-align: left;
 }
+
+
+/* ============================================================
+   ORANGE ACCENT
+============================================================ */
+
+.community-header::before {
+    content: "";
+
+    position: absolute;
+
+    top: 3px;
+    left: 0;
+
+    width: 3px;
+    height: calc(100% - 6px);
+
+    border-radius: 999px;
+
+    background: #ff6b00;
+}
+
+
+/* ============================================================
+   EYEBROW
+============================================================ */
 
 .community-eyebrow {
-  display: inline-block;
-  margin-bottom: 13px;
+    display: inline-flex;
+    align-items: center;
 
-  color: #090909;
+    margin-bottom: 9px;
 
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 1.6px;
-  text-transform: uppercase;
+    color: #ff6b00;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 1.4px;
+
+    line-height: 1.3;
+
+    text-transform: uppercase;
 }
+
+
+/* ============================================================
+   TITLE
+============================================================ */
 
 .community-header h2 {
-  margin: 0 0 15px;
+    margin: 0 0 10px;
 
-  color: #111110;
+    color: #111111;
 
-  font-size: 2.45rem;
-  font-weight: 900;
-  line-height: 1.15;
-  letter-spacing: -0.7px;
+    font-size: 2.2rem;
+
+    font-weight: 800;
+
+    line-height: 1.18;
+
+    letter-spacing: -0.7px;
 }
 
+
+/* ============================================================
+   DESCRIPTION
+============================================================ */
+
 .community-header p {
-  max-width: 650px;
-  margin: 0 auto;
+    max-width: 650px;
 
-  color: #686868;
+    margin: 0;
 
-  font-size: 16px;
-  line-height: 1.75;
+    color: #707070;
+
+    font-size: 1rem;
+
+    line-height: 1.65;
 }
 
 
@@ -60,16 +119,17 @@
 ============================================================ */
 
 .community-grid {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+    width: 100%;
+    max-width: 1200px;
 
-  display: grid;
+    margin: 0 auto;
 
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
+    display: grid;
 
-  gap: 24px;
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 18px;
 }
 
 
@@ -78,33 +138,68 @@
 ============================================================ */
 
 .community-card {
-  min-width: 0;
+    position: relative;
 
-  background: #ffffff;
+    min-width: 0;
 
-  border: 1px solid #e7e5e1;
-  border-radius: 18px;
+    padding: 27px;
 
-  padding: 28px;
+    box-sizing: border-box;
 
-  box-sizing: border-box;
+    background: #ffffff;
 
-  box-shadow:
-    0 5px 18px rgba(0, 0, 0, 0.045);
+    border: 1px solid #e5e5e5;
 
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    border-color 0.25s ease;
+    border-radius: 20px;
+
+    box-shadow:
+        0 3px 12px rgba(0, 0, 0, 0.035);
+
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
 }
 
+
+/* ============================================================
+   SUBTLE ORANGE TOP ACCENT
+============================================================ */
+
+.community-card::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 28px;
+
+    width: 48px;
+    height: 3px;
+
+    border-radius:
+        0 0 999px 999px;
+
+    background: #ff6b00;
+
+    opacity: 0;
+
+    transition: opacity 0.25s ease;
+}
+
+
 .community-card:hover {
-  transform: translateY(-5px);
+    transform: translateY(-4px);
 
-  border-color: #dedbd5;
+    border-color: #d9d9d9;
 
-  box-shadow:
-    0 14px 32px rgba(0, 0, 0, 0.075);
+    box-shadow:
+        0 15px 32px rgba(0, 0, 0, 0.07);
+}
+
+
+.community-card:hover::before {
+    opacity: 1;
 }
 
 
@@ -113,68 +208,86 @@
 ============================================================ */
 
 .review-user {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 
-  gap: 13px;
+    gap: 12px;
 
-  margin-bottom: 18px;
+    margin-bottom: 17px;
 }
+
+
+/* ============================================================
+   PROFILE CIRCLE
+============================================================ */
 
 .profile-circle {
-  width: 48px;
-  height: 48px;
+    width: 46px;
+    height: 46px;
 
-  min-width: 48px;
+    min-width: 46px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  border-radius: 50%;
+    border-radius: 50%;
 
-  background: #f1efeb;
+    box-sizing: border-box;
 
-  color: #252525;
+    background: #fff3eb;
 
-  font-size: 17px;
-  font-weight: 800;
+    border: 1px solid #ffd8bf;
 
-  border: 1px solid #e5e1db;
+    color: #ff6b00;
+
+    font-size: 16px;
+
+    font-weight: 800;
 }
+
+
+/* ============================================================
+   USER INFO
+============================================================ */
 
 .review-user-info {
-  min-width: 0;
+    min-width: 0;
 
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 
-  gap: 3px;
+    gap: 3px;
 }
+
 
 .community-card h3 {
-  margin: 0;
+    margin: 0;
 
-  overflow: hidden;
+    overflow: hidden;
 
-  color: #171717;
+    color: #171717;
 
-  font-size: 16px;
-  font-weight: 750;
+    font-size: 15px;
 
-  line-height: 1.3;
+    font-weight: 750;
 
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    line-height: 1.35;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
 }
 
+
 .review-user-info span {
-  color: #858585;
+    color: #858585;
 
-  font-size: 12px;
-  font-weight: 600;
+    font-size: 12px;
 
-  line-height: 1.4;
+    font-weight: 500;
+
+    line-height: 1.4;
 }
 
 
@@ -183,50 +296,56 @@
 ============================================================ */
 
 .stars {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 
-  gap: 2px;
+    gap: 3px;
 
-  margin-bottom: 17px;
+    margin-bottom: 16px;
 }
+
 
 .star {
-  color: #efeadf;
+    color: #d8d8d8;
 
-  font-size: 17px;
+    font-size: 16px;
 
-  line-height: 1;
+    line-height: 1;
 }
 
+
 .star.active {
-  color: #b4945c;
+    color: #ff6b00;
 }
 
 
 /* ============================================================
-   EVENT
+   EVENT REFERENCE
 ============================================================ */
 
 .review-event {
-  margin-bottom: 18px;
-  padding: 10px 12px;
+    margin-bottom: 17px;
 
-  background: #faf9f7;
+    padding: 10px 12px;
 
-  border: 1px solid #eeece8;
-  border-radius: 9px;
+    background: #f8f8f8;
 
-  color: #77736d;
+    border: 1px solid #e9e9e9;
 
-  font-size: 12px;
-  line-height: 1.5;
+    border-radius: 10px;
+
+    color: #747474;
+
+    font-size: 12px;
+
+    line-height: 1.5;
 }
 
-.review-event strong {
-  color: #36332f;
 
-  font-weight: 700;
+.review-event strong {
+    color: #333333;
+
+    font-weight: 700;
 }
 
 
@@ -235,14 +354,15 @@
 ============================================================ */
 
 .review-comment {
-  margin: 0;
+    margin: 0;
 
-  color: #454545;
+    color: #444444;
 
-  font-size: 15px;
-  line-height: 1.75;
+    font-size: 14.5px;
 
-  font-weight: 450;
+    font-weight: 450;
+
+    line-height: 1.72;
 }
 
 
@@ -251,51 +371,65 @@
 ============================================================ */
 
 .community-footer {
-  margin-top: 38px;
+    margin-top: 34px;
 
-  text-align: center;
+    text-align: center;
 }
+
+
+/* ============================================================
+   VIEW REVIEWS BUTTON
+============================================================ */
 
 .view-reviews-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+    display: inline-flex;
 
-  min-height: 44px;
+    align-items: center;
+    justify-content: center;
 
-  padding: 0 18px;
+    min-height: 44px;
 
-  border: 1px solid #dedbd5;
-  border-radius: 9px;
+    padding: 0 18px;
 
-  background: #ffffff;
+    box-sizing: border-box;
 
-  color: #252525;
+    border: 1px solid #dedede;
 
-  text-decoration: none;
+    border-radius: 10px;
 
-  font-size: 14px;
-  font-weight: 700;
+    background: #ffffff;
 
-  box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.035);
+    color: #252525;
 
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+    text-decoration: none;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.035);
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
+
 .view-reviews-btn:hover {
-  background: #f4f2ef;
+    background: #fff3eb;
 
-  border-color: #d5d1ca;
+    border-color: #ffcca9;
 
-  transform: translateY(-1px);
+    color: #d95500;
 
-  box-shadow:
-    0 6px 15px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 6px 15px rgba(0, 0, 0, 0.055);
 }
 
 
@@ -304,43 +438,46 @@
 ============================================================ */
 
 .community-loading {
-  min-height: 180px;
+    min-height: 180px;
 
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 
-  align-items: center;
-  justify-content: center;
+    align-items: center;
+    justify-content: center;
 
-  gap: 15px;
+    gap: 14px;
 }
+
 
 .community-loading p {
-  margin: 0;
+    margin: 0;
 
-  color: #777777;
+    color: #777777;
 
-  font-size: 15px;
+    font-size: 14px;
 }
+
 
 .community-spinner {
-  width: 32px;
-  height: 32px;
+    width: 30px;
+    height: 30px;
 
-  border: 3px solid #e7e4df;
+    border: 3px solid #e9e9e9;
 
-  border-top-color: #f05a28;
+    border-top-color: #ff6b00;
 
-  border-radius: 50%;
+    border-radius: 50%;
 
-  animation:
-    communitySpin 0.8s linear infinite;
+    animation:
+        communitySpin 0.8s linear infinite;
 }
 
+
 @keyframes communitySpin {
-  to {
-    transform: rotate(360deg);
-  }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 
@@ -349,57 +486,69 @@
 ============================================================ */
 
 .community-empty {
-  max-width: 600px;
+    width: 100%;
+    max-width: 600px;
 
-  margin: 0 auto;
+    margin: 0 auto;
 
-  padding: 45px 30px;
+    padding: 42px 28px;
 
-  text-align: center;
+    box-sizing: border-box;
 
-  background: #ffffff;
+    text-align: center;
 
-  border: 1px solid #e7e5e1;
+    background: #fafafa;
 
-  border-radius: 18px;
+    border: 1px solid #e6e6e6;
 
-  box-shadow:
-    0 8px 25px rgba(0, 0, 0, 0.045);
+    border-radius: 20px;
+
+    box-shadow:
+        0 5px 18px rgba(0, 0, 0, 0.035);
 }
+
 
 .community-empty-icon {
-  width: 65px;
-  height: 65px;
+    width: 62px;
+    height: 62px;
 
-  margin: 0 auto 18px;
+    margin: 0 auto 17px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  border-radius: 50%;
+    border-radius: 50%;
 
-  background: #fff4ed;
+    background: #fff3eb;
 
-  font-size: 30px;
+    color: #ff6b00;
+
+    font-size: 28px;
 }
+
 
 .community-empty h3 {
-  margin: 0 0 10px;
+    margin: 0 0 9px;
 
-  color: #171717;
+    color: #171717;
 
-  font-size: 21px;
+    font-size: 20px;
+
+    line-height: 1.3;
 }
 
+
 .community-empty p {
-  max-width: 480px;
+    max-width: 470px;
 
-  margin: 0 auto 25px;
+    margin: 0 auto 23px;
 
-  color: #707070;
+    color: #707070;
 
-  line-height: 1.7;
+    font-size: 14px;
+
+    line-height: 1.7;
 }
 
 
@@ -408,34 +557,41 @@
 ============================================================ */
 
 .community-events-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+    display: inline-flex;
 
-  min-height: 44px;
+    align-items: center;
+    justify-content: center;
 
-  padding: 0 20px;
+    min-height: 44px;
 
-  border-radius: 9px;
+    padding: 0 20px;
 
-  background: #171717;
+    border-radius: 10px;
 
-  color: #ffffff;
+    background: #ff6b00;
 
-  text-decoration: none;
+    color: #ffffff;
 
-  font-size: 14px;
-  font-weight: 700;
+    text-decoration: none;
 
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease;
+    font-size: 14px;
+
+    font-weight: 700;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
-.community-events-btn:hover {
-  background: #000000;
 
-  transform: translateY(-1px);
+.community-events-btn:hover {
+    background: #e85f00;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 7px 16px rgba(255, 107, 0, 0.18);
 }
 
 
@@ -445,29 +601,28 @@
 
 @media (max-width: 900px) {
 
-  .community {
-    padding: 70px 20px;
-  }
+    .community {
+        padding: 68px 20px 74px;
+    }
 
-  .community-header {
-    margin-bottom: 42px;
-  }
+    .community-header {
+        margin-bottom: 38px;
+    }
 
-  .community-header h2 {
-    font-size: 2.1rem;
-  }
+    .community-header h2 {
+        font-size: 2rem;
+    }
 
-  .community-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    .community-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
 
-    gap: 20px;
-  }
+        gap: 16px;
+    }
 
-  .community-card {
-    padding: 25px;
-  }
-
+    .community-card {
+        padding: 25px;
+    }
 }
 
 
@@ -477,137 +632,180 @@
 
 @media (max-width: 600px) {
 
-  .community {
-    padding: 60px 16px;
-  }
+    .community {
+        padding: 55px 16px 62px;
+    }
 
 
-  /* HEADER */
+    /* HEADER */
 
-  .community-header {
-    margin-bottom: 34px;
-  }
+    .community-header {
+        margin-bottom: 29px;
 
-  .community-eyebrow {
-    margin-bottom: 10px;
+        padding-left: 11px;
+    }
 
-    font-size: 10px;
+    .community-header::before {
+        width: 2px;
+    }
 
-    letter-spacing: 1.4px;
-  }
+    .community-eyebrow {
+        margin-bottom: 8px;
 
-  .community-header h2 {
-    margin-bottom: 12px;
+        font-size: 10px;
 
-    font-size: 1.8rem;
+        letter-spacing: 1.25px;
+    }
 
-    letter-spacing: -0.4px;
-  }
+    .community-header h2 {
+        margin-bottom: 9px;
 
-  .community-header p {
-    font-size: 14px;
+        font-size: 1.8rem;
 
-    line-height: 1.7;
-  }
+        letter-spacing: -0.45px;
+    }
 
+    .community-header p {
+        font-size: 14px;
 
-  /* GRID */
-
-  .community-grid {
-    grid-template-columns: 1fr;
-
-    gap: 15px;
-  }
+        line-height: 1.65;
+    }
 
 
-  /* CARD */
+    /* ========================================================
+       MOBILE REVIEW ARRAY
+    ======================================================== */
 
-  .community-card {
-    padding: 22px;
+    .community-grid {
+        display: flex;
 
-    border-radius: 16px;
-  }
+        width: auto;
 
+        margin-left: -16px;
+        margin-right: -16px;
 
-  .community-card:hover {
-    transform: none;
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-bottom: 12px;
 
-    box-shadow:
-      0 5px 18px rgba(0, 0, 0, 0.045);
-  }
+        gap: 13px;
 
+        overflow-x: auto;
+        overflow-y: visible;
 
-  /* USER */
+        scroll-snap-type: x mandatory;
 
-  .review-user {
-    gap: 11px;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 
-    margin-bottom: 16px;
-  }
-
-  .profile-circle {
-    width: 44px;
-    height: 44px;
-
-    min-width: 44px;
-
-    font-size: 16px;
-  }
-
-  .community-card h3 {
-    font-size: 15px;
-  }
-
-  .review-user-info span {
-    font-size: 11px;
-  }
+    .community-grid::-webkit-scrollbar {
+        display: none;
+    }
 
 
-  /* STARS */
+    /* ========================================================
+       MOBILE CARD
+    ======================================================== */
 
-  .stars {
-    margin-bottom: 15px;
-  }
+    .community-card {
+        flex: 0 0 82%;
 
-  .star {
-    font-size: 16px;
-  }
+        width: 82%;
+
+        max-width: 340px;
+
+        padding: 23px;
+
+        border-radius: 18px;
+
+        scroll-snap-align: start;
+    }
+
+    .community-card:hover {
+        transform: none;
+
+        border-color: #e5e5e5;
+
+        box-shadow:
+            0 3px 12px rgba(0, 0, 0, 0.035);
+    }
+
+    .community-card:hover::before {
+        opacity: 0;
+    }
 
 
-  /* EVENT */
+    /* USER */
 
-  .review-event {
-    margin-bottom: 16px;
+    .review-user {
+        gap: 11px;
 
-    padding: 9px 11px;
+        margin-bottom: 15px;
+    }
 
-    font-size: 11.5px;
-  }
+    .profile-circle {
+        width: 44px;
+        height: 44px;
+
+        min-width: 44px;
+
+        font-size: 15px;
+    }
+
+    .community-card h3 {
+        font-size: 14.5px;
+    }
+
+    .review-user-info span {
+        font-size: 11px;
+    }
 
 
-  /* COMMENT */
+    /* STARS */
 
-  .review-comment {
-    font-size: 14px;
+    .stars {
+        margin-bottom: 14px;
+    }
 
-    line-height: 1.7;
-  }
+    .star {
+        font-size: 15px;
+    }
 
 
-  /* FOOTER */
+    /* EVENT */
 
-  .community-footer {
-    margin-top: 28px;
-  }
+    .review-event {
+        margin-bottom: 15px;
 
-  .view-reviews-btn {
-    min-height: 42px;
+        padding: 9px 11px;
 
-    padding: 0 16px;
+        font-size: 11.5px;
+    }
 
-    font-size: 13px;
-  }
 
+    /* COMMENT */
+
+    .review-comment {
+        font-size: 14px;
+
+        line-height: 1.68;
+    }
+
+
+    /* FOOTER */
+
+    .community-footer {
+        margin-top: 26px;
+    }
+
+    .view-reviews-btn {
+        min-height: 44px;
+
+        padding: 0 17px;
+
+        font-size: 13px;
+    }
 }
 
 
@@ -617,35 +815,47 @@
 
 @media (max-width: 380px) {
 
-  .community {
-    padding: 50px 14px;
-  }
+    .community {
+        padding: 48px 14px 55px;
+    }
 
-  .community-header h2 {
-    font-size: 1.65rem;
-  }
+    .community-header {
+        margin-bottom: 26px;
+    }
 
-  .community-header p {
-    font-size: 13.5px;
-  }
+    .community-header h2 {
+        font-size: 1.65rem;
+    }
 
-  .community-card {
-    padding: 20px;
+    .community-header p {
+        font-size: 13.5px;
+    }
 
-    border-radius: 15px;
-  }
+    .community-grid {
+        margin-left: -14px;
+        margin-right: -14px;
 
-  .profile-circle {
-    width: 42px;
-    height: 42px;
+        padding-left: 14px;
+        padding-right: 14px;
 
-    min-width: 42px;
-  }
+        gap: 12px;
+    }
 
-  .review-comment {
-    font-size: 13.5px;
-  }
+    .community-card {
+        flex-basis: 88%;
 
+        width: 88%;
+
+        max-width: 320px;
+
+        padding: 21px;
+
+        border-radius: 17px;
+    }
+
+    .review-comment {
+        font-size: 13.5px;
+    }
 }
 
 
@@ -655,6 +865,35 @@
 
 .view-reviews-btn:focus-visible,
 .community-events-btn:focus-visible {
-  outline: 2px solid #555555;
-  outline-offset: 3px;
+    outline: 3px solid rgba(255, 107, 0, 0.28);
+
+    outline-offset: 3px;
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .community-grid {
+        scroll-behavior: auto;
+    }
+
+    .community-card,
+    .view-reviews-btn,
+    .community-events-btn {
+        transition: none;
+    }
+
+    .community-card:hover,
+    .view-reviews-btn:hover,
+    .community-events-btn:hover {
+        transform: none;
+    }
+
+    .community-spinner {
+        animation: none;
+    }
 }

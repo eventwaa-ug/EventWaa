@@ -1,267 +1,534 @@
 /* ============================================================
-   FEATURED EVENTS - Round + Orange Brand
+   EVENTWAA — FEATURED EVENTS
+   Modern UI + Orange Brand
 ============================================================ */
+
 .featured-events {
     width: 100%;
     box-sizing: border-box;
+
     padding: 72px 7% 78px;
+
     background: #ffffff;
 }
 
-/* HEADER ROW */
+/* ============================================================
+   HEADER ROW
+============================================================ */
+
 .section-header-row {
     width: 100%;
     max-width: 1200px;
+
     margin: 0 auto 38px;
+
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
+
     gap: 30px;
 }
+
+/* ============================================================
+   HEADER
+============================================================ */
 
 .section-header {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+
     gap: 9px;
 }
 
-/* BADGE - ORANGE */
+/* ============================================================
+   FEATURED BADGE
+============================================================ */
+
 .featured-badge {
     display: inline-flex;
     align-items: center;
+
     gap: 7px;
+
     width: fit-content;
+
     padding: 7px 14px;
+
     border-radius: 999px;
-    background: #FFF1E6;
-    color: #FF6B00;
-    border: 1px solid #FFD7B8;
+
+    background: #fff3eb;
+
+    color: #ff6b00;
+
+    border: 1px solid #ffd8bf;
+
     font-size: 13px;
     font-weight: 800;
     line-height: 1;
 }
 
+/* ============================================================
+   TITLE
+============================================================ */
+
 .section-header h2 {
     margin: 0;
-    color: #111827;
+
+    color: #111111;
+
     font-size: 2.15rem;
     line-height: 1.18;
     font-weight: 800;
+
     letter-spacing: -0.7px;
 }
 
+/* ============================================================
+   DESCRIPTION
+============================================================ */
+
 .section-header p {
-    margin: 0;
     max-width: 600px;
-    color: #6B7280;
+
+    margin: 0;
+
+    color: #707070;
+
     font-size: 1rem;
     line-height: 1.6;
 }
 
-/* SEE ALL - ORANGE */
+/* ============================================================
+   SEE ALL
+============================================================ */
+
 .see-all-link {
     display: inline-flex;
     align-items: center;
+
     gap: 7px;
+
     flex-shrink: 0;
-    color: #111827;
+
+    color: #222222;
+
     text-decoration: none;
+
     font-size: 15px;
     font-weight: 700;
+
     padding: 10px 16px;
+
     border-radius: 999px;
-    background: #F3F4F6;
-    border: 1px solid transparent;
-    transition: all 0.25s ease;
+
+    background: #f3f3f3;
+
+    border: 1px solid #e5e5e5;
+
+    transition:
+        color 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease,
+        gap 0.2s ease,
+        transform 0.2s ease;
 }
 
 .see-all-link:hover {
-    color: white;
-    background: #111827;
+    color: #ffffff;
+
+    background: #222222;
+
+    border-color: #222222;
+
     gap: 10px;
+
+    transform: translateY(-1px);
 }
 
-/* GRID */
+/* ============================================================
+   FEATURED GRID
+============================================================ */
+
 .featured-grid {
     width: 100%;
     max-width: 1200px;
+
     margin: 0 auto;
+
     display: grid;
+
     grid-template-columns: repeat(3, minmax(0, 1fr));
+
     gap: 24px;
 }
 
-/* EVENT WRAPPER - ROUND */
+/* ============================================================
+   EVENT WRAPPER
+============================================================ */
+
 .featured-event-item {
     min-width: 0;
-    border-radius: 24px; /* ROUND */
+
+    border-radius: 22px;
+
     overflow: hidden;
-    background: white;
-    border: 1.5px solid #F3F4F6;
-    transition: all 0.3s ease;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e5e5;
+
+    box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.035);
+
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
 }
 
 .featured-event-item:hover {
-    transform: translateY(-6px);
-    border-color: #FFD7B8;
-    box-shadow: 0 20px 40px rgba(17,24,39,0.08), 0 8px 16px rgba(255,107,0,0.08);
+    transform: translateY(-5px);
+
+    border-color: #d2d2d2;
+
+    box-shadow:
+        0 16px 34px rgba(0, 0, 0, 0.09);
 }
 
-/* FORCE INNER EVENT CARD TO BE ROUND */
+/* ============================================================
+   FORCE INNER EVENT CARD ROUNDING
+============================================================ */
+
 .featured-event-item > * {
-    border-radius: 24px !important;
+    border-radius: 22px !important;
+
     overflow: hidden;
 }
 
 .featured-event-item img {
-    border-radius: 24px 24px 0 0 !important;
+    border-radius: 22px 22px 0 0 !important;
 }
 
-/* EMPTY STATE - ROUND */
+/* ============================================================
+   EMPTY STATE
+============================================================ */
+
 .no-featured-events {
     grid-column: 1 / -1;
+
     width: 100%;
+
     box-sizing: border-box;
+
     text-align: center;
+
     padding: 54px 28px;
-    border: 1.5px dashed #E5E7EB;
-    border-radius: 24px; /* ROUND */
-    background: #FFFBF5;
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.04);
+
+    border: 1px dashed #dcdcdc;
+
+    border-radius: 22px;
+
+    background: #fafafa;
+
+    box-shadow:
+        0 4px 18px rgba(0, 0, 0, 0.035);
 }
+
+/* ============================================================
+   EMPTY ICON
+============================================================ */
 
 .no-featured-icon {
     width: 62px;
     height: 62px;
+
     margin: 0 auto 17px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     border-radius: 999px;
-    background: #FFF1E6;
-    color: #FF6B00;
+
+    background: #fff3eb;
+
+    color: #ff6b00;
 }
+
+/* ============================================================
+   EMPTY TITLE
+============================================================ */
 
 .no-featured-events h3 {
     margin: 0 0 9px;
-    color: #111827;
+
+    color: #171717;
+
     font-size: 1.25rem;
     font-weight: 700;
 }
 
+/* ============================================================
+   EMPTY DESCRIPTION
+============================================================ */
+
 .no-featured-events p {
     max-width: 500px;
+
     margin: 0 auto 23px;
-    color: #6B7280;
+
+    color: #707070;
+
     font-size: 0.96rem;
     line-height: 1.6;
 }
+
+/* ============================================================
+   BROWSE EVENTS BUTTON
+============================================================ */
 
 .browse-events-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     gap: 8px;
+
     min-height: 44px;
+
     padding: 0 20px;
+
     box-sizing: border-box;
-    border-radius: 999px; /* PILL BUTTON */
-    background: #FF6B00;
+
+    border-radius: 999px;
+
+    background: #ff6b00;
+
     color: #ffffff;
+
     text-decoration: none;
+
     font-size: 14px;
     font-weight: 800;
-    transition: all 0.25s ease;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .browse-events-btn:hover {
-    background: #E65E00;
+    background: #e85f00;
+
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(255,107,0,0.3);
+
+    box-shadow:
+        0 8px 20px rgba(255, 107, 0, 0.22);
 }
 
-/* TABLET */
+/* ============================================================
+   TABLET
+============================================================ */
+
 @media (max-width: 1024px) {
-    .featured-events { padding: 65px 5% 70px; }
+
+    .featured-events {
+        padding: 65px 5% 70px;
+    }
+
     .featured-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+
         gap: 20px;
     }
-    .section-header-row { margin-bottom: 32px; }
-    .section-header h2 { font-size: 2rem; }
+
+    .section-header-row {
+        margin-bottom: 32px;
+    }
+
+    .section-header h2 {
+        font-size: 2rem;
+    }
 }
 
-/* MOBILE */
+/* ============================================================
+   MOBILE
+============================================================ */
+
 @media (max-width: 768px) {
-    .featured-events { padding: 55px 20px 60px; }
+
+    .featured-events {
+        padding: 55px 20px 60px;
+    }
+
     .section-header-row {
         align-items: flex-start;
+
         flex-direction: column;
+
         gap: 17px;
+
         margin-bottom: 28px;
     }
-    .section-header { width: 100%; }
-    .section-header h2 { font-size: 1.8rem; }
-    .section-header p { font-size: 0.95rem; }
+
+    .section-header {
+        width: 100%;
+    }
+
+    .section-header h2 {
+        font-size: 1.8rem;
+    }
+
+    .section-header p {
+        font-size: 0.95rem;
+    }
+
+    /* ========================================================
+       HORIZONTAL EVENT CAROUSEL
+    ======================================================== */
 
     .featured-grid {
         display: flex;
+
         width: auto;
+
         margin-left: -20px;
         margin-right: -20px;
+
         padding-left: 20px;
         padding-right: 20px;
+
         gap: 16px;
+
         overflow-x: auto;
         overflow-y: hidden;
+
         scroll-snap-type: x mandatory;
+
         padding-bottom: 12px;
+
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
-    .featured-grid::-webkit-scrollbar { height: 0; }
+
+    .featured-grid::-webkit-scrollbar {
+        display: none;
+    }
 
     .featured-event-item {
         flex: 0 0 82%;
+
         max-width: 360px;
+
         scroll-snap-align: start;
+
         border-radius: 20px;
     }
-    .featured-event-item:hover { transform: none; }
+
+    .featured-event-item > * {
+        border-radius: 20px !important;
+    }
+
+    .featured-event-item img {
+        border-radius: 20px 20px 0 0 !important;
+    }
+
+    .featured-event-item:hover {
+        transform: none;
+
+        box-shadow:
+            0 3px 10px rgba(0, 0, 0, 0.035);
+    }
 
     .no-featured-events {
         flex: 0 0 82%;
+
         padding: 42px 20px;
+
         scroll-snap-align: start;
+
         border-radius: 20px;
     }
 }
 
+/* ============================================================
+   SMALL MOBILE
+============================================================ */
+
 @media (max-width: 480px) {
-    .featured-events { padding: 48px 16px 55px; }
-    .section-header-row { gap: 15px; margin-bottom: 25px; }
-    .featured-badge { font-size: 12px; padding: 6px 12px; }
-    .section-header h2 { font-size: 1.6rem; }
-    .section-header p { font-size: 0.92rem; }
+
+    .featured-events {
+        padding: 48px 16px 55px;
+    }
+
+    .section-header-row {
+        gap: 15px;
+
+        margin-bottom: 25px;
+    }
+
+    .featured-badge {
+        font-size: 12px;
+
+        padding: 6px 12px;
+    }
+
+    .section-header h2 {
+        font-size: 1.6rem;
+    }
+
+    .section-header p {
+        font-size: 0.92rem;
+    }
 
     .featured-grid {
         margin-left: -16px;
         margin-right: -16px;
+
         padding-left: 16px;
         padding-right: 16px;
+
         gap: 14px;
     }
-    .featured-event-item { flex: 0 0 88%; border-radius: 20px; }
-    .no-featured-events { flex-basis: 88%; padding: 38px 18px; }
+
+    .featured-event-item {
+        flex: 0 0 88%;
+
+        border-radius: 20px;
+    }
+
+    .no-featured-events {
+        flex-basis: 88%;
+
+        padding: 38px 18px;
+    }
 }
 
+/* ============================================================
+   VERY SMALL PHONES
+============================================================ */
+
 @media (max-width: 360px) {
-    .featured-events { padding-left: 14px; padding-right: 14px; }
-    .featured-grid {
-        margin-left: -14px;
-        margin-right: -14px;
+
+    .featured-events {
         padding-left: 14px;
         padding-right: 14px;
     }
-    .section-header h2 { font-size: 1.5rem; }
-    .featured-event-item { flex-basis: 91%; }
+
+    .featured-grid {
+        margin-left: -14px;
+        margin-right: -14px;
+
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .section-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .featured-event-item {
+        flex-basis: 91%;
+    }
 }

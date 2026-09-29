@@ -1,182 +1,439 @@
 /* ============================================================
-   EVENTWAA — CITY CHIPS - Round + Orange Brand
+   EVENTWAA — CITY CHIPS
+   Modern Neutral UI
 ============================================================ */
+
+/* ============================================================
+   SECTION
+============================================================ */
+
 .city-chips-section {
     width: 100%;
+
     padding: 58px 8%;
-    background: #FFFBF5;
+
+    background: #ffffff;
+
     box-sizing: border-box;
 }
 
+/* ============================================================
+   HEADER
+============================================================ */
+
 .city-chips-header {
     text-align: center;
+
     margin-bottom: 30px;
 }
 
 .city-chips-header h2 {
     margin: 0 0 8px;
-    color: #111827;
+
+    color: #111111;
+
     font-size: 1.85rem;
-    font-weight: 800;
+    font-weight: 750;
     line-height: 1.2;
+
     letter-spacing: -0.4px;
 }
 
 .city-chips-header p {
     margin: 0;
-    color: #6B7280;
+
+    color: #737373;
+
     font-size: 0.95rem;
     line-height: 1.5;
 }
 
+/* ============================================================
+   WRAPPER
+============================================================ */
+
 .city-chips-wrapper {
     position: relative;
+
     width: 100%;
     max-width: 1200px;
+
     margin: 0 auto;
+
     display: flex;
     align-items: center;
+
     gap: 12px;
 }
+
+/* ============================================================
+   CHIPS CONTAINER
+============================================================ */
 
 .city-chips {
     min-width: 0;
+
     flex: 1;
+
     display: flex;
     align-items: center;
-    gap: 12px;
+
+    gap: 10px;
+
     overflow-x: auto;
+
     padding: 5px 2px 12px;
+
     scroll-behavior: smooth;
     scroll-snap-type: x mandatory;
+
     -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
-.city-chips::-webkit-scrollbar { display: none; }
+.city-chips::-webkit-scrollbar {
+    display: none;
+}
+
+/* ============================================================
+   CITY CHIP
+============================================================ */
 
 .city-chip {
     flex: 0 0 auto;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     gap: 7px;
-    min-height: 46px;
-    padding: 0 20px;
+
+    min-height: 44px;
+
+    padding: 0 18px;
+
     border-radius: 999px;
+
     background: #ffffff;
-    border: 1.5px solid #E5E7EB;
-    color: #374151;
+
+    border: 1px solid #dddddd;
+
+    color: #3f3f3f;
+
     cursor: pointer;
+
     font-family: inherit;
-    font-size: 0.94rem;
-    font-weight: 650;
+
+    font-size: 0.92rem;
+    font-weight: 600;
+
     white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(17,24,39,0.04);
-    transition: all 0.22s ease;
+
+    box-shadow:
+        0 2px 7px rgba(0, 0, 0, 0.035);
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.18s ease;
+
     scroll-snap-align: start;
 }
 
+/* ============================================================
+   CHIP ICON
+============================================================ */
+
 .city-chip-icon {
     flex-shrink: 0;
-    color: #9CA3AF;
-    transition: all 0.22s ease;
+
+    color: #8a8a8a;
+
+    transition:
+        color 0.18s ease,
+        transform 0.18s ease;
 }
 
+/* ============================================================
+   CHIP HOVER
+============================================================ */
+
 .city-chip:hover {
-    transform: translateY(-2px);
-    background: #FFFBF5;
-    border-color: #FFD7B8;
-    color: #111827;
-    box-shadow: 0 7px 18px rgba(255,107,0,0.10);
+    transform: translateY(-1px);
+
+    background: #f7f7f7;
+
+    border-color: #cfcfcf;
+
+    color: orange;
+
+    box-shadow:
+        0 5px 14px rgba(0, 0, 0, 0.07);
 }
 
 .city-chip:hover .city-chip-icon {
-    color: #FF6B00;
-    transform: scale(1.1);
+    color: orange;
+
+    transform: scale(1.05);
 }
 
-/* ACTIVE - ORANGE */
+/* ============================================================
+   ACTIVE CHIP
+============================================================ */
+
 .city-chip.active {
-    background: #FF6B00;
-    border-color: #FF6B00;
+    background: #222222;
+
+    border-color: #222222;
+
     color: #ffffff;
-    box-shadow: 0 8px 20px rgba(255,107,0,0.22);
+
+    box-shadow:
+        0 5px 14px rgba(0, 0, 0, 0.14);
 }
 
-.city-chip.active .city-chip-icon { color: #ffffff; }
+.city-chip.active .city-chip-icon {
+    color: #ffffff;
+}
+
+/* ============================================================
+   ACTIVE CHIP HOVER
+============================================================ */
 
 .city-chip.active:hover {
-    background: #E65E00;
-    border-color: #E65E00;
-    box-shadow: 0 10px 24px rgba(255,107,0,0.28);
+    background: #111111;
+
+    border-color: #111111;
+
+    box-shadow:
+        0 7px 18px rgba(0, 0, 0, 0.18);
 }
 
-/* MORE BUTTON - ROUND PILL */
+/* ============================================================
+   MORE BUTTON
+============================================================ */
+
 .city-more-button {
     flex: 0 0 auto;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     gap: 5px;
-    min-height: 46px;
-    padding: 0 20px;
+
+    min-height: 44px;
+
+    padding: 0 18px;
+
     border-radius: 999px;
-    background: #111827;
-    border: 1.5px solid #111827;
-    color: #ffffff;
+
+    background: #ffffff;
+
+    border: 1px solid #d6d6d6;
+
+    color: #242424;
+
     cursor: pointer;
+
     font-family: inherit;
-    font-size: 0.91rem;
+
+    font-size: 0.9rem;
     font-weight: 700;
+
     white-space: nowrap;
-    box-shadow: 0 5px 15px rgba(17,24,39,0.15);
-    transition: all 0.22s ease;
+
+    box-shadow:
+        0 2px 7px rgba(0, 0, 0, 0.04);
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease,
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
 }
+
+/* ============================================================
+   MORE BUTTON HOVER
+============================================================ */
 
 .city-more-button:hover {
-    background: #FF6B00;
-    border-color: #FF6B00;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(255,107,0,0.25);
+    background: #f4f4f4;
+
+    border-color: #bdbdbd;
+
+    color: #111111;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 5px 14px rgba(0, 0, 0, 0.08);
 }
 
-.city-more-button svg { transition: transform 0.22s ease; }
-.city-more-button:hover svg { transform: translateX(3px); }
-
-@media (max-width: 900px) {
-    .city-chips-section { padding: 50px 5%; }
-    .city-chips-header { margin-bottom: 25px; }
-    .city-chips-header h2 { font-size: 1.7rem; }
-    .city-chips { gap: 10px; }
-    .city-chip { min-height: 42px; padding: 0 16px; font-size: 0.9rem; }
-    .city-more-button { min-height: 42px; padding: 0 16px; font-size: 0.88rem; }
+.city-more-button svg {
+    transition:
+        transform 0.18s ease;
 }
 
-@media (max-width: 600px) {
-    .city-chips-section { padding: 42px 16px; }
-    .city-chips-header { text-align: left; margin-bottom: 20px; }
-    .city-chips-header h2 { font-size: 1.45rem; }
-    .city-chips-header p { font-size: 0.88rem; }
-    .city-chips-wrapper { gap: 8px; }
-    .city-chips { gap: 8px; padding: 3px 2px 10px; }
-    .city-chip { min-height: 40px; padding: 0 14px; gap: 6px; font-size: 0.84rem; }
-    .city-chip-icon { width: 15px; height: 15px; }
-    .city-more-button { min-height: 40px; padding: 0 14px; font-size: 0.82rem; }
-    .city-more-button svg { width: 15px; height: 15px; }
+.city-more-button:hover svg {
+    transform: translateX(3px);
 }
 
-@media (max-width: 380px) {
-    .city-chips-section { padding: 38px 14px; }
-    .city-chips-header h2 { font-size: 1.35rem; }
-    .city-chips-header p { font-size: 0.84rem; }
-    .city-chips-wrapper { gap: 6px; }
-    .city-chips { gap: 7px; }
-    .city-chip { min-height: 38px; padding: 0 12px; font-size: 0.8rem; }
-    .city-more-button { min-height: 38px; padding: 0 12px; font-size: 0.78rem; }
-}
+/* ============================================================
+   FOCUS ACCESSIBILITY
+============================================================ */
 
 .city-chip:focus-visible,
 .city-more-button:focus-visible {
-    outline: 2px solid #FF6B00;
+    outline: 2px solid #777777;
+
     outline-offset: 3px;
+}
+
+/* ============================================================
+   TABLET
+============================================================ */
+
+@media (max-width: 900px) {
+
+    .city-chips-section {
+        padding: 50px 5%;
+    }
+
+    .city-chips-header {
+        margin-bottom: 25px;
+    }
+
+    .city-chips-header h2 {
+        font-size: 1.7rem;
+    }
+
+    .city-chips {
+        gap: 9px;
+    }
+
+    .city-chip {
+        min-height: 42px;
+
+        padding: 0 16px;
+
+        font-size: 0.9rem;
+    }
+
+    .city-more-button {
+        min-height: 42px;
+
+        padding: 0 16px;
+
+        font-size: 0.88rem;
+    }
+}
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 600px) {
+
+    .city-chips-section {
+        padding: 42px 16px;
+    }
+
+    .city-chips-header {
+        text-align: left;
+
+        margin-bottom: 20px;
+    }
+
+    .city-chips-header h2 {
+        font-size: 1.45rem;
+    }
+
+    .city-chips-header p {
+        font-size: 0.88rem;
+    }
+
+    .city-chips-wrapper {
+        gap: 8px;
+    }
+
+    .city-chips {
+        gap: 8px;
+
+        padding: 3px 2px 10px;
+    }
+
+    .city-chip {
+        min-height: 40px;
+
+        padding: 0 14px;
+
+        gap: 6px;
+
+        font-size: 0.84rem;
+    }
+
+    .city-chip-icon {
+        width: 15px;
+        height: 15px;
+    }
+
+    .city-more-button {
+        min-height: 40px;
+
+        padding: 0 14px;
+
+        font-size: 0.82rem;
+    }
+
+    .city-more-button svg {
+        width: 15px;
+        height: 15px;
+    }
+}
+
+/* ============================================================
+   SMALL PHONES
+============================================================ */
+
+@media (max-width: 380px) {
+
+    .city-chips-section {
+        padding: 38px 14px;
+    }
+
+    .city-chips-header h2 {
+        font-size: 1.35rem;
+    }
+
+    .city-chips-header p {
+        font-size: 0.84rem;
+    }
+
+    .city-chips-wrapper {
+        gap: 6px;
+    }
+
+    .city-chips {
+        gap: 7px;
+    }
+
+    .city-chip {
+        min-height: 38px;
+
+        padding: 0 12px;
+
+        font-size: 0.8rem;
+    }
+
+    .city-more-button {
+        min-height: 38px;
+
+        padding: 0 12px;
+
+        font-size: 0.78rem;
+    }
 }

@@ -1,18 +1,16 @@
 /* ============================================================
-   VERIFIED HOSTS
+   EVENTWAA — VERIFIED HOSTS
+   Modern / Trust-focused / Orange Brand
 ============================================================ */
 
 .verified-hosts {
-  width: 100%;
-  padding: 76px 5%;
-  box-sizing: border-box;
+    width: 100%;
 
-  background:
-    linear-gradient(
-      180deg,
-      #ffffff 0%,
-      #fafaf9 100%
-    );
+    padding: 78px 20px 84px;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
 }
 
 
@@ -21,9 +19,10 @@
 ============================================================ */
 
 .verified-hosts-container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+    width: 100%;
+    max-width: 1200px;
+
+    margin: 0 auto;
 }
 
 
@@ -32,60 +31,117 @@
 ============================================================ */
 
 .verified-hosts-header {
-  text-align: center;
-  margin-bottom: 38px;
+    position: relative;
+
+    max-width: 720px;
+
+    margin: 0 auto 42px;
+
+    padding-left: 14px;
+
+    box-sizing: border-box;
+
+    text-align: left;
 }
 
+
+/* ============================================================
+   ORANGE ACCENT
+============================================================ */
+
+.verified-hosts-header::before {
+    content: "";
+
+    position: absolute;
+
+    top: 3px;
+    left: 0;
+
+    width: 3px;
+    height: calc(100% - 6px);
+
+    border-radius: 999px;
+
+    background: #ff6b00;
+}
+
+
+/* ============================================================
+   LABEL
+============================================================ */
 
 .verified-hosts-label {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
+    display: inline-flex;
 
-  margin-bottom: 12px;
+    align-items: center;
+    justify-content: center;
 
-  padding: 7px 12px;
+    gap: 6px;
 
-  border-radius: 999px;
+    margin-bottom: 9px;
 
-  background: #f4f4f2;
-  border: 1px solid #e8e7e3;
+    padding: 6px 10px;
 
-  color: #44413c;
+    border-radius: 999px;
 
-  font-size: 13px;
-  font-weight: 700;
+    background: #fff3eb;
+
+    border: 1px solid #ffd8bf;
+
+    color: #d95500;
+
+    font-size: 11px;
+
+    font-weight: 750;
+
+    line-height: 1.3;
 }
 
+
+.verified-hosts-label svg {
+    flex-shrink: 0;
+
+    color: #ff6b00;
+}
+
+
+/* ============================================================
+   TITLE
+============================================================ */
 
 .verified-hosts-header h2 {
-  margin: 0 0 10px;
+    margin: 0 0 9px;
 
-  color: #171717;
+    color: #111111;
 
-  font-size: clamp(
-    1.8rem,
-    3vw,
-    2.35rem
-  );
+    font-size: clamp(
+        1.8rem,
+        3vw,
+        2.2rem
+    );
 
-  line-height: 1.15;
+    font-weight: 800;
 
-  letter-spacing: -0.7px;
+    line-height: 1.18;
+
+    letter-spacing: -0.65px;
 }
 
 
+/* ============================================================
+   DESCRIPTION
+============================================================ */
+
 .verified-hosts-header p {
-  max-width: 560px;
+    max-width: 620px;
 
-  margin: 0 auto;
+    margin: 0;
 
-  color: #686868;
+    color: #707070;
 
-  font-size: 1rem;
+    font-size: 1rem;
 
-  line-height: 1.6;
+    line-height: 1.65;
 }
 
 
@@ -94,12 +150,14 @@
 ============================================================ */
 
 .hosts-grid {
-  display: grid;
+    width: 100%;
 
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+    display: grid;
 
-  gap: 18px;
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 16px;
 }
 
 
@@ -108,47 +166,78 @@
 ============================================================ */
 
 .host-card {
-  min-width: 0;
+    position: relative;
 
-  display: flex;
-  align-items: center;
+    min-width: 0;
 
-  gap: 13px;
+    display: flex;
 
-  padding: 18px;
+    align-items: center;
 
-  box-sizing: border-box;
+    gap: 12px;
 
-  background: rgba(255, 255, 255, 0.78);
+    padding: 17px;
 
-  border: 1px solid #e8e6e2;
+    box-sizing: border-box;
 
-  border-radius: 16px;
+    background: #ffffff;
 
-  box-shadow:
-    0 5px 18px rgba(0, 0, 0, 0.045);
+    border: 1px solid #e5e5e5;
 
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    border-color 0.25s ease,
-    background 0.25s ease;
+    border-radius: 18px;
+
+    box-shadow:
+        0 3px 12px rgba(0, 0, 0, 0.035);
+
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
 }
 
 
 /* ============================================================
-   HOST CARD HOVER
+   ORANGE TOP ACCENT
+============================================================ */
+
+.host-card::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 22px;
+
+    width: 38px;
+    height: 3px;
+
+    border-radius:
+        0 0 999px 999px;
+
+    background: #ff6b00;
+
+    opacity: 0;
+
+    transition: opacity 0.25s ease;
+}
+
+
+/* ============================================================
+   HOVER
 ============================================================ */
 
 .host-card:hover {
-  transform: translateY(-4px);
+    transform: translateY(-3px);
 
-  background: #ffffff;
+    border-color: #d8d8d8;
 
-  border-color: #ddd9d2;
+    box-shadow:
+        0 12px 26px rgba(0, 0, 0, 0.065);
+}
 
-  box-shadow:
-    0 12px 28px rgba(0, 0, 0, 0.085);
+
+.host-card:hover::before {
+    opacity: 1;
 }
 
 
@@ -157,32 +246,31 @@
 ============================================================ */
 
 .host-avatar {
-  width: 52px;
-  height: 52px;
+    width: 50px;
+    height: 50px;
 
-  flex: 0 0 52px;
+    flex: 0 0 50px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    display: flex;
 
-  border-radius: 50%;
+    align-items: center;
+    justify-content: center;
 
-  background:
-    linear-gradient(
-      145deg,
-      #f2eee8,
-      #e8e2d9
-    );
+    box-sizing: border-box;
 
-  border: 1px solid #ddd7ce;
+    border-radius: 50%;
 
-  color: #393632;
+    background: #f5f5f5;
 
-  font-size: 1.2rem;
-  font-weight: 800;
+    border: 1px solid #e1e1e1;
 
-  text-transform: uppercase;
+    color: #3d3d3d;
+
+    font-size: 1.1rem;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
 }
 
 
@@ -191,31 +279,34 @@
 ============================================================ */
 
 .host-info {
-  min-width: 0;
+    min-width: 0;
 
-  display: flex;
-  flex-direction: column;
+    display: flex;
 
-  gap: 6px;
+    flex-direction: column;
+
+    gap: 5px;
 }
 
 
 .host-info h3 {
-  margin: 0;
+    margin: 0;
 
-  color: #202020;
+    min-width: 0;
 
-  font-size: 0.98rem;
+    color: #202020;
 
-  font-weight: 750;
+    font-size: 0.96rem;
 
-  line-height: 1.3;
+    font-weight: 750;
 
-  overflow: hidden;
+    line-height: 1.3;
 
-  text-overflow: ellipsis;
+    overflow: hidden;
 
-  white-space: nowrap;
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
 }
 
 
@@ -224,27 +315,28 @@
 ============================================================ */
 
 .verified-badge {
-  display: inline-flex;
-  align-items: center;
+    display: inline-flex;
 
-  gap: 5px;
+    align-items: center;
 
-  width: fit-content;
+    gap: 5px;
 
-  color: #65615b;
+    width: fit-content;
 
-  font-size: 12px;
+    color: #666666;
 
-  font-weight: 650;
+    font-size: 11.5px;
 
-  line-height: 1.3;
+    font-weight: 650;
+
+    line-height: 1.3;
 }
 
 
 .verified-badge svg {
-  flex-shrink: 0;
+    flex-shrink: 0;
 
-  color: #45413b;
+    color: #ff6b00;
 }
 
 
@@ -253,61 +345,64 @@
 ============================================================ */
 
 .no-hosts {
-  grid-column: 1 / -1;
+    grid-column: 1 / -1;
 
-  width: 100%;
+    width: 100%;
 
-  box-sizing: border-box;
+    padding: 44px 24px;
 
-  text-align: center;
+    box-sizing: border-box;
 
-  padding: 48px 25px;
+    text-align: center;
 
-  background: rgba(255, 255, 255, 0.75);
+    background: #fafafa;
 
-  border: 1px dashed #d9d6d0;
+    border: 1px dashed #d8d8d8;
 
-  border-radius: 18px;
+    border-radius: 18px;
 }
 
 
 .no-hosts-icon {
-  width: 54px;
-  height: 54px;
+    width: 54px;
+    height: 54px;
 
-  margin: 0 auto 14px;
+    margin: 0 auto 14px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    display: flex;
 
-  border-radius: 50%;
+    align-items: center;
+    justify-content: center;
 
-  background: #f2f0ec;
+    border-radius: 50%;
 
-  color: #55514b;
+    background: #fff3eb;
+
+    color: #ff6b00;
 }
 
 
 .no-hosts h3 {
-  margin: 0 0 8px;
+    margin: 0 0 8px;
 
-  color: #242424;
+    color: #222222;
 
-  font-size: 1.15rem;
+    font-size: 1.12rem;
+
+    line-height: 1.3;
 }
 
 
 .no-hosts p {
-  max-width: 440px;
+    max-width: 440px;
 
-  margin: 0 auto;
+    margin: 0 auto;
 
-  color: #707070;
+    color: #707070;
 
-  font-size: 0.92rem;
+    font-size: 0.91rem;
 
-  line-height: 1.6;
+    line-height: 1.65;
 }
 
 
@@ -317,18 +412,16 @@
 
 @media (max-width: 1050px) {
 
-  .verified-hosts {
-    padding: 68px 4%;
-  }
+    .verified-hosts {
+        padding: 68px 20px 74px;
+    }
 
+    .hosts-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
 
-  .hosts-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-
-    gap: 16px;
-  }
-
+        gap: 15px;
+    }
 }
 
 
@@ -338,49 +431,133 @@
 
 @media (max-width: 680px) {
 
-  .verified-hosts {
-    padding: 58px 18px;
-  }
+    .verified-hosts {
+        padding: 55px 16px 62px;
+    }
 
 
-  .verified-hosts-header {
-    margin-bottom: 30px;
-  }
+    /* HEADER */
+
+    .verified-hosts-header {
+        margin-bottom: 29px;
+
+        padding-left: 11px;
+    }
+
+    .verified-hosts-header::before {
+        width: 2px;
+    }
+
+    .verified-hosts-label {
+        margin-bottom: 8px;
+
+        padding: 5px 9px;
+
+        font-size: 10px;
+    }
+
+    .verified-hosts-header h2 {
+        font-size: 1.8rem;
+
+        letter-spacing: -0.45px;
+    }
+
+    .verified-hosts-header p {
+        font-size: 14px;
+
+        line-height: 1.65;
+    }
 
 
-  .verified-hosts-header h2 {
-    font-size: 1.8rem;
-  }
+    /* ========================================================
+       MOBILE HOST ARRAY
+    ======================================================== */
+
+    .hosts-grid {
+        display: flex;
+
+        width: auto;
+
+        margin-left: -16px;
+        margin-right: -16px;
+
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-bottom: 12px;
+
+        gap: 12px;
+
+        overflow-x: auto;
+        overflow-y: visible;
+
+        scroll-snap-type: x mandatory;
+
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .hosts-grid::-webkit-scrollbar {
+        display: none;
+    }
 
 
-  .verified-hosts-header p {
-    font-size: 0.92rem;
-  }
+    /* ========================================================
+       MOBILE HOST CARD
+    ======================================================== */
+
+    .host-card {
+        flex: 0 0 76%;
+
+        width: 76%;
+
+        max-width: 300px;
+
+        padding: 15px;
+
+        border-radius: 16px;
+
+        scroll-snap-align: start;
+    }
+
+    .host-card:hover {
+        transform: none;
+
+        border-color: #e5e5e5;
+
+        box-shadow:
+            0 3px 12px rgba(0, 0, 0, 0.035);
+    }
+
+    .host-card:hover::before {
+        opacity: 0;
+    }
 
 
-  .hosts-grid {
-    grid-template-columns: 1fr;
+    /* AVATAR */
 
-    gap: 13px;
-  }
+    .host-avatar {
+        width: 47px;
+        height: 47px;
 
+        flex-basis: 47px;
 
-  .host-card {
-    padding: 15px;
-
-    border-radius: 14px;
-  }
+        font-size: 1rem;
+    }
 
 
-  .host-avatar {
-    width: 48px;
-    height: 48px;
+    /* INFO */
 
-    flex-basis: 48px;
+    .host-info {
+        gap: 4px;
+    }
 
-    font-size: 1.1rem;
-  }
+    .host-info h3 {
+        font-size: 0.93rem;
+    }
 
+    .verified-badge {
+        font-size: 11px;
+    }
 }
 
 
@@ -390,25 +567,49 @@
 
 @media (max-width: 400px) {
 
-  .verified-hosts {
-    padding: 50px 15px;
-  }
+    .verified-hosts {
+        padding: 48px 14px 55px;
+    }
+
+    .verified-hosts-header {
+        margin-bottom: 26px;
+    }
+
+    .verified-hosts-header h2 {
+        font-size: 1.65rem;
+    }
+
+    .verified-hosts-header p {
+        font-size: 13.5px;
+    }
+
+    .hosts-grid {
+        margin-left: -14px;
+        margin-right: -14px;
+
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .host-card {
+        flex-basis: 84%;
+
+        width: 84%;
+
+        max-width: 290px;
+    }
+}
 
 
-  .verified-hosts-header h2 {
-    font-size: 1.65rem;
-  }
+/* ============================================================
+   ACCESSIBILITY
+============================================================ */
 
+.host-card:focus-within {
+    border-color: #ffb98e;
 
-  .verified-hosts-label {
-    font-size: 12px;
-  }
-
-
-  .host-card {
-    padding: 14px;
-  }
-
+    box-shadow:
+        0 0 0 3px rgba(255, 107, 0, 0.12);
 }
 
 
@@ -418,12 +619,15 @@
 
 @media (prefers-reduced-motion: reduce) {
 
-  .host-card {
-    transition: none;
-  }
+    .hosts-grid {
+        scroll-behavior: auto;
+    }
 
-  .host-card:hover {
-    transform: none;
-  }
+    .host-card {
+        transition: none;
+    }
 
+    .host-card:hover {
+        transform: none;
+    }
 }

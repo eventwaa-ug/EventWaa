@@ -1,345 +1,532 @@
 /* ============================================================
    EVENTWAA — EVENT SEARCH
-   Google / Eventbrite inspired + Brand Fix
+   Modern Neutral UI
 ============================================================ */
 
 /* ============================================================
    WRAPPER
 ============================================================ */
+
 .event-search-wrapper {
-  position: relative;
-  width: min(92%, 760px);
-  margin: 38px auto 42px;
-  z-index: 100;
+    position: relative;
+    width: min(92%, 760px);
+    margin: 38px auto 42px;
+    z-index: 100;
 }
 
 /* ============================================================
    SEARCH BAR
 ============================================================ */
+
 .search-box {
-  width: 100%;
-  min-height: 64px;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  padding: 6px 7px 6px 22px;
-  background: #ffffff;
-  border: 1.5px solid #E5E7EB;
-  border-radius: 999px;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+    min-height: 62px;
+
+    display: flex;
+    align-items: center;
+
+    box-sizing: border-box;
+
+    padding: 6px 7px 6px 21px;
+
+    background: #ffffff;
+
+    border: 1px solid #dedede;
+    border-radius: 999px;
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.04);
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 /* ============================================================
-   FOCUS - ORANGE BRAND
+   FOCUS
 ============================================================ */
+
 .search-box:focus-within {
-  border-color: #FF6B00;
-  box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.10);
+    border-color: #a8a8a8;
+
+    box-shadow:
+        0 0 0 3px rgba(0, 0, 0, 0.045),
+        0 4px 14px rgba(0, 0, 0, 0.07);
 }
 
 /* ============================================================
    MAIN SEARCH ICON
 ============================================================ */
+
 .search-main-icon {
-  flex-shrink: 0;
-  color: #9CA3AF;
-  margin-right: 12px;
+    flex-shrink: 0;
+
+    color: #777777;
+
+    margin-right: 12px;
+
+    transition:
+        color 0.2s ease;
 }
 
 .search-box:focus-within .search-main-icon {
-  color: #FF6B00;
+    color: #444444;
 }
 
 /* ============================================================
-   INPUT - FIX IPHONE ZOOM
+   INPUT
+   16px is intentionally preserved for iPhone Safari.
 ============================================================ */
+
 .search-box input {
-  flex: 1;
-  width: 100%;
-  min-width: 0;
-  height: 50px;
-  padding: 0 10px 0 0;
-  border: none;
-  outline: none;
-  background: transparent;
-  color: #17191c;
-  font-family: inherit;
-  font-size: 16px !important; /* MUST BE 16px FOR IOS */
-  line-height: 1.4;
-  font-weight: 500;
+    flex: 1;
+
+    width: 100%;
+    min-width: 0;
+
+    height: 48px;
+
+    padding: 0 10px 0 0;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    color: #171717;
+
+    font-family: inherit;
+    font-size: 16px !important;
+    line-height: 1.4;
+    font-weight: 500;
 }
 
 .search-box input::placeholder {
-  color: #9CA3AF;
-  opacity: 1;
-  font-weight: 500;
+    color: #999999;
+    opacity: 1;
+
+    font-weight: 500;
 }
 
 /* ============================================================
-   SEARCH BUTTON - ORANGE BRAND
+   SEARCH BUTTON
 ============================================================ */
+
 .search-submit {
-  flex-shrink: 0;
-  height: 48px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 0 22px;
-  border: none;
-  border-radius: 999px;
-  background: #FF6B00;
-  color: #ffffff;
-  font-family: inherit;
-  font-size: 14px;
-  line-height: 1;
-  font-weight: 800;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    flex-shrink: 0;
+
+    height: 46px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    padding: 0 21px;
+
+    border: 1px solid #222222;
+    border-radius: 999px;
+
+    background: #222222;
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
 }
 
 .search-submit:hover {
-  background: #E65E00;
-  transform: translateY(-1px);
-  box-shadow: 0 5px 12px rgba(255, 107, 0, 0.25);
+    background: grey;
+    border-color: orange;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 5px 14px rgba(0, 0, 0, 0.14);
 }
 
 .search-submit:active {
-  transform: translateY(0);
+    transform: translateY(0);
+
+    box-shadow: none;
+}
+
+.search-submit:focus-visible {
+    outline: 2px solid #999999;
+    outline-offset: 2px;
 }
 
 /* ============================================================
    SEARCH RESULTS
 ============================================================ */
+
 .search-results {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  width: 100%;
-  box-sizing: border-box;
-  overflow: hidden;
-  background: #ffffff;
-  border: 1px solid #E5E7EB;
-  border-radius: 18px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-  z-index: 1000;
+    position: absolute;
+
+    top: calc(100% + 8px);
+    left: 0;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    background: #ffffff;
+
+    border: 1px solid #e1e1e1;
+    border-radius: 15px;
+
+    box-shadow:
+        0 14px 34px rgba(0, 0, 0, 0.10);
+
+    z-index: 1000;
 }
+
+/* ============================================================
+   RESULTS HEADING
+============================================================ */
 
 .search-results-heading {
-  height: 42px;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  box-sizing: border-box;
-  border-bottom: 1px solid #F1F5F9;
-  color: #64748B;
-  font-size: 11px;
-  line-height: 1;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 18px;
+
+    box-sizing: border-box;
+
+    border-bottom: 1px solid #eeeeee;
+
+    color: #858585;
+
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 700;
+
+    letter-spacing: 0.8px;
+
+    text-transform: uppercase;
 }
 
+/* ============================================================
+   SEARCH ITEM
+============================================================ */
+
 .search-item {
-  width: 100%;
-  min-height: 76px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 13px 19px;
-  box-sizing: border-box;
-  border: none;
-  border-bottom: 1px solid #F8FAFC;
-  background: #ffffff;
-  color: #17191c;
-  font-family: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.18s ease;
+    width: 100%;
+    min-height: 72px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    padding: 11px 17px;
+
+    box-sizing: border-box;
+
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+
+    background: #ffffff;
+    color: #171717;
+
+    font-family: inherit;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease;
 }
 
 .search-item:last-child {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 .search-item:hover {
-  background: #FFF4ED;
+    background: #f5f5f5;
 }
 
+.search-item:active {
+    background: #eeeeee;
+}
+
+.search-item:focus-visible {
+    outline: 2px solid #b5b5b5;
+    outline-offset: -2px;
+}
+
+/* ============================================================
+   RESULT ICON
+============================================================ */
+
 .search-item-icon {
-  width: 38px;
-  height: 38px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: #F1F5F9;
-  color: #64748B;
-  transition: background 0.18s ease, color 0.18s ease;
+    width: 37px;
+    height: 37px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #f1f1f1;
+    color: #666666;
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease;
 }
 
 .search-item:hover .search-item-icon {
-  background: #FF6B00;
-  color: #ffffff;
+    background: #e7e7e7;
+    color: #333333;
 }
 
+/* ============================================================
+   RESULT CONTENT
+============================================================ */
+
 .search-item-content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+    flex: 1;
+
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
 }
 
 .search-item-content > strong {
-  display: block;
-  overflow: hidden;
-  color: #17191c;
-  font-size: 15px;
-  line-height: 1.35;
-  font-weight: 700;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+    display: block;
+
+    overflow: hidden;
+
+    color: #202020;
+
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 700;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
+/* ============================================================
+   LOCATION
+============================================================ */
+
 .search-item-location {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: #656b73;
-  font-size: 13px;
-  line-height: 1.35;
-  font-weight: 500;
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #777777;
+
+    font-size: 12px;
+    line-height: 1.35;
+    font-weight: 500;
 }
 
 .search-item-location svg {
-  flex-shrink: 0;
+    flex-shrink: 0;
 }
 
+/* ============================================================
+   RESULT ARROW
+============================================================ */
+
 .search-item-arrow {
-  flex-shrink: 0;
-  color: #9a9fa6;
-  transition: color 0.18s ease, transform 0.18s ease;
+    flex-shrink: 0;
+
+    color: #aaaaaa;
+
+    transition:
+        color 0.18s ease,
+        transform 0.18s ease;
 }
 
 .search-item:hover .search-item-arrow {
-  color: #FF6B00;
-  transform: translateX(3px);
+    color: #555555;
+
+    transform: translateX(3px);
 }
 
 /* ============================================================
    TABLET
 ============================================================ */
+
 @media (max-width: 700px) {
-  .event-search-wrapper {
-    width: calc(100% - 32px);
-    margin: 30px auto 35px;
-  }
-  .search-box {
-    min-height: 60px;
-    padding-left: 18px;
-  }
-  .search-box input {
-    height: 48px;
-    font-size: 16px !important; /* KEEP 16px */
-  }
-  .search-submit {
-    height: 44px;
-    padding: 0 19px;
-    font-size: 13px;
-  }
+    .event-search-wrapper {
+        width: calc(100% - 32px);
+
+        margin: 30px auto 35px;
+    }
+
+    .search-box {
+        min-height: 59px;
+
+        padding-left: 18px;
+    }
+
+    .search-box input {
+        height: 47px;
+
+        font-size: 16px !important;
+    }
+
+    .search-submit {
+        height: 43px;
+
+        padding: 0 18px;
+
+        font-size: 13px;
+    }
 }
 
 /* ============================================================
-   MOBILE - ZOOM FIX
+   MOBILE
 ============================================================ */
+
 @media (max-width: 520px) {
-  .event-search-wrapper {
-    width: calc(100% - 24px);
-    margin: 24px auto 30px;
-  }
-  .search-box {
-    min-height: 56px;
-    padding: 5px 6px 5px 16px;
-    border-radius: 999px;
-  }
-  .search-main-icon {
-    width: 19px;
-    height: 19px;
-    margin-right: 8px;
-  }
-  .search-box input {
-    height: 46px;
-    padding-right: 6px;
-    font-size: 16px !important; /* FIXED - WAS 14px */
-    transform: translateZ(0);
-  }
-  .search-box input::placeholder {
-    font-size: 14px;
-  }
-  .search-submit {
-    width: 46px;
-    height: 46px;
-    padding: 0;
-    gap: 0;
-  }
-  .search-submit span {
-    display: none;
-  }
-  .search-submit svg {
-    width: 18px;
-    height: 18px;
-  }
-  .search-results {
-    top: calc(100% + 7px);
-    border-radius: 15px;
-  }
-  .search-results-heading {
-    height: 40px;
-    padding: 0 16px;
-    font-size: 10px;
-  }
-  .search-item {
-    min-height: 70px;
-    gap: 11px;
-    padding: 11px 15px;
-  }
-  .search-item-icon {
-    width: 35px;
-    height: 35px;
-  }
-  .search-item-content > strong {
-    font-size: 14px;
-  }
-  .search-item-location {
-    font-size: 12px;
-  }
-  .search-item-arrow {
-    width: 15px;
-    height: 15px;
-  }
+    .event-search-wrapper {
+        width: calc(100% - 24px);
+
+        margin: 24px auto 30px;
+    }
+
+    .search-box {
+        min-height: 56px;
+
+        padding: 5px 6px 5px 15px;
+
+        border-radius: 999px;
+    }
+
+    .search-main-icon {
+        width: 19px;
+        height: 19px;
+
+        margin-right: 8px;
+    }
+
+    .search-box input {
+        height: 46px;
+
+        padding-right: 6px;
+
+        /* Keep 16px to prevent iPhone zoom */
+        font-size: 16px !important;
+
+        transform: translateZ(0);
+    }
+
+    .search-box input::placeholder {
+        font-size: 14px;
+    }
+
+    .search-submit {
+        width: 46px;
+        height: 46px;
+
+        padding: 0;
+
+        gap: 0;
+    }
+
+    .search-submit span {
+        display: none;
+    }
+
+    .search-submit svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .search-results {
+        top: calc(100% + 7px);
+
+        border-radius: 14px;
+    }
+
+    .search-results-heading {
+        height: 38px;
+
+        padding: 0 15px;
+
+        font-size: 10px;
+    }
+
+    .search-item {
+        min-height: 67px;
+
+        gap: 10px;
+
+        padding: 10px 14px;
+    }
+
+    .search-item-icon {
+        width: 34px;
+        height: 34px;
+
+        border-radius: 9px;
+    }
+
+    .search-item-content > strong {
+        font-size: 13px;
+    }
+
+    .search-item-location {
+        font-size: 11px;
+    }
+
+    .search-item-arrow {
+        width: 15px;
+        height: 15px;
+    }
 }
 
 /* ============================================================
-   SMALL PHONES - ZOOM FIX
+   SMALL PHONES
 ============================================================ */
+
 @media (max-width: 360px) {
-  .event-search-wrapper {
-    width: calc(100% - 18px);
-  }
-  .search-box {
-    padding-left: 13px;
-  }
-  .search-box input {
-    font-size: 16px !important; /* FIXED - WAS 13px */
-  }
-  .search-box input::placeholder {
-    font-size: 13px;
-  }
-  .search-item-content > strong {
-    font-size: 13px;
-  }
+    .event-search-wrapper {
+        width: calc(100% - 18px);
+    }
+
+    .search-box {
+        padding-left: 13px;
+    }
+
+    .search-box input {
+        font-size: 16px !important;
+    }
+
+    .search-box input::placeholder {
+        font-size: 13px;
+    }
+
+    .search-item-content > strong {
+        font-size: 12px;
+    }
 }

@@ -1,226 +1,430 @@
 /* ============================================================
    EVENTWAA — BROWSE CATEGORIES
-   Round + Orange Brand
+   Modern UI + Orange Brand
 ============================================================ */
+
 .browse-categories {
     width: 100%;
     box-sizing: border-box;
+
     padding: 54px 6% 60px;
-    background: linear-gradient(180deg, #ffffff 0%, #FFFBF5 100%);
+
+    background: #ffffff;
+
     font-family: Arial, Helvetica, sans-serif;
 }
 
-/* HEADER */
+/* ============================================================
+   HEADER
+============================================================ */
+
 .section-header {
     max-width: 1180px;
+
     margin: 0 auto 28px;
+
     text-align: center;
 }
+
 .section-header .badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     padding: 6px 14px;
     margin-bottom: 10px;
+
     border-radius: 999px;
-    background: #FFF1E6;
-    color: #FF6B00;
+
+    background: #fff3eb;
+
+    color: #ff6b00;
+
     font-size: 0.76rem;
     font-weight: 800;
+
     letter-spacing: 0.02em;
 }
+
 .section-header h2 {
     margin: 0 0 7px;
-    color: #111827;
+
+    color: #111111;
+
     font-size: 2rem;
     font-weight: 800;
     line-height: 1.2;
+
     letter-spacing: -0.04em;
 }
+
 .section-header p {
-    margin: 0 auto;
     max-width: 600px;
-    color: #6B7280;
+
+    margin: 0 auto;
+
+    color: #6f6f6f;
+
     font-size: 0.96rem;
     line-height: 1.55;
 }
 
-/* GRID */
+/* ============================================================
+   GRID
+============================================================ */
+
 .category-grid {
     width: 100%;
     max-width: 1180px;
+
     margin: 0 auto;
+
     display: grid;
+
     grid-template-columns: repeat(3, minmax(0, 1fr));
+
     gap: 16px;
 }
 
-/* CARD - ROUND */
+/* ============================================================
+   CATEGORY CARD
+============================================================ */
+
 .category-card {
     position: relative;
+
     width: 100%;
     min-width: 0;
+
     box-sizing: border-box;
+
     display: flex;
     align-items: center;
+
     gap: 14px;
+
     padding: 18px 20px;
-    border: 1.5px solid #F3F4F6;
-    border-radius: 24px; /* ROUND */
+
+    border: 1px solid #e7e7e7;
+    border-radius: 20px;
+
     background: #ffffff;
-    box-shadow: 0 4px 16px rgba(17, 24, 39, 0.05);
-    color: #252321;
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.035);
+
+    color: #252525;
+
     text-align: left;
+
     cursor: pointer;
+
     font-family: inherit;
+
     appearance: none;
     outline: none;
+
     overflow: hidden;
-    transition: all 0.22s ease;
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
 }
+
+/* ============================================================
+   SUBTLE ORANGE ACCENT
+============================================================ */
 
 .category-card::before {
     content: "";
+
     position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: radial-gradient(400px at 0% 0%, rgba(255,107,0,0.08), transparent 60%);
+
+    top: 0;
+    left: 0;
+
+    width: 3px;
+    height: 100%;
+
+    background: #ff6b00;
+
     opacity: 0;
-    transition: opacity 0.22s ease;
+
+    transform: scaleY(0.45);
+
+    transform-origin: center;
+
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
 }
 
+/* ============================================================
+   CARD HOVER
+============================================================ */
+
 .category-card:hover {
-    transform: translateY(-4px);
-    border-color: #FFD7B8;
-    background: #FFFBF5;
-    box-shadow: 0 16px 32px rgba(255, 107, 0, 0.12), 0 4px 12px rgba(17,24,39,0.06);
+    transform: translateY(-3px);
+
+    background: #ffffff;
+
+    border-color: #d7d7d7;
+
+    box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.075);
 }
-.category-card:hover::before { opacity: 1; }
-.category-card:active { transform: translateY(-1px); }
+
+.category-card:hover::before {
+    opacity: 1;
+
+    transform: scaleY(0.72);
+}
+
+.category-card:active {
+    transform: translateY(-1px);
+}
+
 .category-card:focus-visible {
-    outline: 3px solid rgba(255,107,0,0.25);
+    outline: 3px solid rgba(255, 107, 0, 0.22);
+
     outline-offset: 3px;
 }
 
-/* ICON - ROUNDER */
+/* ============================================================
+   CATEGORY ICON
+============================================================ */
+
 .category-icon {
     position: relative;
     z-index: 1;
+
     width: 52px;
     height: 52px;
+
     flex: 0 0 52px;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 16px; /* ROUND ICON */
-    background: #FFF1E6;
-    color: #FF6B00;
-    transition: all 0.22s ease;
-}
-.category-card:hover .category-icon {
-    transform: translateY(-1px) rotate(-3deg) scale(1.05);
-    background: #FF6B00;
-    color: white;
+
+    border-radius: 15px;
+
+    background: #fff3eb;
+
+    color: #ff6b00;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
 }
 
-/* CONTENT */
+.category-card:hover .category-icon {
+    transform: translateY(-1px) scale(1.04);
+
+    background: #ff6b00;
+
+    color: #ffffff;
+}
+
+/* ============================================================
+   CONTENT
+============================================================ */
+
 .category-content {
     position: relative;
     z-index: 1;
+
     flex: 1;
+
     min-width: 0;
 }
+
 .category-content h3 {
     margin: 0 0 4px;
-    color: #111827;
+
+    color: #171717;
+
     font-size: 1rem;
     font-weight: 700;
+
     line-height: 1.25;
 }
+
 .category-content p {
     margin: 0;
-    color: #6B7280;
+
+    color: #777777;
+
     font-size: 0.84rem;
+
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
 
-/* ARROW - FULL ROUND */
+/* ============================================================
+   ARROW
+============================================================ */
+
 .category-arrow {
     position: relative;
     z-index: 1;
+
     width: 32px;
     height: 32px;
+
     flex: 0 0 32px;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 999px; /* FULL ROUND */
-    background: #F3F4F6;
-    color: #9CA3AF;
-    transition: all 0.22s ease;
+
+    border-radius: 999px;
+
+    background: #f2f2f2;
+
+    color: #8a8a8a;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
 }
+
 .category-card:hover .category-arrow {
     transform: translate(2px, -2px);
-    background: #111827;
-    color: white;
+
+    background: #ff6b00;
+
+    color: #ffffff;
 }
 
-/* TABLET */
+/* ============================================================
+   TABLET
+============================================================ */
+
 @media (max-width: 900px) {
-    .browse-categories { padding: 48px 5% 54px; }
+
+    .browse-categories {
+        padding: 48px 5% 54px;
+    }
+
     .category-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+
         gap: 14px;
     }
-    .section-header { margin-bottom: 24px; }
-    .section-header h2 { font-size: 1.85rem; }
+
+    .section-header {
+        margin-bottom: 24px;
+    }
+
+    .section-header h2 {
+        font-size: 1.85rem;
+    }
 }
 
-/* MOBILE - HORIZONTAL ROUND SCROLL */
+/* ============================================================
+   MOBILE — HORIZONTAL SCROLL
+============================================================ */
+
 @media (max-width: 650px) {
-    .browse-categories { padding: 42px 18px 48px; }
-    .section-header { text-align: left; margin-bottom: 21px; }
-    .section-header h2 { font-size: 1.65rem; }
-    .section-header p { margin: 0; font-size: 0.9rem; }
+
+    .browse-categories {
+        padding: 42px 18px 48px;
+    }
+
+    .section-header {
+        text-align: left;
+
+        margin-bottom: 21px;
+    }
+
+    .section-header h2 {
+        font-size: 1.65rem;
+    }
+
+    .section-header p {
+        margin: 0;
+
+        font-size: 0.9rem;
+    }
 
     .category-grid {
         display: flex;
+
         width: calc(100% + 18px);
+
         gap: 12px;
+
         padding: 2px 18px 12px 0;
+
         overflow-x: auto;
+
         scroll-snap-type: x mandatory;
+
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
-    .category-grid::-webkit-scrollbar { display: none; }
+
+    .category-grid::-webkit-scrollbar {
+        display: none;
+    }
 
     .category-card {
         flex: 0 0 250px;
+
         padding: 16px;
+
         gap: 12px;
-        border-radius: 20px; /* ROUND ON MOBILE */
+
+        border-radius: 18px;
+
         scroll-snap-align: start;
     }
+
     .category-icon {
         width: 46px;
         height: 46px;
+
         flex-basis: 46px;
-        border-radius: 14px;
+
+        border-radius: 13px;
     }
 }
 
+/* ============================================================
+   SMALL PHONES
+============================================================ */
+
 @media (max-width: 390px) {
-    .browse-categories { padding: 38px 15px 43px; }
-    .section-header h2 { font-size: 1.52rem; }
+
+    .browse-categories {
+        padding: 38px 15px 43px;
+    }
+
+    .section-header h2 {
+        font-size: 1.52rem;
+    }
+
     .category-grid {
         width: calc(100% + 15px);
+
         gap: 10px;
+
         padding-right: 15px;
     }
+
     .category-card {
         flex-basis: 230px;
+
         padding: 14px;
-        border-radius: 18px;
+
+        border-radius: 17px;
     }
 }

@@ -1,20 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* =========================================================
-   PROFILE PAGE
-   Clean / Neutral / Accessible
+   EVENTWAA PROFILE
+   Modern / Clean / Neutral / Orange Brand
 ========================================================= */
 
 .profile-page {
     width: 100%;
-    max-width: 900px;
+    max-width: 920px;
     min-height: 100vh;
+
     margin: 0 auto;
-    padding: 40px 25px 70px;
+    padding: 36px 24px 72px;
+
     box-sizing: border-box;
 
-    background: #f6f7f9;
-
+    background: #f7f8fa;
     color: #17191d;
 
     font-family:
@@ -32,23 +33,46 @@
 ========================================================= */
 
 .profile-card {
+    position: relative;
+
     display: flex;
     align-items: center;
-    gap: 22px;
 
     width: 100%;
-    box-sizing: border-box;
 
-    padding: 25px;
-    margin-bottom: 24px;
+    gap: 22px;
+
+    padding: 24px;
+
+    margin-bottom: 22px;
+
+    box-sizing: border-box;
 
     background: #ffffff;
 
-    border: 1px solid #e4e6ea;
-    border-radius: 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
 
     box-shadow:
-        0 2px 8px rgba(15, 23, 42, 0.04);
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 8px 24px rgba(15, 23, 42, 0.05);
+
+    overflow: hidden;
+}
+
+/* Small EventWaa brand accent */
+.profile-card::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 4px;
+    height: 100%;
+
+    background: #ff6b00;
 }
 
 
@@ -57,10 +81,12 @@
 ========================================================= */
 
 .profile-photo-wrapper {
-    width: 100px;
-    height: 100px;
+    width: 96px;
+    height: 96px;
 
-    flex-shrink: 0;
+    flex: 0 0 96px;
+
+    position: relative;
 }
 
 .profile-photo {
@@ -73,7 +99,11 @@
 
     border-radius: 50%;
 
-    border: 3px solid #f0f1f3;
+    border: 3px solid #ffffff;
+
+    box-shadow:
+        0 0 0 1px #e5e7eb,
+        0 5px 14px rgba(15, 23, 42, 0.10);
 
     box-sizing: border-box;
 }
@@ -90,13 +120,22 @@
 
     border-radius: 50%;
 
-    background: #f1f3f5;
+    background:
+        linear-gradient(
+            145deg,
+            #fff7f0,
+            #f3f4f6
+        );
 
     color: #ff6b00;
 
-    border: 3px solid #e4e6ea;
+    border: 3px solid #ffffff;
 
-    font-size: 38px;
+    box-shadow:
+        0 0 0 1px #e5e7eb,
+        0 5px 14px rgba(15, 23, 42, 0.08);
+
+    font-size: 36px;
     font-weight: 800;
 }
 
@@ -107,28 +146,34 @@
 
 .profile-info {
     min-width: 0;
+    flex: 1;
 }
 
 .profile-info h1 {
-    margin: 0 0 6px;
+    margin: 0 0 7px;
 
-    color: #17191d;
+    color: #111827;
 
     font-size: 25px;
     font-weight: 800;
-    line-height: 1.25;
+
+    line-height: 1.2;
+    letter-spacing: -0.45px;
 
     overflow-wrap: anywhere;
 }
 
 .profile-info p {
-    margin: 0 0 12px;
+    max-width: 620px;
 
-    color: #626872;
+    margin: 0 0 13px;
+
+    color: #6b7280;
 
     font-size: 14px;
     font-weight: 400;
-    line-height: 1.5;
+
+    line-height: 1.55;
 
     overflow-wrap: anywhere;
 }
@@ -140,7 +185,10 @@
 
 .profile-status {
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
+
+    gap: 7px;
 }
 
 .profile-badge {
@@ -148,21 +196,27 @@
     align-items: center;
     gap: 6px;
 
-    padding: 6px 11px;
+    min-height: 27px;
 
+    padding: 6px 10px;
+
+    border: 1px solid #e5e7eb;
     border-radius: 999px;
 
-    background: #f1f3f5;
+    background: #f8f9fa;
 
-    color: #50555d;
+    color: #4b5563;
 
     font-size: 11px;
     font-weight: 700;
+
     line-height: 1;
 }
 
 .profile-badge.verified {
-    background: #ecf8f0;
+    background: #f0faf4;
+    border-color: #ccebd8;
+
     color: #177245;
 }
 
@@ -176,13 +230,14 @@
 
     background: #ffffff;
 
-    border: 1px solid #e4e6ea;
-    border-radius: 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
 
     overflow: hidden;
 
     box-shadow:
-        0 2px 8px rgba(15, 23, 42, 0.04);
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 8px 24px rgba(15, 23, 42, 0.045);
 }
 
 
@@ -191,18 +246,21 @@
 ========================================================= */
 
 .profile-menu-item {
+    position: relative;
+
     width: 100%;
+    min-height: 76px;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    gap: 15px;
+    gap: 18px;
 
-    padding: 18px 20px;
+    padding: 16px 20px;
 
-    border: none;
-    border-bottom: 1px solid #eceef1;
+    border: 0;
+    border-bottom: 1px solid #eef0f2;
 
     background: #ffffff;
 
@@ -216,7 +274,8 @@
 
     transition:
         background-color 0.18s ease,
-        box-shadow 0.18s ease;
+        box-shadow 0.18s ease,
+        transform 0.18s ease;
 }
 
 .profile-menu-item:last-child {
@@ -224,13 +283,18 @@
 }
 
 .profile-menu-item:hover {
-    background: #f8f9fa;
+    background: #fafafa;
+}
+
+.profile-menu-item:active {
+    background: #f7f7f7;
 }
 
 .profile-menu-item:focus-visible {
-    outline: 2px solid #ff6b00;
-    outline-offset: -2px;
-    background: #fafafa;
+    outline: 3px solid rgba(255, 107, 0, 0.22);
+    outline-offset: -3px;
+
+    background: #fffaf6;
 }
 
 
@@ -240,11 +304,12 @@
 
 .profile-menu-left {
     min-width: 0;
+    flex: 1;
 
     display: flex;
     align-items: center;
 
-    gap: 15px;
+    gap: 14px;
 }
 
 
@@ -256,15 +321,16 @@
     width: 44px;
     height: 44px;
 
-    flex-shrink: 0;
+    flex: 0 0 44px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    border-radius: 12px;
+    border: 1px solid #eceef1;
+    border-radius: 13px;
 
-    background: #f1f3f5;
+    background: #f6f7f8;
 
     color: #ff6b00;
 
@@ -272,12 +338,18 @@
 
     transition:
         background-color 0.18s ease,
-        color 0.18s ease;
+        border-color 0.18s ease,
+        color 0.18s ease,
+        transform 0.18s ease;
 }
 
 .profile-menu-item:hover .profile-menu-icon {
-    background: #fff1e8;
-    color: #e85f00;
+    background: #fff4ed;
+    border-color: #ffd7b8;
+
+    color: #ff6b00;
+
+    transform: translateY(-1px);
 }
 
 
@@ -287,6 +359,7 @@
 
 .profile-menu-left > div {
     min-width: 0;
+    flex: 1;
 }
 
 .profile-menu-left strong {
@@ -296,6 +369,7 @@
 
     font-size: 15px;
     font-weight: 700;
+
     line-height: 1.35;
 
     overflow-wrap: anywhere;
@@ -308,6 +382,7 @@
 
     font-size: 12px;
     font-weight: 400;
+
     line-height: 1.45;
 
     overflow-wrap: anywhere;
@@ -328,24 +403,30 @@
 }
 
 .profile-arrow {
+    width: 28px;
+    height: 28px;
+
     display: flex;
     align-items: center;
     justify-content: center;
 
-    color: #8a9098;
+    border-radius: 50%;
 
-    font-size: 24px;
+    color: #9ca3af;
+
+    font-size: 22px;
     line-height: 1;
 
-    flex-shrink: 0;
-
     transition:
+        background-color 0.18s ease,
         color 0.18s ease,
         transform 0.18s ease;
 }
 
 .profile-menu-item:hover .profile-arrow {
+    background: #fff4ed;
     color: #ff6b00;
+
     transform: translateX(2px);
 }
 
@@ -355,26 +436,29 @@
 ========================================================= */
 
 .notification-count {
-    min-width: 22px;
-    height: 22px;
+    min-width: 23px;
+    height: 23px;
 
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 
-    padding: 0 6px;
+    padding: 0 7px;
 
     box-sizing: border-box;
 
     border-radius: 999px;
 
     background: #ff6b00;
-
     color: #ffffff;
 
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 800;
+
     line-height: 1;
+
+    box-shadow:
+        0 2px 6px rgba(255, 107, 0, 0.18);
 }
 
 
@@ -383,11 +467,12 @@
 ========================================================= */
 
 .profile-logout-section {
-    margin-top: 20px;
+    margin-top: 18px;
 }
 
 .profile-logout-button {
     width: 100%;
+    min-height: 48px;
 
     display: flex;
     align-items: center;
@@ -395,12 +480,12 @@
 
     gap: 9px;
 
-    padding: 14px 20px;
+    padding: 13px 20px;
 
     box-sizing: border-box;
 
-    border: 1px solid #e1e4e8;
-    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
 
     background: #ffffff;
 
@@ -413,20 +498,36 @@
 
     cursor: pointer;
 
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.03);
+
     transition:
         background-color 0.18s ease,
         border-color 0.18s ease,
-        color 0.18s ease;
+        color 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.18s ease;
 }
 
 .profile-logout-button:hover {
     background: #fff7f2;
+
     border-color: #f2b99a;
+
     color: #b93808;
+
+    box-shadow:
+        0 4px 12px rgba(15, 23, 42, 0.06);
+
+    transform: translateY(-1px);
+}
+
+.profile-logout-button:active {
+    transform: translateY(0);
 }
 
 .profile-logout-button:focus-visible {
-    outline: 2px solid #ff6b00;
+    outline: 3px solid rgba(255, 107, 0, 0.22);
     outline-offset: 2px;
 }
 
@@ -438,24 +539,42 @@
 @media (max-width: 768px) {
 
     .profile-page {
-        padding: 30px 18px 55px;
+        max-width: 100%;
+
+        padding: 30px 18px 60px;
     }
 
     .profile-card {
-        padding: 20px;
+        gap: 18px;
+
+        padding: 21px;
+
+        border-radius: 18px;
     }
 
     .profile-photo-wrapper {
         width: 82px;
         height: 82px;
+
+        flex-basis: 82px;
     }
 
     .profile-info h1 {
         font-size: 22px;
     }
 
+    .profile-info p {
+        font-size: 13px;
+    }
+
+    .profile-menu {
+        border-radius: 18px;
+    }
+
     .profile-menu-item {
-        padding: 17px 18px;
+        min-height: 72px;
+
+        padding: 16px 18px;
     }
 }
 
@@ -467,50 +586,81 @@
 @media (max-width: 600px) {
 
     .profile-page {
-        padding: 22px 12px 45px;
+        padding:
+            20px
+            12px
+            calc(44px + env(safe-area-inset-bottom));
     }
 
     .profile-card {
-        gap: 15px;
+        align-items: flex-start;
+
+        gap: 14px;
 
         padding: 17px;
 
-        border-radius: 15px;
+        margin-bottom: 16px;
+
+        border-radius: 16px;
+    }
+
+    .profile-card::before {
+        width: 3px;
     }
 
     .profile-photo-wrapper {
         width: 68px;
         height: 68px;
+
+        flex-basis: 68px;
     }
 
     .profile-photo-fallback {
-        font-size: 28px;
+        font-size: 27px;
+    }
+
+    .profile-info {
+        padding-top: 2px;
     }
 
     .profile-info h1 {
+        margin-bottom: 5px;
+
         font-size: 19px;
+
+        letter-spacing: -0.25px;
     }
 
     .profile-info p {
         margin-bottom: 9px;
 
         font-size: 12px;
+
+        line-height: 1.45;
+    }
+
+    .profile-status {
+        gap: 5px;
     }
 
     .profile-badge {
+        min-height: 25px;
+
         padding: 5px 9px;
 
         font-size: 10px;
     }
 
     .profile-menu {
-        border-radius: 15px;
+        border-radius: 16px;
     }
 
     .profile-menu-item {
-        padding: 15px 14px;
+        min-height: 68px;
 
-        gap: 10px;
+        padding: 14px 13px;
+
+        gap: 9px;
     }
 
     .profile-menu-left {
@@ -521,7 +671,9 @@
         width: 39px;
         height: 39px;
 
-        border-radius: 10px;
+        flex-basis: 39px;
+
+        border-radius: 11px;
 
         font-size: 18px;
     }
@@ -531,22 +683,41 @@
     }
 
     .profile-menu-left p {
+        margin-top: 3px;
+
         font-size: 11px;
     }
 
+    .profile-menu-right {
+        gap: 6px;
+    }
+
     .profile-arrow {
-        font-size: 22px;
+        width: 26px;
+        height: 26px;
+
+        font-size: 20px;
     }
 
     .notification-count {
         min-width: 21px;
         height: 21px;
 
+        padding: 0 6px;
+
         font-size: 10px;
     }
 
+    .profile-logout-section {
+        margin-top: 14px;
+    }
+
     .profile-logout-button {
-        padding: 13px;
+        min-height: 46px;
+
+        padding: 12px;
+
+        border-radius: 13px;
 
         font-size: 13px;
     }
@@ -565,7 +736,7 @@
     }
 
     .profile-card {
-        gap: 12px;
+        gap: 11px;
 
         padding: 14px;
     }
@@ -573,10 +744,12 @@
     .profile-photo-wrapper {
         width: 58px;
         height: 58px;
+
+        flex-basis: 58px;
     }
 
     .profile-photo-fallback {
-        font-size: 24px;
+        font-size: 23px;
     }
 
     .profile-info h1 {
@@ -588,7 +761,7 @@
     }
 
     .profile-menu-item {
-        padding: 14px 12px;
+        padding: 13px 11px;
     }
 
     .profile-menu-left {
@@ -598,6 +771,10 @@
     .profile-menu-icon {
         width: 36px;
         height: 36px;
+
+        flex-basis: 36px;
+
+        border-radius: 10px;
 
         font-size: 16px;
     }
@@ -611,6 +788,70 @@
     }
 
     .profile-arrow {
-        font-size: 20px;
+        width: 24px;
+        height: 24px;
+
+        font-size: 19px;
+    }
+}
+
+
+/* =========================================================
+   TOUCH DEVICES
+========================================================= */
+
+@media (hover: none) {
+
+    .profile-menu-item:hover {
+        background: #ffffff;
+    }
+
+    .profile-menu-item:hover .profile-menu-icon {
+        background: #f6f7f8;
+        border-color: #eceef1;
+
+        color: #ff6b00;
+
+        transform: none;
+    }
+
+    .profile-menu-item:hover .profile-arrow {
+        background: transparent;
+
+        color: #9ca3af;
+
+        transform: none;
+    }
+
+    .profile-logout-button:hover {
+        background: #ffffff;
+        border-color: #e5e7eb;
+        color: #c2410c;
+
+        box-shadow:
+            0 1px 2px rgba(15, 23, 42, 0.03);
+
+        transform: none;
+    }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .profile-menu-item,
+    .profile-menu-icon,
+    .profile-arrow,
+    .profile-logout-button {
+        transition: none;
+    }
+
+    .profile-menu-item:hover .profile-menu-icon,
+    .profile-menu-item:hover .profile-arrow,
+    .profile-logout-button:hover {
+        transform: none;
     }
 }

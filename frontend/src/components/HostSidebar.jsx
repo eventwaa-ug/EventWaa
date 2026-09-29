@@ -11,7 +11,6 @@ import {
     ScanSearch,
     LogOut,
     Menu,
-    X,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { usePlatformSettings } from "../context/PlatformSettingsContext.jsx";
@@ -179,7 +178,7 @@ function HostSidebar() {
                         }
                         aria-label="Close host menu"
                     >
-                        <X size={25} strokeWidth={2.2} />
+                        X
                     </button>
                 </div>
 

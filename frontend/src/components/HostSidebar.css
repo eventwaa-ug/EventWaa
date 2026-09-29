@@ -1,16 +1,16 @@
 /* ============================================================
    EVENTWAA HOST SIDEBAR
    Desktop + Mobile Drawer
-   ============================================================ */
+   Modern UI — Orange Brand Theme
+============================================================ */
 
 * {
     box-sizing: border-box;
 }
 
-
 /* ============================================================
    SIDEBAR
-   ============================================================ */
+============================================================ */
 
 .host-sidebar {
     position: fixed;
@@ -29,10 +29,6 @@
 
     box-shadow: 4px 0 24px rgba(17, 24, 39, 0.05);
 
-    /*
-     * IMPORTANT:
-     * The sidebar must be ABOVE the mobile overlay.
-     */
     z-index: 10000;
 
     transform: translateX(0);
@@ -44,10 +40,9 @@
     overflow: hidden;
 }
 
-
 /* ============================================================
    HEADER
-   ============================================================ */
+============================================================ */
 
 .host-sidebar-header {
     width: 100%;
@@ -77,7 +72,9 @@
 
 .host-sidebar-logo:focus-visible {
     border-radius: 999px;
-    box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.18);
+
+    box-shadow:
+        0 0 0 4px rgba(255, 107, 0, 0.18);
 }
 
 .host-platform-logo {
@@ -99,12 +96,12 @@
 
     max-width: 100%;
 
-    color: #ffffff;
-    background: #111827;
-
     padding: 8px 14px;
 
     border-radius: 999px;
+
+    background: #111827;
+    color: #ffffff;
 
     font-size: 21px;
     font-weight: 900;
@@ -116,10 +113,9 @@
     text-overflow: ellipsis;
 }
 
-
 /* ============================================================
    CLOSE BUTTON
-   ============================================================ */
+============================================================ */
 
 .host-sidebar-close {
     display: none;
@@ -130,10 +126,10 @@
     align-items: center;
     justify-content: center;
 
-    border: none;
-    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
 
-    background: transparent;
+    background: #ffffff;
     color: #6b7280;
 
     cursor: pointer;
@@ -141,19 +137,23 @@
     flex-shrink: 0;
 
     transition:
-        background 0.2s ease,
-        color 0.2s ease;
+        background-color 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
 }
 
 .host-sidebar-close:hover {
-    background: #f3f4f6;
-    color: #111827;
-}
+    background: #FFF4ED;
+    border-color: #FF6B00;
+    color: #FF6B00;
 
+    transform: translateY(-1px);
+}
 
 /* ============================================================
    HOST PROFILE
-   ============================================================ */
+============================================================ */
 
 .host-profile {
     width: 100%;
@@ -162,7 +162,6 @@
 
     display: flex;
     align-items: center;
-
     gap: 12px;
 
     border-bottom: 1px solid #f3f4f6;
@@ -178,17 +177,17 @@
     align-items: center;
     justify-content: center;
 
+    flex-shrink: 0;
+
     border-radius: 50%;
 
     background: #fff1e6;
+    border: 1px solid #ffd7b8;
+
     color: #ff6b00;
 
     font-size: 17px;
     font-weight: 800;
-
-    border: 1px solid #ffd7b8;
-
-    flex-shrink: 0;
 }
 
 .host-profile-info {
@@ -219,10 +218,9 @@
     font-size: 12px;
 }
 
-
 /* ============================================================
    NAVIGATION
-   ============================================================ */
+============================================================ */
 
 .host-navigation {
     flex: 1;
@@ -257,10 +255,9 @@
     text-transform: uppercase;
 }
 
-
 /* ============================================================
    NAVIGATION ITEMS
-   ============================================================ */
+============================================================ */
 
 .host-nav-item {
     position: relative;
@@ -273,7 +270,6 @@
 
     display: flex;
     align-items: center;
-
     gap: 12px;
 
     border: 1.5px solid transparent;
@@ -291,7 +287,7 @@
     cursor: pointer;
 
     transition:
-        background 0.2s ease,
+        background-color 0.2s ease,
         border-color 0.2s ease,
         color 0.2s ease,
         transform 0.2s ease;
@@ -323,15 +319,15 @@
 }
 
 .host-nav-item:hover {
-    background: #fffbf5;
-    border-color: #ffd7b8;
+    background: #FFF4ED;
+    border-color: #FFD7B8;
     color: #111827;
 
     transform: translateX(2px);
 }
 
 .host-nav-item:hover .host-nav-icon {
-    color: #ff6b00;
+    color: #FF6B00;
 }
 
 .host-nav-item.active {
@@ -340,17 +336,17 @@
 
     color: #ffffff;
 
-    box-shadow: 0 6px 16px rgba(17, 24, 39, 0.14);
+    box-shadow:
+        0 6px 16px rgba(17, 24, 39, 0.14);
 }
 
 .host-nav-item.active .host-nav-icon {
-    color: #ff6b00;
+    color: #FF6B00;
 }
-
 
 /* ============================================================
    LOGOUT
-   ============================================================ */
+============================================================ */
 
 .host-sidebar-bottom {
     width: 100%;
@@ -380,18 +376,25 @@
     color: #b91c1c;
 }
 
+.logout-item:hover .host-nav-icon {
+    color: #b91c1c;
+}
 
 /* ============================================================
    MOBILE MENU BUTTON
-   ============================================================ */
+============================================================ */
 
 .host-menu-button {
     display: none;
 
     position: fixed;
 
-    top: 16px;
-    left: 16px;
+    /*
+     * Sits below the navbar and slightly to the right,
+     * leaving the ScrollControls Back button accessible.
+     */
+    top: 76px;
+    left: 22px;
 
     width: 44px;
     height: 44px;
@@ -409,49 +412,52 @@
 
     cursor: pointer;
 
-    /*
-     * Must remain above both the overlay and sidebar.
-     */
-    z-index: 10001;
+    z-index: 1500;
 
     box-shadow:
         0 6px 18px rgba(17, 24, 39, 0.10);
 
     transition:
-        background 0.2s ease,
+        background-color 0.2s ease,
         color 0.2s ease,
         border-color 0.2s ease,
-        transform 0.2s ease;
-
-    touch-action: manipulation;
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .host-menu-button:hover {
-    background: #111827;
-    border-color: #111827;
-    color: #ffffff;
+    background: #FFF4ED;
+    border-color: #FF6B00;
+    color: #FF6B00;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 7px 18px rgba(255, 107, 0, 0.16);
 }
 
 .host-menu-button:active {
     transform: scale(0.96);
 }
 
-
 /* ============================================================
    MOBILE OVERLAY
-   ============================================================ */
+============================================================ */
 
 .host-sidebar-overlay {
     position: fixed;
 
-    inset: 0;
+    /*
+     * Keep the navbar and top controls usable.
+     */
+    top: 64px;
+    right: 0;
+    bottom: 0;
+    left: 0;
 
     background: rgba(17, 24, 39, 0.42);
 
-    /*
-     * Below sidebar, above the rest of the page.
-     */
-    z-index: 9999;
+    z-index: 1300;
 
     animation: hostOverlayFade 0.2s ease;
 
@@ -468,15 +474,19 @@
     }
 }
 
-
 /* ============================================================
    MOBILE SIDEBAR
-   ============================================================ */
+============================================================ */
 
 @media (max-width: 768px) {
 
     .host-menu-button {
         display: flex !important;
+
+        top: 76px;
+        left: 22px;
+
+        z-index: 1500;
     }
 
     .host-sidebar {
@@ -484,17 +494,18 @@
         max-width: 86vw;
 
         /*
-         * Closed position.
+         * Pull the mobile drawer below the navbar.
          */
+        top: 64px;
+
+        height: calc(100vh - 64px);
+        height: calc(100dvh - 64px);
+
         transform: translateX(-110%);
 
-        
         box-shadow: none;
 
-        /*
-         * Keep drawer above overlay.
-         */
-        z-index: 10000;
+        z-index: 1400;
     }
 
     .host-sidebar.host-sidebar-open {
@@ -509,16 +520,15 @@
     }
 }
 
-
 /* ============================================================
    SMALL PHONES
-   ============================================================ */
+============================================================ */
 
 @media (max-width: 480px) {
 
     .host-menu-button {
-        top: 14px;
-        left: 14px;
+        top: 74px;
+        left: 18px;
 
         width: 42px;
         height: 42px;
@@ -527,19 +537,40 @@
     .host-sidebar {
         width: 290px;
         max-width: 88vw;
+
+        top: 60px;
+
+        height: calc(100vh - 60px);
+        height: calc(100dvh - 60px);
+    }
+
+    .host-sidebar-overlay {
+        top: 60px;
     }
 }
 
+/* ============================================================
+   ACCESSIBILITY
+============================================================ */
+
+.host-menu-button:focus-visible,
+.host-sidebar-close:focus-visible,
+.host-nav-item:focus-visible,
+.host-sidebar-logo:focus-visible {
+    outline: 2px solid #FF6B00;
+    outline-offset: 3px;
+}
 
 /* ============================================================
    REDUCED MOTION
-   ============================================================ */
+============================================================ */
 
 @media (prefers-reduced-motion: reduce) {
 
     .host-sidebar,
     .host-menu-button,
-    .host-nav-item {
+    .host-nav-item,
+    .host-sidebar-close {
         transition: none;
     }
 
