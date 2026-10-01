@@ -23,17 +23,5 @@
         "status": "active",
         "verifiedHost": false,
         "hostMode": false
-    },
-    {
-        "id": 1788708801551,
-        "name": "okelo team",
-        "email": "eventwaa.ug@gmail.com",
-        "password": "scrypt:32768:8:1$vkynNl443ZDuBTVR$22517cc9f25211df6531aa07a8d4a07b9cfc5bdd165e159a8b7c8773a08847e9a7cd5c189920add59eba9b1012de11f23b5d5afa312224435f0269a723a268b6",
-        "role": "team",
-        "status": "active",
-        "verifiedHost": false,
-        "hostMode": false,
-        "teamMember": true,
-        "teamAccountId": "TEAM-1788708801551"
     }
 ]

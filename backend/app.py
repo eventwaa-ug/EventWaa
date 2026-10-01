@@ -42,46 +42,27 @@ app = Flask(
     static_folder="uploads"
     )
 
-# React frontend
+# ============================================================
+# CORS CONFIGURATION
+# ============================================================
+
+ALLOWED_ORIGINS = [
+    "https://eventwaa.com",
+    "https://www.eventwaa.com",
+    "http://localhost:5173",
+    "http://localhost:3000",
+]
+
 CORS(
     app,
     resources={
         r"/*": {
-            "origins": "*"
+            "origins": ALLOWED_ORIGINS
         }
     },
     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"]
+    allow_headers=["Content-Type", "Authorization"],
 )
-
-# ============================================================
-# CORS RESPONSE HEADERS
-# ============================================================
-
-@app.after_request
-def add_cors_headers(response):
-
-    origin = request.headers.get("Origin")
-
-    allowed_origins = {
-        "https://event-waa-e7jm.vercel.app",
-        "https://event-waa-zhnd.vercel.app",
-        "https://event-waa-zhnd-git-main-event-waa.vercel.app",
-        "http://localhost:5173",
-        "http://localhost:3000",
-    }
-
-    if origin in allowed_origins:
-        response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Vary"] = "Origin"
-        response.headers["Access-Control-Allow-Methods"] = (
-            "GET, POST, PUT, DELETE, OPTIONS"
-        )
-        response.headers["Access-Control-Allow-Headers"] = (
-            "Content-Type, Authorization"
-        )
-
-    return response
 
 # ============================================================
 # CORS PREFLIGHT HANDLER
@@ -95,17 +76,36 @@ def handle_options(path):
 # EMAIL CONFIGURATION
 # ============================================================
 
-app.config["MAIL_SERVER"] = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-app.config["MAIL_PORT"] = int(os.getenv("EMAIL_PORT", 587))
+app.config["MAIL_SERVER"] = os.getenv(
+    "EMAIL_HOST",
+    "smtp.gmail.com"
+)
+
+app.config["MAIL_PORT"] = int(
+    os.getenv("EMAIL_PORT", 587)
+)
+
 app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USERNAME"] = os.getenv("EMAIL_USERNAME")
-app.config["MAIL_PASSWORD"] = os.getenv("EMAIL_PASSWORD")
-app.config["MAIL_DEFAULT_SENDER"] = os.getenv("EMAIL_USERNAME")
-print("MAIL USERNAME:", app.config["MAIL_USERNAME"])
-print("MAIL PASSWORD LOADED:", bool(app.config["MAIL_PASSWORD"]))
+
+app.config["MAIL_USERNAME"] = os.getenv(
+    "EMAIL_USERNAME"
+)
+
+app.config["MAIL_PASSWORD"] = os.getenv(
+    "EMAIL_PASSWORD"
+)
+
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv(
+    "EMAIL_USERNAME"
+)
+
+print(
+    "MAIL CONFIG LOADED:",
+    bool(app.config["MAIL_USERNAME"]),
+    bool(app.config["MAIL_PASSWORD"])
+)
 
 mail = Mail(app)
-
 # ============================================================
 # EVENTWAA ADMIN PASSWORD RECOVERY EMAIL
 #
@@ -188,13 +188,15 @@ Location: Gulu, Uganda
         }
 
 # ============================================================
-# FLASK SECRET KEY
+# SECRET KEY
 # ============================================================
 
-app.config["SECRET_KEY"] = os.getenv(
+SECRET_KEY = os.getenv(
     "SECRET_KEY",
-    "eventwaa-development-secret-key-change-this"
+    "eventwaa-local-development-secret-key"
 )
+
+app.config["SECRET_KEY"] = SECRET_KEY
 
 # ============================================================
 # EVENTWAA TICKET EMAIL

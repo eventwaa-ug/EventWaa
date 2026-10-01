@@ -1,24 +1,29 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+    FiAlertCircle,
+    FiArrowLeft,
+    FiArrowRight,
+    FiCalendar,
+    FiCheckCircle,
+    FiClock,
+    FiEdit3,
+    FiHeart,
+    FiMapPin,
+    FiMessageCircle,
+    FiSettings,
+    FiUsers,
+} from "react-icons/fi";
+
 import "../styles/HostProfile.css";
 import { useAuth } from "../context/AuthContext";
 
-function HostProfile() {
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
+function HostProfile() {
     const { id } = useParams();
     const navigate = useNavigate();
-
     const { user } = useAuth();
-
-        /* =========================================================
-       BACKEND
-    ========================================================= */
-
-    const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
-
-    // ============================================================
-    // STATE
-    // ============================================================
 
     const [host, setHost] = useState(null);
     const [events, setEvents] = useState([]);
@@ -31,170 +36,115 @@ function HostProfile() {
     const [error, setError] = useState("");
 
     // ============================================================
-    // IMAGE URL
+    // IMAGE HELPERS
     // ============================================================
 
-    const getImageUrl = (image) => {
-
+    const getImageUrl = (image, fallback = "/default-avatar.png") => {
         if (!image) {
-            return "/default-avatar.png";
+            return fallback;
         }
 
         if (
             typeof image === "string" &&
-            (
-                image.startsWith("http://") ||
-                image.startsWith("https://")
-            )
+            (image.startsWith("http://") ||
+                image.startsWith("https://"))
         ) {
             return image;
         }
 
-        return `${BACKEND_URL}${image}`;
+        if (image.startsWith("/")) {
+            return `${BACKEND_URL}${image}`;
+        }
+
+        return `${BACKEND_URL}/${image}`;
     };
 
-    // ============================================================
-    // EVENT POSTER URL
-    // ============================================================
-
     const getEventImageUrl = (event) => {
-
         const image =
             event?.eventPoster ||
             event?.poster ||
             event?.image;
 
-        if (!image) {
-            return "/default-event.jpg";
-        }
-
-        if (
-            typeof image === "string" &&
-            (
-                image.startsWith("http://") ||
-                image.startsWith("https://")
-            )
-        ) {
-            return image;
-        }
-
-        return `${BACKEND_URL}${image}`;
+        return getImageUrl(image, "/default-event.jpg");
     };
 
     // ============================================================
-    // LOAD HOST
+    // LOAD HOST PROFILE
     // ============================================================
 
     useEffect(() => {
-
         let cancelled = false;
 
         const loadHostProfile = async () => {
-
             setLoading(true);
             setError("");
 
             try {
+                // ------------------------------------------------
+                // LOAD USERS
+                // ------------------------------------------------
 
-                // =================================================
-                // GET USERS
-                // =================================================
-
-                const usersResponse =
-                    await fetch(
-                        `${BACKEND_URL}/users`
-                    );
+                const usersResponse = await fetch(
+                    `${BACKEND_URL}/users`
+                );
 
                 if (!usersResponse.ok) {
-                    throw new Error(
-                        "Failed to load users."
-                    );
+                    throw new Error("Failed to load users.");
                 }
 
-                const usersData =
-                    await usersResponse.json();
+                const usersData = await usersResponse.json();
 
-                // =================================================
-                // SUPPORT BOTH:
-                //
-                // [users]
-                //
-                // AND
-                //
-                // { users: [...] }
-                // =================================================
+                const users = Array.isArray(usersData)
+                    ? usersData
+                    : Array.isArray(usersData?.users)
+                        ? usersData.users
+                        : [];
 
-                const users =
-                    Array.isArray(usersData)
-                        ? usersData
-                        : Array.isArray(usersData?.users)
-                            ? usersData.users
-                            : [];
+                const foundHost = users.find(
+                    (item) =>
+                        String(item.id) === String(id)
+                );
 
-                const foundHost =
-                    users.find(
-                        (item) =>
-                            String(item.id) ===
-                            String(id)
-                    );
-
-                if (cancelled) {
-                    return;
-                }
+                if (cancelled) return;
 
                 if (!foundHost) {
-
                     setHost(null);
+                    setError("This host could not be found.");
                     setLoading(false);
-                    setError(
-                        "This host could not be found."
-                    );
-
                     return;
                 }
 
                 setHost(foundHost);
 
-                // =================================================
+                // ------------------------------------------------
                 // LOAD EVENTS
-                // =================================================
+                // ------------------------------------------------
 
                 try {
-
-                    const eventsResponse =
-                        await fetch(
-                            `${BACKEND_URL}/events`
-                        );
+                    const eventsResponse = await fetch(
+                        `${BACKEND_URL}/events`
+                    );
 
                     if (eventsResponse.ok) {
-
                         const eventsData =
                             await eventsResponse.json();
 
-                        const allEvents =
-                            Array.isArray(eventsData)
-                                ? eventsData
-                                : Array.isArray(
-                                    eventsData?.events
-                                )
-                                    ? eventsData.events
-                                    : [];
+                        const allEvents = Array.isArray(eventsData)
+                            ? eventsData
+                            : Array.isArray(eventsData?.events)
+                                ? eventsData.events
+                                : [];
 
-                        const hostEvents =
-                            allEvents.filter(
-                                (event) =>
-                                    String(
-                                        event.hostId
-                                    ) === String(id)
-                            );
+                        const hostEvents = allEvents.filter(
+                            (event) =>
+                                String(event.hostId) === String(id)
+                        );
 
                         if (!cancelled) {
                             setEvents(hostEvents);
                         }
                     }
-
                 } catch (eventsError) {
-
                     console.error(
                         "HOST EVENTS ERROR:",
                         eventsError
@@ -205,38 +155,34 @@ function HostProfile() {
                     }
                 }
 
-                // =================================================
+                // ------------------------------------------------
                 // LOAD BOOKINGS
-                // =================================================
+                // ------------------------------------------------
 
                 try {
-
-                    const bookingsResponse =
-                        await fetch(
-                            `${BACKEND_URL}/bookings`
-                        );
+                    const bookingsResponse = await fetch(
+                        `${BACKEND_URL}/bookings`
+                    );
 
                     if (bookingsResponse.ok) {
-
                         const bookingsData =
                             await bookingsResponse.json();
 
-                        const allBookings =
-                            Array.isArray(bookingsData)
-                                ? bookingsData
-                                : Array.isArray(
-                                    bookingsData?.bookings
-                                )
-                                    ? bookingsData.bookings
-                                    : [];
+                        const allBookings = Array.isArray(
+                            bookingsData
+                        )
+                            ? bookingsData
+                            : Array.isArray(
+                                bookingsData?.bookings
+                            )
+                                ? bookingsData.bookings
+                                : [];
 
                         if (!cancelled) {
                             setBookings(allBookings);
                         }
                     }
-
                 } catch (bookingError) {
-
                     console.error(
                         "BOOKINGS ERROR:",
                         bookingError
@@ -247,36 +193,27 @@ function HostProfile() {
                     }
                 }
 
-                // =================================================
-                // FOLLOWING STATUS
-                // =================================================
+                // ------------------------------------------------
+                // CHECK FOLLOWING STATUS
+                // ------------------------------------------------
 
                 if (user?.id) {
-
                     try {
-
-                        const response =
-                            await fetch(
-                                `${BACKEND_URL}/follow/check/${id}/${user.id}`
-                            );
+                        const response = await fetch(
+                            `${BACKEND_URL}/follow/check/${id}/${user.id}`
+                        );
 
                         if (response.ok) {
-
                             const data =
                                 await response.json();
 
                             if (!cancelled) {
-
                                 setFollowing(
-                                    Boolean(
-                                        data.following
-                                    )
+                                    Boolean(data.following)
                                 );
                             }
                         }
-
                     } catch (followError) {
-
                         console.error(
                             "FOLLOW CHECK ERROR:",
                             followError
@@ -284,24 +221,20 @@ function HostProfile() {
                     }
                 }
 
-                // =================================================
-                // FOLLOWERS
-                // =================================================
+                // ------------------------------------------------
+                // LOAD FOLLOWERS
+                // ------------------------------------------------
 
                 try {
-
-                    const followersResponse =
-                        await fetch(
-                            `${BACKEND_URL}/followers/${id}`
-                        );
+                    const followersResponse = await fetch(
+                        `${BACKEND_URL}/followers/${id}`
+                    );
 
                     if (followersResponse.ok) {
-
                         const followersData =
                             await followersResponse.json();
 
                         if (!cancelled) {
-
                             setFollowers(
                                 Number(
                                     followersData?.count || 0
@@ -309,9 +242,7 @@ function HostProfile() {
                             );
                         }
                     }
-
                 } catch (followersError) {
-
                     console.error(
                         "FOLLOWERS ERROR:",
                         followersError
@@ -325,20 +256,16 @@ function HostProfile() {
                 if (!cancelled) {
                     setLoading(false);
                 }
-
-            } catch (error) {
-
+            } catch (loadError) {
                 console.error(
                     "HOST PROFILE ERROR:",
-                    error
+                    loadError
                 );
 
                 if (!cancelled) {
-
                     setError(
                         "Unable to load this host profile."
                     );
-
                     setLoading(false);
                 }
             }
@@ -349,7 +276,6 @@ function HostProfile() {
         return () => {
             cancelled = true;
         };
-
     }, [id, user?.id]);
 
     // ============================================================
@@ -357,20 +283,16 @@ function HostProfile() {
     // ============================================================
 
     if (loading) {
-
         return (
             <div className="host-profile-state">
+                <div
+                    className="host-loading-spinner"
+                    aria-hidden="true"
+                />
 
-                <div className="host-loading-spinner"></div>
+                <h2>Loading host profile...</h2>
 
-                <h2>
-                    Loading host profile...
-                </h2>
-
-                <p>
-                    Please wait a moment.
-                </p>
-
+                <p>Please wait a moment.</p>
             </div>
         );
     }
@@ -380,17 +302,13 @@ function HostProfile() {
     // ============================================================
 
     if (error || !host) {
-
         return (
             <div className="host-profile-state">
-
                 <div className="host-error-icon">
-                    !
+                    <FiAlertCircle aria-hidden="true" />
                 </div>
 
-                <h2>
-                    Host Not Found
-                </h2>
+                <h2>Host Not Found</h2>
 
                 <p>
                     {error ||
@@ -399,70 +317,63 @@ function HostProfile() {
 
                 <button
                     type="button"
-                    onClick={() =>
-                        navigate(-1)
-                    }
+                    className="host-back-btn"
+                    onClick={() => navigate(-1)}
                 >
+                    <FiArrowLeft aria-hidden="true" />
                     Go Back
                 </button>
-
             </div>
         );
     }
 
     // ============================================================
-    // MY PROFILE
+    // PROFILE INFORMATION
     // ============================================================
 
     const isMyProfile =
         user &&
-        String(user.id) ===
-        String(host.id);
+        String(user.id) === String(host.id);
+
+    const isVerified =
+        host.verifiedHost === true ||
+        host.verifiedHost === "true";
 
     // ============================================================
     // TOTAL ATTENDEES
     // ============================================================
 
-    const hostEventIds =
-        new Set(
-            events.map(
-                (event) =>
-                    String(event.id)
-            )
-        );
+    const hostEventIds = new Set(
+        events.map((event) => String(event.id))
+    );
 
-    const totalAttendees =
-        bookings
-            .filter((booking) =>
-                hostEventIds.has(
-                    String(booking.eventId)
-                )
+    const totalAttendees = bookings
+        .filter((booking) =>
+            hostEventIds.has(
+                String(booking.eventId)
             )
-            .reduce(
-                (total, booking) =>
-                    total +
-                    Number(
-                        booking.quantity || 0
-                    ),
-                0
-            );
+        )
+        .reduce(
+            (total, booking) =>
+                total +
+                Number(booking.quantity || 0),
+            0
+        );
 
     // ============================================================
     // FOLLOW HOST
     // ============================================================
 
     const handleFollow = async () => {
-
         if (!user) {
-
             alert(
                 "Please login to follow this host."
             );
 
             navigate("/login", {
                 state: {
-                    from: `/host/${id}`
-                }
+                    from: `/host/${id}`,
+                },
             });
 
             return;
@@ -473,32 +384,22 @@ function HostProfile() {
         }
 
         try {
+            const response = await fetch(
+                `${BACKEND_URL}/follow`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                    },
+                    body: JSON.stringify({
+                        hostId: Number(id),
+                        userId: user.id,
+                    }),
+                }
+            );
 
-            const response =
-                await fetch(
-                    `${BACKEND_URL}/follow`,
-                    {
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body: JSON.stringify({
-
-                            hostId:
-                                Number(id),
-
-                            userId:
-                                user.id
-
-                        })
-                    }
-                );
-
-            const data =
-                await response.json();
+            const data = await response.json();
 
             if (!response.ok) {
                 throw new Error(
@@ -508,49 +409,39 @@ function HostProfile() {
             }
 
             if (data.success) {
-
                 setFollowing(true);
 
                 try {
-
                     const followersResponse =
                         await fetch(
                             `${BACKEND_URL}/followers/${id}`
                         );
 
-                    if (
-                        followersResponse.ok
-                    ) {
-
+                    if (followersResponse.ok) {
                         const followersData =
                             await followersResponse.json();
 
                         setFollowers(
                             Number(
-                                followersData?.count ||
-                                0
+                                followersData?.count || 0
                             )
                         );
                     }
-
-                } catch (error) {
-
+                } catch (countError) {
                     console.error(
                         "FOLLOWER COUNT ERROR:",
-                        error
+                        countError
                     );
                 }
             }
-
-        } catch (error) {
-
+        } catch (followError) {
             console.error(
                 "FOLLOW ERROR:",
-                error
+                followError
             );
 
             alert(
-                error.message ||
+                followError.message ||
                 "Failed to follow host."
             );
         }
@@ -561,13 +452,11 @@ function HostProfile() {
     // ============================================================
 
     const handleContact = () => {
-
         if (!user) {
-
             navigate("/login", {
                 state: {
-                    from: `/host/${id}`
-                }
+                    from: `/host/${id}`,
+                },
             });
 
             return;
@@ -579,21 +468,78 @@ function HostProfile() {
     };
 
     // ============================================================
+    // EVENT PRICE
+    // ============================================================
+
+    const getEventPrice = (event) => {
+        if (
+            event.eventType?.toLowerCase() ===
+            "free"
+        ) {
+            return {
+                text: "Free Entry",
+                type: "free",
+            };
+        }
+
+        if (
+            Array.isArray(event.tickets) &&
+            event.tickets.length > 0
+        ) {
+            const prices = event.tickets
+                .map((ticket) =>
+                    Number(ticket.price)
+                )
+                .filter(
+                    (price) =>
+                        Number.isFinite(price) &&
+                        price > 0
+                );
+
+            if (prices.length > 0) {
+                return {
+                    text: `From UGX ${Math.min(
+                        ...prices
+                    ).toLocaleString()}`,
+                    type: "paid",
+                };
+            }
+        }
+
+        const eventPrice = Number(
+            event.price || 0
+        );
+
+        if (
+            Number.isFinite(eventPrice) &&
+            eventPrice > 0
+        ) {
+            return {
+                text: `UGX ${eventPrice.toLocaleString()}`,
+                type: "paid",
+            };
+        }
+
+        return {
+            text: "Price unavailable",
+            type: "unknown",
+        };
+    };
+
+    // ============================================================
     // RENDER
     // ============================================================
 
     return (
-
-        <div className="host-profile">
+        <main className="host-profile">
 
             {/* ====================================================
-                HOST HEADER
+                PROFILE HEADER
             ==================================================== */}
 
             <section className="host-cover">
 
                 <div className="host-avatar-wrapper">
-
                     <img
                         src={getImageUrl(
                             host.image ||
@@ -602,81 +548,48 @@ function HostProfile() {
                         )}
                         alt={
                             host.name ||
-                            "Host"
+                            "Event host"
                         }
                         className="host-avatar"
-                        onError={(e) => {
-
-                            e.currentTarget.src =
+                        onError={(event) => {
+                            event.currentTarget.src =
                                 "/default-avatar.png";
-
                         }}
                     />
-
                 </div>
 
-                {/* =================================================
-                    HOST NAME
-                ================================================= */}
-
                 <div className="host-name-row">
-
                     <h1>
                         {host.name ||
                             "Event Organizer"}
                     </h1>
 
-                    {(
-                        host.verifiedHost === true ||
-                        host.verifiedHost === "true"
-                    ) && (
-
+                    {isVerified && (
                         <span className="verified-badge">
-
-                            <span>
-                                ✓
-                            </span>
-
+                            <FiCheckCircle
+                                aria-hidden="true"
+                            />
                             Verified Host
-
                         </span>
-
                     )}
-
                 </div>
 
-                {/* =================================================
-                    ORGANIZER NAME
-                ================================================= */}
-
-                <h3>
+                <p className="host-organizer-name">
                     {host.organizerName ||
                         "Event Organizer"}
-                </h3>
-
-                {/* =================================================
-                    LOCATION
-                ================================================= */}
-
-                <p className="host-location">
-
-                    📍{" "}
-
-                    {host.location ||
-                        "Gulu, Uganda"}
-
                 </p>
 
-                {/* =================================================
-                    ACTIONS
-                ================================================= */}
+                <p className="host-location">
+                    <FiMapPin aria-hidden="true" />
+                    <span>
+                        {host.location ||
+                            "Gulu, Uganda"}
+                    </span>
+                </p>
 
                 <div className="host-actions">
-
                     {isMyProfile ? (
-
                         <>
-
                             <button
                                 type="button"
                                 className="host-primary-btn"
@@ -686,7 +599,10 @@ function HostProfile() {
                                     )
                                 }
                             >
-                                ⚙️ Manage Dashboard
+                                <FiSettings
+                                    aria-hidden="true"
+                                />
+                                Manage Dashboard
                             </button>
 
                             <button
@@ -698,15 +614,14 @@ function HostProfile() {
                                     )
                                 }
                             >
-                                ✏️ Edit Profile
+                                <FiEdit3
+                                    aria-hidden="true"
+                                />
+                                Edit Profile
                             </button>
-
                         </>
-
                     ) : (
-
                         <>
-
                             <button
                                 type="button"
                                 className={
@@ -714,33 +629,31 @@ function HostProfile() {
                                         ? "host-following-btn"
                                         : "host-primary-btn"
                                 }
-                                onClick={
-                                    handleFollow
-                                }
+                                onClick={handleFollow}
+                                aria-pressed={following}
                             >
+                                <FiHeart
+                                    aria-hidden="true"
+                                />
 
                                 {following
-                                    ? "❤️ Following"
-                                    : "🤍 Follow"}
-
+                                    ? "Following"
+                                    : "Follow"}
                             </button>
 
                             <button
                                 type="button"
                                 className="host-secondary-btn"
-                                onClick={
-                                    handleContact
-                                }
+                                onClick={handleContact}
                             >
-                                💬 Chat with Host
+                                <FiMessageCircle
+                                    aria-hidden="true"
+                                />
+                                Chat with Host
                             </button>
-
                         </>
-
                     )}
-
                 </div>
-
             </section>
 
             {/* ====================================================
@@ -748,274 +661,68 @@ function HostProfile() {
             ==================================================== */}
 
             <section className="host-about">
-
-                <h2>
-                    About
-                </h2>
+                <div className="section-heading">
+                    <span className="section-kicker">
+                        About the host
+                    </span>
+                </div>
 
                 <p>
-
                     {host.description ||
                         "Creating amazing experiences on EventWaa."}
-
                 </p>
-
             </section>
 
             {/* ====================================================
                 STATISTICS
             ==================================================== */}
 
-            <section className="host-stats">
-
+            <section
+                className="host-stats"
+                aria-label="Host statistics"
+            >
                 <div className="host-stat-card">
-
                     <span className="host-stat-icon">
-                        📅
+                        <FiCalendar
+                            aria-hidden="true"
+                        />
                     </span>
-
-                    <h3>
-                        {events.length}
-                    </h3>
-
-                    <p>
-                        Events Hosted
-                    </p>
-
-                </div>
-
-                <div className="host-stat-card">
-
-                    <span className="host-stat-icon">
-                        👥
-                    </span>
-
-                    <h3>
-                        {totalAttendees}
-                    </h3>
-
-                    <p>
-                        Attendees
-                    </p>
-
-                </div>
-
-                <div className="host-stat-card">
-
-                    <span className="host-stat-icon">
-                        ❤️
-                    </span>
-
-                    <h3>
-                        {followers}
-                    </h3>
-
-                    <p>
-                        Followers
-                    </p>
-
-                </div>
-
-            </section>
-
-            {/* ====================================================
-                EVENTS
-            ==================================================== */}
-
-            <section className="host-events">
-
-                <div className="host-events-header">
 
                     <div>
-
-                        <h2>
-                            Upcoming Events
-                        </h2>
-
-                        <p>
-                            Events hosted by{" "}
-                            {host.organizerName ||
-                                host.name}
-                        </p>
-
+                        <h3>{events.length}</h3>
+                        <p>Events</p>
                     </div>
-
-                    <span className="host-event-count">
-
-                        {events.length}{" "}
-                        {events.length === 1
-                            ? "Event"
-                            : "Events"}
-
-                    </span>
-
                 </div>
 
-                {/* =================================================
-                    NO EVENTS
-                ================================================= */}
+                <div className="host-stat-card">
+                    <span className="host-stat-icon">
+                        <FiUsers
+                            aria-hidden="true"
+                        />
+                    </span>
 
-                {events.length === 0 ? (
-
-                    <div className="no-host-events">
-
-                        <div>
-                            📅
-                        </div>
-
-                        <h3>
-                            No upcoming events
-                        </h3>
-
-                        <p>
-                            This host has no published
-                            events at the moment.
-                        </p>
-
+                    <div>
+                        <h3>{totalAttendees}</h3>
+                        <p>Attendees</p>
                     </div>
+                </div>
 
-                ) : (
+                <div className="host-stat-card">
+                    <span className="host-stat-icon">
+                        <FiHeart
+                            aria-hidden="true"
+                        />
+                    </span>
 
-                    <div className="host-event-list">
-
-                        {events.map(
-                            (event) => (
-
-                                <article
-                                    className="public-event-card"
-                                    key={event.id}
-                                >
-
-                                    <img
-                                        src={getEventImageUrl(
-                                            event
-                                        )}
-                                        alt={
-                                            event.title ||
-                                            "Event"
-                                        }
-                                        onError={(e) => {
-
-                                            e.currentTarget.src =
-                                                "/default-event.jpg";
-
-                                        }}
-                                    />
-
-                                    <div className="public-event-content">
-
-                                        <div className="public-event-top">
-
-                                            <h3>
-                                                {event.title}
-                                            </h3>
-
-                                            {(
-                                                event.verifiedHost ===
-                                                    true ||
-                                                event.verifiedHost ===
-                                                    "true"
-                                            ) && (
-
-                                                <span>
-                                                    ✓ Verified
-                                                </span>
-
-                                            )}
-
-                                        </div>
-
-                                        <p>
-                                            📍{" "}
-                                            {event.venue ||
-                                                "Venue TBA"}
-                                            {event.city
-                                                ? `, ${event.city}`
-                                                : ""}
-                                        </p>
-
-                                        <p>
-                                            📅{" "}
-                                            {event.date ||
-                                                "Date TBA"}
-                                        </p>
-
-                                        {event.startTime && (
-
-                                            <p>
-                                                🕒{" "}
-                                                {event.startTime}
-
-                                                {event.endTime
-                                                    ? ` - ${event.endTime}`
-                                                    : ""}
-                                            </p>
-
-                                        )}
-
-                                        <p className="host-event-price">
-
-                                            {event.eventType?.toLowerCase() ===
-                                                "free"
-
-                                                ? "Free Entry"
-
-                                                : Array.isArray(
-                                                    event.tickets
-                                                ) &&
-                                                  event.tickets.length > 0
-
-                                                    ? `From UGX ${Math.min(
-                                                        ...event.tickets
-                                                            .map(
-                                                                (ticket) =>
-                                                                    Number(
-                                                                        ticket.price
-                                                                    )
-                                                            )
-                                                            .filter(
-                                                                (price) =>
-                                                                    price > 0
-                                                            )
-                                                    ).toLocaleString()}`
-
-                                                    : Number(
-                                                        event.price || 0
-                                                    ) > 0
-
-                                                        ? `UGX ${Number(
-                                                            event.price
-                                                        ).toLocaleString()}`
-
-                                                        : "Price unavailable"}
-
-                                        </p>
-
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                navigate(
-                                                    `/events/${event.id}`
-                                                )
-                                            }
-                                        >
-                                            View Event →
-                                        </button>
-
-                                    </div>
-
-                                </article>
-
-                            )
-                        )}
-
+                    <div>
+                        <h3>{followers}</h3>
+                        <p>Followers</p>
                     </div>
-
-                )}
-
+                </div>
             </section>
 
-        </div>
+        
+        </main>
     );
 }
 

@@ -175,12 +175,10 @@ function Login() {
                             className="auth-logo"
                         />
                     ) : (
-                        <h1>
-                            {
-                                settings.platformName
-                            }
-                        </h1>
+                        <h1>{settings.platformName}</h1>
                     )}
+
+                    <h1>{settings.platformName}</h1>
                     <p>
                         Welcome back. Sign in to continue.
                     </p>

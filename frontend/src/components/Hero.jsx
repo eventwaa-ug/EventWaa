@@ -53,6 +53,15 @@ function Hero({ handleExploreEvents }) {
                 ease: "easeOut"
             }}
         >
+            <img 
+               className="hero-background-image"
+               src="/images/guluhero.jpeg"
+               alt="image loading"
+               arial-hidden="true"
+               fetchPriority="high"
+            />
+
+
             <div className="hero-content">
                 {/* ==================================================
                     SMALL LABEL

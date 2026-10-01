@@ -96,6 +96,8 @@ function Register() {
           <h1>{settings.platformName}</h1>
         )}
 
+         <h1>{settings.platformName}</h1>
+
         <p>Create your account, discover events, host
           events and sell tickets on the platform.</p>
       </div>
