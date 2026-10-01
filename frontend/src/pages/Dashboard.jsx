@@ -359,50 +359,46 @@ function Dashboard() {
   ========================================================= */
 
   useEffect(() => {
-    if (!user?.id) {
-      return;
-    }
+  if (!user?.id || !BACKEND_URL) {
+    return;
+  }
 
-    const loadUnread =
-      async () => {
-        try {
-          const response =
-            await fetch(
-              `${BACKEND_URL}/messages/unread/${user.id}`
-            );
-
-          if (!response.ok) {
-            return;
-          }
-
-          const data =
-            await response.json();
-
-          setUnreadCount(
-            Number(
-              data?.unread || 0
-            )
-          );
-        } catch (error) {
-          console.error(
-            "UNREAD MESSAGE ERROR:",
-            error
-          );
-        }
-      };
-
-    loadUnread();
-
-    const interval =
-      setInterval(
-        loadUnread,
-        3000
+  const loadUnread = async () => {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/messages/unread/${user.id}`
       );
 
-    return () =>
-      clearInterval(interval);
-  }, [user, BACKEND_URL]);
+      if (!response.ok) {
+        throw new Error(
+          `Unread messages request failed: ${response.status}`
+        );
+      }
 
+      const data = await response.json();
+
+      setUnreadCount(
+        Number(data?.unread || 0)
+      );
+    } catch (error) {
+      console.error(
+        "UNREAD MESSAGE ERROR:",
+        error
+      );
+    }
+  };
+
+  loadUnread();
+
+  const interval = setInterval(
+    loadUnread,
+    3000
+  );
+
+  return () => {
+    clearInterval(interval);
+  };
+}, [user?.id, BACKEND_URL]);
   /* =========================================================
      ACTIVE BOOKING
   ========================================================= */

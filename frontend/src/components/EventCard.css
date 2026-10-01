@@ -1,16 +1,23 @@
 /* ============================================================
    EVENTWAA — EVENT CARD
-   Modern • Clean • Responsive • Orange Brand
+   Modern • Clean • Responsive
+   Neutral Software UI + Orange Brand Accents
 ============================================================ */
 
 .event-card {
     width: 100%;
     min-width: 0;
+
     background: #ffffff;
-    border: 1px solid #E5E7EB;
+
+    border: 1px solid #e5e7eb;
     border-radius: 24px;
+
     overflow: hidden;
-    box-shadow: 0 4px 14px rgba(17, 24, 39, 0.045);
+
+    box-shadow:
+        0 4px 14px rgba(17, 24, 39, 0.045);
+
     transition:
         transform 0.25s ease,
         box-shadow 0.25s ease,
@@ -19,10 +26,11 @@
 
 .event-card:hover {
     transform: translateY(-5px);
-    border-color: #FFD7B8;
+
+    border-color: #d1d5db;
+
     box-shadow:
-        0 18px 38px rgba(17, 24, 39, 0.08),
-        0 6px 16px rgba(255, 107, 0, 0.07);
+        0 18px 38px rgba(17, 24, 39, 0.08);
 }
 
 /* ============================================================
@@ -31,22 +39,32 @@
 
 .event-image-wrapper {
     position: relative;
+
     width: 100%;
+
     overflow: hidden;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #F8F9FA;
+
+    background: #f8f9fa;
+
     border-radius: 24px 24px 0 0;
 }
 
 .event-image {
     display: block;
+
     width: 100%;
     max-width: 100%;
+
     height: auto;
+
     object-fit: contain;
-    transition: transform 0.35s ease;
+
+    transition:
+        transform 0.35s ease;
 }
 
 .event-card:hover .event-image {
@@ -59,8 +77,10 @@
 
 .event-type {
     position: absolute;
+
     top: 12px;
     left: 12px;
+
     z-index: 5;
 
     display: inline-flex;
@@ -68,36 +88,53 @@
     justify-content: center;
 
     padding: 6px 11px;
+
     border-radius: 999px;
 
     font-size: 0.74rem;
     line-height: 1;
     font-weight: 800;
+
     letter-spacing: 0.01em;
 
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
 }
 
-/* Free */
+/* ============================================================
+   FREE
+============================================================ */
+
 .event-type.free {
     background: rgba(236, 253, 245, 0.96);
+
     color: #047857;
-    border: 1px solid #A7F3D0;
+
+    border: 1px solid #a7f3d0;
 }
 
-/* Paid — EventWaa orange */
+/* ============================================================
+   PAID
+============================================================ */
+
 .event-type.paid {
     background: rgba(255, 241, 230, 0.97);
-    color: #E85D00;
-    border: 1px solid #FFD7B8;
+
+    color: #e85d00;
+
+    border: 1px solid #ffd7b8;
 }
 
-/* Cancelled */
+/* ============================================================
+   CANCELLED
+============================================================ */
+
 .event-type.cancelled {
     background: rgba(254, 242, 242, 0.97);
-    color: #991B1B;
-    border: 1px solid #FECACA;
+
+    color: #991b1b;
+
+    border: 1px solid #fecaca;
 }
 
 /* ============================================================
@@ -106,8 +143,10 @@
 
 .verified-host {
     position: absolute;
+
     top: 12px;
     right: 12px;
+
     z-index: 5;
 
     display: inline-flex;
@@ -115,9 +154,11 @@
     justify-content: center;
 
     padding: 6px 11px;
+
     border-radius: 999px;
 
     background: rgba(255, 255, 255, 0.96);
+
     color: #374151;
 
     border: 1px solid rgba(229, 231, 235, 0.9);
@@ -126,7 +167,8 @@
     line-height: 1;
     font-weight: 700;
 
-    box-shadow: 0 4px 12px rgba(17, 24, 39, 0.08);
+    box-shadow:
+        0 4px 12px rgba(17, 24, 39, 0.08);
 
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
@@ -138,8 +180,10 @@
 
 .favorite-button {
     position: absolute;
+
     top: 12px;
     right: 12px;
+
     z-index: 10;
 
     width: 42px;
@@ -150,10 +194,15 @@
     justify-content: center;
 
     padding: 0;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.15);
+
     border-radius: 50%;
 
     background: #111827;
+
     color: #ffffff;
 
     font-size: 20px;
@@ -161,7 +210,8 @@
 
     cursor: pointer;
 
-    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.18);
+    box-shadow:
+        0 5px 14px rgba(0, 0, 0, 0.18);
 
     transition:
         transform 0.2s ease,
@@ -172,8 +222,11 @@
 
 .favorite-button:hover {
     transform: scale(1.07);
-    background: #FF6B00;
-    box-shadow: 0 7px 18px rgba(255, 107, 0, 0.25);
+
+    background: #ff6b00;
+
+    box-shadow:
+        0 7px 18px rgba(255, 107, 0, 0.25);
 }
 
 .favorite-button:active {
@@ -181,20 +234,29 @@
 }
 
 .favorite-button:focus-visible {
-    outline: 3px solid rgba(255, 107, 0, 0.25);
+    outline:
+        3px solid
+        rgba(255, 107, 0, 0.25);
+
     outline-offset: 3px;
 }
 
-/* Active favorite */
+/* ============================================================
+   ACTIVE FAVORITE
+============================================================ */
+
 .favorite-active {
     background: #ffffff;
-    color: #FF6B00;
-    border-color: #FFD7B8;
+
+    color: #ff6b00;
+
+    border-color: #ffd7b8;
 }
 
 .favorite-active:hover {
-    background: #FFF7F0;
-    color: #E85D00;
+    background: #fff7f0;
+
+    color: #e85d00;
 }
 
 /* ============================================================
@@ -212,13 +274,14 @@
 
     font-size: 1.06rem;
     line-height: 1.35;
+
     font-weight: 800;
 
     letter-spacing: -0.2px;
 
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+
     overflow: hidden;
 }
 
@@ -230,11 +293,12 @@
 .event-date {
     display: flex;
     align-items: center;
+
     gap: 7px;
 
     margin: 7px 0;
 
-    color: #6B7280;
+    color: #6b7280;
 
     font-size: 0.86rem;
     line-height: 1.45;
@@ -243,6 +307,8 @@
 .event-location svg,
 .event-date svg {
     flex: 0 0 auto;
+
+    color: #9ca3af;
 }
 
 /* ============================================================
@@ -252,43 +318,55 @@
 .event-price {
     margin: 13px 0 14px;
 
-    color: #FF6B00;
+    color: #ff6b00;
 
     font-size: 0.96rem;
     line-height: 1.3;
+
     font-weight: 800;
 }
 
 .event-price.cancelled {
-    color: #991B1B;
+    color: #991b1b;
 }
 
 /* ============================================================
-   VIEW DETAILS BUTTON
+   VIEW TICKETS / VIEW EVENT
+   Modern Software-Style Button
 ============================================================ */
 
 .view-details-btn {
     width: 100%;
+
     box-sizing: border-box;
 
     display: flex;
     align-items: center;
     justify-content: center;
+
     gap: 7px;
+
+    min-height: 44px;
 
     padding: 11px 16px;
 
-    background: #111827;
-    color: #ffffff;
+    background: #f3f4f6;
 
-    border: 1px solid #111827;
+    color: #1f2937;
+
+    border:
+        1px solid
+        #e5e7eb;
+
     border-radius: 999px;
 
     text-align: center;
+
     text-decoration: none;
 
     font-size: 0.88rem;
     line-height: 1.2;
+
     font-weight: 750;
 
     cursor: pointer;
@@ -297,26 +375,88 @@
         transform 0.2s ease,
         background 0.2s ease,
         border-color 0.2s ease,
+        color 0.2s ease,
         box-shadow 0.2s ease;
 }
 
+.view-details-btn svg {
+    flex: 0 0 auto;
+
+    color: #6b7280;
+
+    stroke: currentColor;
+
+    transition:
+        color 0.2s ease;
+}
+
+/* ============================================================
+   MODERN GREY HOVER
+============================================================ */
+
 .view-details-btn:hover {
-    background: #FF6B00;
-    border-color: #FF6B00;
-    color: #ffffff;
+    background: #e5e7eb;
+
+    border-color: #d1d5db;
+
+    color: #111827;
 
     transform: translateY(-2px);
 
-    box-shadow: 0 8px 18px rgba(255, 107, 0, 0.22);
+    box-shadow:
+        0 8px 18px
+        rgba(17, 24, 39, 0.16);
 }
+
+.view-details-btn:hover svg {
+    color: #ffffff;
+}
+
+/* ============================================================
+   ACTIVE
+============================================================ */
 
 .view-details-btn:active {
+    background: #1f2937;
+
+    border-color: #1f2937;
+
+    color: #ffffff;
+
     transform: translateY(0);
+
+    box-shadow:
+        0 3px 8px
+        rgba(17, 24, 39, 0.12);
 }
 
+.view-details-btn:active svg {
+    color: #ffffff;
+}
+
+/* ============================================================
+   FOCUS
+============================================================ */
+
 .view-details-btn:focus-visible {
-    outline: 3px solid rgba(255, 107, 0, 0.25);
+    outline:
+        3px solid
+        rgba(75, 85, 99, 0.22);
+
     outline-offset: 3px;
+}
+
+/* ============================================================
+   VISITED
+   Prevent browser/global link colors
+============================================================ */
+
+.view-details-btn:visited {
+    color: #1f2937;
+}
+
+.view-details-btn:visited:hover {
+    color: #ffffff;
 }
 
 /* ============================================================
@@ -342,7 +482,11 @@
     }
 
     .event-image-wrapper {
-        border-radius: 20px 20px 0 0;
+        border-radius:
+            20px
+            20px
+            0
+            0;
     }
 
     .event-card-content {
@@ -367,13 +511,20 @@
 
     .event-card {
         width: 100%;
+
         margin: 0 auto;
+
         border-radius: 19px;
     }
 
     .event-image-wrapper {
         width: 100%;
-        border-radius: 19px 19px 0 0;
+
+        border-radius:
+            19px
+            19px
+            0
+            0;
     }
 
     .event-card-content {
@@ -382,17 +533,20 @@
 
     .event-card-content h3 {
         margin-bottom: 9px;
+
         font-size: 0.99rem;
     }
 
     .event-location,
     .event-date {
         margin: 6px 0;
+
         font-size: 0.82rem;
     }
 
     .event-price {
         margin: 11px 0 13px;
+
         font-size: 0.91rem;
     }
 
@@ -411,6 +565,7 @@
         left: 10px;
 
         padding: 6px 9px;
+
         font-size: 0.71rem;
     }
 
@@ -419,12 +574,15 @@
         right: 10px;
 
         padding: 5px 9px;
+
         font-size: 0.7rem;
     }
 
     .view-details-btn {
         min-height: 42px;
+
         padding: 10px 12px;
+
         font-size: 0.85rem;
     }
 }
@@ -440,7 +598,11 @@
     }
 
     .event-image-wrapper {
-        border-radius: 17px 17px 0 0;
+        border-radius:
+            17px
+            17px
+            0
+            0;
     }
 
     .event-card-content {
@@ -458,6 +620,12 @@
 
     .event-price {
         font-size: 0.88rem;
+    }
+
+    .view-details-btn {
+        min-height: 41px;
+
+        font-size: 0.83rem;
     }
 }
 
@@ -490,7 +658,11 @@
 
     .event-card {
         box-shadow: none;
-        border: 1px solid #D1D5DB;
+
+        border:
+            1px solid
+            #d1d5db;
+
         break-inside: avoid;
     }
 

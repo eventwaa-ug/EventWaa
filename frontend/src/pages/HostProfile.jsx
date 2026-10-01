@@ -3,10 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
     FiAlertCircle,
     FiArrowLeft,
-    FiArrowRight,
     FiCalendar,
     FiCheckCircle,
-    FiClock,
     FiEdit3,
     FiHeart,
     FiMapPin,
@@ -39,15 +37,20 @@ function HostProfile() {
     // IMAGE HELPERS
     // ============================================================
 
-    const getImageUrl = (image, fallback = "/default-avatar.png") => {
+    const getImageUrl = (
+        image,
+        fallback = "/default-avatar.png"
+    ) => {
         if (!image) {
             return fallback;
         }
 
         if (
             typeof image === "string" &&
-            (image.startsWith("http://") ||
-                image.startsWith("https://"))
+            (
+                image.startsWith("http://") ||
+                image.startsWith("https://")
+            )
         ) {
             return image;
         }
@@ -57,15 +60,6 @@ function HostProfile() {
         }
 
         return `${BACKEND_URL}/${image}`;
-    };
-
-    const getEventImageUrl = (event) => {
-        const image =
-            event?.eventPoster ||
-            event?.poster ||
-            event?.image;
-
-        return getImageUrl(image, "/default-event.jpg");
     };
 
     // ============================================================
@@ -89,10 +83,13 @@ function HostProfile() {
                 );
 
                 if (!usersResponse.ok) {
-                    throw new Error("Failed to load users.");
+                    throw new Error(
+                        "Failed to load users."
+                    );
                 }
 
-                const usersData = await usersResponse.json();
+                const usersData =
+                    await usersResponse.json();
 
                 const users = Array.isArray(usersData)
                     ? usersData
@@ -105,11 +102,15 @@ function HostProfile() {
                         String(item.id) === String(id)
                 );
 
-                if (cancelled) return;
+                if (cancelled) {
+                    return;
+                }
 
                 if (!foundHost) {
                     setHost(null);
-                    setError("This host could not be found.");
+                    setError(
+                        "This host could not be found."
+                    );
                     setLoading(false);
                     return;
                 }
@@ -121,24 +122,31 @@ function HostProfile() {
                 // ------------------------------------------------
 
                 try {
-                    const eventsResponse = await fetch(
-                        `${BACKEND_URL}/events`
-                    );
+                    const eventsResponse =
+                        await fetch(
+                            `${BACKEND_URL}/events`
+                        );
 
                     if (eventsResponse.ok) {
                         const eventsData =
                             await eventsResponse.json();
 
-                        const allEvents = Array.isArray(eventsData)
-                            ? eventsData
-                            : Array.isArray(eventsData?.events)
-                                ? eventsData.events
-                                : [];
+                        const allEvents =
+                            Array.isArray(eventsData)
+                                ? eventsData
+                                : Array.isArray(
+                                    eventsData?.events
+                                )
+                                    ? eventsData.events
+                                    : [];
 
-                        const hostEvents = allEvents.filter(
-                            (event) =>
-                                String(event.hostId) === String(id)
-                        );
+                        const hostEvents =
+                            allEvents.filter(
+                                (event) =>
+                                    String(
+                                        event.hostId
+                                    ) === String(id)
+                            );
 
                         if (!cancelled) {
                             setEvents(hostEvents);
@@ -160,26 +168,30 @@ function HostProfile() {
                 // ------------------------------------------------
 
                 try {
-                    const bookingsResponse = await fetch(
-                        `${BACKEND_URL}/bookings`
-                    );
+                    const bookingsResponse =
+                        await fetch(
+                            `${BACKEND_URL}/bookings`
+                        );
 
                     if (bookingsResponse.ok) {
                         const bookingsData =
                             await bookingsResponse.json();
 
-                        const allBookings = Array.isArray(
-                            bookingsData
-                        )
-                            ? bookingsData
-                            : Array.isArray(
-                                bookingsData?.bookings
+                        const allBookings =
+                            Array.isArray(
+                                bookingsData
                             )
-                                ? bookingsData.bookings
-                                : [];
+                                ? bookingsData
+                                : Array.isArray(
+                                    bookingsData?.bookings
+                                )
+                                    ? bookingsData.bookings
+                                    : [];
 
                         if (!cancelled) {
-                            setBookings(allBookings);
+                            setBookings(
+                                allBookings
+                            );
                         }
                     }
                 } catch (bookingError) {
@@ -199,9 +211,10 @@ function HostProfile() {
 
                 if (user?.id) {
                     try {
-                        const response = await fetch(
-                            `${BACKEND_URL}/follow/check/${id}/${user.id}`
-                        );
+                        const response =
+                            await fetch(
+                                `${BACKEND_URL}/follow/check/${id}/${user.id}`
+                            );
 
                         if (response.ok) {
                             const data =
@@ -209,7 +222,9 @@ function HostProfile() {
 
                             if (!cancelled) {
                                 setFollowing(
-                                    Boolean(data.following)
+                                    Boolean(
+                                        data.following
+                                    )
                                 );
                             }
                         }
@@ -226,9 +241,10 @@ function HostProfile() {
                 // ------------------------------------------------
 
                 try {
-                    const followersResponse = await fetch(
-                        `${BACKEND_URL}/followers/${id}`
-                    );
+                    const followersResponse =
+                        await fetch(
+                            `${BACKEND_URL}/followers/${id}`
+                        );
 
                     if (followersResponse.ok) {
                         const followersData =
@@ -237,7 +253,8 @@ function HostProfile() {
                         if (!cancelled) {
                             setFollowers(
                                 Number(
-                                    followersData?.count || 0
+                                    followersData?.count ||
+                                    0
                                 )
                             );
                         }
@@ -284,15 +301,19 @@ function HostProfile() {
 
     if (loading) {
         return (
-            <div className="host-profile-state">
+            <div className="host-profile-page-state">
                 <div
-                    className="host-loading-spinner"
+                    className="host-profile-loading-spinner"
                     aria-hidden="true"
                 />
 
-                <h2>Loading host profile...</h2>
+                <h2>
+                    Loading host profile...
+                </h2>
 
-                <p>Please wait a moment.</p>
+                <p>
+                    Please wait a moment.
+                </p>
             </div>
         );
     }
@@ -303,12 +324,16 @@ function HostProfile() {
 
     if (error || !host) {
         return (
-            <div className="host-profile-state">
-                <div className="host-error-icon">
-                    <FiAlertCircle aria-hidden="true" />
+            <div className="host-profile-page-state">
+                <div className="host-profile-error-icon">
+                    <FiAlertCircle
+                        aria-hidden="true"
+                    />
                 </div>
 
-                <h2>Host Not Found</h2>
+                <h2>
+                    Host Not Found
+                </h2>
 
                 <p>
                     {error ||
@@ -317,10 +342,12 @@ function HostProfile() {
 
                 <button
                     type="button"
-                    className="host-back-btn"
+                    className="host-profile-back-btn"
                     onClick={() => navigate(-1)}
                 >
-                    <FiArrowLeft aria-hidden="true" />
+                    <FiArrowLeft
+                        aria-hidden="true"
+                    />
                     Go Back
                 </button>
             </div>
@@ -344,21 +371,28 @@ function HostProfile() {
     // ============================================================
 
     const hostEventIds = new Set(
-        events.map((event) => String(event.id))
+        events.map((event) =>
+            String(event.id)
+        )
     );
 
-    const totalAttendees = bookings
-        .filter((booking) =>
-            hostEventIds.has(
-                String(booking.eventId)
+    const totalAttendees =
+        bookings
+            .filter((booking) =>
+                hostEventIds.has(
+                    String(
+                        booking.eventId
+                    )
+                )
             )
-        )
-        .reduce(
-            (total, booking) =>
-                total +
-                Number(booking.quantity || 0),
-            0
-        );
+            .reduce(
+                (total, booking) =>
+                    total +
+                    Number(
+                        booking.quantity || 0
+                    ),
+                0
+            );
 
     // ============================================================
     // FOLLOW HOST
@@ -384,22 +418,24 @@ function HostProfile() {
         }
 
         try {
-            const response = await fetch(
-                `${BACKEND_URL}/follow`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-                    },
-                    body: JSON.stringify({
-                        hostId: Number(id),
-                        userId: user.id,
-                    }),
-                }
-            );
+            const response =
+                await fetch(
+                    `${BACKEND_URL}/follow`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+                        },
+                        body: JSON.stringify({
+                            hostId: Number(id),
+                            userId: user.id,
+                        }),
+                    }
+                );
 
-            const data = await response.json();
+            const data =
+                await response.json();
 
             if (!response.ok) {
                 throw new Error(
@@ -417,13 +453,16 @@ function HostProfile() {
                             `${BACKEND_URL}/followers/${id}`
                         );
 
-                    if (followersResponse.ok) {
+                    if (
+                        followersResponse.ok
+                    ) {
                         const followersData =
                             await followersResponse.json();
 
                         setFollowers(
                             Number(
-                                followersData?.count || 0
+                                followersData?.count ||
+                                0
                             )
                         );
                     }
@@ -468,78 +507,19 @@ function HostProfile() {
     };
 
     // ============================================================
-    // EVENT PRICE
-    // ============================================================
-
-    const getEventPrice = (event) => {
-        if (
-            event.eventType?.toLowerCase() ===
-            "free"
-        ) {
-            return {
-                text: "Free Entry",
-                type: "free",
-            };
-        }
-
-        if (
-            Array.isArray(event.tickets) &&
-            event.tickets.length > 0
-        ) {
-            const prices = event.tickets
-                .map((ticket) =>
-                    Number(ticket.price)
-                )
-                .filter(
-                    (price) =>
-                        Number.isFinite(price) &&
-                        price > 0
-                );
-
-            if (prices.length > 0) {
-                return {
-                    text: `From UGX ${Math.min(
-                        ...prices
-                    ).toLocaleString()}`,
-                    type: "paid",
-                };
-            }
-        }
-
-        const eventPrice = Number(
-            event.price || 0
-        );
-
-        if (
-            Number.isFinite(eventPrice) &&
-            eventPrice > 0
-        ) {
-            return {
-                text: `UGX ${eventPrice.toLocaleString()}`,
-                type: "paid",
-            };
-        }
-
-        return {
-            text: "Price unavailable",
-            type: "unknown",
-        };
-    };
-
-    // ============================================================
     // RENDER
     // ============================================================
 
     return (
-        <main className="host-profile">
+        <main className="host-profile-page">
 
             {/* ====================================================
                 PROFILE HEADER
             ==================================================== */}
 
-            <section className="host-cover">
+            <section className="host-profile-cover">
 
-                <div className="host-avatar-wrapper">
+                <div className="host-profile-avatar-wrapper">
                     <img
                         src={getImageUrl(
                             host.image ||
@@ -550,7 +530,7 @@ function HostProfile() {
                             host.name ||
                             "Event host"
                         }
-                        className="host-avatar"
+                        className="host-profile-avatar"
                         onError={(event) => {
                             event.currentTarget.src =
                                 "/default-avatar.png";
@@ -558,14 +538,14 @@ function HostProfile() {
                     />
                 </div>
 
-                <div className="host-name-row">
+                <div className="host-profile-name-row">
                     <h1>
                         {host.name ||
                             "Event Organizer"}
                     </h1>
 
                     {isVerified && (
-                        <span className="verified-badge">
+                        <span className="host-profile-verified-badge">
                             <FiCheckCircle
                                 aria-hidden="true"
                             />
@@ -574,25 +554,28 @@ function HostProfile() {
                     )}
                 </div>
 
-                <p className="host-organizer-name">
+                <p className="host-profile-organizer-name">
                     {host.organizerName ||
                         "Event Organizer"}
                 </p>
 
-                <p className="host-location">
-                    <FiMapPin aria-hidden="true" />
+                <p className="host-profile-location">
+                    <FiMapPin
+                        aria-hidden="true"
+                    />
+
                     <span>
                         {host.location ||
                             "Gulu, Uganda"}
                     </span>
                 </p>
 
-                <div className="host-actions">
+                <div className="host-profile-actions">
                     {isMyProfile ? (
                         <>
                             <button
                                 type="button"
-                                className="host-primary-btn"
+                                className="host-profile-primary-btn"
                                 onClick={() =>
                                     navigate(
                                         "/dashboard"
@@ -602,12 +585,13 @@ function HostProfile() {
                                 <FiSettings
                                     aria-hidden="true"
                                 />
+
                                 Manage Dashboard
                             </button>
 
                             <button
                                 type="button"
-                                className="host-secondary-btn"
+                                className="host-profile-secondary-btn"
                                 onClick={() =>
                                     navigate(
                                         "/edit-host-profile"
@@ -617,6 +601,7 @@ function HostProfile() {
                                 <FiEdit3
                                     aria-hidden="true"
                                 />
+
                                 Edit Profile
                             </button>
                         </>
@@ -626,11 +611,15 @@ function HostProfile() {
                                 type="button"
                                 className={
                                     following
-                                        ? "host-following-btn"
-                                        : "host-primary-btn"
+                                        ? "host-profile-following-btn"
+                                        : "host-profile-primary-btn"
                                 }
-                                onClick={handleFollow}
-                                aria-pressed={following}
+                                onClick={
+                                    handleFollow
+                                }
+                                aria-pressed={
+                                    following
+                                }
                             >
                                 <FiHeart
                                     aria-hidden="true"
@@ -643,12 +632,15 @@ function HostProfile() {
 
                             <button
                                 type="button"
-                                className="host-secondary-btn"
-                                onClick={handleContact}
+                                className="host-profile-secondary-btn"
+                                onClick={
+                                    handleContact
+                                }
                             >
                                 <FiMessageCircle
                                     aria-hidden="true"
                                 />
+
                                 Chat with Host
                             </button>
                         </>
@@ -660,9 +652,9 @@ function HostProfile() {
                 ABOUT
             ==================================================== */}
 
-            <section className="host-about">
-                <div className="section-heading">
-                    <span className="section-kicker">
+            <section className="host-profile-about">
+                <div className="host-profile-section-heading">
+                    <span className="host-profile-section-kicker">
                         About the host
                     </span>
                 </div>
@@ -678,50 +670,63 @@ function HostProfile() {
             ==================================================== */}
 
             <section
-                className="host-stats"
+                className="host-profile-stats"
                 aria-label="Host statistics"
             >
-                <div className="host-stat-card">
-                    <span className="host-stat-icon">
+                <div className="host-profile-stat-card">
+                    <span className="host-profile-stat-icon">
                         <FiCalendar
                             aria-hidden="true"
                         />
                     </span>
 
                     <div>
-                        <h3>{events.length}</h3>
-                        <p>Events</p>
+                        <h3>
+                            {events.length}
+                        </h3>
+
+                        <p>
+                            Events
+                        </p>
                     </div>
                 </div>
 
-                <div className="host-stat-card">
-                    <span className="host-stat-icon">
+                <div className="host-profile-stat-card">
+                    <span className="host-profile-stat-icon">
                         <FiUsers
                             aria-hidden="true"
                         />
                     </span>
 
                     <div>
-                        <h3>{totalAttendees}</h3>
-                        <p>Attendees</p>
+                        <h3>
+                            {totalAttendees}
+                        </h3>
+
+                        <p>
+                            Attendees
+                        </p>
                     </div>
                 </div>
 
-                <div className="host-stat-card">
-                    <span className="host-stat-icon">
+                <div className="host-profile-stat-card">
+                    <span className="host-profile-stat-icon">
                         <FiHeart
                             aria-hidden="true"
                         />
                     </span>
 
                     <div>
-                        <h3>{followers}</h3>
-                        <p>Followers</p>
+                        <h3>
+                            {followers}
+                        </h3>
+
+                        <p>
+                            Followers
+                        </p>
                     </div>
                 </div>
             </section>
-
-        
         </main>
     );
 }

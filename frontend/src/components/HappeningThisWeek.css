@@ -1,14 +1,13 @@
 /* ============================================================
    EVENTWAA — HAPPENING THIS WEEK
-   Modern UI + Orange Brand
+   Clean Modern UI
+   Orange Brand — No Global Blue Button Dependencies
 ============================================================ */
 
 .week-events {
     width: 100%;
     box-sizing: border-box;
-
     padding: 72px 7% 78px;
-
     background: #ffffff;
 }
 
@@ -19,7 +18,6 @@
 .week-section-header {
     width: 100%;
     max-width: 1200px;
-
     margin: 0 auto 36px;
 
     display: flex;
@@ -94,7 +92,7 @@
 
     border: 1px solid #ffd8bf;
 
-    color: #ff6b00;
+    color: #ff6b00 !important;
 
     font-size: 13px;
     font-weight: 800;
@@ -104,6 +102,8 @@
 
 .week-badge svg {
     flex-shrink: 0;
+    color: #ff6b00 !important;
+    stroke: #ff6b00 !important;
 }
 
 /* ============================================================
@@ -113,7 +113,7 @@
 .week-heading-content h2 {
     margin: 0;
 
-    color: #111111;
+    color: #111111 !important;
 
     font-size: 2.15rem;
 
@@ -133,7 +133,7 @@
 
     margin: 0;
 
-    color: #707070;
+    color: #707070 !important;
 
     font-size: 1rem;
 
@@ -174,13 +174,14 @@
 
     padding: 0;
 
-    border: 1px solid #dddddd;
+    border: 1px solid #dddddd !important;
 
     border-radius: 999px;
 
-    background: #ffffff;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
 
-    color: #333333;
+    color: #333333 !important;
 
     cursor: pointer;
 
@@ -192,12 +193,18 @@
         box-shadow 0.2s ease;
 }
 
+.week-slider-btn svg {
+    color: inherit !important;
+    stroke: currentColor !important;
+}
+
 .week-slider-btn:hover {
-    background: #f4f4f4;
+    background: #f4f4f4 !important;
+    background-color: #f4f4f4 !important;
 
-    border-color: #c9c9c9;
+    border-color: #c9c9c9 !important;
 
-    color: #111111;
+    color: #111111 !important;
 
     transform: translateY(-1px);
 
@@ -212,13 +219,12 @@
 }
 
 .week-slider-btn:focus-visible {
-    outline: 2px solid #ff6b00;
-
+    outline: 2px solid #ff6b00 !important;
     outline-offset: 3px;
 }
 
 /* ============================================================
-   SEE ALL
+   SEE ALL HEADER LINK
 ============================================================ */
 
 .week-see-all {
@@ -233,13 +239,14 @@
 
     border-radius: 999px;
 
-    background: #f3f3f3;
+    background: #f3f3f3 !important;
+    background-color: #f3f3f3 !important;
 
-    border: 1px solid #e5e5e5;
+    border: 1px solid #e5e5e5 !important;
 
-    color: #222222;
+    color: #222222 !important;
 
-    text-decoration: none;
+    text-decoration: none !important;
 
     font-size: 14px;
 
@@ -253,21 +260,38 @@
         transform 0.2s ease;
 }
 
+.week-see-all:visited {
+    background: #f3f3f3 !important;
+    background-color: #f3f3f3 !important;
+    border-color: #e5e5e5 !important;
+    color: #222222 !important;
+}
+
+.week-see-all svg {
+    color: inherit !important;
+    stroke: currentColor !important;
+}
+
 .week-see-all:hover {
-    background: #222222;
+    background: #222222 !important;
+    background-color: #222222 !important;
 
-    border-color: #222222;
+    border-color: #222222 !important;
 
-    color: #ffffff;
+    color: #ffffff !important;
 
     gap: 9px;
 
     transform: translateY(-1px);
 }
 
-.week-see-all:focus-visible {
-    outline: 2px solid #ff6b00;
+.week-see-all:hover svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+}
 
+.week-see-all:focus-visible {
+    outline: 2px solid #ff6b00 !important;
     outline-offset: 3px;
 }
 
@@ -318,7 +342,7 @@
 }
 
 /* ============================================================
-   EVENT CARD WRAPPER
+   EVENT CARD
 ============================================================ */
 
 .week-event-card {
@@ -366,12 +390,15 @@
 
 .week-event-card > * {
     border-radius: 22px !important;
-
     overflow: hidden;
 }
 
 .week-event-card img {
-    border-radius: 22px 22px 0 0 !important;
+    border-radius:
+        22px
+        22px
+        0
+        0 !important;
 }
 
 /* ============================================================
@@ -394,7 +421,7 @@
 
     border-radius: 22px;
 
-    background: #fafafa;
+    background: #fafafa !important;
 
     box-shadow:
         0 4px 18px rgba(0, 0, 0, 0.035);
@@ -416,9 +443,14 @@
 
     border-radius: 999px;
 
-    background: #fff3eb;
+    background: #fff3eb !important;
 
-    color: #ff6b00;
+    color: #ff6b00 !important;
+}
+
+.no-week-icon svg {
+    color: #ff6b00 !important;
+    stroke: #ff6b00 !important;
 }
 
 /* ============================================================
@@ -428,7 +460,7 @@
 .no-week-events h3 {
     margin: 0 0 9px;
 
-    color: #171717;
+    color: #171717 !important;
 
     font-size: 1.25rem;
 
@@ -446,7 +478,7 @@
 
     margin: 0 auto 23px;
 
-    color: #707070;
+    color: #707070 !important;
 
     font-size: 0.96rem;
 
@@ -454,18 +486,11 @@
 }
 
 /* ============================================================
-   VIEW ALL BUTTON
-   Uses the existing shared class from the JSX.
+   DISCOVER EVENTS
+   Dedicated class — NOT .view-all-btn
 ============================================================ */
 
-.week-view-all {
-    display: flex;
-    justify-content: center;
-
-    margin-top: 34px;
-}
-
-.week-view-all .view-all-btn {
+.week-discover-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -478,29 +503,48 @@
 
     border-radius: 999px;
 
-    background: #ff6b00;
+    background: #ff6b00 !important;
+    background-color: #ff6b00 !important;
 
-    border: 1px solid #ff6b00;
+    border: 1px solid #ff6b00 !important;
 
-    color: #ffffff;
+    color: #ffffff !important;
 
-    text-decoration: none;
+    text-decoration: none !important;
 
     font-size: 14px;
 
     font-weight: 800;
 
+    cursor: pointer;
+
+    -webkit-appearance: none;
+    appearance: none;
+
     transition:
         background 0.2s ease,
         border-color 0.2s ease,
+        color 0.2s ease,
         transform 0.2s ease,
         box-shadow 0.2s ease;
 }
 
-.week-view-all .view-all-btn:hover {
-    background: #e85f00;
+.week-discover-btn:visited {
+    background: #ff6b00 !important;
+    background-color: #ff6b00 !important;
 
-    border-color: #e85f00;
+    border-color: #ff6b00 !important;
+
+    color: #ffffff !important;
+}
+
+.week-discover-btn:hover {
+    background: #e85f00 !important;
+    background-color: #e85f00 !important;
+
+    border-color: #e85f00 !important;
+
+    color: #ffffff !important;
 
     transform: translateY(-2px);
 
@@ -508,10 +552,129 @@
         0 8px 20px rgba(255, 107, 0, 0.22);
 }
 
-.week-view-all .view-all-btn:focus-visible,
-.no-week-events .view-all-btn:focus-visible {
-    outline: 2px solid #ff6b00;
+.week-discover-btn:active {
+    background: #d95500 !important;
+    background-color: #d95500 !important;
 
+    border-color: #d95500 !important;
+
+    color: #ffffff !important;
+
+    transform: translateY(0);
+
+    box-shadow: none;
+}
+
+.week-discover-btn:focus,
+.week-discover-btn:focus-visible {
+    background: #ff6b00 !important;
+    background-color: #ff6b00 !important;
+
+    border-color: #ff6b00 !important;
+
+    color: #ffffff !important;
+
+    outline: 2px solid #ff6b00 !important;
+    outline-offset: 3px;
+}
+
+/* ============================================================
+   BOTTOM VIEW ALL
+   Dedicated class — NOT .view-all-btn
+============================================================ */
+
+.week-view-all {
+    display: flex;
+    justify-content: center;
+
+    margin-top: 34px;
+}
+
+.week-bottom-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 44px;
+
+    padding: 0 21px;
+
+    box-sizing: border-box;
+
+    border-radius: 999px;
+
+    background: #ff6b00 !important;
+    background-color: #ff6b00 !important;
+
+    border: 1px solid #ff6b00 !important;
+
+    color: #ffffff !important;
+
+    text-decoration: none !important;
+
+    font-size: 14px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+    -webkit-appearance: none;
+    appearance: none;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.week-bottom-btn:visited {
+    background: #ff6b00 !important;
+    background-color: #ff6b00 !important;
+
+    border-color: #ff6b00 !important;
+
+    color: #ffffff !important;
+}
+
+.week-bottom-btn:hover {
+    background: #e85f00 !important;
+    background-color: #e85f00 !important;
+
+    border-color: #e85f00 !important;
+
+    color: #ffffff !important;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 20px rgba(255, 107, 0, 0.22);
+}
+
+.week-bottom-btn:active {
+    background: #d95500 !important;
+    background-color: #d95500 !important;
+
+    border-color: #d95500 !important;
+
+    color: #ffffff !important;
+
+    transform: translateY(0);
+
+    box-shadow: none;
+}
+
+.week-bottom-btn:focus,
+.week-bottom-btn:focus-visible {
+    background: #ff6b00 !important;
+    background-color: #ff6b00 !important;
+
+    border-color: #ff6b00 !important;
+
+    color: #ffffff !important;
+
+    outline: 2px solid #ff6b00 !important;
     outline-offset: 3px;
 }
 
@@ -618,7 +781,8 @@
     }
 
     .week-event-card {
-        flex: 0 0 82vw;
+        flex:
+            0 0 82vw;
 
         width: 82vw;
 
@@ -632,7 +796,11 @@
     }
 
     .week-event-card img {
-        border-radius: 20px 20px 0 0 !important;
+        border-radius:
+            20px
+            20px
+            0
+            0 !important;
     }
 
     .week-event-card:hover {
@@ -785,14 +953,16 @@
     .week-slider-btn,
     .week-see-all,
     .week-event-card,
-    .week-view-all .view-all-btn {
+    .week-discover-btn,
+    .week-bottom-btn {
         transition: none;
     }
 
     .week-slider-btn:hover,
     .week-see-all:hover,
     .week-event-card:hover,
-    .week-view-all .view-all-btn:hover {
+    .week-discover-btn:hover,
+    .week-bottom-btn:hover {
         transform: none;
     }
 }

@@ -27,19 +27,15 @@ function HappeningThisWeek() {
     0
   );
 
-
   // ============================================================
   // NEXT 7 DAYS
   // ============================================================
 
-  const nextWeek = new Date(
-    today
-  );
+  const nextWeek = new Date(today);
 
   nextWeek.setDate(
     nextWeek.getDate() + 7
   );
-
 
   // ============================================================
   // THIS WEEK EVENTS
@@ -49,15 +45,13 @@ function HappeningThisWeek() {
     events || []
   )
     .filter((event) => {
-
       if (!event?.date) {
         return false;
       }
 
-      const eventDate =
-        new Date(
-          event.date
-        );
+      const eventDate = new Date(
+        event.date
+      );
 
       if (
         Number.isNaN(
@@ -78,7 +72,6 @@ function HappeningThisWeek() {
         eventDate >= today &&
         eventDate <= nextWeek
       );
-
     })
     .sort(
       (a, b) =>
@@ -87,24 +80,17 @@ function HappeningThisWeek() {
     )
     .slice(0, 6);
 
-
   // ============================================================
   // SLIDER CONTROLS
   // ============================================================
 
-  const scrollSlider = (
-    direction
-  ) => {
-
-    if (
-      !sliderRef.current
-    ) {
+  const scrollSlider = (direction) => {
+    if (!sliderRef.current) {
       return;
     }
 
     const amount =
-      sliderRef.current
-        .clientWidth * 0.72;
+      sliderRef.current.clientWidth * 0.72;
 
     sliderRef.current.scrollBy({
       left:
@@ -113,25 +99,20 @@ function HappeningThisWeek() {
           : -amount,
       behavior: "smooth",
     });
-
   };
-
 
   // ============================================================
   // RENDER
   // ============================================================
 
   return (
-
     <section className="week-events">
-
 
       {/* ======================================================
           HEADER
       ====================================================== */}
 
       <div className="week-section-header">
-
 
         <div className="week-heading-content">
 
@@ -150,11 +131,9 @@ function HappeningThisWeek() {
 
           </div>
 
-
           <h2>
             Happening this week
           </h2>
-
 
           <p>
             Events you can attend in the
@@ -162,7 +141,6 @@ function HappeningThisWeek() {
           </p>
 
         </div>
-
 
         <div className="week-header-actions">
 
@@ -178,14 +156,11 @@ function HappeningThisWeek() {
                   scrollSlider("prev")
                 }
               >
-
                 <ChevronLeft
                   size={20}
                   strokeWidth={2.3}
                 />
-
               </button>
-
 
               <button
                 type="button"
@@ -195,24 +170,22 @@ function HappeningThisWeek() {
                   scrollSlider("next")
                 }
               >
-
                 <ChevronRight
                   size={20}
                   strokeWidth={2.3}
                 />
-
               </button>
 
             </div>
 
           )}
 
-
           <Link
             to="/events?filter=this-week"
             className="week-see-all"
           >
             See all
+
             <ChevronRight
               size={17}
               strokeWidth={2.3}
@@ -222,7 +195,6 @@ function HappeningThisWeek() {
         </div>
 
       </div>
-
 
       {/* ======================================================
           EVENTS
@@ -241,21 +213,18 @@ function HappeningThisWeek() {
 
           </div>
 
-
           <h3>
             No upcoming events this week
           </h3>
-
 
           <p>
             Check out all available events
             and find something exciting to attend.
           </p>
 
-
           <Link
             to="/events"
-            className="view-all-btn"
+            className="week-discover-btn"
           >
             Discover Events
           </Link>
@@ -294,7 +263,6 @@ function HappeningThisWeek() {
 
       )}
 
-
       {/* ======================================================
           BOTTOM VIEW ALL
       ====================================================== */}
@@ -305,7 +273,7 @@ function HappeningThisWeek() {
 
           <Link
             to="/events"
-            className="view-all-btn"
+            className="week-bottom-btn"
           >
             View all events
           </Link>
@@ -315,10 +283,7 @@ function HappeningThisWeek() {
       )}
 
     </section>
-
   );
-
 }
-
 
 export default HappeningThisWeek;
