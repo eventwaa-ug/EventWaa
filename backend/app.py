@@ -1688,10 +1688,6 @@ Uganda's event discovery and ticketing platform
 # ADMIN LOGIN SECURITY
 # ============================================================
 
-# ============================================================
-# ADMIN LOGIN SECURITY
-# ============================================================
-
 admin_failed_login_attempts = 0
 
 # Unix timestamp when the admin account lock expires.
