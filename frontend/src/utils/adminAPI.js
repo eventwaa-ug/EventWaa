@@ -36,6 +36,22 @@ export async function adminFetch(
         `Bearer ${token}`
     );
 
+    /*
+     * EventWaa admin POST/PUT requests send JSON.
+     * Automatically set the content type whenever
+     * a request has a body, unless the caller already
+     * supplied its own Content-Type.
+     */
+    if (
+        options.body &&
+        !headers.has("Content-Type")
+    ) {
+        headers.set(
+            "Content-Type",
+            "application/json"
+        );
+    }
+
     const response = await fetch(
         `${BACKEND_URL}${endpoint}`,
         {
