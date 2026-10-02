@@ -99,6 +99,7 @@ import AdminTicketScanner from "./pages/AdminTicketScanner";
 import AdminScan from "./pages/AdminScan";
 import AdminTeamMembers from "./pages/AdminTeamMembers";
 import AdminTeamInvitation from "./pages/AdminTeamInvitation";
+import AdminAnnouncements from "./pages/AdminAnnouncements";
 
 /* =========================================================
    PUBLIC INFORMATION PAGES
@@ -808,6 +809,12 @@ function App() {
                     <Route
                         path="team-members"
                         element={<AdminTeamMembers />}
+                    />
+
+                    {/* ANNOUNCEMENTS */}
+                    <Route
+                        path="announcements"
+                        element={<AdminAnnouncements />}
                     />
 
                     {/* REVENUE */}

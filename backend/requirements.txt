@@ -9,3 +9,4 @@ Werkzeug
 itsdangerous
 Pillow
 gunicorn
+resend

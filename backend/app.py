@@ -8,6 +8,8 @@ import hashlib
 import hmac
 import uuid
 import secrets
+import resend
+import traceback
 #print(secrets.token_urlsafe(32))
 import qrcode
 from io import BytesIO
@@ -73,6 +75,30 @@ def handle_options(path):
     return "", 204
 
 # ============================================================
+# RESEND EMAIL CONFIGURATION
+# ============================================================
+
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+
+EMAIL_FROM = os.getenv(
+    "EMAIL_FROM",
+    "EventWaa <noreply@eventwaa.com>"
+)
+
+if RESEND_API_KEY:
+    resend.api_key = RESEND_API_KEY
+
+print(
+    "RESEND CONFIG LOADED:",
+    bool(RESEND_API_KEY)
+)
+
+print(
+    "EMAIL FROM:",
+    EMAIL_FROM
+)
+
+# ============================================================
 # EMAIL CONFIGURATION
 # ============================================================
 
@@ -124,6 +150,198 @@ print(
 )
 
 mail = Mail(app)
+
+def send_otp_email(receiver_email, otp):
+
+    if not receiver_email:
+        return {
+            "success": False,
+            "message": "Recipient email is missing."
+        }
+
+    if not otp:
+        return {
+            "success": False,
+            "message": "OTP is missing."
+        }
+
+    try:
+
+        html_body = f"""
+        <!DOCTYPE html>
+        <html>
+        <body style="
+            margin:0;
+            padding:0;
+            background:#f5f5f5;
+            font-family:Arial,Helvetica,sans-serif;
+            color:#222;
+        ">
+
+            <div style="
+                max-width:600px;
+                margin:40px auto;
+                background:#ffffff;
+                border-radius:12px;
+                overflow:hidden;
+                border:1px solid #e5e5e5;
+            ">
+
+                <div style="
+                    background:#ff6b00;
+                    color:#ffffff;
+                    padding:24px;
+                    text-align:center;
+                ">
+                    <h1 style="
+                        margin:0;
+                        font-size:28px;
+                    ">
+                        EventWaa
+                    </h1>
+
+                    <p style="
+                        margin:6px 0 0;
+                        font-size:14px;
+                    ">
+                        Password Recovery
+                    </p>
+                </div>
+
+                <div style="padding:32px;">
+
+                    <h2 style="
+                        margin-top:0;
+                        color:#222;
+                    ">
+                        Your recovery code
+                    </h2>
+
+                    <p style="
+                        color:#555;
+                        line-height:1.6;
+                    ">
+                        Use the code below to reset your EventWaa
+                        account password.
+                    </p>
+
+                    <div style="
+                        margin:28px 0;
+                        padding:20px;
+                        background:#f7f7f7;
+                        border:1px solid #e5e5e5;
+                        border-radius:10px;
+                        text-align:center;
+                    ">
+
+                        <div style="
+                            font-size:12px;
+                            font-weight:bold;
+                            color:#777;
+                            letter-spacing:1px;
+                            margin-bottom:10px;
+                        ">
+                            RECOVERY CODE
+                        </div>
+
+                        <div style="
+                            font-size:32px;
+                            font-weight:bold;
+                            letter-spacing:8px;
+                            color:#ff6b00;
+                        ">
+                            {otp}
+                        </div>
+
+                    </div>
+
+                    <p style="
+                        color:#555;
+                        line-height:1.6;
+                    ">
+                        This code expires in
+                        <strong>10 minutes</strong>.
+                    </p>
+
+                    <p style="
+                        color:#777;
+                        font-size:13px;
+                        line-height:1.6;
+                    ">
+                        If you did not request a password reset,
+                        you can safely ignore this email.
+                    </p>
+
+                </div>
+
+                <div style="
+                    padding:20px 32px;
+                    background:#fafafa;
+                    border-top:1px solid #eeeeee;
+                    color:#888;
+                    font-size:12px;
+                    text-align:center;
+                ">
+                    EventWaa
+                </div>
+
+            </div>
+
+        </body>
+        </html>
+        """
+
+        text_body = f"""
+EventWaa Password Recovery
+
+Your password recovery code is:
+
+{otp}
+
+This code expires in 10 minutes.
+
+If you did not request a password reset,
+you can safely ignore this email.
+
+EventWaa
+"""
+
+        params = {
+            "from": EMAIL_FROM,
+            "to": [receiver_email],
+            "subject": "Your EventWaa Password Recovery Code",
+            "html": html_body,
+            "text": text_body,
+        }
+
+        response = resend.Emails.send(params)
+
+        print(
+            "PASSWORD RECOVERY EMAIL SENT:",
+            receiver_email,
+            response
+        )
+
+        return {
+            "success": True,
+            "message": "Password recovery email sent."
+        }
+
+    except Exception as error:
+
+        import traceback
+
+        print(
+            "PASSWORD RECOVERY EMAIL ERROR:",
+            repr(error)
+        )
+
+        traceback.print_exc()
+
+        return {
+            "success": False,
+            "message": "Unable to send password recovery email."
+        }
 
 # ============================================================
 # EVENTWAA ADMIN PASSWORD RECOVERY EMAIL
@@ -232,6 +450,8 @@ def send_ticket_email(booking):
     - Ticket ID
     - QR code
     - Link to the EventWaa ticket
+
+    Email delivery is handled by Resend.
     """
 
     try:
@@ -284,19 +504,13 @@ def send_ticket_email(booking):
         ).strip()
 
         event_title = (
-            booking.get(
-                "eventTitle"
-            )
-            or
-            "EventWaa Event"
+            booking.get("eventTitle")
+            or "EventWaa Event"
         )
 
         ticket_type = (
-            booking.get(
-                "ticketType"
-            )
-            or
-            "Regular"
+            booking.get("ticketType")
+            or "Regular"
         )
 
         quantity = int(
@@ -321,35 +535,23 @@ def send_ticket_email(booking):
         # ====================================================
 
         event_date = (
-            booking.get(
-                "eventDate"
-            )
-            or
-            ""
+            booking.get("eventDate")
+            or ""
         )
 
         event_time = (
-            booking.get(
-                "eventTime"
-            )
-            or
-            ""
+            booking.get("eventTime")
+            or ""
         )
 
         event_venue = (
-            booking.get(
-                "eventVenue"
-            )
-            or
-            ""
+            booking.get("eventVenue")
+            or ""
         )
 
         event_city = (
-            booking.get(
-                "eventCity"
-            )
-            or
-            ""
+            booking.get("eventCity")
+            or ""
         )
 
 
@@ -362,7 +564,6 @@ def send_ticket_email(booking):
             "http://localhost:5173"
         ).rstrip("/")
 
-
         ticket_url = (
             f"{frontend_url}"
             f"/ticket/{ticket_id}"
@@ -373,8 +574,8 @@ def send_ticket_email(booking):
         # GENERATE QR CODE
         #
         # IMPORTANT:
-        # The QR contains the SAME ticket ID that
-        # TicketDetails.jsx and the scanner use.
+        # The QR contains the SAME ticket ID used by
+        # TicketDetails.jsx and the EventWaa scanner.
         # ====================================================
 
         qr = qrcode.QRCode(
@@ -390,7 +591,6 @@ def send_ticket_email(booking):
 
         )
 
-
         qr.add_data(
             ticket_id
         )
@@ -399,26 +599,34 @@ def send_ticket_email(booking):
             fit=True
         )
 
-
         qr_image = qr.make_image(
             fill_color="black",
             back_color="white"
         )
 
-
         qr_buffer = BytesIO()
-
 
         qr_image.save(
             qr_buffer,
             format="PNG"
         )
 
-
         qr_buffer.seek(0)
 
-
         qr_bytes = qr_buffer.getvalue()
+
+
+        # ====================================================
+        # CONVERT QR TO BASE64
+        #
+        # Resend accepts attachment content as Base64.
+        # ====================================================
+
+        import base64
+
+        qr_base64 = base64.b64encode(
+            qr_bytes
+        ).decode("utf-8")
 
 
         # ====================================================
@@ -439,14 +647,20 @@ def send_ticket_email(booking):
         if event_date:
 
             date_html = f"""
-                <div class="detail">
-                    <span class="detail-label">
+                <div class="detail-row">
+                    <div class="detail-icon">
                         DATE
-                    </span>
+                    </div>
 
-                    <span class="detail-value">
-                        {event_date}
-                    </span>
+                    <div class="detail-content">
+                        <div class="detail-label">
+                            DATE
+                        </div>
+
+                        <div class="detail-value">
+                            {event_date}
+                        </div>
+                    </div>
                 </div>
             """
 
@@ -456,14 +670,20 @@ def send_ticket_email(booking):
         if event_time:
 
             time_html = f"""
-                <div class="detail">
-                    <span class="detail-label">
+                <div class="detail-row">
+                    <div class="detail-icon">
                         TIME
-                    </span>
+                    </div>
 
-                    <span class="detail-value">
-                        {event_time}
-                    </span>
+                    <div class="detail-content">
+                        <div class="detail-label">
+                            TIME
+                        </div>
+
+                        <div class="detail-value">
+                            {event_time}
+                        </div>
+                    </div>
                 </div>
             """
 
@@ -480,16 +700,21 @@ def send_ticket_email(booking):
                     f", {event_city}"
                 )
 
-
             location_html = f"""
-                <div class="detail">
-                    <span class="detail-label">
+                <div class="detail-row">
+                    <div class="detail-icon">
                         VENUE
-                    </span>
+                    </div>
 
-                    <span class="detail-value">
-                        {location_text}
-                    </span>
+                    <div class="detail-content">
+                        <div class="detail-label">
+                            VENUE
+                        </div>
+
+                        <div class="detail-value">
+                            {location_text}
+                        </div>
+                    </div>
                 </div>
             """
 
@@ -521,12 +746,12 @@ def send_ticket_email(booking):
 body {{
     margin: 0;
     padding: 0;
-    background: #f4f6f8;
+    background: #f3f4f6;
     font-family:
         Arial,
         Helvetica,
         sans-serif;
-    color: #172033;
+    color: #111827;
 }}
 
 .wrapper {{
@@ -536,8 +761,9 @@ body {{
 }}
 
 .card {{
+    width: 100%;
     max-width: 620px;
-    margin: auto;
+    margin: 0 auto;
     background: #ffffff;
     border-radius: 18px;
     overflow: hidden;
@@ -556,12 +782,17 @@ body {{
 .logo {{
     font-size: 30px;
     font-weight: 800;
+    letter-spacing: -0.5px;
+}}
+
+.brand-accent {{
+    color: #ff6b00;
 }}
 
 .tagline {{
     margin-top: 7px;
     font-size: 13px;
-    opacity: 0.75;
+    color: #d1d5db;
 }}
 
 .content {{
@@ -577,28 +808,32 @@ body {{
     width: 58px;
     height: 58px;
     line-height: 58px;
-    margin: auto;
+    margin: 0 auto;
     border-radius: 50%;
-    background: #e9f8ef;
-    color: #16a34a;
-    font-size: 30px;
-    font-weight: bold;
+    background: #fff3e8;
+    color: #ff6b00;
+    font-size: 26px;
+    font-weight: 800;
 }}
 
 .success h1 {{
     margin:
         15px 0 8px;
     font-size: 26px;
+    color: #111827;
 }}
 
 .success p {{
     margin: 0;
     color: #667085;
     font-size: 15px;
+    line-height: 1.5;
 }}
 
 .event-box {{
     background: #f8fafc;
+    border:
+        1px solid #eaecf0;
     border-radius: 14px;
     padding: 22px;
     margin-bottom: 25px;
@@ -609,29 +844,47 @@ body {{
         0 0 18px;
     font-size: 21px;
     font-weight: 700;
+    color: #111827;
 }}
 
-.detail {{
-    padding: 11px 0;
+.detail-row {{
+    display: table;
+    width: 100%;
+    padding: 12px 0;
     border-bottom:
         1px solid #e5e7eb;
 }}
 
-.detail:last-child {{
+.detail-row:last-child {{
     border-bottom: none;
 }}
 
+.detail-icon {{
+    display: table-cell;
+    width: 58px;
+    vertical-align: middle;
+    color: #ff6b00;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+}}
+
+.detail-content {{
+    display: table-cell;
+    vertical-align: middle;
+}}
+
 .detail-label {{
-    display: block;
-    font-size: 11px;
+    font-size: 10px;
     color: #667085;
     letter-spacing: 0.5px;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
 }}
 
 .detail-value {{
     font-size: 15px;
     font-weight: 600;
+    color: #111827;
 }}
 
 .ticket-box {{
@@ -640,12 +893,16 @@ body {{
         1px dashed #d0d5dd;
     border-radius: 14px;
     padding: 25px 20px;
+    background: #ffffff;
 }}
 
 .ticket-heading {{
-    margin: 0 0 15px;
+    margin:
+        0 0 18px;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 800;
+    color: #111827;
+    letter-spacing: 0.3px;
 }}
 
 .qr {{
@@ -659,7 +916,8 @@ body {{
 
 .ticket-id-label {{
     color: #667085;
-    font-size: 11px;
+    font-size: 10px;
+    letter-spacing: 0.5px;
     margin-bottom: 5px;
 }}
 
@@ -667,6 +925,7 @@ body {{
     font-family: monospace;
     font-size: 14px;
     font-weight: 700;
+    color: #111827;
     word-break: break-all;
 }}
 
@@ -676,7 +935,7 @@ body {{
     padding:
         14px 24px;
     border-radius: 10px;
-    background: #111827;
+    background: #ff6b00;
     color: #ffffff !important;
     text-decoration: none;
     font-weight: 700;
@@ -688,6 +947,7 @@ body {{
     color: #667085;
     font-size: 13px;
     line-height: 1.6;
+    text-align: center;
 }}
 
 .footer {{
@@ -699,13 +959,12 @@ body {{
 }}
 
 .footer strong {{
-    color: #172033;
+    color: #111827;
 }}
 
 </style>
 
 </head>
-
 
 <body>
 
@@ -719,7 +978,7 @@ body {{
     <div class="header">
 
         <div class="logo">
-            EventWaa
+            Event<span class="brand-accent">Waa</span>
         </div>
 
         <div class="tagline">
@@ -743,12 +1002,11 @@ body {{
             </div>
 
             <h1>
-                Booking Confirmed!
+                Booking Confirmed
             </h1>
 
             <p>
-                Hi {buyer_name},
-                your EventWaa ticket is ready.
+                Hi {buyer_name}, your EventWaa ticket is ready.
             </p>
 
         </div>
@@ -763,41 +1021,65 @@ body {{
             </div>
 
 
-            <div class="detail">
+            <div class="detail-row">
 
-                <span class="detail-label">
-                    TICKET TYPE
-                </span>
+                <div class="detail-icon">
+                    TICKET
+                </div>
 
-                <span class="detail-value">
-                    {ticket_type}
-                </span>
+                <div class="detail-content">
 
-            </div>
+                    <div class="detail-label">
+                        TICKET TYPE
+                    </div>
 
+                    <div class="detail-value">
+                        {ticket_type}
+                    </div>
 
-            <div class="detail">
-
-                <span class="detail-label">
-                    QUANTITY
-                </span>
-
-                <span class="detail-value">
-                    {quantity}
-                </span>
+                </div>
 
             </div>
 
 
-            <div class="detail">
+            <div class="detail-row">
 
-                <span class="detail-label">
-                    AMOUNT PAID
-                </span>
+                <div class="detail-icon">
+                    QTY
+                </div>
 
-                <span class="detail-value">
-                    {formatted_amount}
-                </span>
+                <div class="detail-content">
+
+                    <div class="detail-label">
+                        QUANTITY
+                    </div>
+
+                    <div class="detail-value">
+                        {quantity}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <div class="detail-icon">
+                    PAID
+                </div>
+
+                <div class="detail-content">
+
+                    <div class="detail-label">
+                        AMOUNT PAID
+                    </div>
+
+                    <div class="detail-value">
+                        {formatted_amount}
+                    </div>
+
+                </div>
 
             </div>
 
@@ -849,12 +1131,11 @@ body {{
 
         <p class="note">
 
-            Please keep this email safe.
-            Present the QR code at the event
-            entrance for verification.
+            Keep this email safe and present the QR code
+            at the event entrance for verification.
 
-            You can also access your ticket
-            anytime from your EventWaa account.
+            You can also access your ticket anytime
+            from your EventWaa account.
 
         </p>
 
@@ -888,31 +1169,13 @@ body {{
 
 
         # ====================================================
-        # CREATE FLASK-MAIL MESSAGE
-        # ====================================================
-
-        message = Message(
-
-            subject=(
-                f"Your EventWaa Ticket — "
-                f"{event_title}"
-            ),
-
-            recipients=[
-                buyer_email
-            ]
-
-        )
-
-
-        # ====================================================
         # PLAIN TEXT VERSION
         # ====================================================
 
-        message.body = f"""
+        text_body = f"""
 Hi {buyer_name},
 
-Your booking has been confirmed!
+Your EventWaa booking has been confirmed.
 
 EVENT
 {event_title}
@@ -929,10 +1192,30 @@ AMOUNT PAID
 TICKET ID
 {ticket_id}
 
-View your ticket:
+"""
+
+        if event_date:
+            text_body += f"DATE\n{event_date}\n\n"
+
+        if event_time:
+            text_body += f"TIME\n{event_time}\n\n"
+
+        if event_venue:
+            location_text = event_venue
+
+            if event_city:
+                location_text += f", {event_city}"
+
+            text_body += (
+                f"VENUE\n"
+                f"{location_text}\n\n"
+            )
+
+        text_body += f"""
+VIEW YOUR TICKET
 {ticket_url}
 
-Please present your QR code at the event entrance.
+Please present the QR code at the event entrance for verification.
 
 Thank you for using EventWaa.
 
@@ -941,45 +1224,47 @@ Discover. Book. Experience.
 
 
         # ====================================================
-        # HTML VERSION
+        # RESEND EMAIL
+        #
+        # The QR code is sent as an inline Base64 attachment
+        # and referenced by CID from the HTML email.
         # ====================================================
 
-        message.html = html_body
+        params = {
+            "from": EMAIL_FROM,
 
+            "to": [
+                buyer_email
+            ],
 
-        # ====================================================
-        # ATTACH QR CODE
-        # ====================================================
+            "subject": (
+                f"Your EventWaa Ticket — "
+                f"{event_title}"
+            ),
 
-        message.attach(
+            "html": html_body,
 
-            "eventwaa-ticket-qr.png",
+            "text": text_body,
 
-            "image",
-
-            qr_bytes,
-
-            headers=[
-                (
-                    "Content-ID",
-                    "<eventwaa-ticket-qr>"
-                ),
-
-                (
-                    "Content-Disposition",
-                    "inline"
-                )
+            "attachments": [
+                {
+                    "content": qr_base64,
+                    "filename": "eventwaa-ticket-qr.png",
+                    "content_type": "image/png",
+                    "content_id": "eventwaa-ticket-qr",
+                }
             ]
+        }
 
+
+        print(
+            "EVENTWAA: SENDING TICKET EMAIL VIA RESEND:",
+            buyer_email
         )
 
 
-        # ====================================================
-        # SEND
-        # ====================================================
-
-        mail.send(
-            message
+        resend.Emails.send(
+            params
         )
 
 
@@ -1000,54 +1285,111 @@ Discover. Book. Experience.
 
         print(
             "EVENTWAA TICKET EMAIL ERROR:",
+            type(e).__name__,
             str(e)
         )
 
 
         return {
             "success": False,
-            "message": str(e)
+            "message":
+                "Unable to send ticket email."
         }
 
-#password recovery email
-def send_otp_email(receiver_email, otp):
 
-    msg = Message(
-        subject="Your EventWaa Password Recovery Code",
-        sender=app.config["MAIL_DEFAULT_SENDER"],
-        recipients=[receiver_email]
-    )
+# ============================================================
+# EVENTWAA RESEND EMAIL SENDER
+# ============================================================
 
-    msg.body = f"""
-Hello,
+def send_eventwaa_email(
+    receiver_email,
+    subject,
+    html_body,
+    text_body=""
+):
+    try:
 
-We received a request to reset the password for your EventWaa account.
+        if not RESEND_API_KEY:
 
-Your verification code is:
+            print(
+                "EVENTWAA EMAIL ERROR: "
+                "RESEND_API_KEY is not configured."
+            )
 
-{otp}
+            return {
+                "success": False,
+                "message":
+                    "Email service is not configured."
+            }
 
-This code expires in 10 minutes.
+        if not receiver_email:
 
-If you did not request a password reset, you can safely ignore this email.
+            return {
+                "success": False,
+                "message":
+                    "Recipient email is required."
+            }
 
-For your security, never share this code with anyone.
+        print(
+            "EVENTWAA: SENDING EMAIL WITH RESEND"
+        )
 
---------------------------------------------------
+        print(
+            "TO:",
+            receiver_email
+        )
 
-EventWaa
-Uganda's event discovery and ticketing platform
+        print(
+            "FROM:",
+            EMAIL_FROM
+        )
 
-Email: eventwaa.ug@gmail.com
-Phone: +256 767 261 206
-Website: eventwaa.com
-Location: Gulu, Uganda
+        params = {
+            "from": EMAIL_FROM,
+            "to": [receiver_email],
+            "subject": subject,
+            "html": html_body
+        }
 
---------------------------------------------------
-"""
+        if text_body:
+            params["text"] = text_body
 
-    mail.send(msg)
+        response = resend.Emails.send(
+            params
+        )
 
+        print(
+            "EVENTWAA: RESEND EMAIL SENT"
+        )
+
+        print(
+            "RESEND RESPONSE:",
+            response
+        )
+
+        return {
+            "success": True,
+            "message":
+                "Email sent successfully.",
+            "response":
+                response
+        }
+
+    except Exception as e:
+
+        print(
+            "EVENTWAA RESEND EMAIL ERROR:",
+            type(e).__name__,
+            str(e)
+        )
+
+        return {
+            "success": False,
+            "message":
+                "Unable to send email.",
+            "error":
+                str(e)
+        }
 
 # ============================================================
 # EVENTWAA TEAM MEMBER INVITATION EMAIL
@@ -1111,7 +1453,12 @@ def send_team_invitation_email(
 
                     details_html += f"""
                         <div class="event-detail">
-                            📅 {event_date}
+                            <span class="detail-icon">
+                                DATE
+                            </span>
+                            <span>
+                                {event_date}
+                            </span>
                         </div>
                     """
 
@@ -1119,17 +1466,24 @@ def send_team_invitation_email(
 
                     details_html += f"""
                         <div class="event-detail">
-                            📍 {event_location}
+                            <span class="detail-icon">
+                                LOCATION
+                            </span>
+                            <span>
+                                {event_location}
+                            </span>
                         </div>
                     """
 
                 events_html += f"""
                     <div class="event-card">
+
                         <div class="event-title">
                             {event_title}
                         </div>
 
                         {details_html}
+
                     </div>
                 """
 
@@ -1155,6 +1509,7 @@ def send_team_invitation_email(
 
             events_html = """
                 <div class="event-card">
+
                     <div class="event-title">
                         No specific events assigned yet
                     </div>
@@ -1162,6 +1517,7 @@ def send_team_invitation_email(
                     <div class="event-detail">
                         Your host may assign events to you later.
                     </div>
+
                 </div>
             """
 
@@ -1175,6 +1531,7 @@ def send_team_invitation_email(
 
         html_body = f"""
 <!DOCTYPE html>
+
 <html>
 
 <head>
@@ -1248,7 +1605,10 @@ body {{
     margin: 0 auto;
     border-radius: 50%;
     background: #fff4ec;
-    font-size: 27px;
+    color: #ff6b00;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
 }}
 
 .welcome h1 {{
@@ -1339,13 +1699,23 @@ body {{
 .event-title {{
     font-size: 14px;
     font-weight: 700;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
 }}
 
 .event-detail {{
     color: #667085;
     font-size: 12px;
-    line-height: 1.6;
+    line-height: 1.7;
+    margin-top: 4px;
+}}
+
+.detail-icon {{
+    display: inline-block;
+    margin-right: 7px;
+    color: #ff6b00;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
 }}
 
 .button-wrapper {{
@@ -1371,6 +1741,13 @@ body {{
     color: #9a3412;
     font-size: 13px;
     line-height: 1.6;
+}}
+
+.security-title {{
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
 }}
 
 .note {{
@@ -1435,7 +1812,7 @@ body {{
         <div class="welcome">
 
             <div class="welcome-icon">
-                👥
+                TEAM
             </div>
 
             <h1>
@@ -1525,16 +1902,14 @@ body {{
 
         <div class="security">
 
-            <strong>
-                🔐 Keep your login details private.
-            </strong>
-
-            <br>
+            <span class="security-title">
+                SECURITY NOTICE
+            </span>
 
             This temporary password was generated
             specifically for your EventWaa team account.
-            Do not share your login credentials with
-            anyone else.
+            Keep your login details private and do not
+            share your credentials with anyone else.
 
         </div>
 
@@ -1574,29 +1949,10 @@ body {{
 """
 
         # ====================================================
-        # CREATE MESSAGE
-        # ====================================================
-
-        message = Message(
-            subject="You're invited to an EventWaa team",
-            sender=(
-                app.config.get(
-                    "MAIL_DEFAULT_SENDER"
-                )
-                or app.config.get(
-                    "MAIL_USERNAME"
-                )
-            ),
-            recipients=[
-                receiver_email
-            ]
-        )
-
-        # ====================================================
         # PLAIN TEXT VERSION
         # ====================================================
 
-        message.body = f"""
+        text_body = f"""
 Hello {member_name},
 
 You have been invited to join an EventWaa event team.
@@ -1623,13 +1979,14 @@ TEAM LOGIN
 
 {team_login_url}
 
-IMPORTANT
----------
+SECURITY NOTICE
+---------------
 
-Keep your login details private.
-
-This is a temporary password generated specifically
+This temporary password was generated specifically
 for your EventWaa team account.
+
+Keep your login details private and do not share
+your credentials with anyone else.
 
 If you were not expecting this invitation,
 please contact the EventWaa host who added you.
@@ -1643,31 +2000,45 @@ Uganda's event discovery and ticketing platform
 """
 
         # ====================================================
-        # HTML VERSION
-        # ====================================================
-
-        message.html = html_body
-
-        # ====================================================
-        # SEND
+        # SEND WITH RESEND
         # ====================================================
 
         print(
             "EVENTWAA: SENDING TEAM INVITATION EMAIL"
         )
 
-        result = mail.send(
-            message
+        result = send_eventwaa_email(
+            receiver_email=receiver_email,
+            subject="You're invited to an EventWaa team",
+            html_body=html_body,
+            text_body=text_body
         )
 
+        if result.get("success"):
+
+            print(
+                "EVENTWAA: TEAM INVITATION EMAIL SENT"
+            )
+
+            return {
+                "success": True,
+                "message":
+                    "Team invitation email sent successfully."
+            }
+
         print(
-            "EVENTWAA: TEAM INVITATION EMAIL SENT"
+            "EVENTWAA: TEAM INVITATION EMAIL FAILED"
         )
 
         return {
-            "success": True,
+            "success": False,
             "message":
-                "Team invitation email sent successfully."
+                result.get(
+                    "message",
+                    "Unable to send the team invitation email."
+                ),
+            "error":
+                result.get("error")
         }
 
     except Exception as e:
@@ -1681,9 +2052,11 @@ Uganda's event discovery and ticketing platform
         return {
             "success": False,
             "message":
-                "Unable to send the team invitation email."
+                "Unable to send the team invitation email.",
+            "error":
+                str(e)
         }
-
+    
 # ============================================================
 # ADMIN LOGIN SECURITY
 # ============================================================
@@ -9339,19 +9712,12 @@ def send_admin_team_member_invitation(
             )
         )
 
-
         if member is None:
 
             return jsonify({
-
-                "success":
-                    False,
-
-                "message":
-                    "Team member not found."
-
+                "success": False,
+                "message": "Team member not found."
             }), 404
-
 
         # ----------------------------------------------------
         # EMAIL
@@ -9364,60 +9730,55 @@ def send_admin_team_member_invitation(
             ) or ""
         ).strip().lower()
 
-
         if not email:
 
             return jsonify({
-
-                "success":
-                    False,
-
+                "success": False,
                 "message":
                     "This team member has no email address."
-
             }), 400
-
 
         # ----------------------------------------------------
         # STATUS
         # ----------------------------------------------------
 
         if (
-            member.get(
-                "status"
-            )
+            member.get("status")
             ==
             "Disabled"
         ):
 
             return jsonify({
-
-                "success":
-                    False,
-
+                "success": False,
                 "message":
                     "Cannot invite a disabled team member."
-
             }), 400
 
-
         # ----------------------------------------------------
-        # CHECK EXISTING ACCOUNT
+        # CHECK EXISTING ADMIN ACCOUNT
         # ----------------------------------------------------
 
-        admin_team_accounts = load_admin_team_accounts()
+        admin_team_accounts = (
+            load_admin_team_accounts()
+        )
 
         for account in admin_team_accounts:
+
             existing_email = str(
-                account.get("email", "") or ""
+                account.get(
+                    "email",
+                    ""
+                ) or ""
             ).strip().lower()
 
             if existing_email == email:
+
                 return jsonify({
                     "success": False,
-                    "message": "An admin team account already exists for this email."
+                    "message":
+                        "An admin team account already exists "
+                        "for this email."
                 }), 409
-
 
         # ----------------------------------------------------
         # CREATE TOKEN
@@ -9430,7 +9791,6 @@ def send_admin_team_member_invitation(
             )
         )
 
-
         # ----------------------------------------------------
         # CREATE LINK
         # ----------------------------------------------------
@@ -9440,7 +9800,6 @@ def send_admin_team_member_invitation(
                 token
             )
         )
-
 
         # ----------------------------------------------------
         # INVITATION DATES
@@ -9456,18 +9815,14 @@ def send_admin_team_member_invitation(
             )
         )
 
-
         # ----------------------------------------------------
         # UPDATE MEMBER
         # ----------------------------------------------------
 
         updated_member = (
             update_admin_team_member_record(
-
                 member.get("id"),
-
                 {
-
                     "invitationStatus":
                         "Pending",
 
@@ -9479,25 +9834,18 @@ def send_admin_team_member_invitation(
 
                     "accountCreated":
                         False
-
                 }
-
             )
         )
-
 
         if updated_member is None:
 
             return jsonify({
-
-                "success":
-                    False,
-
+                "success": False,
                 "message":
-                    "Unable to update team member invitation status."
-
+                    "Unable to update team member "
+                    "invitation status."
             }), 500
-
 
         # ----------------------------------------------------
         # EMAIL CONTENT
@@ -9510,7 +9858,6 @@ def send_admin_team_member_invitation(
             )
         )
 
-
         member_role = (
             member.get(
                 "role",
@@ -9518,308 +9865,538 @@ def send_admin_team_member_invitation(
             )
         )
 
-
         member_host = (
-            member.get(
-                "host"
-            )
+            member.get("host")
             or
             "Not assigned"
         )
-
 
         member_event = (
-            member.get(
-                "event"
-            )
+            member.get("event")
             or
             "Not assigned"
         )
-
 
         subject = (
             "You're invited to join the EventWaa Team"
         )
 
+        # ----------------------------------------------------
+        # HTML EMAIL
+        # ----------------------------------------------------
 
         html_body = f"""
-        <!DOCTYPE html>
+<!DOCTYPE html>
 
-        <html>
+<html>
 
-        <head>
+<head>
 
-            <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-            <meta
-                name="viewport"
-                content="width=device-width, initial-scale=1.0"
-            >
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-            <title>
-                EventWaa Team Invitation
-            </title>
+<title>
+    EventWaa Team Invitation
+</title>
 
-        </head>
+<style>
 
-        <body
-            style="
-                margin:0;
-                padding:0;
-                background:#f5f6fa;
-                font-family:Arial,Helvetica,sans-serif;
-                color:#222;
-            "
-        >
+body {{
+    margin: 0;
+    padding: 0;
+    background: #f4f6f8;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #172033;
+}}
 
-            <div
-                style="
-                    max-width:600px;
-                    margin:40px auto;
-                    background:#ffffff;
-                    border-radius:16px;
-                    overflow:hidden;
-                    box-shadow:0 8px 30px rgba(0,0,0,0.08);
-                "
-            >
+.wrapper {{
+    width: 100%;
+    padding: 35px 15px;
+    box-sizing: border-box;
+}}
 
-                <div
-                    style="
-                        padding:30px;
-                        background:#6c3df4;
-                        color:#ffffff;
-                    "
-                >
+.card {{
+    max-width: 620px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.08);
+}}
 
-                    <h1
-                        style="
-                            margin:0 0 8px;
-                            font-size:28px;
-                        "
-                    >
-                        EventWaa
-                    </h1>
+.header {{
+    background: #111827;
+    color: #ffffff;
+    text-align: center;
+    padding: 32px 20px;
+}}
 
-                    <p
-                        style="
-                            margin:0;
-                            font-size:15px;
-                            opacity:0.9;
-                        "
-                    >
-                        Team Invitation
-                    </p>
+.logo {{
+    font-size: 30px;
+    font-weight: 800;
+}}
 
-                </div>
+.tagline {{
+    margin-top: 7px;
+    font-size: 13px;
+    opacity: 0.75;
+}}
 
+.content {{
+    padding: 35px 30px;
+}}
 
-                <div
-                    style="
-                        padding:30px;
-                    "
-                >
+.welcome {{
+    text-align: center;
+    margin-bottom: 28px;
+}}
 
-                    <p>
-                        Hello {member_name},
-                    </p>
+.welcome-icon {{
+    width: 58px;
+    height: 58px;
+    line-height: 58px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: #fff4ec;
+    color: #ff6b00;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}}
 
+.welcome h1 {{
+    margin: 15px 0 8px;
+    font-size: 26px;
+}}
 
-                    <p>
-                        You have been invited to join the
-                        <strong>EventWaa team</strong>.
-                    </p>
+.welcome p {{
+    margin: 0;
+    color: #667085;
+    font-size: 15px;
+    line-height: 1.6;
+}}
 
+.message {{
+    font-size: 15px;
+    line-height: 1.7;
+    color: #475467;
+    margin-bottom: 25px;
+}}
 
-                    <div
-                        style="
-                            margin:24px 0;
-                            padding:20px;
-                            background:#f7f5ff;
-                            border-radius:12px;
-                        "
-                    >
+.account-box {{
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 25px;
+}}
 
-                        <p>
-                            <strong>Role:</strong>
-                            {member_role}
-                        </p>
+.account-title {{
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 18px;
+}}
 
-                        <p>
-                            <strong>Host:</strong>
-                            {member_host}
-                        </p>
+.detail {{
+    padding: 11px 0;
+    border-bottom: 1px solid #e5e7eb;
+}}
 
-                        <p>
-                            <strong>Event:</strong>
-                            {member_event}
-                        </p>
+.detail:last-child {{
+    border-bottom: none;
+}}
 
-                    </div>
+.label {{
+    display: block;
+    font-size: 11px;
+    color: #667085;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}}
 
+.value {{
+    font-size: 15px;
+    font-weight: 600;
+    word-break: break-word;
+}}
 
-                    <p>
-                        Accept your invitation to create your
-                        EventWaa team account and access the
-                        team features assigned to you.
-                    </p>
+.button-wrapper {{
+    text-align: center;
+    margin: 30px 0;
+}}
 
+.button {{
+    display: inline-block;
+    padding: 14px 25px;
+    border-radius: 10px;
+    background: #ff6b00;
+    color: #ffffff !important;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+}}
 
-                    <div
-                        style="
-                            margin:30px 0;
-                            text-align:center;
-                        "
-                    >
+.assignment {{
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 20px;
+    margin: 25px 0;
+}}
 
-                        <a
-                            href="{invitation_link}"
-                            style="
-                                display:inline-block;
-                                background:#6c3df4;
-                                color:#ffffff;
-                                text-decoration:none;
-                                padding:15px 26px;
-                                border-radius:10px;
-                                font-weight:bold;
-                            "
-                        >
-                            Accept Team Invitation
-                        </a>
+.assignment-title {{
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}}
 
-                    </div>
+.assignment-row {{
+    padding: 10px 0;
+    border-bottom: 1px solid #e5e7eb;
+}}
 
+.assignment-row:last-child {{
+    border-bottom: none;
+}}
 
-                    <p
-                        style="
-                            color:#777;
-                            font-size:13px;
-                            line-height:1.6;
-                        "
-                    >
-                        This invitation expires in
-                        <strong>48 hours</strong>.
-                    </p>
+.assignment-label {{
+    display: block;
+    font-size: 10px;
+    color: #667085;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    margin-bottom: 4px;
+}}
 
+.assignment-value {{
+    font-size: 14px;
+    font-weight: 600;
+}}
 
-                    <p
-                        style="
-                            color:#777;
-                            font-size:13px;
-                            line-height:1.6;
-                        "
-                    >
-                        If you were not expecting this invitation,
-                        you can safely ignore this email.
-                    </p>
+.security {{
+    background: #fff7ed;
+    border-radius: 12px;
+    padding: 16px;
+    color: #9a3412;
+    font-size: 13px;
+    line-height: 1.6;
+}}
 
-                </div>
+.security-title {{
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+}}
+
+.note {{
+    margin-top: 25px;
+    color: #667085;
+    font-size: 13px;
+    line-height: 1.6;
+}}
+
+.footer {{
+    padding: 22px 20px;
+    background: #f8fafc;
+    text-align: center;
+    color: #667085;
+    font-size: 12px;
+}}
+
+.footer strong {{
+    color: #172033;
+}}
+
+@media (max-width: 600px) {{
+
+    .wrapper {{
+        padding: 15px 8px;
+    }}
+
+    .content {{
+        padding: 28px 20px;
+    }}
+
+    .welcome h1 {{
+        font-size: 23px;
+    }}
+
+}}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<div class="card">
+
+    <div class="header">
+
+        <div class="logo">
+            EventWaa
+        </div>
+
+        <div class="tagline">
+            Discover. Book. Experience.
+        </div>
+
+    </div>
+
+    <div class="content">
+
+        <div class="welcome">
+
+            <div class="welcome-icon">
+                TEAM
+            </div>
+
+            <h1>
+                You're Invited to the EventWaa Team
+            </h1>
+
+            <p>
+                Welcome to the EventWaa team,
+                {member_name}.
+            </p>
+
+        </div>
+
+        <div class="message">
+
+            You have been invited to join the
+            <strong>EventWaa team</strong>.
+            Accept your invitation to create your
+            team account and access the features
+            assigned to you.
+
+        </div>
+
+        <div class="assignment">
+
+            <div class="assignment-title">
+                Your Assignment
+            </div>
+
+            <div class="assignment-row">
+
+                <span class="assignment-label">
+                    ROLE
+                </span>
+
+                <span class="assignment-value">
+                    {member_role}
+                </span>
 
             </div>
 
-        </body>
+            <div class="assignment-row">
 
-        </html>
-        """
+                <span class="assignment-label">
+                    HOST
+                </span>
 
+                <span class="assignment-value">
+                    {member_host}
+                </span>
 
-        # ============================================================
-        # SEND INVITATION EMAIL
-        # ============================================================
+            </div>
 
-        try:
+            <div class="assignment-row">
 
-            print("==============================================")
-            print("ADMIN TEAM INVITATION EMAIL")
-            print("==============================================")
-            print("TO:", email)
-            print("FROM:", app.config.get("MAIL_DEFAULT_SENDER"))
-            print("MAIL SERVER:", app.config.get("MAIL_SERVER"))
-            print("MAIL PORT:", app.config.get("MAIL_PORT"))
-            print("MAIL USE TLS:", app.config.get("MAIL_USE_TLS"))
-            print("MAIL USE SSL:", app.config.get("MAIL_USE_SSL"))
-            print("MAIL USERNAME:", app.config.get("MAIL_USERNAME"))
-            print("==============================================")
+                <span class="assignment-label">
+                    EVENT
+                </span>
 
-            msg = Message(
-                subject=subject,
-                sender=app.config.get(
-                    "MAIL_DEFAULT_SENDER"
-                ) or app.config.get(
-                    "MAIL_USERNAME"
-                ),
-                recipients=[
-                    email
-                ],
-                html=html_body
-            )
+                <span class="assignment-value">
+                    {member_event}
+                </span>
 
-            mail.send(msg)
+            </div>
 
-            print(
-                "ADMIN TEAM INVITATION EMAIL SENT SUCCESSFULLY TO:",
-                email
-            )
+        </div>
 
-        except Exception as email_error:
+        <div class="button-wrapper">
+
+            <a
+                href="{invitation_link}"
+                class="button"
+            >
+                Accept Team Invitation
+            </a>
+
+        </div>
+
+        <div class="security">
+
+            <span class="security-title">
+                INVITATION SECURITY
+            </span>
+
+            This invitation expires in
+            <strong>48 hours</strong>.
+
+            <br><br>
+
+            If you were not expecting this invitation,
+            you can safely ignore this email.
+
+        </div>
+
+        <p class="note">
+
+            If you have questions about your assignment,
+            please contact the EventWaa administrator
+            who invited you.
+
+        </p>
+
+    </div>
+
+    <div class="footer">
+
+        <strong>
+            EventWaa
+        </strong>
+
+        <br>
+
+        Discover. Book. Experience.
+
+        <br><br>
+
+        Uganda's event discovery and ticketing platform
+
+    </div>
+
+</div>
+
+</div>
+
+</body>
+
+</html>
+"""
+
+        # ----------------------------------------------------
+        # PLAIN TEXT VERSION
+        # ----------------------------------------------------
+
+        text_body = f"""
+Hello {member_name},
+
+You have been invited to join the EventWaa team.
+
+YOUR ASSIGNMENT
+---------------
+
+Role:
+{member_role}
+
+Host:
+{member_host}
+
+Event:
+{member_event}
+
+ACCEPT INVITATION
+-----------------
+
+{invitation_link}
+
+This invitation expires in 48 hours.
+
+If you were not expecting this invitation,
+you can safely ignore this email.
+
+--------------------------------------------------
+
+EventWaa
+Discover. Book. Experience.
+
+Uganda's event discovery and ticketing platform
+"""
+
+        # ----------------------------------------------------
+        # SEND WITH RESEND
+        # ----------------------------------------------------
+
+        print("==============================================")
+        print("ADMIN TEAM INVITATION EMAIL")
+        print("==============================================")
+        print("TO:", email)
+        print("FROM:", EMAIL_FROM)
+        print("EMAIL PROVIDER: RESEND")
+        print("==============================================")
+
+        email_result = send_eventwaa_email(
+            receiver_email=email,
+            subject=subject,
+            html_body=html_body,
+            text_body=text_body
+        )
+
+        if not email_result.get("success"):
 
             print("==============================================")
             print("ADMIN TEAM INVITATION EMAIL FAILED")
             print("RECIPIENT:", email)
             print(
-                "ERROR TYPE:",
-                type(email_error).__name__
-            )
-            print(
                 "ERROR:",
-                str(email_error)
+                email_result.get(
+                    "error",
+                    email_result.get("message")
+                )
             )
             print("==============================================")
 
             return jsonify({
                 "success": False,
                 "message":
-                    "Team member was created, but the invitation email could not be sent.",
+                    "Team member invitation could not be sent.",
                 "emailError":
-                    str(email_error)
+                    email_result.get(
+                        "message",
+                        "Unable to send invitation email."
+                    )
             }), 500
 
+        print(
+            "ADMIN TEAM INVITATION EMAIL SENT SUCCESSFULLY TO:",
+            email
+        )
 
         # ----------------------------------------------------
         # SUCCESS
         # ----------------------------------------------------
 
         return jsonify({
-
-            "success":
-                True,
-
+            "success": True,
             "message":
                 "Team invitation sent successfully.",
-
             "member":
                 updated_member
-
         }), 200
-
 
     except Exception as e:
 
         print(
             "SEND ADMIN TEAM INVITATION ERROR:",
+            type(e).__name__,
             str(e)
         )
 
-
         return jsonify({
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 f"Unable to send team invitation: {str(e)}"
-
         }), 500
-
 
 # ============================================================
 # VALIDATE ADMIN TEAM INVITATION
@@ -13844,6 +14421,162 @@ NOTIFICATIONS_FILE = "notifications.json"
 EVENT_REPORTS_FILE = "event_reports.json"
 WALLET_FILE = "wallet.json"
 
+# ============================================================
+# ANNOUNCEMENTS STORAGE
+# ============================================================
+
+ANNOUNCEMENTS_FILE = "announcements.json"
+
+
+def ensure_announcements_file():
+
+    if not os.path.exists(
+        ANNOUNCEMENTS_FILE
+    ):
+
+        with open(
+            ANNOUNCEMENTS_FILE,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                [],
+                file,
+                indent=4,
+                ensure_ascii=False
+            )
+
+
+def load_announcements():
+
+    ensure_announcements_file()
+
+    try:
+
+        with open(
+            ANNOUNCEMENTS_FILE,
+            "r",
+            encoding="utf-8"
+        ) as file:
+
+            data = json.load(file)
+
+        if not isinstance(
+            data,
+            list
+        ):
+            return []
+
+        return data
+
+    except Exception as error:
+
+        print(
+            "ANNOUNCEMENTS LOAD ERROR:",
+            str(error)
+        )
+
+        return []
+
+
+def save_announcements(
+    announcements
+):
+
+    ensure_announcements_file()
+
+    with open(
+        ANNOUNCEMENTS_FILE,
+        "w",
+        encoding="utf-8"
+    ) as file:
+
+        json.dump(
+            announcements,
+            file,
+            indent=4,
+            ensure_ascii=False
+        )
+
+
+# ============================================================
+# USERS STORAGE
+# ============================================================
+
+USERS_FILE = "users.json"
+
+
+def ensure_users_file():
+
+    if not os.path.exists(
+        USERS_FILE
+    ):
+
+        with open(
+            USERS_FILE,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                [],
+                file,
+                indent=4,
+                ensure_ascii=False
+            )
+
+
+def load_users():
+
+    ensure_users_file()
+
+    try:
+
+        with open(
+            USERS_FILE,
+            "r",
+            encoding="utf-8"
+        ) as file:
+
+            data = json.load(file)
+
+        if not isinstance(
+            data,
+            list
+        ):
+            return []
+
+        return data
+
+    except Exception as error:
+
+        print(
+            "USERS LOAD ERROR:",
+            str(error)
+        )
+
+        return []
+
+
+def save_users(
+    users
+):
+
+    ensure_users_file()
+
+    with open(
+        USERS_FILE,
+        "w",
+        encoding="utf-8"
+    ) as file:
+
+        json.dump(
+            users,
+            file,
+            indent=4,
+            ensure_ascii=False
+        )
 
 # ============================================================
 # ADMIN SETTINGS
@@ -14649,13 +15382,45 @@ def forgot_password():
     )
 
 
-    # Send OTP email
+    # ====================================================
+    # SEND OTP EMAIL
+    # ====================================================
+
     try:
 
-        send_otp_email(
+        email_result = send_otp_email(
             email,
             otp
         )
+
+        # The email helper handles Resend errors and
+        # returns success=False when delivery fails.
+        if not email_result.get("success"):
+
+            print(
+                "PASSWORD RECOVERY EMAIL FAILED:",
+                email_result.get("message")
+            )
+
+            # Remove failed recovery request
+            resets = [
+                reset
+                for reset in resets
+                if str(
+                    reset.get("email", "")
+                ).lower() != email
+            ]
+
+            save_password_resets(
+                resets
+            )
+
+            return jsonify({
+                "success": False,
+                "message": (
+                    "Unable to send the recovery email right now."
+                )
+            }), 500
 
     except Exception as error:
 
@@ -14668,12 +15433,6 @@ def forgot_password():
 
         traceback.print_exc()
 
-        return jsonify({
-            "success": False,
-            "message": "Unable to send the recovery email right now."
-        }), 500
-
-
         # Remove failed recovery request
         resets = [
             reset
@@ -14683,11 +15442,9 @@ def forgot_password():
             ).lower() != email
         ]
 
-
         save_password_resets(
             resets
         )
-
 
         return jsonify({
             "success": False,
@@ -14695,15 +15452,6 @@ def forgot_password():
                 "Unable to send the recovery email right now."
             )
         }), 500
-
-
-    return jsonify({
-        "success": True,
-        "message": (
-            "If an account exists with this email, "
-            "a recovery code has been sent."
-        )
-    }), 200
 
 # ============================================================
 # VERIFY PASSWORD RESET OTP
@@ -42723,11 +43471,33 @@ def create_notification(
                 return
 
 
-    notification = {
+    existing_ids = []
 
-        "id": len(
-            notifications
-        ) + 1,
+    for existing_notification in notifications:
+
+        try:
+            existing_ids.append(
+                int(
+                    existing_notification.get(
+                        "id",
+                        0
+                    )
+                )
+            )
+        except (
+            TypeError,
+            ValueError
+        ):
+            pass
+
+    next_notification_id = (
+        max(existing_ids)
+        if existing_ids
+        else 0
+    ) + 1
+
+    notification = {
+        "id": next_notification_id,
 
         "userId": user_id,
 
@@ -42908,7 +43678,6 @@ def unread_notifications(user_id):
         "unread": unread
     })
 
-
 # ============================================================
 # DELETE NOTIFICATION
 # ============================================================
@@ -42943,6 +43712,304 @@ def delete_notification(notification_id):
     return jsonify({
         "success": True
     })
+
+
+# ============================================================
+# ADMIN ANNOUNCEMENTS
+# ============================================================
+
+@app.route(
+    "/admin/announcements",
+    methods=["POST"]
+)
+@admin_required
+def create_admin_announcement():
+
+    try:
+
+        data = request.get_json() or {}
+
+        title = str(
+            data.get("title", "")
+        ).strip()
+
+        message = str(
+            data.get("message", "")
+        ).strip()
+
+        audience = str(
+            data.get("audience", "all_hosts")
+        ).strip().lower()
+
+        # ----------------------------------------------------
+        # VALIDATION
+        # ----------------------------------------------------
+
+        if not title:
+            return jsonify({
+                "success": False,
+                "message": "Announcement title is required."
+            }), 400
+
+        if not message:
+            return jsonify({
+                "success": False,
+                "message": "Announcement message is required."
+            }), 400
+
+        if len(title) > 120:
+            return jsonify({
+                "success": False,
+                "message": (
+                    "Announcement title cannot exceed "
+                    "120 characters."
+                )
+            }), 400
+
+        if len(message) > 2000:
+            return jsonify({
+                "success": False,
+                "message": (
+                    "Announcement message cannot exceed "
+                    "2000 characters."
+                )
+            }), 400
+
+        if audience != "all_hosts":
+            return jsonify({
+                "success": False,
+                "message": "Unsupported announcement audience."
+            }), 400
+
+        # ----------------------------------------------------
+        # LOAD USERS
+        # ----------------------------------------------------
+
+        users = load_users()
+
+        if not isinstance(users, list):
+            users = []
+
+        # ----------------------------------------------------
+        # FIND ACTIVE HOSTS
+        # ----------------------------------------------------
+
+        host_users = []
+
+        for user in users:
+
+            role = str(
+                user.get("role", "")
+            ).strip().lower()
+
+            status = str(
+                user.get("status", "Active")
+            ).strip().lower()
+
+            if (
+                role == "host"
+                and status not in {
+                    "suspended",
+                    "disabled",
+                    "inactive"
+                }
+                and user.get("id") is not None
+            ):
+                host_users.append(user)
+
+        # ----------------------------------------------------
+        # CREATE NOTIFICATIONS
+        # ----------------------------------------------------
+
+        notifications = load_notifications()
+
+        if not isinstance(notifications, list):
+            notifications = []
+
+        existing_ids = []
+
+        for notification in notifications:
+
+            try:
+                existing_ids.append(
+                    int(
+                        notification.get(
+                            "id",
+                            0
+                        )
+                    )
+                )
+            except (
+                TypeError,
+                ValueError
+            ):
+                pass
+
+        next_notification_id = (
+            max(existing_ids)
+            if existing_ids
+            else 0
+        ) + 1
+
+        created_at = datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+
+        recipient_count = 0
+
+        for user in host_users:
+
+            notification = {
+                "id": next_notification_id,
+                "userId": user.get("id"),
+                "title": title,
+                "message": message,
+                "type": "announcement",
+                "link": "",
+                "read": False,
+                "createdAt": created_at,
+                "announcement": True
+            }
+
+            notifications.append(notification)
+
+            next_notification_id += 1
+            recipient_count += 1
+
+        save_notifications(notifications)
+
+        # ----------------------------------------------------
+        # ANNOUNCEMENT HISTORY
+        # ----------------------------------------------------
+
+        announcements = load_announcements()
+
+        if not isinstance(announcements, list):
+            announcements = []
+
+        existing_announcement_ids = []
+
+        for announcement in announcements:
+
+            try:
+                existing_announcement_ids.append(
+                    int(
+                        announcement.get(
+                            "id",
+                            0
+                        )
+                    )
+                )
+            except (
+                TypeError,
+                ValueError
+            ):
+                pass
+
+        next_announcement_id = (
+            max(existing_announcement_ids)
+            if existing_announcement_ids
+            else 0
+        ) + 1
+
+        announcement_record = {
+            "id": next_announcement_id,
+            "title": title,
+            "message": message,
+            "audience": audience,
+            "recipientCount": recipient_count,
+            "createdAt": created_at,
+            "createdBy": "admin"
+        }
+
+        announcements.append(
+            announcement_record
+        )
+
+        save_announcements(
+            announcements
+        )
+
+        return jsonify({
+            "success": True,
+            "message": (
+                f"Announcement sent to "
+                f"{recipient_count} host"
+                f"{'' if recipient_count == 1 else 's'}."
+            ),
+            "announcement": announcement_record
+        }), 201
+
+    except Exception as error:
+
+        import traceback
+
+        print(
+            "ADMIN ANNOUNCEMENT ERROR:",
+            repr(error)
+        )
+
+        traceback.print_exc()
+
+        return jsonify({
+            "success": False,
+            "message": (
+                "Unable to send announcement."
+            )
+        }), 500
+
+
+# ============================================================
+# GET ADMIN ANNOUNCEMENT HISTORY
+# ============================================================
+
+@app.route(
+    "/admin/announcements",
+    methods=["GET"]
+)
+@admin_required
+def get_admin_announcements():
+
+    try:
+
+        announcements = load_announcements()
+
+        if not isinstance(
+            announcements,
+            list
+        ):
+            announcements = []
+
+        announcements.sort(
+            key=lambda item: int(
+                item.get("id", 0)
+            ),
+            reverse=True
+        )
+
+        return jsonify({
+            "success": True,
+            "announcements": announcements
+        }), 200
+
+    except Exception as error:
+
+        import traceback
+
+        print(
+            "ADMIN ANNOUNCEMENTS LOAD ERROR:",
+            repr(error)
+        )
+
+        traceback.print_exc()
+
+        return jsonify({
+            "success": False,
+            "message": (
+                "Unable to load announcements."
+            ),
+            "announcements": []
+        }), 500
 
 
 # ============================================================
@@ -48826,6 +49893,16 @@ if __name__ == "__main__":
     print(" EventWaa Backend Starting...")
     print("==========================================")
     print("Settings:", load_admin_settings())
+    print("\n===== EVENTWAA ROUTES =====")
+
+    for rule in app.url_map.iter_rules():
+        if "announcement" in rule.rule.lower():
+            print(
+                rule.rule,
+                sorted(rule.methods)
+            )
+
+    print("===========================\n")
 
     port = int(os.environ.get("PORT", 5000))
     # Railway provides ports automatically, use 5000 locally.

@@ -5,6 +5,7 @@ import {
     LayoutDashboard,
     Users,
     UserRoundCog,
+    Megaphone, 
     CalendarDays,
     ScanLine,
     Mic2,
@@ -63,6 +64,14 @@ function AdminLayout() {
                     >
                         <UserRoundCog size={19} />
                         <span>Team Members</span>
+                    </NavLink>
+                    {/* ANNOUNCEMENTS */}
+                    <NavLink
+                        to="/admin/announcements"
+                        onClick={closeMenu}
+                    >
+                        <Megaphone size={19} />
+                        <span>Announcements</span>
                     </NavLink>
                     {/* EVENTS */}
                     <NavLink
