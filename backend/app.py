@@ -82,10 +82,15 @@ app.config["MAIL_SERVER"] = os.getenv(
 )
 
 app.config["MAIL_PORT"] = int(
-    os.getenv("EMAIL_PORT", 587)
+    os.getenv(
+        "EMAIL_PORT",
+        587
+    )
 )
 
 app.config["MAIL_USE_TLS"] = True
+
+app.config["MAIL_USE_SSL"] = False
 
 app.config["MAIL_USERNAME"] = os.getenv(
     "EMAIL_USERNAME"
@@ -99,13 +104,27 @@ app.config["MAIL_DEFAULT_SENDER"] = os.getenv(
     "EMAIL_USERNAME"
 )
 
+# Prevent SMTP connection problems from
+# hanging a Gunicorn worker.
+app.config["MAIL_TIMEOUT"] = int(
+    os.getenv(
+        "EMAIL_TIMEOUT",
+        10
+    )
+)
+
 print(
     "MAIL CONFIG LOADED:",
-    bool(app.config["MAIL_USERNAME"]),
-    bool(app.config["MAIL_PASSWORD"])
+    bool(
+        app.config["MAIL_USERNAME"]
+    ),
+    bool(
+        app.config["MAIL_PASSWORD"]
+    )
 )
 
 mail = Mail(app)
+
 # ============================================================
 # EVENTWAA ADMIN PASSWORD RECOVERY EMAIL
 #
@@ -1033,6 +1052,7 @@ Location: Gulu, Uganda
 # ============================================================
 # EVENTWAA TEAM MEMBER INVITATION EMAIL
 # ============================================================
+
 def send_team_invitation_email(
     receiver_email,
     member_name,
@@ -1041,100 +1061,135 @@ def send_team_invitation_email(
     assigned_events
 ):
     try:
+
         # ====================================================
         # FRONTEND URL
         # ====================================================
+
         frontend_url = os.getenv(
             "FRONTEND_URL",
             "http://localhost:5173"
         ).rstrip("/")
+
         team_login_url = (
             f"{frontend_url}/team-login"
         )
+
         # ====================================================
         # ASSIGNED EVENTS
         # ====================================================
+
         events_html = ""
         events_text = ""
+
         if assigned_events:
+
             for event in assigned_events:
+
                 event_title = (
                     event.get("title")
                     or event.get("eventTitle")
                     or "Untitled Event"
                 )
+
                 event_date = (
                     event.get("date")
                     or event.get("eventDate")
                     or ""
                 )
+
                 event_location = (
                     event.get("location")
                     or event.get("venue")
                     or event.get("eventVenue")
                     or ""
                 )
+
                 details_html = ""
+
                 if event_date:
+
                     details_html += f"""
                         <div class="event-detail">
                             📅 {event_date}
                         </div>
                     """
+
                 if event_location:
+
                     details_html += f"""
                         <div class="event-detail">
                             📍 {event_location}
                         </div>
                     """
+
                 events_html += f"""
                     <div class="event-card">
                         <div class="event-title">
                             {event_title}
                         </div>
+
                         {details_html}
                     </div>
                 """
+
                 events_text += (
                     f"- {event_title}"
                 )
+
                 if event_date:
+
                     events_text += (
                         f" | {event_date}"
                     )
+
                 if event_location:
+
                     events_text += (
                         f" | {event_location}"
                     )
+
                 events_text += "\n"
+
         else:
+
             events_html = """
                 <div class="event-card">
                     <div class="event-title">
                         No specific events assigned yet
                     </div>
+
                     <div class="event-detail">
                         Your host may assign events to you later.
                     </div>
                 </div>
             """
+
             events_text = (
                 "No specific events assigned yet.\n"
             )
+
         # ====================================================
         # HTML EMAIL
         # ====================================================
+
         html_body = f"""
 <!DOCTYPE html>
 <html>
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
 >
+
 <title>EventWaa Team Invitation</title>
+
 <style>
+
 body {{
     margin: 0;
     padding: 0;
@@ -1142,84 +1197,101 @@ body {{
     font-family: Arial, Helvetica, sans-serif;
     color: #172033;
 }}
+
 .wrapper {{
     width: 100%;
     padding: 35px 15px;
     box-sizing: border-box;
 }}
+
 .card {{
     max-width: 620px;
     margin: 0 auto;
     background: #ffffff;
     border-radius: 18px;
     overflow: hidden;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.08);
 }}
+
 .header {{
     background: #111827;
     color: #ffffff;
     text-align: center;
     padding: 32px 20px;
 }}
+
 .logo {{
     font-size: 30px;
     font-weight: 800;
 }}
+
 .tagline {{
     margin-top: 7px;
     font-size: 13px;
     opacity: 0.75;
 }}
+
 .content {{
     padding: 35px 30px;
 }}
+
 .welcome {{
     text-align: center;
     margin-bottom: 28px;
 }}
+
 .welcome-icon {{
     width: 58px;
     height: 58px;
     line-height: 58px;
     margin: 0 auto;
     border-radius: 50%;
-    background: #eef2ff;
+    background: #fff4ec;
     font-size: 27px;
 }}
+
 .welcome h1 {{
     margin: 15px 0 8px;
     font-size: 26px;
 }}
+
 .welcome p {{
     margin: 0;
     color: #667085;
     font-size: 15px;
     line-height: 1.6;
 }}
+
 .message {{
     font-size: 15px;
     line-height: 1.7;
     color: #475467;
     margin-bottom: 25px;
 }}
+
 .account-box {{
     background: #f8fafc;
     border-radius: 14px;
     padding: 22px;
     margin-bottom: 25px;
 }}
+
 .account-title {{
     font-size: 17px;
     font-weight: 700;
     margin-bottom: 18px;
 }}
+
 .detail {{
     padding: 11px 0;
     border-bottom: 1px solid #e5e7eb;
 }}
+
 .detail:last-child {{
     border-bottom: none;
 }}
+
 .label {{
     display: block;
     font-size: 11px;
@@ -1227,11 +1299,13 @@ body {{
     letter-spacing: 0.5px;
     margin-bottom: 5px;
 }}
+
 .value {{
     font-size: 15px;
     font-weight: 600;
     word-break: break-word;
 }}
+
 .password {{
     display: inline-block;
     margin-top: 3px;
@@ -1245,43 +1319,51 @@ body {{
     letter-spacing: 0.5px;
     word-break: break-all;
 }}
+
 .events {{
     margin-bottom: 25px;
 }}
+
 .events h3 {{
     margin: 0 0 15px;
     font-size: 17px;
 }}
+
 .event-card {{
     background: #f8fafc;
     border-radius: 10px;
     padding: 14px 16px;
     margin-bottom: 9px;
 }}
+
 .event-title {{
     font-size: 14px;
     font-weight: 700;
     margin-bottom: 5px;
 }}
+
 .event-detail {{
     color: #667085;
     font-size: 12px;
     line-height: 1.6;
 }}
+
 .button-wrapper {{
     text-align: center;
     margin: 30px 0;
 }}
+
 .button {{
     display: inline-block;
     padding: 14px 25px;
     border-radius: 10px;
-    background: #111827;
+    background: #ff6b00;
     color: #ffffff !important;
     text-decoration: none;
     font-weight: 700;
     font-size: 14px;
 }}
+
 .security {{
     background: #fff7ed;
     border-radius: 12px;
@@ -1290,12 +1372,14 @@ body {{
     font-size: 13px;
     line-height: 1.6;
 }}
+
 .note {{
     margin-top: 25px;
     color: #667085;
     font-size: 13px;
     line-height: 1.6;
 }}
+
 .footer {{
     padding: 22px 20px;
     background: #f8fafc;
@@ -1303,183 +1387,297 @@ body {{
     color: #667085;
     font-size: 12px;
 }}
+
 .footer strong {{
     color: #172033;
 }}
+
 @media (max-width: 600px) {{
+
     .wrapper {{
         padding: 15px 8px;
     }}
+
     .content {{
         padding: 28px 20px;
     }}
+
     .welcome h1 {{
         font-size: 23px;
     }}
+
 }}
+
 </style>
+
 </head>
+
 <body>
+
 <div class="wrapper">
+
 <div class="card">
+
     <div class="header">
+
         <div class="logo">
             EventWaa
         </div>
+
         <div class="tagline">
             Discover. Book. Experience.
         </div>
+
     </div>
+
     <div class="content">
+
         <div class="welcome">
+
             <div class="welcome-icon">
                 👥
             </div>
+
             <h1>
                 You're Invited to a Team
             </h1>
+
             <p>
                 Welcome to the EventWaa team,
                 {member_name}.
             </p>
+
         </div>
+
         <div class="message">
+
             You have been added as a team member
             on EventWaa. You can use the login
             details below to access your team account
             and help manage event check-ins.
+
         </div>
+
         <div class="account-box">
+
             <div class="account-title">
                 Your Team Login
             </div>
+
             <div class="detail">
+
                 <span class="label">
                     EMAIL
                 </span>
+
                 <span class="value">
                     {receiver_email}
                 </span>
+
             </div>
+
             <div class="detail">
+
                 <span class="label">
                     ROLE
                 </span>
+
                 <span class="value">
                     {role}
                 </span>
+
             </div>
+
             <div class="detail">
+
                 <span class="label">
                     TEMPORARY PASSWORD
                 </span>
+
                 <span class="password">
                     {temporary_password}
                 </span>
+
             </div>
+
         </div>
+
         <div class="events">
+
             <h3>
                 Your Assigned Events
             </h3>
+
             {events_html}
+
         </div>
+
         <div class="button-wrapper">
+
             <a
                 href="{team_login_url}"
                 class="button"
             >
                 Open Team Login
             </a>
+
         </div>
+
         <div class="security">
+
             <strong>
                 🔐 Keep your login details private.
             </strong>
+
             <br>
+
             This temporary password was generated
             specifically for your EventWaa team account.
             Do not share your login credentials with
             anyone else.
+
         </div>
+
         <p class="note">
+
             If you were not expecting this invitation,
             please contact the EventWaa host who added
             you to their team.
+
         </p>
+
     </div>
+
     <div class="footer">
+
         <strong>
             EventWaa
         </strong>
+
         <br>
+
         Discover. Book. Experience.
+
         <br><br>
+
         Uganda's event discovery and ticketing platform
+
     </div>
+
 </div>
+
 </div>
+
 </body>
+
 </html>
 """
+
         # ====================================================
         # CREATE MESSAGE
         # ====================================================
+
         message = Message(
             subject="You're invited to an EventWaa team",
-            sender=app.config["MAIL_DEFAULT_SENDER"],
-            recipients=[receiver_email]
+            sender=(
+                app.config.get(
+                    "MAIL_DEFAULT_SENDER"
+                )
+                or app.config.get(
+                    "MAIL_USERNAME"
+                )
+            ),
+            recipients=[
+                receiver_email
+            ]
         )
+
         # ====================================================
         # PLAIN TEXT VERSION
         # ====================================================
+
         message.body = f"""
 Hello {member_name},
+
 You have been invited to join an EventWaa event team.
+
 YOUR TEAM ACCOUNT
 -----------------
+
 Email:
 {receiver_email}
+
 Role:
 {role}
+
 Temporary password:
 {temporary_password}
+
 ASSIGNED EVENTS
 ---------------
+
 {events_text}
+
 TEAM LOGIN
 ----------
+
 {team_login_url}
+
 IMPORTANT
 ---------
+
 Keep your login details private.
+
 This is a temporary password generated specifically
 for your EventWaa team account.
+
 If you were not expecting this invitation,
 please contact the EventWaa host who added you.
+
 --------------------------------------------------
+
 EventWaa
 Discover. Book. Experience.
+
 Uganda's event discovery and ticketing platform
 """
+
         # ====================================================
         # HTML VERSION
         # ====================================================
+
         message.html = html_body
+
         # ====================================================
         # SEND
         # ====================================================
-        mail.send(message)
+
+        print(
+            "EVENTWAA: SENDING TEAM INVITATION EMAIL"
+        )
+
+        result = mail.send(
+            message
+        )
+
+        print(
+            "EVENTWAA: TEAM INVITATION EMAIL SENT"
+        )
+
         return {
             "success": True,
             "message":
                 "Team invitation email sent successfully."
         }
+
     except Exception as e:
+
         print(
             "EVENTWAA TEAM INVITATION EMAIL ERROR:",
+            type(e).__name__,
             str(e)
         )
+
         return {
             "success": False,
             "message":
