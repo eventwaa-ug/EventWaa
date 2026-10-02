@@ -6404,6 +6404,7 @@ def check_ticket_event_access(
 # This section contains the SINGLE source of truth for:
 #
 # - Admin team members
+# - Admin team accounts
 # - Team member creation
 # - Team member status
 # - Team member removal
@@ -6421,8 +6422,7 @@ def check_ticket_event_access(
 # ============================================================
 
 ADMIN_TEAM_MEMBERS_FILE = "admin_team_members.json"
-
-TEAM_ACCOUNTS_FILE = "admin_team_accounts.json"
+ADMIN_TEAM_ACCOUNTS_FILE = "admin_team_accounts.json"
 
 
 # ============================================================
@@ -6459,8 +6459,6 @@ def ensure_admin_team_members_file():
             )
 
 
-
-
 # ============================================================
 # LOAD ADMIN TEAM MEMBERS
 # ============================================================
@@ -6479,7 +6477,6 @@ def load_admin_team_members():
 
             data = json.load(file)
 
-
         if not isinstance(
             data,
             list
@@ -6487,9 +6484,7 @@ def load_admin_team_members():
 
             return []
 
-
         return data
-
 
     except Exception as e:
 
@@ -6499,6 +6494,115 @@ def load_admin_team_members():
         )
 
         return []
+
+
+# ============================================================
+# SAVE ADMIN TEAM MEMBERS
+# ============================================================
+
+def save_admin_team_members(
+    members
+):
+
+    ensure_admin_team_members_file()
+
+    with open(
+        ADMIN_TEAM_MEMBERS_FILE,
+        "w",
+        encoding="utf-8"
+    ) as file:
+
+        json.dump(
+            members,
+            file,
+            indent=4,
+            ensure_ascii=False
+        )
+
+
+# ============================================================
+# ENSURE ADMIN TEAM ACCOUNTS FILE EXISTS
+# ============================================================
+
+def ensure_admin_team_accounts_file():
+
+    if not os.path.exists(
+        ADMIN_TEAM_ACCOUNTS_FILE
+    ):
+
+        with open(
+            ADMIN_TEAM_ACCOUNTS_FILE,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                [],
+                file,
+                indent=4,
+                ensure_ascii=False
+            )
+
+
+# ============================================================
+# LOAD ADMIN TEAM ACCOUNTS
+# ============================================================
+
+def load_admin_team_accounts():
+
+    ensure_admin_team_accounts_file()
+
+    try:
+
+        with open(
+            ADMIN_TEAM_ACCOUNTS_FILE,
+            "r",
+            encoding="utf-8"
+        ) as file:
+
+            data = json.load(file)
+
+        if not isinstance(
+            data,
+            list
+        ):
+
+            return []
+
+        return data
+
+    except Exception as e:
+
+        print(
+            "ADMIN TEAM ACCOUNTS LOAD ERROR:",
+            str(e)
+        )
+
+        return []
+
+
+# ============================================================
+# SAVE ADMIN TEAM ACCOUNTS
+# ============================================================
+
+def save_admin_team_accounts(
+    accounts
+):
+
+    ensure_admin_team_accounts_file()
+
+    with open(
+        ADMIN_TEAM_ACCOUNTS_FILE,
+        "w",
+        encoding="utf-8"
+    ) as file:
+
+        json.dump(
+            accounts,
+            file,
+            indent=4,
+            ensure_ascii=False
+        )
 
 
 # ============================================================
@@ -6522,7 +6626,10 @@ def load_events():
 
             data = json.load(f)
 
-            if isinstance(data, list):
+            if isinstance(
+                data,
+                list
+            ):
                 return data
 
             return []
@@ -9302,31 +9409,17 @@ def send_admin_team_member_invitation(
         # CHECK EXISTING ACCOUNT
         # ----------------------------------------------------
 
-        team_accounts = (
-            load_team_accounts()
-        )
+        admin_team_accounts = load_admin_team_accounts()
 
-
-        for account in team_accounts:
-
+        for account in admin_team_accounts:
             existing_email = str(
-                account.get(
-                    "email",
-                    ""
-                ) or ""
+                account.get("email", "") or ""
             ).strip().lower()
 
-
             if existing_email == email:
-
                 return jsonify({
-
-                    "success":
-                        False,
-
-                    "message":
-                        "A team account already exists for this email."
-
+                    "success": False,
+                    "message": "An admin team account already exists for this email."
                 }), 409
 
 
@@ -10158,19 +10251,19 @@ def accept_admin_team_invitation():
 
 
         # ----------------------------------------------------
-        # LOAD TEAM ACCOUNTS
+        # LOAD  ADMIN TEAM ACCOUNTS
         # ----------------------------------------------------
 
-        team_accounts = (
-            load_team_accounts()
+        admin_team_accounts = (
+            load_admin_team_accounts()
         )
 
 
         # ----------------------------------------------------
-        # CHECK EXISTING TEAM ACCOUNT
+        # CHECK EXISTING ADMIN TEAM ACCOUNT
         # ----------------------------------------------------
 
-        for account in team_accounts:
+        for account in admin_team_accounts:
 
             existing_email = str(
                 account.get(
@@ -10188,7 +10281,7 @@ def accept_admin_team_invitation():
                         False,
 
                     "message":
-                        "A team account already exists for this email."
+                        "An admin team account already exists for this email."
 
                 }), 409
 
@@ -10211,7 +10304,7 @@ def accept_admin_team_invitation():
         account = {
 
             "id":
-                f"TEAM-{member_id}",
+                f"ADMIN-TEAM-{member_id}",
 
             "memberId":
                 int(member_id),
@@ -10249,6 +10342,9 @@ def accept_admin_team_invitation():
             "status":
                 "Active",
 
+            "teamType":
+                 "admin",
+
             "createdAt":
                 datetime.now().isoformat()
 
@@ -10259,13 +10355,13 @@ def accept_admin_team_invitation():
         # SAVE TEAM ACCOUNT
         # ----------------------------------------------------
 
-        team_accounts.append(
+        admin_team_accounts.append(
             account
         )
 
 
-        save_team_accounts(
-            team_accounts
+        save_admin_team_accounts(
+            admin_team_accounts
         )
 
 
