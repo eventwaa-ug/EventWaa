@@ -3624,12 +3624,7 @@ def verify_admin_team_token(token):
         # team_accounts.json file.
         # ====================================================
 
-        team_accounts = (
-            load_json_file(
-                "team_accounts.json",
-                []
-            )
-        )
+        team_accounts = load_admin_team_accounts()
 
         if not isinstance(
             team_accounts,
