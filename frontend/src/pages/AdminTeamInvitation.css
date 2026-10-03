@@ -749,3 +749,74 @@
     }
 
 }
+/* ============================================================
+   WELCOME ICON
+============================================================ */
+
+.team-invitation-welcome-icon {
+    width: 64px;
+    height: 64px;
+
+    margin: 0 auto 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 18px;
+
+    background: #FFF1E8;
+    color: #FF6B00;
+
+    border: 1px solid #FFD8BF;
+
+    box-shadow:
+        0 8px 24px rgba(255, 107, 0, 0.10);
+}
+
+.team-invitation-welcome-icon svg {
+    display: block;
+
+    width: 34px;
+    height: 34px;
+
+    color: #FF6B00;
+
+    stroke-width: 2;
+}
+
+
+/* ============================================================
+   SECURITY FOOTER
+============================================================ */
+
+.team-invitation-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    margin-top: 22px;
+
+    color: #6B7280;
+
+    font-size: 13px;
+    line-height: 1.5;
+
+    text-align: center;
+}
+
+.team-invitation-footer svg {
+    flex: 0 0 auto;
+
+    width: 16px;
+    height: 16px;
+
+    color: #FF6B00;
+
+    stroke-width: 2;
+}
+
+.team-invitation-footer span {
+    display: inline-block;
+}

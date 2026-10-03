@@ -11972,23 +11972,13 @@ def admin_team_login():
             }), 400
 
         # ====================================================
-        # LOAD TEAM ACCOUNTS
+        # LOAD ADMIN TEAM ACCOUNTS
         #
-        # Both Admin Team and Host Team login accounts are stored
-        # in team_accounts.json.
-        #
-        # Admin Team member records remain in:
-        #   admin_team_members.json
-        #
-        # Host Team member records remain in:
-        #   team_members.json
+        # Admin Team accounts are stored seperately
+        # from host team.
         # ====================================================
 
-        team_accounts = load_json_file(
-            "team_accounts.json",
-            []
-        )
-
+        team_accounts = load_admin_team_accounts()
         if not isinstance(team_accounts, list):
             team_accounts = []
 

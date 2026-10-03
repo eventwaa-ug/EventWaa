@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Home,
@@ -18,6 +18,9 @@ import { useAuth } from "../context/AuthContext";
 import { usePlatformSettings } from "../context/PlatformSettingsContext";
 import "./Navbar.css";
 
+const BACKEND_URL =
+  import.meta.env.VITE_API_BASE_URL;
+
 function Navbar() {
   const { user, logout } = useAuth();
   const { settings } = usePlatformSettings();
@@ -26,11 +29,93 @@ function Navbar() {
 
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const [unreadNotifications, setUnreadNotifications] =
+    useState(0);
+
   const platformName =
     settings?.platformName || "EventWaa";
 
   const platformLogo =
     settings?.platformLogo || "";
+
+  // ============================================================
+  // LOAD UNREAD NOTIFICATIONS
+  // ============================================================
+
+  const loadUnreadNotifications = async () => {
+    if (!user?.id) {
+      setUnreadNotifications(0);
+      return;
+    }
+
+    try {
+      /*
+       * Use the existing notifications endpoint.
+       * This avoids creating another notification system.
+       */
+      const response = await fetch(
+        `${BACKEND_URL}/notifications/${user.id}`
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Failed to load notifications."
+        );
+      }
+
+      const data = await response.json();
+
+      /*
+       * The existing Notifications page receives
+       * an array of notifications.
+       */
+      if (!Array.isArray(data)) {
+        setUnreadNotifications(0);
+        return;
+      }
+
+      const unreadCount = data.filter(
+        (notification) =>
+          notification?.read === false
+      ).length;
+
+      setUnreadNotifications(unreadCount);
+
+    } catch (error) {
+      console.error(
+        "NAVBAR NOTIFICATIONS LOAD ERROR:",
+        error
+      );
+
+      /*
+       * Do not break the Navbar if notifications
+       * temporarily fail to load.
+       */
+      setUnreadNotifications(0);
+    }
+  };
+
+  // ============================================================
+  // NOTIFICATION POLLING
+  // ============================================================
+
+  useEffect(() => {
+    if (!user?.id) {
+      setUnreadNotifications(0);
+      return;
+    }
+
+    loadUnreadNotifications();
+
+    const interval = setInterval(
+      loadUnreadNotifications,
+      3000
+    );
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [user?.id]);
 
   // ============================================================
   // CLOSE MENU
@@ -46,7 +131,11 @@ function Navbar() {
 
   const handleLogout = () => {
     logout();
+
+    setUnreadNotifications(0);
+
     closeMenu();
+
     navigate("/login");
   };
 
@@ -57,6 +146,15 @@ function Navbar() {
   const toggleMenu = () => {
     setMenuOpen((current) => !current);
   };
+
+  // ============================================================
+  // NOTIFICATION LABEL
+  // ============================================================
+
+  const notificationLabel =
+    unreadNotifications > 0
+      ? `${unreadNotifications} unread notifications`
+      : "Notifications";
 
   return (
     <>
@@ -84,7 +182,10 @@ function Navbar() {
           )}
 
           <span className="logo-text">
-            Event<span style={{color: "#FF6B00"}}>Waa</span>
+            Event
+            <span style={{ color: "#FF6B00" }}>
+              Waa
+            </span>
           </span>
         </Link>
 
@@ -164,13 +265,22 @@ function Navbar() {
 
               <Link
                 to="/notifications"
-                className="desktop-icon-link"
-                aria-label="Notifications"
+                className="desktop-icon-link notification-icon-link"
+                aria-label={notificationLabel}
+                title={notificationLabel}
               >
                 <Bell
                   size={20}
                   strokeWidth={2}
                 />
+
+                {unreadNotifications > 0 && (
+                  <span className="notification-badge">
+                    {unreadNotifications > 99
+                      ? "99+"
+                      : unreadNotifications}
+                  </span>
+                )}
               </Link>
 
 
@@ -237,32 +347,68 @@ function Navbar() {
 
 
         {/* ====================================================
-            MOBILE MENU BUTTON
+            MOBILE NAVBAR ACTIONS
         ==================================================== */}
 
-        <button
-          type="button"
-          className="mobile-menu-button"
-          onClick={toggleMenu}
-          aria-label={
-            menuOpen
-              ? "Close navigation menu"
-              : "Open navigation menu"
-          }
-          aria-expanded={menuOpen}
-        >
-          {menuOpen ? (
-            <X
-              size={25}
-              strokeWidth={2.5}
-            />
-          ) : (
-            <Menu
-              size={25}
-              strokeWidth={2.5}
-            />
+        <div className="mobile-navbar-actions">
+
+          {/* ==================================================
+              MOBILE NOTIFICATIONS
+          ================================================== */}
+
+          {user && (
+            <Link
+              to="/notifications"
+              className="mobile-notification-button"
+              onClick={closeMenu}
+              aria-label={notificationLabel}
+              title={notificationLabel}
+            >
+              <Bell
+                size={21}
+                strokeWidth={2}
+              />
+
+              {unreadNotifications > 0 && (
+                <span className="notification-badge">
+                  {unreadNotifications > 99
+                    ? "99+"
+                    : unreadNotifications}
+                </span>
+              )}
+            </Link>
           )}
-        </button>
+
+
+          {/* ==================================================
+              MOBILE MENU BUTTON
+          ================================================== */}
+
+          <button
+            type="button"
+            className="mobile-menu-button"
+            onClick={toggleMenu}
+            aria-label={
+              menuOpen
+                ? "Close navigation menu"
+                : "Open navigation menu"
+            }
+            aria-expanded={menuOpen}
+          >
+            {menuOpen ? (
+              <X
+                size={25}
+                strokeWidth={2.5}
+              />
+            ) : (
+              <Menu
+                size={25}
+                strokeWidth={2.5}
+              />
+            )}
+          </button>
+
+        </div>
 
       </nav>
 
@@ -315,17 +461,39 @@ function Navbar() {
               />
             )}
 
-            <span style={{fontWeight: 800, letterSpacing: '-0.5px'}}>
-            <span style={{color: '#111'}}>Event</span><span
-            style={{color: '#FF6B00'}}>Waa</span>
-          </span>
+            <span
+              style={{
+                fontWeight: 800,
+                letterSpacing: "-0.5px",
+              }}
+            >
+              <span style={{ color: "#111" }}>
+                Event
+              </span>
+
+              <span style={{ color: "#FF6B00" }}>
+                Waa
+              </span>
+            </span>
 
           </Link>
 
 
-          <button type="button" className="mobile-close-button" onClick={closeMenu} 
-          aria-label="Close menu">
-            <span style={{fontSize:'24px', lineHeight:'1', fontWeight:700}}>X</span>
+          <button
+            type="button"
+            className="mobile-close-button"
+            onClick={closeMenu}
+            aria-label="Close menu"
+          >
+            <span
+              style={{
+                fontSize: "24px",
+                lineHeight: "1",
+                fontWeight: 700,
+              }}
+            >
+              X
+            </span>
           </button>
 
         </div>
@@ -355,6 +523,7 @@ function Navbar() {
                   user.firstName ||
                   "Welcome"}
               </strong>
+
 
               <span>
                 {user.email}
@@ -465,6 +634,14 @@ function Navbar() {
                 <span>
                   Notifications
                 </span>
+
+                {unreadNotifications > 0 && (
+                  <span className="mobile-notification-count">
+                    {unreadNotifications > 99
+                      ? "99+"
+                      : unreadNotifications}
+                  </span>
+                )}
 
                 <ChevronRight
                   className="mobile-nav-arrow"

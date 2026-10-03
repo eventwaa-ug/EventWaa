@@ -1,506 +1,719 @@
 /* ============================================================
    EVENTWAA — ADMIN HOST APPLICATIONS
-   Professional verification / document review interface
-   ============================================================ */
+   Host verification / document review interface
+============================================================ */
+
 :root {
-    --host-bg: #f6f7f9;
+    --host-bg: #f6f7fb;
     --host-surface: #ffffff;
     --host-surface-soft: #f9fafb;
-    --host-border: #e4e7ec;
-    --host-border-dark: #d0d5dd;
-    --host-text: #101828;
-    --host-text-secondary: #344054;
-    --host-muted: #667085;
-    --host-muted-light: #98a2b3;
-    --host-primary: #1877f2;
-    --host-primary-dark: #0f5fc4;
-    --host-primary-soft: #eff6ff;
+
+    --host-border: #e5e7eb;
+    --host-border-dark: #d1d5db;
+
+    --host-text: #111827;
+    --host-text-secondary: #374151;
+    --host-muted: #6b7280;
+    --host-muted-light: #9ca3af;
+
+    /* EventWaa brand */
+    --host-primary: #ff6b00;
+    --host-primary-dark: #e85f00;
+    --host-primary-soft: #fff1e8;
+
+    /* Semantic states */
     --host-success: #067647;
     --host-success-bg: #ecfdf3;
+
     --host-warning: #b54708;
     --host-warning-bg: #fffaeb;
+
     --host-danger: #b42318;
     --host-danger-bg: #fef3f2;
+
     --host-shadow:
-        0 2px 8px rgba(16, 24, 40, 0.04),
-        0 12px 32px rgba(16, 24, 40, 0.05);
+        0 3px 12px rgba(15, 23, 42, 0.04);
+
     --host-radius: 16px;
 }
+
 /* ============================================================
    PAGE
-   ============================================================ */
+============================================================ */
+
 .host-review-page {
     width: 100%;
     min-height: 100vh;
-    padding: 42px 44px 70px;
-    background:
-        linear-gradient(
-            180deg,
-            #f8fafc 0%,
-            #f6f7f9 100%
-        );
+
+    box-sizing: border-box;
+
+    padding: 32px 32px 60px;
+
+    background: var(--host-bg);
     color: var(--host-text);
 }
+
 /* ============================================================
    PAGE TITLE
-   ============================================================ */
+============================================================ */
+
 .host-review-page > h1 {
     width: 100%;
     max-width: 1180px;
+
     margin: 0 auto 30px;
-    text-align: center;
-    font-size: clamp(2rem, 3vw, 2.7rem);
-    line-height: 1.15;
-    font-weight: 800;
-    letter-spacing: -0.045em;
+
     color: var(--host-text);
+
+    font-size: clamp(2rem, 3vw, 2.6rem);
+    font-weight: 800;
+    line-height: 1.2;
+
+    letter-spacing: -0.04em;
+
+    text-align: center;
 }
+
 /* ============================================================
    SEARCH / FILTER CONTROLS
-   ============================================================ */
+============================================================ */
+
 .application-controls {
     width: 100%;
     max-width: 1180px;
-    margin: 0 auto 32px;
+
+    margin: 0 auto 28px;
+
     display: grid;
     grid-template-columns: minmax(0, 1fr) 230px;
-    gap: 14px;
+
+    gap: 12px;
 }
+
 .application-controls input,
 .application-controls select {
     width: 100%;
-    height: 52px;
-    padding: 0 16px;
+    height: 50px;
+
+    box-sizing: border-box;
+
+    padding: 0 15px;
+
     border: 1px solid var(--host-border);
-    border-radius: 12px;
+    border-radius: 10px;
+
+    outline: none;
+
     background: var(--host-surface);
     color: var(--host-text);
+
     font-family: inherit;
-    font-size: 0.95rem;
-    outline: none;
-    box-shadow:
-        0 1px 2px rgba(16, 24, 40, 0.03);
+    font-size: 14px;
+
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+
     transition:
         border-color 0.2s ease,
         box-shadow 0.2s ease,
         background 0.2s ease;
 }
+
 .application-controls input::placeholder {
     color: var(--host-muted-light);
 }
+
 .application-controls input:hover,
 .application-controls select:hover {
     border-color: var(--host-border-dark);
 }
+
 .application-controls input:focus,
 .application-controls select:focus {
     border-color: var(--host-primary);
+
     box-shadow:
-        0 0 0 4px rgba(24, 119, 242, 0.10);
+        0 0 0 3px rgba(255, 107, 0, 0.12);
 }
+
 /* ============================================================
    APPLICATION CARD
-   ============================================================ */
+============================================================ */
+
 .application-card {
     width: 100%;
     max-width: 1180px;
-    margin: 0 auto 24px;
-    padding: 30px;
-    background: var(--host-surface);
+
+    box-sizing: border-box;
+
+    margin: 0 auto 20px;
+    padding: 26px;
+
     border: 1px solid var(--host-border);
     border-radius: var(--host-radius);
+
+    background: var(--host-surface);
+
     box-shadow: var(--host-shadow);
+
     overflow: hidden;
+
     transition:
-        transform 0.22s ease,
-        box-shadow 0.22s ease,
-        border-color 0.22s ease;
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
 }
+
 .application-card:hover {
-    transform: translateY(-2px);
-    border-color: #d8dee8;
+    border-color: #dfe2e7;
+
     box-shadow:
-        0 4px 12px rgba(16, 24, 40, 0.05),
-        0 20px 42px rgba(16, 24, 40, 0.08);
+        0 8px 22px rgba(15, 23, 42, 0.06);
+
+    transform: translateY(-1px);
 }
+
 /* ============================================================
    APPLICANT NAME
-   ============================================================ */
+============================================================ */
+
 .application-card h2 {
-    margin: 0 0 22px;
-    font-size: 1.45rem;
-    line-height: 1.3;
-    font-weight: 800;
-    letter-spacing: -0.025em;
+    margin: 0 0 20px;
+
     color: var(--host-text);
+
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.3;
+
+    letter-spacing: -0.02em;
 }
+
 /* ============================================================
    APPLICANT INFORMATION
-   ============================================================ */
+============================================================ */
+
 .application-card > p {
-    margin: 0;
-    padding: 13px 0;
     display: flex;
     align-items: baseline;
     gap: 8px;
-    border-bottom: 1px solid #f0f2f5;
+
+    margin: 0;
+    padding: 12px 0;
+
+    border-bottom: 1px solid #f0f1f4;
+
     color: var(--host-text-secondary);
-    font-size: 0.94rem;
+
+    font-size: 14px;
     line-height: 1.5;
 }
+
 .application-card > p:last-of-type {
-    border-bottom: 0;
+    border-bottom: none;
 }
-/* ============================================================
-   STATUS LINE
-   ============================================================ */
-.application-card > p:last-of-type {
-    margin-top: 4px;
+
+.application-card > p strong {
+    flex-shrink: 0;
+
+    color: var(--host-text);
+
+    font-weight: 700;
 }
+
 /* ============================================================
    STATUS BADGES
-   ============================================================ */
+============================================================ */
+
 .status {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 30px;
-    padding: 5px 12px;
+
+    min-height: 28px;
+
+    padding: 5px 11px;
+
     border-radius: 999px;
-    font-size: 0.78rem;
-    font-weight: 750;
+
+    font-size: 12px;
+    font-weight: 800;
     line-height: 1;
+
     text-transform: capitalize;
 }
+
 .status.pending {
-    color: var(--host-warning);
     background: var(--host-warning-bg);
+    color: var(--host-warning);
 }
+
 .status.approved {
-    color: var(--host-success);
     background: var(--host-success-bg);
+    color: var(--host-success);
 }
+
 .status.rejected {
-    color: var(--host-danger);
     background: var(--host-danger-bg);
+    color: var(--host-danger);
 }
+
 /* ============================================================
    DOCUMENTS SECTION
-   ============================================================ */
+============================================================ */
+
 .documents {
-    margin-top: 30px;
-    padding-top: 28px;
     display: grid;
+
     grid-template-columns:
         repeat(3, minmax(0, 1fr));
-    gap: 18px;
+
+    gap: 16px;
+
+    margin-top: 26px;
+    padding-top: 24px;
+
     border-top: 1px solid var(--host-border);
 }
+
 /* ============================================================
    DOCUMENT HEADING
-   ============================================================ */
+============================================================ */
+
 .documents h3 {
     grid-column: 1 / -1;
-    margin: 0 0 2px;
-    font-size: 1.08rem;
-    line-height: 1.4;
-    font-weight: 800;
+
+    margin: 0;
+
     color: var(--host-text);
+
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.4;
 }
+
 /* ============================================================
    DOCUMENT LINKS
-   ============================================================ */
+============================================================ */
+
 .documents a {
     position: relative;
+
     display: block;
+
     min-width: 0;
-    padding: 8px;
-    background: var(--host-surface-soft);
+
+    padding: 7px;
+
     border: 1px solid var(--host-border);
-    border-radius: 14px;
+    border-radius: 12px;
+
+    background: var(--host-surface-soft);
+
     text-decoration: none;
+
     overflow: hidden;
+
     transition:
-        transform 0.22s ease,
-        border-color 0.22s ease,
-        box-shadow 0.22s ease;
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
+
 .documents a::after {
     content: "View document";
+
     position: absolute;
-    left: 14px;
-    right: 14px;
-    bottom: 14px;
+
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+
     padding: 9px 12px;
-    border-radius: 9px;
-    background: rgba(16, 24, 40, 0.82);
+
+    border-radius: 8px;
+
+    background: rgba(17, 24, 39, 0.84);
     color: #ffffff;
+
     text-align: center;
-    font-size: 0.78rem;
+
+    font-size: 12px;
     font-weight: 700;
+
     opacity: 0;
+
     transform: translateY(5px);
+
     transition:
         opacity 0.2s ease,
         transform 0.2s ease;
 }
+
 .documents a:hover {
-    transform: translateY(-3px);
-    border-color: #bfd5f8;
+    border-color: #ffc49d;
+
     box-shadow:
-        0 10px 24px rgba(16, 24, 40, 0.10);
+        0 8px 20px rgba(15, 23, 42, 0.08);
+
+    transform: translateY(-2px);
 }
+
 .documents a:hover::after {
     opacity: 1;
     transform: translateY(0);
 }
+
 /* ============================================================
    DOCUMENT IMAGES
-   ============================================================ */
+============================================================ */
+
 .documents img {
     display: block;
+
     width: 100%;
-    height: 230px;
+    height: 220px;
+
     object-fit: cover;
-    border-radius: 9px;
+
+    border-radius: 8px;
+
     background: #eef1f5;
+
     cursor: pointer;
+
     transition:
-        transform 0.3s ease,
-        filter 0.3s ease;
+        transform 0.25s ease,
+        filter 0.25s ease;
 }
+
 .documents a:hover img {
     transform: scale(1.015);
     filter: brightness(0.92);
 }
+
 /* ============================================================
    ACTIONS
-   ============================================================ */
+============================================================ */
+
 .actions {
-    margin-top: 30px;
-    padding-top: 24px;
     display: flex;
-    gap: 12px;
+    gap: 10px;
+
+    margin-top: 26px;
+    padding-top: 22px;
+
     border-top: 1px solid var(--host-border);
 }
+
 /* ============================================================
    ACTION BUTTONS
-   ============================================================ */
+============================================================ */
+
 .actions button {
-    min-height: 50px;
-    padding: 0 24px;
-    border-radius: 11px;
+    min-height: 46px;
+
+    flex: 1;
+
+    padding: 0 20px;
+
     border: 1px solid transparent;
+    border-radius: 10px;
+
     font-family: inherit;
-    font-size: 0.94rem;
-    font-weight: 750;
+    font-size: 14px;
+    font-weight: 700;
+
     cursor: pointer;
+
     transition:
         transform 0.18s ease,
         box-shadow 0.18s ease,
         background 0.18s ease,
         border-color 0.18s ease;
 }
+
 .actions button:hover {
     transform: translateY(-1px);
 }
+
 .actions button:active {
     transform: translateY(0);
 }
+
 /* ============================================================
    APPROVE
-   ============================================================ */
+============================================================ */
+
 .approve {
-    flex: 1;
     background: var(--host-success);
     color: #ffffff;
+
     box-shadow:
-        0 4px 10px rgba(6, 118, 71, 0.14);
+        0 4px 10px rgba(6, 118, 71, 0.12);
 }
+
 .approve:hover {
     background: #05603a;
+
     box-shadow:
-        0 8px 18px rgba(6, 118, 71, 0.20);
+        0 7px 16px rgba(6, 118, 71, 0.18);
 }
+
 /* ============================================================
    REJECT
-   ============================================================ */
+============================================================ */
+
 .reject {
-    flex: 1;
     background: #ffffff;
     color: var(--host-danger);
+
     border-color: #f0c7c4 !important;
 }
+
 .reject:hover {
     background: var(--host-danger-bg);
+
     border-color: #e9aaa5 !important;
+
     box-shadow:
-        0 8px 18px rgba(180, 35, 24, 0.08);
+        0 7px 16px rgba(180, 35, 24, 0.07);
 }
+
 /* ============================================================
    EMPTY STATE
-   ============================================================ */
+============================================================ */
+
 .host-review-page > p {
     width: 100%;
     max-width: 700px;
-    margin: 60px auto;
-    padding: 35px;
-    text-align: center;
+
+    box-sizing: border-box;
+
+    margin: 50px auto;
+    padding: 50px 30px;
+
     border: 1px solid var(--host-border);
     border-radius: 16px;
+
     background: var(--host-surface);
+
     color: var(--host-muted);
-    font-size: 1rem;
+
+    font-size: 15px;
+    line-height: 1.6;
+
+    text-align: center;
+
+    box-shadow:
+        0 3px 12px rgba(15, 23, 42, 0.04);
 }
+
+/* ============================================================
+   KEYBOARD FOCUS
+============================================================ */
+
+.actions button:focus-visible,
+.application-controls input:focus-visible,
+.application-controls select:focus-visible,
+.documents a:focus-visible {
+    outline: 3px solid rgba(255, 107, 0, 0.22);
+    outline-offset: 3px;
+}
+
 /* ============================================================
    LARGE DESKTOP
-   ============================================================ */
+============================================================ */
+
 @media (min-width: 1400px) {
     .host-review-page {
-        padding-left: 60px;
-        padding-right: 60px;
+        padding-left: 48px;
+        padding-right: 48px;
     }
+
     .application-card,
     .application-controls,
     .host-review-page > h1 {
         max-width: 1240px;
     }
+
     .application-card {
-        padding: 34px;
+        padding: 30px;
     }
+
     .documents img {
-        height: 250px;
+        height: 240px;
     }
 }
+
 /* ============================================================
    TABLET / SMALL DESKTOP
-   ============================================================ */
+============================================================ */
+
 @media (max-width: 900px) {
     .host-review-page {
-        padding: 32px 24px 55px;
+        padding: 28px 22px 50px;
     }
+
     .application-controls {
         grid-template-columns: 1fr 190px;
     }
+
     .application-card {
-        padding: 25px;
+        padding: 24px;
     }
+
     .documents {
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
     }
+
     .documents img {
-        height: 220px;
+        height: 210px;
     }
 }
+
 /* ============================================================
    MOBILE
-   ============================================================ */
+============================================================ */
+
 @media (max-width: 650px) {
     .host-review-page {
-        padding: 24px 15px 40px;
+        padding: 22px 14px 40px;
     }
-    /* Page title */
+
+    /* PAGE TITLE */
+
     .host-review-page > h1 {
-        margin-bottom: 24px;
-        font-size: 1.9rem;
-        letter-spacing: -0.04em;
+        margin-bottom: 22px;
+
+        font-size: 1.85rem;
+        letter-spacing: -0.035em;
     }
-    /* Search */
+
+    /* CONTROLS */
+
     .application-controls {
         grid-template-columns: 1fr;
+
         gap: 10px;
-        margin-bottom: 22px;
+
+        margin-bottom: 20px;
     }
+
     .application-controls input,
     .application-controls select {
-        height: 50px;
+        height: 48px;
     }
-    /* Application */
+
+    /* APPLICATION */
+
     .application-card {
-        padding: 21px 18px;
-        margin-bottom: 18px;
-        border-radius: 15px;
+        padding: 20px 17px;
+        margin-bottom: 16px;
+
+        border-radius: 14px;
     }
+
     .application-card:hover {
         transform: none;
-        box-shadow: var(--host-shadow);
+
+        box-shadow:
+            0 3px 12px rgba(15, 23, 42, 0.04);
     }
+
     .application-card h2 {
-        margin-bottom: 17px;
-        font-size: 1.28rem;
+        margin-bottom: 16px;
+        font-size: 20px;
     }
-    /* Information rows */
+
+    /* INFORMATION */
+
     .application-card > p {
         display: block;
-        padding: 11px 0;
-        font-size: 0.9rem;
+
+        padding: 10px 0;
+
+        font-size: 13px;
     }
-    /* Documents */
+
+    .application-card > p strong {
+        display: inline-block;
+
+        margin-right: 3px;
+    }
+
+    /* DOCUMENTS */
+
     .documents {
         grid-template-columns: 1fr;
-        gap: 14px;
-        margin-top: 24px;
-        padding-top: 23px;
+
+        gap: 13px;
+
+        margin-top: 22px;
+        padding-top: 21px;
     }
-    .documents h3 {
-        margin-bottom: 2px;
-    }
+
     .documents img {
-        height: 250px;
+        height: 240px;
     }
+
     .documents a::after {
+        left: 11px;
+        right: 11px;
+        bottom: 11px;
+
         opacity: 1;
         transform: none;
-        left: 12px;
-        right: 12px;
-        bottom: 12px;
     }
-    /* Actions */
+
+    /* ACTIONS */
+
     .actions {
         flex-direction: column;
-        margin-top: 24px;
-        padding-top: 20px;
+
+        gap: 9px;
+
+        margin-top: 22px;
+        padding-top: 19px;
     }
+
     .actions button {
         width: 100%;
-        min-height: 50px;
+        min-height: 48px;
     }
 }
+
 /* ============================================================
    VERY SMALL PHONES
-   ============================================================ */
+============================================================ */
+
 @media (max-width: 380px) {
     .host-review-page {
         padding-left: 12px;
         padding-right: 12px;
     }
+
     .application-card {
         padding: 18px 15px;
     }
+
     .host-review-page > h1 {
-        font-size: 1.7rem;
+        font-size: 1.65rem;
     }
+
     .application-card h2 {
-        font-size: 1.18rem;
+        font-size: 18px;
     }
+
     .documents img {
         height: 220px;
     }
 }
-/* ============================================================
-   ACCESSIBILITY
-   ============================================================ */
-.actions button:focus-visible,
-.application-controls input:focus-visible,
-.application-controls select:focus-visible,
-.documents a:focus-visible {
-    outline: 3px solid rgba(24, 119, 242, 0.22);
-    outline-offset: 3px;
-}
+
 /* ============================================================
    REDUCED MOTION
-   ============================================================ */
+============================================================ */
+
 @media (prefers-reduced-motion: reduce) {
     .application-card,
     .documents a,
@@ -510,9 +723,69 @@
     .application-controls select {
         transition: none;
     }
+
     .application-card:hover,
     .documents a:hover,
     .actions button:hover {
         transform: none;
     }
+}
+/* ============================================================
+   REFRESH BUTTON
+============================================================ */
+
+.host-review-refresh {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 44px;
+    padding: 0 16px;
+
+    border: 1px solid #ff6b00;
+    border-radius: 10px;
+
+    background: #ff6b00;
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.host-review-refresh:hover:not(:disabled) {
+    background: #e85f00;
+    border-color: #e85f00;
+    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.18);
+    transform: translateY(-1px);
+}
+
+.host-review-refresh:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.host-review-refresh:focus-visible {
+    outline: 3px solid rgba(255, 107, 0, 0.22);
+    outline-offset: 2px;
+}
+
+.host-review-refresh:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.host-review-refresh svg {
+    flex-shrink: 0;
+    stroke-width: 2.2;
 }

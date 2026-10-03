@@ -154,6 +154,48 @@
 }
 
 /* ============================================================
+   NOTIFICATION ICON
+============================================================ */
+
+.notification-icon-link {
+    position: relative;
+}
+
+/* ============================================================
+   NOTIFICATION BADGE
+============================================================ */
+
+.notification-badge {
+    position: absolute;
+
+    top: -3px;
+    right: -4px;
+
+    min-width: 17px;
+    height: 17px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 4px;
+
+    border: 2px solid #ffffff;
+    border-radius: 999px;
+
+    background: #FF6B00;
+    color: #ffffff;
+
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1;
+
+    white-space: nowrap;
+
+    pointer-events: none;
+}
+
+/* ============================================================
    LOGIN
 ============================================================ */
 
@@ -275,6 +317,72 @@
 }
 
 /* ============================================================
+   MOBILE NAVBAR ACTIONS
+============================================================ */
+
+.mobile-navbar-actions {
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   MOBILE NOTIFICATION BUTTON
+============================================================ */
+
+.mobile-notification-button {
+    position: relative;
+
+    width: 42px;
+    height: 42px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+
+    background: #ffffff;
+    color: #FF6B00;
+
+    text-decoration: none;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.mobile-notification-button:hover {
+    background: #FFF4ED;
+    border-color: #FF6B00;
+    color: #FF6B00;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 5px 12px rgba(255, 107, 0, 0.12);
+}
+
+.mobile-notification-button:active {
+    transform: scale(0.95);
+}
+
+.mobile-notification-button svg {
+    stroke: currentColor;
+    flex-shrink: 0;
+}
+
+/* ============================================================
    MOBILE MENU BUTTON
 ============================================================ */
 
@@ -286,6 +394,8 @@
 
     align-items: center;
     justify-content: center;
+
+    flex-shrink: 0;
 
     padding: 0;
 
@@ -686,6 +796,25 @@
     color: #FF6B00;
 }
 
+.mobile-notification-count {
+    min-width: 24px;
+    height: 22px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 6px;
+
+    border-radius: 999px;
+
+    background: #FFF4ED;
+    color: #FF6B00;
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
 .mobile-nav-links .mobile-register-link {
     margin-top: 5px;
 
@@ -762,6 +891,7 @@
 .desktop-register-button:focus-visible,
 .logout-button:focus-visible,
 .mobile-menu-button:focus-visible,
+.mobile-notification-button:focus-visible,
 .mobile-close-button:focus-visible,
 .mobile-nav-links a:focus-visible,
 .mobile-logout-button:focus-visible,
@@ -816,12 +946,12 @@
         display: none;
     }
 
-    .mobile-menu-button {
+    .mobile-navbar-actions {
         display: flex;
     }
 
-    .hamburger {
-        display: none;
+    .mobile-menu-button {
+        display: flex;
     }
 }
 
@@ -847,6 +977,16 @@
 
     .logo-text {
         font-size: 1.45rem;
+    }
+
+    .mobile-navbar-actions {
+        gap: 6px;
+    }
+
+    .mobile-notification-button,
+    .mobile-menu-button {
+        width: 40px;
+        height: 40px;
     }
 
     .mobile-side-menu {
@@ -875,6 +1015,8 @@
     .desktop-login-button,
     .desktop-register-button,
     .logout-button,
+    .mobile-navbar-actions,
+    .mobile-notification-button,
     .mobile-menu-button,
     .mobile-menu-backdrop,
     .mobile-side-menu,

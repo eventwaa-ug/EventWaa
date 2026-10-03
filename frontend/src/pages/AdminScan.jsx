@@ -1,16 +1,40 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  FiCamera,
-  FiSearch,
-  FiX,
-  FiCalendar
-} from "react-icons/fi";
+  Camera,
+  Search,
+  X,
+  CalendarDays,
+  Ticket,
+  CheckCircle2,
+  Clock3,
+  AlertCircle,
+  RefreshCcw,
+  Star,
+} from "lucide-react";
 import "./AdminScan.css";
 import { adminFetch } from "../utils/adminAPI";
 
+/* ============================================================
+   BACKEND
+============================================================ */
+
+const BACKEND_URL =
+  import.meta.env.VITE_API_BASE_URL;
+
+
+/* ============================================================
+   ADMIN SCAN
+============================================================ */
+
 function AdminScan() {
+
   const navigate = useNavigate();
+
+
+  /* ==========================================================
+     STATE
+  ========================================================== */
 
   const [events, setEvents] = useState([]);
   const [search, setSearch] = useState("");
@@ -18,16 +42,20 @@ function AdminScan() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // ============================================================
-  // LOAD EVENTS
-  // ============================================================
+
+  /* ==========================================================
+     LOAD EVENTS
+  ========================================================== */
 
   useEffect(() => {
     loadEvents();
   }, []);
 
+
   async function loadEvents() {
+
     try {
+
       setLoading(true);
       setError("");
 
@@ -37,36 +65,47 @@ function AdminScan() {
         );
 
       if (Array.isArray(data)) {
+
         setEvents(data);
-      } else if (Array.isArray(data?.events)) {
+
+      } else if (
+        Array.isArray(data?.events)
+      ) {
+
         setEvents(data.events);
+
       } else {
+
         setEvents([]);
+
       }
 
-    } catch (error) {
+    } catch (loadError) {
+
       console.error(
         "ADMIN SCAN EVENTS ERROR:",
-        error
+        loadError
       );
 
       setError(
-        error.message ||
+        loadError?.message ||
         "Unable to load events. Please try again."
       );
 
     } finally {
+
       setLoading(false);
+
     }
+
   }
 
-  // ============================================================
-  // POSTER URL
-  // ============================================================
+
+  /* ==========================================================
+     POSTER URL
+  ========================================================== */
 
   function getPosterUrl(event) {
-    const BACKEND_URL =
-      import.meta.env.VITE_API_BASE_URL;
 
     const poster =
       event?.eventPoster ||
@@ -78,7 +117,8 @@ function AdminScan() {
       return "";
     }
 
-    const imagePath = String(poster).trim();
+    const imagePath =
+      String(poster).trim();
 
     if (!imagePath) {
       return "";
@@ -88,216 +128,348 @@ function AdminScan() {
       imagePath.startsWith("http://") ||
       imagePath.startsWith("https://")
     ) {
+
       return imagePath;
+
     }
 
     if (imagePath.startsWith("/")) {
+
       return `${BACKEND_URL}${imagePath}`;
+
     }
 
     return `${BACKEND_URL}/${imagePath}`;
+
   }
 
-  // ============================================================
-  // PRICE
-  // ============================================================
+
+  /* ==========================================================
+     PRICE
+  ========================================================== */
 
   function getPrice(event) {
-    if (
-      String(event?.eventType || "").toLowerCase() ===
-      "free"
-    ) {
+
+    const eventType =
+      String(
+        event?.eventType || ""
+      ).toLowerCase();
+
+    if (eventType === "free") {
       return "Free";
     }
 
-    const tickets = Array.isArray(event?.tickets)
-      ? event.tickets
-      : [];
+    const tickets =
+      Array.isArray(event?.tickets)
+        ? event.tickets
+        : [];
 
     if (tickets.length > 0) {
-      const prices = tickets
-        .map((ticket) => Number(ticket?.price))
-        .filter((price) => !Number.isNaN(price));
+
+      const prices =
+        tickets
+          .map((ticket) =>
+            Number(ticket?.price)
+          )
+          .filter(
+            (price) =>
+              !Number.isNaN(price)
+          );
 
       if (prices.length > 0) {
-        const lowestPrice = Math.min(...prices);
+
+        const lowestPrice =
+          Math.min(...prices);
 
         if (lowestPrice === 0) {
           return "Free";
         }
 
-        return `From UGX ${lowestPrice.toLocaleString()}`;
+        return (
+          `From UGX ${lowestPrice.toLocaleString()}`
+        );
+
       }
+
     }
 
-    const price = Number(event?.price);
+    const price =
+      Number(event?.price);
 
-    if (!Number.isNaN(price) && price > 0) {
-      return `UGX ${price.toLocaleString()}`;
+    if (
+      !Number.isNaN(price) &&
+      price > 0
+    ) {
+
+      return (
+        `UGX ${price.toLocaleString()}`
+      );
+
     }
 
     return "Free";
+
   }
 
-  // ============================================================
-  // TICKET TOTAL
-  // ============================================================
+
+  /* ==========================================================
+     TOTAL TICKETS
+  ========================================================== */
 
   function getTotalTickets(event) {
+
     if (
       Array.isArray(event?.tickets) &&
       event.tickets.length > 0
     ) {
+
       return event.tickets.reduce(
         (total, ticket) =>
           total +
-          Number(ticket?.quantity || 0),
+          Number(
+            ticket?.quantity || 0
+          ),
         0
       );
+
     }
 
-    return Number(event?.capacity || 0);
+    return Number(
+      event?.capacity || 0
+    );
+
   }
 
-  // ============================================================
-  // TICKETS SOLD
-  // ============================================================
+
+  /* ==========================================================
+     TICKETS SOLD
+  ========================================================== */
 
   function getTicketsSold(event) {
+
     return Number(
       event?.ticketsSold ||
       event?.attendees ||
       0
     );
+
   }
 
-  // ============================================================
-  // FILTER EVENTS
-  // ============================================================
 
-  const filteredEvents = useMemo(() => {
-    const searchValue =
-      search.trim().toLowerCase();
+  /* ==========================================================
+     FILTER EVENTS
+  ========================================================== */
 
-    return events.filter((event) => {
-      const title =
-        String(event?.title || "").toLowerCase();
+  const filteredEvents =
+    useMemo(() => {
 
-      const venue =
-        String(event?.venue || "").toLowerCase();
+      const searchValue =
+        search
+          .trim()
+          .toLowerCase();
 
-      const city =
-        String(event?.city || "").toLowerCase();
+      return events.filter(
+        (event) => {
 
-      const category =
-        String(event?.category || "").toLowerCase();
+          const title =
+            String(
+              event?.title || ""
+            ).toLowerCase();
 
-      const host =
-        String(
-          event?.hostName ||
-          event?.organizerName ||
-          ""
-        ).toLowerCase();
+          const venue =
+            String(
+              event?.venue || ""
+            ).toLowerCase();
 
-      const matchesSearch =
-        !searchValue ||
-        title.includes(searchValue) ||
-        venue.includes(searchValue) ||
-        city.includes(searchValue) ||
-        category.includes(searchValue) ||
-        host.includes(searchValue);
+          const city =
+            String(
+              event?.city || ""
+            ).toLowerCase();
 
-      if (!matchesSearch) {
-        return false;
-      }
+          const category =
+            String(
+              event?.category || ""
+            ).toLowerCase();
 
-      if (filter === "all") {
-        return true;
-      }
+          const host =
+            String(
+              event?.hostName ||
+              event?.organizerName ||
+              ""
+            ).toLowerCase();
 
-      if (filter === "paid") {
-        return (
-          String(event?.eventType || "").toLowerCase() ===
-          "paid"
-        );
-      }
+          const matchesSearch =
+            !searchValue ||
+            title.includes(searchValue) ||
+            venue.includes(searchValue) ||
+            city.includes(searchValue) ||
+            category.includes(searchValue) ||
+            host.includes(searchValue);
 
-      if (filter === "free") {
-        return (
-          String(event?.eventType || "").toLowerCase() ===
-          "free"
-        );
-      }
+          if (!matchesSearch) {
+            return false;
+          }
 
-      if (filter === "featured") {
-        return event?.featured === true;
-      }
+          if (filter === "all") {
+            return true;
+          }
 
-      if (filter === "admin") {
-        return event?.adminEvent === true;
-      }
+          if (filter === "paid") {
 
-      if (filter === "host") {
-        return event?.adminEvent !== true;
-      }
+            return (
+              String(
+                event?.eventType || ""
+              ).toLowerCase() ===
+              "paid"
+            );
 
-      return true;
-    });
-  }, [events, search, filter]);
+          }
 
-  // ============================================================
-  // LOADING
-  // ============================================================
+          if (filter === "free") {
+
+            return (
+              String(
+                event?.eventType || ""
+              ).toLowerCase() ===
+              "free"
+            );
+
+          }
+
+          if (filter === "featured") {
+
+            return (
+              event?.featured === true
+            );
+
+          }
+
+          if (filter === "admin") {
+
+            return (
+              event?.adminEvent === true
+            );
+
+          }
+
+          if (filter === "host") {
+
+            return (
+              event?.adminEvent !== true
+            );
+
+          }
+
+          return true;
+
+        }
+      );
+
+    }, [
+      events,
+      search,
+      filter,
+    ]);
+
+
+  /* ==========================================================
+     LOADING STATE
+  ========================================================== */
 
   if (loading) {
-    return (
-      <div className="admin-scan-page">
-        <div className="admin-scan-state">
-          <div className="admin-scan-spinner"></div>
 
-          <h2>Loading Events</h2>
+    return (
+
+      <div className="admin-scan-page">
+
+        <div className="admin-scan-state">
+
+          <div
+            className="admin-scan-spinner"
+            aria-hidden="true"
+          />
+
+          <h2>
+            Loading Events
+          </h2>
 
           <p>
-            Preparing events for ticket scanning...
+            Preparing events for ticket
+            scanning...
           </p>
+
         </div>
+
       </div>
+
     );
+
   }
 
-  // ============================================================
-  // ERROR
-  // ============================================================
+
+  /* ==========================================================
+     ERROR STATE
+  ========================================================== */
 
   if (error) {
+
     return (
+
       <div className="admin-scan-page">
-        <div className="admin-scan-state admin-scan-error">
+
+        <div
+          className="
+            admin-scan-state
+            admin-scan-error
+          "
+          role="alert"
+        >
+
           <div className="admin-scan-state-icon">
-            ⚠️
+
+            <AlertCircle
+              aria-hidden="true"
+            />
+
           </div>
 
-          <h2>Unable to Load Events</h2>
+          <h2>
+            Unable to Load Events
+          </h2>
 
-          <p>{error}</p>
+          <p>
+            {error}
+          </p>
 
           <button
+            type="button"
             className="admin-scan-retry"
             onClick={loadEvents}
           >
             Try Again
           </button>
+
         </div>
+
       </div>
+
     );
+
   }
 
-  // ============================================================
-  // RENDER
-  // ============================================================
+
+  /* ==========================================================
+     RENDER
+  ========================================================== */
 
   return (
+
     <div className="admin-scan-page">
+
+
+      {/* ======================================================
+          HEADER
+      ====================================================== */}
 
       <div className="admin-scan-header">
 
@@ -312,46 +484,80 @@ function AdminScan() {
           </h1>
 
           <p>
-            Select an event to open its ticket
-            scanner and manage attendee entry.
+            Select an event to open its
+            ticket scanner and manage
+            attendee entry.
           </p>
 
         </div>
 
-        <div className="admin-scan-header-icon">
-          <FiCamera aria-hidden="true" />
+        <div
+          className="admin-scan-header-icon"
+          aria-hidden="true"
+        >
+
+          <Camera />
+
         </div>
 
       </div>
 
+
+      {/* ======================================================
+          SEARCH + FILTER
+      ====================================================== */}
+
       <div className="admin-scan-controls">
 
         <div className="admin-scan-search">
-          <FiSearch aria-hidden="true" />
+
+          <Search
+            aria-hidden="true"
+          />
 
           <input
             type="text"
-            placeholder="Search events, venue, city, host..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search events, venue, city, host..."
+            aria-label="Search events"
+            onChange={(event) =>
+              setSearch(
+                event.target.value
+              )
+            }
           />
 
           {search && (
+
             <button
               type="button"
               className="clear-search-btn"
               aria-label="Clear search"
-              onClick={() => setSearch("")}
+              onClick={() =>
+                setSearch("")
+              }
             >
-              <FiX aria-hidden="true" />
+
+              <X
+                aria-hidden="true"
+              />
+
             </button>
+
           )}
+
         </div>
+
 
         <select
           value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+          onChange={(event) =>
+            setFilter(
+              event.target.value
+            )
+          }
           className="admin-scan-filter"
+          aria-label="Filter events"
         >
 
           <option value="all">
@@ -382,40 +588,68 @@ function AdminScan() {
 
       </div>
 
+
+      {/* ======================================================
+          RESULTS BAR
+      ====================================================== */}
+
       <div className="admin-scan-results">
 
         <div>
+
           Showing{" "}
+
           <strong>
             {filteredEvents.length}
-          </strong>{" "}
-          of{" "}
+          </strong>
+
+          {" "}of{" "}
+
           <strong>
             {events.length}
-          </strong>{" "}
-          events
+          </strong>
+
+          {" "}events
+
         </div>
 
         {(search || filter !== "all") && (
+
           <button
+            type="button"
             className="clear-filters-btn"
             onClick={() => {
+
               setSearch("");
               setFilter("all");
+
             }}
           >
+
             Clear filters
+
           </button>
+
         )}
 
       </div>
+
+
+      {/* ======================================================
+          NO EVENTS
+      ====================================================== */}
 
       {filteredEvents.length === 0 ? (
 
         <div className="admin-scan-state">
 
-          <div className="admin-scan-state-icon">
-            🔎
+          <div
+            className="admin-scan-state-icon"
+            aria-hidden="true"
+          >
+
+            <Search />
+
           </div>
 
           <h2>
@@ -428,242 +662,366 @@ function AdminScan() {
           </p>
 
           <button
+            type="button"
             className="admin-scan-retry"
             onClick={() => {
+
               setSearch("");
               setFilter("all");
+
             }}
           >
+
             Show All Events
+
           </button>
 
         </div>
 
       ) : (
 
+        /* ====================================================
+           EVENT GRID
+        ==================================================== */
+
         <div className="admin-scan-grid">
 
-          {filteredEvents.map((event) => {
+          {filteredEvents.map(
+            (event) => {
 
-            const posterUrl =
-              getPosterUrl(event);
+              const posterUrl =
+                getPosterUrl(event);
 
-            const totalTickets =
-              getTotalTickets(event);
+              const totalTickets =
+                getTotalTickets(event);
 
-            const ticketsSold =
-              getTicketsSold(event);
+              const ticketsSold =
+                getTicketsSold(event);
 
-            const remaining =
-              Math.max(
-                totalTickets - ticketsSold,
-                0
-              );
+              const remaining =
+                Math.max(
+                  totalTickets -
+                  ticketsSold,
+                  0
+                );
 
-            return (
 
-              <div
-                className="admin-scan-event-card"
-                key={event.id}
-              >
+              const eventType =
+                String(
+                  event?.eventType || ""
+                ).toLowerCase();
 
-                <div className="admin-scan-poster">
+              const isFree =
+                eventType === "free";
 
-                  {posterUrl ? (
 
-                    <img
-                      src={posterUrl}
-                      alt={
-                        event.title ||
-                        "Event poster"
-                      }
-                      onError={(e) => {
-                        e.currentTarget.style.display =
-                          "none";
+              return (
 
-                        const fallback =
-                          e.currentTarget.parentElement
-                            ?.querySelector(
-                              ".admin-scan-poster-fallback"
-                            );
+                <article
+                  className="admin-scan-event-card"
+                  key={event.id}
+                >
 
-                        if (fallback) {
-                          fallback.style.display =
-                            "flex";
+
+                  {/* ==========================================
+                      POSTER
+                  ========================================== */}
+
+                  <div className="admin-scan-poster">
+
+                    {posterUrl ? (
+
+                      <img
+                        src={posterUrl}
+                        alt={
+                          event?.title ||
+                          "Event poster"
                         }
+                        onError={(event) => {
+
+                          event.currentTarget.style.display =
+                            "none";
+
+                          const fallback =
+                            event.currentTarget
+                              .parentElement
+                              ?.querySelector(
+                                ".admin-scan-poster-fallback"
+                              );
+
+                          if (fallback) {
+
+                            fallback.style.display =
+                              "flex";
+
+                          }
+
+                        }}
+                      />
+
+                    ) : null}
+
+
+                    <div
+                      className="
+                        admin-scan-poster-fallback
+                      "
+                      style={{
+                        display:
+                          posterUrl
+                            ? "none"
+                            : "flex",
                       }}
-                    />
+                    >
 
-                  ) : null}
+                      <span>
+                        <CalendarDays
+                          aria-hidden="true"
+                        />
+                      </span>
 
-                  <div
-                    className="admin-scan-poster-fallback"
-                    style={{
-                      display: posterUrl
-                        ? "none"
-                        : "flex"
-                    }}
-                  >
-                    <span>
-                      <FiCalendar aria-hidden="true" />
-                    </span>
+                      <strong>
+                        EventWaa
+                      </strong>
 
-                    <strong>EventWaa</strong>
-
-                    <small>No poster available</small>
-                  </div>
-
-                  {event.featured && (
-                    <span className="admin-scan-featured">
-                      ★ Featured
-                    </span>
-                  )}
-
-                </div>
-
-                <div className="admin-scan-card-content">
-
-                  <div className="admin-scan-event-heading">
-
-                    <div>
-
-                      <h2>
-                        {event.title ||
-                          "Untitled Event"}
-                      </h2>
-
-                      <p>
-                        Event #{event.id}
-                      </p>
+                      <small>
+                        No poster available
+                      </small>
 
                     </div>
 
-                    <span
-                      className={
-                        String(
-                          event.eventType || ""
-                        ).toLowerCase() ===
-                        "free"
-                          ? "event-type free"
-                          : "event-type paid"
+
+                    {event?.featured && (
+
+                      <span className="admin-scan-featured">
+
+                        <Star
+                          aria-hidden="true"
+                        />
+
+                        Featured
+
+                      </span>
+
+                    )}
+
+                  </div>
+
+
+                  {/* ==========================================
+                      CARD CONTENT
+                  ========================================== */}
+
+                  <div className="admin-scan-card-content">
+
+
+                    {/* ========================================
+                        EVENT HEADING
+                    ======================================== */}
+
+                    <div className="admin-scan-event-heading">
+
+                      <div>
+
+                        <h2>
+                          {event?.title ||
+                            "Untitled Event"}
+                        </h2>
+
+                        <p>
+                          Event #{event?.id}
+                        </p>
+
+                      </div>
+
+
+                      <span
+                        className={
+                          isFree
+                            ? "event-type free"
+                            : "event-type paid"
+                        }
+                      >
+
+                        {isFree
+                          ? "FREE"
+                          : "PAID"}
+
+                      </span>
+
+                    </div>
+
+
+                    {/* ========================================
+                        EVENT INFORMATION
+                    ======================================== */}
+
+                    <div className="admin-scan-info">
+
+                      <div>
+
+                        <span>
+                          Host
+                        </span>
+
+                        <strong>
+                          {event?.hostName ||
+                            event?.organizerName ||
+                            "EventWaa"}
+                        </strong>
+
+                      </div>
+
+
+                      <div>
+
+                        <span>
+                          Venue
+                        </span>
+
+                        <strong>
+                          {event?.venue ||
+                            "Not specified"}
+                        </strong>
+
+                      </div>
+
+
+                      <div>
+
+                        <span>
+                          Date
+                        </span>
+
+                        <strong>
+                          {event?.date ||
+                            "Not specified"}
+                        </strong>
+
+                      </div>
+
+
+                      <div>
+
+                        <span>
+                          Price
+                        </span>
+
+                        <strong>
+                          {getPrice(event)}
+                        </strong>
+
+                      </div>
+
+                    </div>
+
+
+                    {/* ========================================
+                        ATTENDANCE
+                    ======================================== */}
+
+                    <div className="admin-scan-attendance">
+
+
+                      <div>
+
+                        <span>
+
+                          <Ticket
+                            aria-hidden="true"
+                          />
+
+                          Tickets
+
+                        </span>
+
+                        <strong>
+                          {totalTickets.toLocaleString()}
+                        </strong>
+
+                      </div>
+
+
+                      <div>
+
+                        <span>
+
+                          <CheckCircle2
+                            aria-hidden="true"
+                          />
+
+                          Sold / Used
+
+                        </span>
+
+                        <strong>
+                          {ticketsSold.toLocaleString()}
+                        </strong>
+
+                      </div>
+
+
+                      <div>
+
+                        <span>
+
+                          <Clock3
+                            aria-hidden="true"
+                          />
+
+                          Remaining
+
+                        </span>
+
+                        <strong>
+                          {remaining.toLocaleString()}
+                        </strong>
+
+                      </div>
+
+                    </div>
+
+
+                    {/* ========================================
+                        SCAN BUTTON
+                    ======================================== */}
+
+                    <button
+                      type="button"
+                      className="select-event-scan-btn"
+                      onClick={() =>
+                        navigate(
+                          `/admin/scan/${event.id}`
+                        )
                       }
                     >
-                      {String(
-                        event.eventType || ""
-                      ).toLowerCase() === "free"
-                        ? "FREE"
-                        : "PAID"}
-                    </span>
+
+                      <Camera
+                        aria-hidden="true"
+                      />
+
+                      Scan This Event
+
+                    </button>
 
                   </div>
 
-                  <div className="admin-scan-info">
+                </article>
 
-                    <div>
-                      <span>
-                        Host
-                      </span>
+              );
 
-                      <strong>
-                        {event.hostName ||
-                          event.organizerName ||
-                          "EventWaa"}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>
-                        Venue
-                      </span>
-
-                      <strong>
-                        {event.venue ||
-                          "Not specified"}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>
-                        Date
-                      </span>
-
-                      <strong>
-                        {event.date ||
-                          "Not specified"}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>
-                        Price
-                      </span>
-
-                      <strong>
-                        {getPrice(event)}
-                      </strong>
-                    </div>
-
-                  </div>
-
-                  <div className="admin-scan-attendance">
-
-                    <div>
-                      <span>
-                        🎟️ Tickets
-                      </span>
-
-                      <strong>
-                        {totalTickets.toLocaleString()}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>
-                        ✅ Sold / Used
-                      </span>
-
-                      <strong>
-                        {ticketsSold.toLocaleString()}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>
-                        ⏳ Remaining
-                      </span>
-
-                      <strong>
-                        {remaining.toLocaleString()}
-                      </strong>
-                    </div>
-
-                  </div>
-
-                  <button
-                    className="select-event-scan-btn"
-                    onClick={() =>
-                      navigate(
-                        `/admin/scan/${event.id}`
-                      )
-                    }
-                  >
-                    <FiCamera aria-hidden="true" />
-                    Scan This Event
-                  </button>
-
-                </div>
-
-              </div>
-
-            );
-          })}
+            }
+          )}
 
         </div>
 
       )}
 
     </div>
+
   );
+
 }
+
 
 export default AdminScan;
