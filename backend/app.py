@@ -3499,15 +3499,27 @@ def get_pesapal_transaction_status(
 #     team_accounts.json
 #     admin_team_members.json
 #
+# The signed token contains:
+#
+#     role
+#     teamType
+#     email
+#     memberId
+#     name
+#
 # IMPORTANT:
-# Admin Team accounts are stored in the shared
-# team_accounts.json file.
 #
-# Admin Team member records remain in:
+# The account record and admin team-member record can have
+# different IDs.
 #
-#     admin_team_members.json
+# Therefore the token memberId is allowed to match:
 #
-# Completely separate from Host Team authentication.
+#     1. team_accounts.memberId
+#     2. team_accounts.id
+#     3. admin_team_members.memberId
+#     4. admin_team_members.id
+#
+# Email remains the fallback identity.
 # ============================================================
 
 def verify_admin_team_token(token):
@@ -3516,6 +3528,10 @@ def verify_admin_team_token(token):
         return None
 
     try:
+
+        # ====================================================
+        # DECODE TOKEN
+        # ====================================================
 
         serializer = (
             get_team_token_serializer()
@@ -3530,7 +3546,6 @@ def verify_admin_team_token(token):
             data,
             dict
         ):
-
             return None
 
         # ====================================================
@@ -3587,13 +3602,26 @@ def verify_admin_team_token(token):
         )
 
         # ====================================================
-        # TEAM ACCOUNTS
+        # TOKEN MEMBER ID
+        # ====================================================
+
+        token_member_id = str(
+            data.get(
+                "memberId",
+                ""
+            ) or ""
+        ).strip()
+
+        print(
+            "ADMIN TEAM TOKEN MEMBER ID:",
+            token_member_id or "NONE"
+        )
+
+        # ====================================================
+        # LOAD TEAM ACCOUNTS
         #
-        # Admin Team accounts are stored in:
-        #
-        #     team_accounts.json
-        #
-        # DO NOT use admin_team_accounts.json here.
+        # Admin Team accounts are stored in the shared
+        # team_accounts.json file.
         # ====================================================
 
         team_accounts = (
@@ -3607,8 +3635,11 @@ def verify_admin_team_token(token):
             team_accounts,
             list
         ):
-
             team_accounts = []
+
+        # ====================================================
+        # FIND ACCOUNT BY EMAIL
+        # ====================================================
 
         account = None
 
@@ -3618,7 +3649,6 @@ def verify_admin_team_token(token):
                 item,
                 dict
             ):
-
                 continue
 
             item_email = str(
@@ -3628,7 +3658,11 @@ def verify_admin_team_token(token):
                 ) or ""
             ).strip().lower()
 
-            if item_email == token_email:
+            if (
+                item_email
+                ==
+                token_email
+            ):
 
                 account = item
 
@@ -3652,12 +3686,14 @@ def verify_admin_team_token(token):
         # ACCOUNT STATUS
         # ====================================================
 
-        if str(
+        account_status = str(
             account.get(
                 "status",
                 "Active"
             ) or "Active"
-        ).strip().lower() != "active":
+        ).strip().lower()
+
+        if account_status != "active":
 
             print(
                 "ADMIN TEAM TOKEN REJECTED: "
@@ -3668,65 +3704,52 @@ def verify_admin_team_token(token):
             return None
 
         # ====================================================
-        # MEMBER ID
+        # ACCOUNT IDS
+        #
+        # Keep both possible account identifiers.
         # ====================================================
 
-        token_member_id = str(
-            data.get(
+        account_member_id = str(
+            account.get(
                 "memberId",
                 ""
             ) or ""
         ).strip()
 
-        stored_member_id = str(
+        account_id = str(
             account.get(
-                "memberId",
-                account.get(
-                    "id",
-                    ""
-                )
-            )
-            or ""
+                "id",
+                ""
+            ) or ""
         ).strip()
 
-        if token_member_id:
-
-            if (
-                stored_member_id
-                and
-                token_member_id
-                !=
-                stored_member_id
-            ):
-
-                print(
-                    "ADMIN TEAM TOKEN REJECTED: "
-                    "MEMBER ID MISMATCH."
-                )
-
-                print(
-                    "TOKEN MEMBER ID:",
-                    token_member_id
-                )
-
-                print(
-                    "ACCOUNT MEMBER ID:",
-                    stored_member_id
-                )
-
-                return None
-
         # ====================================================
-        # LOAD ADMIN MEMBER RECORD
+        # LOAD ADMIN TEAM MEMBER RECORD
         #
-        # This remains separate from team_accounts.json.
+        # This is important because the login process may
+        # create the token using the ID from this record.
         # ====================================================
 
         admin_members = (
             load_admin_team_members()
         )
 
+        if not isinstance(
+            admin_members,
+            list
+        ):
+            admin_members = []
+
         current_member = None
+
+        # ====================================================
+        # FIND CURRENT ADMIN MEMBER
+        #
+        # Priority:
+        #
+        # 1. token memberId
+        # 2. email
+        # ====================================================
 
         for member in admin_members:
 
@@ -3734,7 +3757,6 @@ def verify_admin_team_token(token):
                 member,
                 dict
             ):
-
                 continue
 
             member_id = str(
@@ -3759,7 +3781,7 @@ def verify_admin_team_token(token):
             ).strip().lower()
 
             # ------------------------------------------------
-            # MATCH BY TOKEN MEMBER ID
+            # MATCH TOKEN MEMBER ID
             # ------------------------------------------------
 
             if (
@@ -3777,10 +3799,12 @@ def verify_admin_team_token(token):
                 break
 
             # ------------------------------------------------
-            # FALLBACK MATCH BY EMAIL
+            # FALLBACK TO EMAIL
             # ------------------------------------------------
 
             if (
+                not current_member
+                and
                 member_email
                 and
                 member_email
@@ -3793,6 +3817,78 @@ def verify_admin_team_token(token):
                 break
 
         # ====================================================
+        # VALIDATE MEMBER ID
+        #
+        # IMPORTANT:
+        #
+        # The token ID is allowed to come from either the
+        # account record OR the actual admin member record.
+        #
+        # This fixes the current mismatch.
+        # ====================================================
+
+        if token_member_id:
+
+            valid_member_ids = {
+                value
+                for value in (
+                    account_member_id,
+                    account_id,
+                    (
+                        str(
+                            current_member.get(
+                                "memberId",
+                                ""
+                            ) or ""
+                        ).strip()
+                        if isinstance(
+                            current_member,
+                            dict
+                        )
+                        else ""
+                    ),
+                    (
+                        str(
+                            current_member.get(
+                                "id",
+                                ""
+                            ) or ""
+                        ).strip()
+                        if isinstance(
+                            current_member,
+                            dict
+                        )
+                        else ""
+                    )
+                )
+                if value
+            }
+
+            if (
+                valid_member_ids
+                and
+                token_member_id
+                not in valid_member_ids
+            ):
+
+                print(
+                    "ADMIN TEAM TOKEN REJECTED: "
+                    "MEMBER ID MISMATCH."
+                )
+
+                print(
+                    "TOKEN MEMBER ID:",
+                    token_member_id
+                )
+
+                print(
+                    "VALID MEMBER IDS:",
+                    list(valid_member_ids)
+                )
+
+                return None
+
+        # ====================================================
         # MEMBER STATUS
         # ====================================================
 
@@ -3801,12 +3897,14 @@ def verify_admin_team_token(token):
             dict
         ):
 
-            if str(
+            member_status = str(
                 current_member.get(
                     "status",
                     "Active"
                 ) or "Active"
-            ).strip().lower() != "active":
+            ).strip().lower()
+
+            if member_status != "active":
 
                 print(
                     "ADMIN TEAM TOKEN REJECTED: "
@@ -3841,7 +3939,10 @@ def verify_admin_team_token(token):
         ] = current_member
 
         # ====================================================
-        # USE MEMBER ID FROM ACTUAL ADMIN MEMBER RECORD
+        # USE ACTUAL ADMIN MEMBER ID
+        #
+        # If an admin member record exists, it becomes the
+        # authoritative member identity.
         # ====================================================
 
         if isinstance(
