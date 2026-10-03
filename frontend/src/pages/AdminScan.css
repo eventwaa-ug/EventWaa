@@ -349,7 +349,6 @@
   font-weight: 750;
   line-height: 1.35;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
 .admin-scan-event-heading p {
   margin: 5px 0 0;
