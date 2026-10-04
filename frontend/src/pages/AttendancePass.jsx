@@ -16,7 +16,12 @@ function AttendancePass() {
     const loadPass = async () => {
       try {
         const response = await fetch(
-          `${BACKEND_URL}/attendance/${attendanceId}`
+          `${BACKEND_URL}/attendance/${attendanceId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("eventwaa_user_token") || ""}`,
+            },
+          }
         );
 
         const data = await response.json();

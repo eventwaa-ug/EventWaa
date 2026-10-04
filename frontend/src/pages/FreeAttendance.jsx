@@ -35,7 +35,8 @@ function FreeAttendance() {
     const response = await fetch(`${BACKEND_URL}/attendance`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("eventwaa_user_token") || ""}`
       },
       body: JSON.stringify({
         eventId: event.id,

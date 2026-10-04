@@ -341,19 +341,29 @@ function TicketScanner() {
                     return;
                 }
                 try {
+                    const scanToken = isAnyTeamScanner
+                        ? getTeamToken()
+                        : isAdminScanner
+                            ? localStorage.getItem("eventwaa_admin_token") || sessionStorage.getItem("eventwaa_admin_token")
+                            : localStorage.getItem("eventwaa_user_token");
+                    const scanHeaders = scanToken
+                        ? { Authorization: `Bearer ${scanToken}` }
+                        : {};
                     /* =================================================
                        PAID BOOKINGS
                     ================================================= */
                     const paidResponse =
                         await fetch(
-                            `${BACKEND_URL}/bookings/event/${id}`
+                            `${BACKEND_URL}/bookings/event/${id}`,
+                            { headers: scanHeaders }
                         );
                     /* =================================================
                        FREE ATTENDANCE
                     ================================================= */
                     const freeResponse =
                         await fetch(
-                            `${BACKEND_URL}/attendance/event/${id}`
+                            `${BACKEND_URL}/attendance/event/${id}`,
+                            { headers: scanHeaders }
                         );
                     if (
                         !paidResponse.ok &&

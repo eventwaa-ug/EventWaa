@@ -32,6 +32,15 @@ function Attendees() {
     hostRefunds: true,
     autoRefundApproval: false,
   });
+  const scannerToken =
+    localStorage.getItem("eventwaa_admin_token") ||
+    sessionStorage.getItem("eventwaa_admin_token") ||
+    localStorage.getItem("eventwaa_admin_team_token") ||
+    sessionStorage.getItem("eventwaa_admin_team_token") ||
+    localStorage.getItem("eventwaa_team_token") ||
+    sessionStorage.getItem("eventwaa_team_token") ||
+    localStorage.getItem("eventwaa_user_token") ||
+    "";
   // =========================================================
   // LOAD ATTENDEES
   // =========================================================
@@ -60,19 +69,28 @@ function Attendees() {
       let response;
       if (eventData.eventType === "Free") {
         response = await fetch(
-          `${BACKEND_URL}/attendance/event/${id}`
+          `${BACKEND_URL}/attendance/event/${id}`,
+          { headers: { Authorization: `Bearer ${scannerToken}` } }
         );
       } else {
         response = await fetch(
-          `${BACKEND_URL}/bookings/event/${id}`
+          `${BACKEND_URL}/bookings/event/${id}`,
+          { headers: { Authorization: `Bearer ${scannerToken}` } }
         );
       }
       const data = await response.json();
-      setAttendees(
-        Array.isArray(data)
-          ? data
-          : []
-      );
+      const rows = Array.isArray(data) ? data : [];
+      setAttendees(eventData.eventType === "Free"
+        ? rows
+        : rows.flatMap((booking) => (Array.isArray(booking.tickets) ? booking.tickets : []).map((ticket) => ({
+            ...ticket,
+            id: booking.id,
+            bookingId: booking.id,
+            eventId: booking.eventId,
+            eventTitle: booking.eventTitle,
+            buyer: ticket.buyer || booking.buyer,
+            refundStatus: ticket.refundStatus || booking.refundStatus,
+          }))));
     } catch (error) {
       console.error(
         "LOAD ATTENDEES ERROR:",
@@ -91,11 +109,12 @@ function Attendees() {
   const checkInAttendee = async (ticket) => {
     try {
       const response = await fetch(
-        `${BACKEND_URL}/check-ticket/${ticket.ticketId}`,
+        `${BACKEND_URL}/verify-entry/${encodeURIComponent(ticket.ticketId)}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${scannerToken}`,
           },
           body: JSON.stringify({
             eventId: id,

@@ -18024,6 +18024,33 @@ def complete_verified_eventwaa_payment(
     paid_amount
 ):
 
+    try:
+        with eventwaa_file_lock("admin_wallet_finalization"):
+            with eventwaa_file_lock("host_wallet_finalization"):
+                with eventwaa_file_lock("payment_fulfillment"):
+                    return _complete_verified_eventwaa_payment_locked(
+                        payment,
+                        payments,
+                        transaction_id,
+                        provider,
+                        paid_amount
+                    )
+    except TimeoutError as error:
+        return {
+            "success": False,
+            "message": str(error),
+            "retryable": True
+        }, 503
+
+
+def _complete_verified_eventwaa_payment_locked(
+    payment,
+    payments,
+    transaction_id,
+    provider,
+    paid_amount
+):
+
     now = datetime.now().strftime(
         "%Y-%m-%d %H:%M:%S"
     )
@@ -18845,6 +18872,9 @@ def complete_verified_eventwaa_payment(
                 "buyer",
                 {}
             ),
+
+        "ownerUserId":
+            payment.get("ownerUserId"),
 
         # ====================================================
         # PURCHASE DETAILS
@@ -24250,6 +24280,8 @@ def initialize_pesapal_payment():
             silent=True
         ) or {}
 
+        authenticated_user = verify_user_request()
+
         event_id = data.get(
             "eventId"
         )
@@ -24286,6 +24318,10 @@ def initialize_pesapal_payment():
                 ""
             )
         ).strip().lower()
+
+        if authenticated_user:
+            buyer_name = str(authenticated_user.get("name", buyer_name) or buyer_name).strip()
+            buyer_email = str(authenticated_user.get("email", buyer_email) or buyer_email).strip().lower()
 
         buyer_phone = str(
             buyer.get(
@@ -24466,10 +24502,7 @@ def initialize_pesapal_payment():
         # GENERATE EVENTWAA PAYMENT REFERENCE
         # ====================================================
 
-        user_id = data.get(
-            "userId",
-            buyer_email
-        )
+        user_id = authenticated_user.get("id") if authenticated_user else buyer_email
 
         tx_ref = generate_payment_reference(
             event_id,
@@ -24547,6 +24580,9 @@ def initialize_pesapal_payment():
                 "phone":
                     buyer_phone
             },
+
+            "ownerUserId":
+                authenticated_user.get("id") if authenticated_user else None,
 
             "ticketPrice":
                 ticket_price,
@@ -26031,6 +26067,8 @@ def initialize_payment():
             silent=True
         ) or {}
 
+        authenticated_user = verify_user_request()
+
 
         event_id = data.get(
             "eventId"
@@ -26073,6 +26111,10 @@ def initialize_payment():
                 ""
             )
         ).strip().lower()
+
+        if authenticated_user:
+            buyer_name = str(authenticated_user.get("name", buyer_name) or buyer_name).strip()
+            buyer_email = str(authenticated_user.get("email", buyer_email) or buyer_email).strip().lower()
 
 
         # ====================================================
@@ -26339,10 +26381,7 @@ def initialize_payment():
         # GENERATE UNIQUE TRANSACTION REFERENCE
         # ====================================================
 
-        user_id = data.get(
-            "userId",
-            buyer_email
-        )
+        user_id = authenticated_user.get("id") if authenticated_user else buyer_email
 
 
         tx_ref = generate_payment_reference(
@@ -26420,6 +26459,9 @@ def initialize_payment():
                     buyer_email
 
             },
+
+            "ownerUserId":
+                authenticated_user.get("id") if authenticated_user else None,
 
             # =================================================
             # PAYMENT METHOD INFORMATION
@@ -33881,6 +33923,10 @@ def admin_cancel_event(event_id):
 )
 def create_refund():
 
+    refund_actor = get_booking_request_actor()
+    if not refund_actor:
+        return jsonify({"success": False, "message": "Authentication required."}), 401
+
     data = request.get_json(
         silent=True
     ) or {}
@@ -34068,6 +34114,19 @@ def create_refund():
                 return jsonify(
                     response_body
                 ), 404
+
+            actor_role = refund_actor.get("role")
+            actor_user = refund_actor.get("user", {})
+            if actor_role == "user":
+                owns_booking = (
+                    str(booking.get("ownerUserId", "")) == str(actor_user.get("id", ""))
+                    or str((booking.get("buyer") or {}).get("email", booking.get("email", ""))).strip().lower()
+                    == str(actor_user.get("email", "")).strip().lower()
+                )
+                if not owns_booking:
+                    return jsonify({"success": False, "message": "Booking not found."}), 404
+            elif actor_role != "admin":
+                return jsonify({"success": False, "message": "Only the booking owner or an administrator may request this refund."}), 403
 
             # ==================================================
             # PREVENT DUPLICATE REFUNDS
@@ -35912,11 +35971,33 @@ def get_admin_refunds():
 # JSON storage still does not provide a true database
 # transaction across multiple files.
 # ============================================================
+def get_booking_request_actor():
+    scanner = verify_admin_or_team_token()
+    if scanner:
+        return scanner
+    user = verify_user_request()
+    if user:
+        role = "host" if (
+            user.get("verifiedHost") is True
+            or user.get("hostMode") is True
+            or str(user.get("verifiedHost", "")).lower() == "true"
+            or str(user.get("hostMode", "")).lower() == "true"
+        ) else "user"
+        return {"role": role, "user": user}
+    return None
+
+
 @app.route(
     "/bookings",
     methods=["GET", "POST"]
 )
 def create_booking():
+
+    if request.method == "POST":
+        return jsonify({
+            "success": False,
+            "message": "Paid bookings must be completed through the verified payment flow."
+        }), 409
 
     # ========================================================
     # GET BOOKINGS
@@ -35929,11 +36010,56 @@ def create_booking():
             []
         )
 
+        actor = get_booking_request_actor()
+        if not actor:
+            return jsonify({"success": False, "message": "Authentication required."}), 401
+
+        role = actor.get("role")
+        actor_user = actor.get("user", {})
+        requested_event_id = str(request.args.get("eventId", "")).strip()
+
+        if role == "admin":
+            scoped_bookings = bookings
+        elif role == "user":
+            actor_email = str(actor_user.get("email", "")).strip().lower()
+            actor_id = str(actor_user.get("id", ""))
+            scoped_bookings = [
+                booking for booking in bookings
+                if str(booking.get("ownerUserId", "")) == actor_id
+                or str((booking.get("buyer") or {}).get("email", booking.get("email", ""))).strip().lower() == actor_email
+            ]
+        elif role == "host" and not requested_event_id:
+            actor_email = str(actor_user.get("email", "")).strip().lower()
+            actor_id = str(actor_user.get("id", ""))
+            scoped_bookings = [
+                booking for booking in bookings
+                if str(booking.get("ownerUserId", "")) == actor_id
+                or str((booking.get("buyer") or {}).get("email", booking.get("email", ""))).strip().lower() == actor_email
+            ]
+        elif requested_event_id:
+            if role == "team":
+                accessible_ids, error = get_team_accessible_event_ids(actor_user)
+                if accessible_ids is None or requested_event_id not in {str(item) for item in accessible_ids}:
+                    return jsonify({"success": False, "message": error or "You are not assigned to this event."}), 403
+            elif role == "host":
+                if str(actor_user.get("id", "")) != str(next((event.get("hostId") for event in load_json_file("events.json", []) if str(event.get("id")) == requested_event_id), "")):
+                    return jsonify({"success": False, "message": "You are not authorized for this event."}), 403
+            scoped_bookings = [booking for booking in bookings if str(booking.get("eventId", "")) == requested_event_id]
+        else:
+            return jsonify({"success": False, "message": "Event ID is required."}), 400
+
+        if role == "user":
+            for booking in scoped_bookings:
+                booking.pop("transactionId", None)
+                booking.pop("txRef", None)
+                booking.pop("paymentProvider", None)
+                booking.pop("payment", None)
+
         return jsonify({
             "success":
                 True,
             "bookings":
-                bookings
+                scoped_bookings
         }), 200
 
     # ========================================================
@@ -37452,6 +37578,68 @@ def create_booking():
 
         }), 500
 
+
+@app.route("/bookings/<int:booking_id>", methods=["GET"])
+def get_booking(booking_id):
+    actor = get_booking_request_actor()
+    if not actor:
+        return jsonify({"success": False, "message": "Authentication required."}), 401
+
+    booking = next(
+        (item for item in load_json_file("bookings.json", []) if str(item.get("id", "")) == str(booking_id)),
+        None
+    )
+    if not booking:
+        return jsonify({"success": False, "message": "Booking not found."}), 404
+
+    role = actor.get("role")
+    user = actor.get("user", {})
+    if role == "user":
+        if not (
+            str(booking.get("ownerUserId", "")) == str(user.get("id", ""))
+            or str((booking.get("buyer") or {}).get("email", booking.get("email", ""))).strip().lower() == str(user.get("email", "")).strip().lower()
+        ):
+            return jsonify({"success": False, "message": "Booking not found."}), 404
+        booking.pop("transactionId", None)
+        booking.pop("txRef", None)
+        booking.pop("paymentProvider", None)
+        booking.pop("payment", None)
+    elif role == "team":
+        event_ids, error = get_team_accessible_event_ids(user)
+        if event_ids is None or str(booking.get("eventId", "")) not in {str(value) for value in event_ids}:
+            return jsonify({"success": False, "message": error or "Booking not found."}), 404
+    elif role == "host":
+        event = next((item for item in load_json_file("events.json", []) if str(item.get("id", "")) == str(booking.get("eventId", ""))), None)
+        if not event or str(event.get("hostId", "")) != str(user.get("id", "")):
+            return jsonify({"success": False, "message": "Booking not found."}), 404
+    elif role != "admin":
+        return jsonify({"success": False, "message": "Not authorized."}), 403
+
+    return jsonify({"success": True, "booking": booking}), 200
+
+
+@app.route("/bookings/event/<int:event_id>", methods=["GET"])
+def get_event_bookings(event_id):
+    actor = get_booking_request_actor()
+    if not actor:
+        return jsonify({"success": False, "message": "Authentication required."}), 401
+
+    role = actor.get("role")
+    user = actor.get("user", {})
+    if role == "team":
+        event_ids, error = get_team_accessible_event_ids(user)
+        if event_ids is None or str(event_id) not in {str(value) for value in event_ids}:
+            return jsonify({"success": False, "message": error or "You are not assigned to this event."}), 403
+    elif role == "host":
+        event = next((item for item in load_json_file("events.json", []) if str(item.get("id", "")) == str(event_id)), None)
+        if not event or str(event.get("hostId", "")) != str(user.get("id", "")):
+            return jsonify({"success": False, "message": "You are not authorized for this event."}), 403
+    elif role not in ("admin",):
+        return jsonify({"success": False, "message": "Admin, host, or assigned team access required."}), 403
+
+    bookings = [booking for booking in load_json_file("bookings.json", []) if str(booking.get("eventId", "")) == str(event_id)]
+    return jsonify(bookings), 200
+
 # ============================================================
 # DELETE INDIVIDUAL PAST TICKET
 #
@@ -37819,6 +38007,105 @@ def delete_past_ticket(ticket_id):
 )
 def create_attendance():
 
+    data = request.get_json(silent=True) or {}
+    event_id = data.get("eventId")
+    user = verify_user_request()
+    if not user:
+        return jsonify({"success": False, "message": "Authentication required."}), 401
+
+    name = str(user.get("name", "") or "").strip()
+    email = str(user.get("email", "") or "").strip().lower()
+    if not event_id or not name or not email or "@" not in email:
+        return jsonify({"success": False, "message": "A valid event and attendee account are required."}), 400
+
+    try:
+        with eventwaa_file_lock("attendance"):
+            events = load_json_file("events.json", [])
+            attendance = load_attendance()
+            if not isinstance(events, list) or not isinstance(attendance, list):
+                return jsonify({"success": False, "message": "Attendance data is unavailable."}), 500
+
+            event = next((item for item in events if isinstance(item, dict) and str(item.get("id", "")) == str(event_id)), None)
+            if not event:
+                return jsonify({"success": False, "message": "Event not found."}), 404
+
+            if str(event.get("status", "")).strip().lower() not in ("published", "active"):
+                return jsonify({"success": False, "message": "This event is not open for attendance registration."}), 400
+
+            if str(event.get("eventType", "")).strip().lower() != "free":
+                return jsonify({"success": False, "message": "Free attendance is only available for free events."}), 409
+
+            tickets = event.get("tickets", [])
+            if not isinstance(tickets, list) or not tickets:
+                return jsonify({"success": False, "message": "This event has no free attendance capacity configured."}), 409
+
+            try:
+                if any(int(float(ticket.get("price", 0) or 0)) != 0 for ticket in tickets if isinstance(ticket, dict)):
+                    return jsonify({"success": False, "message": "This event requires a paid ticket."}), 409
+            except (TypeError, ValueError):
+                return jsonify({"success": False, "message": "Event ticket configuration is invalid."}), 409
+
+            event_date = str(event.get("date", "")).strip()
+            try:
+                if not event_date or datetime.strptime(event_date[:10], "%Y-%m-%d").date() < datetime.now().date():
+                    return jsonify({"success": False, "message": "This event has already passed."}), 400
+            except ValueError:
+                return jsonify({"success": False, "message": "Event date is invalid."}), 400
+
+            try:
+                capacity = int(float(event.get("capacity", 0) or 0))
+                attendees_count = int(event.get("attendees", 0) or 0)
+            except (TypeError, ValueError):
+                capacity = 0
+                attendees_count = 0
+
+            ticket_capacity = sum(int(float(ticket.get("remaining", ticket.get("quantity", 0)) or 0)) for ticket in tickets if isinstance(ticket, dict))
+            if capacity <= 0 or attendees_count >= capacity or ticket_capacity <= 0:
+                return jsonify({"success": False, "message": "Free attendance capacity has been reached."}), 409
+
+            if any(
+                str(record.get("eventId", "")) == str(event_id)
+                and str(record.get("email", "")).strip().lower() == email
+                for record in attendance
+                if isinstance(record, dict)
+            ):
+                return jsonify({"success": False, "message": "An attendance pass already exists for this attendee."}), 409
+
+            pass_id = f"FW{uuid.uuid4().hex.upper()}"
+            record = {
+                "id": len(attendance) + 1,
+                "eventId": event.get("id"),
+                "eventTitle": event.get("title", ""),
+                "name": name,
+                "email": email,
+                "ownerUserId": user.get("id"),
+                "passId": pass_id,
+                "ticketId": f"FREE-{pass_id}",
+                "checkedIn": False,
+                "checkInCount": 0,
+                "checkInLimit": 1,
+                "checkInHistory": [],
+                "refundStatus": None,
+                "valid": True,
+                "cancelled": False,
+                "createdAt": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            attendance.append(record)
+            event["attendees"] = attendees_count + 1
+            for ticket in tickets:
+                if isinstance(ticket, dict) and int(float(ticket.get("remaining", ticket.get("quantity", 0)) or 0)) > 0:
+                    ticket["remaining"] = int(float(ticket.get("remaining", ticket.get("quantity", 0)) or 0)) - 1
+                    break
+            save_attendance(attendance)
+            save_json_file("events.json", events)
+
+            return jsonify({"success": True, "attendance": record}), 201
+    except TimeoutError as error:
+        return jsonify({"success": False, "message": str(error), "retryable": True}), 503
+
+
+def legacy_create_attendance_unrouted():
+
     data = request.get_json(
         silent=True
     ) or {}
@@ -38080,10 +38367,32 @@ def create_attendance():
     methods=["GET"]
 )
 def get_attendance():
-
-    return jsonify(
-        load_attendance()
-    )
+    actor = get_booking_request_actor()
+    if not actor:
+        return jsonify({"success": False, "message": "Authentication required."}), 401
+    attendance = load_attendance()
+    role = actor.get("role")
+    user = actor.get("user", {})
+    if role == "admin":
+        return jsonify(attendance)
+    if role == "user":
+        email = str(user.get("email", "")).strip().lower()
+        return jsonify([record for record in attendance if str(record.get("ownerUserId", "")) == str(user.get("id", "")) or str(record.get("email", "")).strip().lower() == email])
+    if role == "host" and not request.args.get("eventId"):
+        email = str(user.get("email", "")).strip().lower()
+        return jsonify([record for record in attendance if str(record.get("ownerUserId", "")) == str(user.get("id", "")) or str(record.get("email", "")).strip().lower() == email])
+    event_id = str(request.args.get("eventId", "")).strip()
+    if not event_id:
+        return jsonify({"success": False, "message": "Event ID is required."}), 400
+    if role == "team":
+        event_ids, error = get_team_accessible_event_ids(user)
+        if event_ids is None or event_id not in {str(value) for value in event_ids}:
+            return jsonify({"success": False, "message": error or "You are not assigned to this event."}), 403
+    else:
+        event = next((item for item in load_json_file("events.json", []) if str(item.get("id", "")) == event_id), None)
+        if not event or str(event.get("hostId", "")) != str(user.get("id", "")):
+            return jsonify({"success": False, "message": "You are not authorized for this event."}), 403
+    return jsonify([record for record in attendance if str(record.get("eventId", "")) == event_id])
 
 
 # ============================================================
@@ -38095,6 +38404,22 @@ def get_attendance():
     methods=["GET"]
 )
 def get_free_event_attendees(event_id):
+    actor = get_booking_request_actor()
+    if not actor:
+        return jsonify({"success": False, "message": "Authentication required."}), 401
+    role = actor.get("role")
+    user = actor.get("user", {})
+    if role != "admin":
+        if role == "team":
+            event_ids, error = get_team_accessible_event_ids(user)
+            if event_ids is None or str(event_id) not in {str(value) for value in event_ids}:
+                return jsonify({"success": False, "message": error or "You are not assigned to this event."}), 403
+        elif role == "host":
+            event = next((item for item in load_json_file("events.json", []) if str(item.get("id", "")) == str(event_id)), None)
+            if not event or str(event.get("hostId", "")) != str(user.get("id", "")):
+                return jsonify({"success": False, "message": "You are not authorized for this event."}), 403
+        else:
+            return jsonify({"success": False, "message": "Admin, host, or assigned team access required."}), 403
 
     attendance = load_attendance()
 
@@ -38125,7 +38450,9 @@ def get_free_event_attendees(event_id):
     methods=["GET"]
 )
 def get_attendance_pass(attendance_id):
-
+    actor = get_booking_request_actor()
+    if not actor:
+        return jsonify({"success": False, "message": "Authentication required."}), 401
     attendance = load_attendance()
 
 
@@ -38134,6 +38461,22 @@ def get_attendance_pass(attendance_id):
         if int(
             person.get("id", 0)
         ) == attendance_id:
+
+            if actor.get("role") == "user":
+                user = actor.get("user", {})
+                if not (
+                    str(person.get("ownerUserId", "")) == str(user.get("id", ""))
+                    or str(person.get("email", "")).strip().lower() == str(user.get("email", "")).strip().lower()
+                ):
+                    return jsonify({"success": False, "message": "Attendance pass not found."}), 404
+            elif actor.get("role") == "team":
+                event_ids, error = get_team_accessible_event_ids(actor.get("user", {}))
+                if event_ids is None or str(person.get("eventId", "")) not in {str(value) for value in event_ids}:
+                    return jsonify({"success": False, "message": error or "Attendance pass not found."}), 404
+            elif actor.get("role") == "host":
+                event = next((item for item in load_json_file("events.json", []) if str(item.get("id", "")) == str(person.get("eventId", ""))), None)
+                if not event or str(event.get("hostId", "")) != str(actor.get("user", {}).get("id", "")):
+                    return jsonify({"success": False, "message": "Attendance pass not found."}), 404
 
             return jsonify(
                 person
@@ -38169,6 +38512,15 @@ def get_attendance_pass(attendance_id):
 )
 def verify_entry(entry_id):
 
+    try:
+        with eventwaa_file_lock("entry_checkin"):
+            return _verify_entry_locked(entry_id)
+    except TimeoutError as error:
+        return jsonify({"success": False, "message": str(error), "retryable": True}), 503
+
+
+def _verify_entry_locked(entry_id):
+
     data = request.get_json(
         silent=True
     ) or {}
@@ -38187,6 +38539,16 @@ def verify_entry(entry_id):
     # ========================================================
 
     auth_user = verify_admin_or_team_token()
+
+    if not auth_user:
+        normal_user = verify_user_request()
+        if normal_user and (
+            normal_user.get("verifiedHost") is True
+            or normal_user.get("hostMode") is True
+            or str(normal_user.get("verifiedHost", "")).lower() == "true"
+            or str(normal_user.get("hostMode", "")).lower() == "true"
+        ):
+            auth_user = {"role": "host", "user": normal_user}
 
     if not auth_user:
 
@@ -38226,6 +38588,7 @@ def verify_entry(entry_id):
     is_main_admin = (
         role == "admin"
     )
+    is_host_user = role == "host"
 
     # ========================================================
     # TEAM AUTHENTICATION
@@ -38334,7 +38697,7 @@ def verify_entry(entry_id):
     # Admin team: assigned admin-team events.
     # ========================================================
 
-    if not is_main_admin:
+    if not is_main_admin and not is_host_user:
 
         allowed_event_ids = []
 
@@ -38498,6 +38861,9 @@ def verify_entry(entry_id):
                     "You are not assigned to this event."
             }), 403
 
+    if is_host_user and str(selected_event.get("hostId", "")) != str(user.get("id", "")):
+        return jsonify({"success": False, "message": "You are not authorized to scan this event."}), 403
+
     # ========================================================
     # NORMALIZE ENTRY ID
     # ========================================================
@@ -38652,6 +39018,43 @@ def verify_entry(entry_id):
             "success": False,
             "message": "Ticket or attendance pass not found."
         }), 404
+
+    if selected_event is None:
+        selected_event = next(
+            (
+                event for event in events
+                if isinstance(event, dict)
+                and str(event.get("id", "") or event.get("eventId", "")).strip() == found_event_id
+            ),
+            None
+        )
+
+    if not selected_event:
+        return jsonify({"success": False, "message": "Event not found."}), 404
+
+    if str(selected_event.get("status", "")).strip().lower() not in ("published", "active"):
+        return jsonify({"success": False, "message": "This event is not valid for entry."}), 400
+
+    try:
+        event_date = datetime.strptime(str(selected_event.get("date", ""))[:10], "%Y-%m-%d").date()
+    except ValueError:
+        return jsonify({"success": False, "message": "Event date is invalid."}), 400
+
+    if event_date < datetime.now().date():
+        return jsonify({"success": False, "message": "This event has already passed."}), 400
+
+    if found_ticket is not None:
+        booking_status = str(found_booking.get("status", "")).strip().lower()
+        if (
+            found_ticket.get("valid") is False
+            or found_ticket.get("cancelled") is True
+            or found_booking.get("valid") is False
+            or found_booking.get("cancelled") is True
+            or booking_status in ("cancelled", "invalid")
+        ):
+            return jsonify({"success": False, "message": "This ticket is invalid or cancelled."}), 400
+    elif found_attendee.get("valid") is False or found_attendee.get("cancelled") is True:
+        return jsonify({"success": False, "message": "This attendance pass is invalid or cancelled."}), 400
 
     # ========================================================
     # EVENT MATCHING
@@ -42944,6 +43347,11 @@ def host_ticket_search(user):
     methods=["PUT"]
 )
 def check_ticket(ticket_id):
+    data = request.get_json(silent=True) or {}
+    if not str(data.get("eventId", "") or "").strip():
+        return jsonify({"success": False, "message": "Event ID is required."}), 400
+    return verify_entry(ticket_id)
+
     data = request.get_json(
         silent=True
     ) or {}
@@ -43099,6 +43507,32 @@ def check_ticket(ticket_id):
     methods=["GET"]
 )
 def get_checked_in():
+    actor = get_booking_request_actor()
+    if not actor:
+        return jsonify({"success": False, "message": "Authentication required."}), 401
+
+    role = actor.get("role")
+    user = actor.get("user", {})
+    event_id = str(request.args.get("eventId", "")).strip()
+    allowed_event_ids = None
+    if role == "host":
+        host_events = [
+            event for event in load_json_file("events.json", [])
+            if isinstance(event, dict) and str(event.get("hostId", "")) == str(user.get("id", ""))
+        ]
+        if event_id and event_id not in {str(event.get("id", "")) for event in host_events}:
+            return jsonify({"success": False, "message": "You are not authorized for this event."}), 403
+        allowed_event_ids = {str(event.get("id", "")) for event in host_events} if not event_id else {event_id}
+    elif role == "team":
+        if not event_id:
+            return jsonify({"success": False, "message": "Event ID is required."}), 400
+        event_ids, error = get_team_accessible_event_ids(user)
+        if event_ids is None or event_id not in {str(value) for value in event_ids}:
+            return jsonify({"success": False, "message": error or "You are not assigned to this event."}), 403
+        allowed_event_ids = {event_id}
+    elif role not in ("admin", "user"):
+        return jsonify({"success": False, "message": "Not authorized."}), 403
+
     bookings = load_json_file(
         "bookings.json",
         []
@@ -43117,6 +43551,18 @@ def get_checked_in():
             list
         ):
             continue
+
+        if role == "user":
+            owns_booking = (
+                str(booking.get("ownerUserId", "")) == str(user.get("id", ""))
+                or str((booking.get("buyer") or {}).get("email", booking.get("email", ""))).strip().lower()
+                == str(user.get("email", "")).strip().lower()
+            )
+            if not owns_booking:
+                continue
+        elif allowed_event_ids is not None and str(booking.get("eventId", "")) not in allowed_event_ids:
+            continue
+
         # ====================================================
         # LOOP THROUGH INDIVIDUAL TICKETS
         # ====================================================
@@ -43155,7 +43601,6 @@ def get_checked_in():
     return jsonify(
         checked_in
     ), 200
-
 # ============================================================
 # HOST APPLICATION
 # ============================================================

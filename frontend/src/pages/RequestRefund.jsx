@@ -177,6 +177,7 @@ function RequestRefund() {
             headers: {
               "Content-Type":
                 "application/json",
+              Authorization: `Bearer ${localStorage.getItem("eventwaa_user_token") || ""}`,
             },
             body: JSON.stringify({
               bookingId,

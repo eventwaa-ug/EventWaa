@@ -193,6 +193,9 @@ function Booking() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(localStorage.getItem("eventwaa_user_token")
+            ? { Authorization: `Bearer ${localStorage.getItem("eventwaa_user_token")}` }
+            : {}),
         },
         body: JSON.stringify({
           eventId: event.id,
@@ -253,6 +256,9 @@ function Booking() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(localStorage.getItem("eventwaa_user_token")
+            ? { Authorization: `Bearer ${localStorage.getItem("eventwaa_user_token")}` }
+            : {}),
         },
         body: JSON.stringify({
           eventId: event.id,

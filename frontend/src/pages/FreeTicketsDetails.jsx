@@ -16,7 +16,11 @@ function FreePassDetails() {
 
     useEffect(() => {
 
-        fetch(`${BACKEND_URL}/attendance/${attendanceId}`)
+        fetch(`${BACKEND_URL}/attendance/${attendanceId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("eventwaa_user_token") || ""}`,
+            },
+        })
             .then(res => res.json())
             .then(data => {
 

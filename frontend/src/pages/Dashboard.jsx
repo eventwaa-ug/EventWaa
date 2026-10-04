@@ -287,7 +287,12 @@ function Dashboard() {
         try {
           const bookingsResponse =
             await fetch(
-              `${BACKEND_URL}/bookings`
+              `${BACKEND_URL}/bookings`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("eventwaa_user_token") || ""}`,
+                },
+              }
             );
 
           if (
@@ -320,7 +325,12 @@ function Dashboard() {
         try {
           const checkedInResponse =
             await fetch(
-              `${BACKEND_URL}/bookings/checked-in`
+              `${BACKEND_URL}/bookings/checked-in`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("eventwaa_user_token") || ""}`,
+                },
+              }
             );
 
           if (

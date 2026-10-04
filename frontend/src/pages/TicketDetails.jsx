@@ -116,7 +116,12 @@ function TicketDetails() {
 
           const response =
             await fetch(
-              `${BACKEND_URL}/bookings`
+              `${BACKEND_URL}/bookings/${encodeURIComponent(requestedBookingId)}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("eventwaa_user_token") || ""}`,
+                },
+              }
             );
 
 
@@ -129,63 +134,8 @@ function TicketDetails() {
           }
 
 
-          const data =
-            await response.json();
-
-
-          const bookings =
-            Array.isArray(
-              data
-            )
-              ? data
-              : Array.isArray(
-                  data?.bookings
-                )
-              ? data.bookings
-              : [];
-
-
-          let foundBooking =
-            null;
-
-
-          for (
-            const item of
-            bookings
-          ) {
-
-            if (
-              !item ||
-              typeof item !==
-                "object"
-            ) {
-              continue;
-            }
-
-
-            const currentBookingId =
-              String(
-                item.id ||
-                item.bookingId ||
-                item._id ||
-                item.ticketId ||
-                ""
-              ).trim();
-
-
-            if (
-              currentBookingId ===
-              requestedBookingId
-            ) {
-
-              foundBooking =
-                item;
-
-              break;
-
-            }
-
-          }
+          const data = await response.json();
+          const foundBooking = data?.booking || null;
 
 
           if (

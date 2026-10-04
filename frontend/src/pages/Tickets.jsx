@@ -119,7 +119,12 @@ function Tickets() {
         // PAID BOOKINGS
         // ======================================================
         const bookingsResponse = await fetch(
-          `${BACKEND_URL}/bookings`
+          `${BACKEND_URL}/bookings`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("eventwaa_user_token") || ""}`,
+            },
+          }
         );
         if (!bookingsResponse.ok) {
           throw new Error("Unable to load bookings.");
@@ -159,7 +164,12 @@ function Tickets() {
         let myPasses = [];
         try {
           const attendanceResponse = await fetch(
-            `${BACKEND_URL}/attendance`
+            `${BACKEND_URL}/attendance`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("eventwaa_user_token") || ""}`,
+              },
+            }
           );
           if (attendanceResponse.ok) {
             const attendanceData =
