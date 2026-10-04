@@ -3154,15 +3154,6 @@ def get_pesapal_token():
 
         data = {}
 
-    print(
-        "PESAPAL AUTH STATUS:",
-        response.status_code
-    )
-
-    print(
-        "PESAPAL AUTH RESPONSE:",
-        data
-    )   
 
     if response.status_code >= 400:
 
@@ -16249,32 +16240,105 @@ def admin_get_host_applications():
 @app.before_request
 def platform_maintenance_check():
 
-    # Always allow OPTIONS requests.
-    # This prevents CORS preflight errors.
+    # ============================================================
+    # ALWAYS ALLOW CORS PREFLIGHT
+    # ============================================================
+
     if request.method == "OPTIONS":
         return None
 
+    # ============================================================
+    # LOAD PLATFORM SETTINGS
+    # ============================================================
+
     settings = load_admin_settings()
 
+    # Maintenance mode is OFF.
+    # Everything continues normally.
     if not settings.get("maintenanceMode", False):
         return None
 
-    # Admin routes remain available.
+    # ============================================================
+    # ADMIN LOGIN GATE
+    #
+    # /eventwaa-control is intentionally outside /admin.
+    # It must remain accessible so the administrator can
+    # authenticate while maintenance mode is active.
+    # ============================================================
+
+    if request.path == "/eventwaa-control":
+        return None
+
+    # ============================================================
+    # ADMIN ROUTES
+    #
+    # Existing /admin/* backend routes remain available.
+    # ============================================================
+
     if request.path.startswith("/admin"):
         return None
 
-    # Static files/uploads remain available.
+    # ============================================================
+    # AUTHENTICATED ADMIN API REQUESTS
+    #
+    # Some EventWaa admin APIs do not use the /admin prefix.
+    #
+    # Example:
+    #
+    #     /users
+    #
+    # The admin dashboard sends its admin Bearer token with
+    # these requests.
+    #
+    # We verify that token using the existing EventWaa
+    # verify_admin_token() function.
+    # ============================================================
+
+    authorization = request.headers.get(
+        "Authorization",
+        ""
+    ).strip()
+
+    if authorization.startswith("Bearer "):
+
+        token = authorization[
+            len("Bearer "):
+        ].strip()
+
+        if token and verify_admin_token(token):
+
+            # Authenticated administrator.
+            # Allow the request during maintenance.
+            return None
+
+    # ============================================================
+    # STATIC FILES / UPLOADS
+    #
+    # These remain available so images and other uploaded
+    # assets do not suddenly break during maintenance mode.
+    # ============================================================
+
     if request.path.startswith("/uploads"):
         return None
 
-    # Allow health/home route.
+    # ============================================================
+    # PUBLIC MAINTENANCE-ALLOWED ROUTES
+    # ============================================================
+
     if request.path in MAINTENANCE_ALLOWED_ROUTES:
         return None
+
+    # ============================================================
+    # BLOCK EVERYTHING ELSE
+    # ============================================================
 
     return jsonify({
         "success": False,
         "maintenanceMode": True,
-        "message": "EventWaa is currently under maintenance. Please try again later."
+        "message": (
+            "EventWaa is currently under maintenance. "
+            "Please try again later."
+        )
     }), 503
 
 
@@ -19694,6 +19758,103 @@ def load_wallet():
     save_wallet(wallet)
 
     return wallet
+
+
+# ============================================================
+# PAYOUT SAFETY HELPERS
+# ============================================================
+
+def normalize_payout_method(method):
+
+    method_text = str(
+        method or ""
+    ).strip()
+
+    normalized = method_text.lower()
+
+    if normalized in (
+        "mtn mobile money",
+        "mtn",
+        "mtn mobile",
+        "mtn mobilemoney"
+    ):
+        return "MTN Mobile Money", "MTN"
+
+    if normalized in (
+        "airtel mobile money",
+        "airtel",
+        "airtel mobile",
+        "airtel mobilemoney"
+    ):
+        return "Airtel Mobile Money", "AIRTEL"
+
+    if normalized in (
+        "bank account",
+        "bank",
+        "bank transfer"
+    ):
+        return "Bank Account", "BANK"
+
+    raise ValueError(
+        "Unsupported withdrawal method."
+    )
+
+
+
+def get_existing_withdrawal_for_idempotency(wallet, idempotency_key):
+
+    if not wallet or not idempotency_key:
+        return None
+
+    for withdrawal in wallet.get(
+        "withdrawals",
+        []
+    ):
+
+        if not isinstance(
+            withdrawal,
+            dict
+        ):
+            continue
+
+        if str(
+            withdrawal.get(
+                "idempotencyKey",
+                ""
+            )
+        ).strip() == str(
+            idempotency_key
+        ).strip():
+            return withdrawal
+
+    return None
+
+
+
+def get_ongoing_withdrawal_metadata(withdrawal):
+
+    if not isinstance(
+        withdrawal,
+        dict
+    ):
+        return {
+            "status": "pending",
+            "providerStatus": "pending"
+        }
+
+    return {
+        "status": withdrawal.get(
+            "status",
+            "pending"
+        ),
+        "providerStatus": withdrawal.get(
+            "providerStatus",
+            withdrawal.get(
+                "flutterwaveStatus",
+                "pending"
+            )
+        )
+    }
 
 
 # ============================================================
@@ -44633,7 +44794,8 @@ def get_flutterwave_transfer(
     "/host/wallet/withdraw/<int:host_id>",
     methods=["POST"]
 )
-def host_withdraw(host_id):
+@host_required
+def host_withdraw(user, host_id):
 
     try:
 
@@ -44641,13 +44803,17 @@ def host_withdraw(host_id):
             silent=True
         ) or {}
 
-
-        # ====================================================
-        # READ REQUEST DATA
-        # ====================================================
+        if int(
+            user.get("id", 0)
+        ) != int(
+            host_id
+        ):
+            return jsonify({
+                "success": False,
+                "message": "You are not authorized to withdraw from this host wallet."
+            }), 403
 
         try:
-
             amount = int(
                 data.get(
                     "amount",
@@ -44655,14 +44821,11 @@ def host_withdraw(host_id):
                 )
                 or 0
             )
-
         except (
             TypeError,
             ValueError
         ):
-
             amount = 0
-
 
         method = str(
             data.get(
@@ -44672,7 +44835,6 @@ def host_withdraw(host_id):
             or ""
         ).strip()
 
-
         account = str(
             data.get(
                 "account",
@@ -44681,356 +44843,153 @@ def host_withdraw(host_id):
             or ""
         ).strip()
 
-
-        # ====================================================
-        # VALIDATE AMOUNT
-        # ====================================================
+        idempotency_key = str(
+            data.get(
+                "idempotencyKey",
+                data.get(
+                    "idempotency_key",
+                    ""
+                )
+            )
+            or ""
+        ).strip()
 
         if amount <= 0:
-
             return jsonify({
-
-                "success":
-                    False,
-
-                "message":
-                    "Enter a valid withdrawal amount."
-
+                "success": False,
+                "message": "Enter a valid withdrawal amount."
             }), 400
 
-
-        # ====================================================
-        # VALIDATE METHOD
-        # ====================================================
-
-        allowed_methods = {
-
-            "MTN Mobile Money",
-
-            "Airtel Mobile Money",
-
-            "Bank Account"
-
-        }
-
-
-        if method not in allowed_methods:
-
+        if not method:
             return jsonify({
-
-                "success":
-                    False,
-
-                "message":
-                    "Unsupported withdrawal method."
-
+                "success": False,
+                "message": "Withdrawal method is required."
             }), 400
 
-
-        # ====================================================
-        # VALIDATE ACCOUNT
-        # ====================================================
+        try:
+            method_name, _ = normalize_payout_method(method)
+        except ValueError:
+            return jsonify({
+                "success": False,
+                "message": "Unsupported withdrawal method."
+            }), 400
 
         if not account:
-
             return jsonify({
-
-                "success":
-                    False,
-
-                "message":
-                    "Withdrawal account is required."
-
+                "success": False,
+                "message": "Withdrawal account is required."
             }), 400
 
+        with eventwaa_file_lock("host_wallet_finalization"):
+            wallets = load_host_wallets()
+            wallet = None
 
-        # ====================================================
-        # LOAD HOST WALLETS
-        # ====================================================
+            for candidate in wallets:
+                try:
+                    if int(candidate.get("hostId", 0)) == int(host_id):
+                        wallet = candidate
+                        break
+                except (TypeError, ValueError):
+                    continue
 
-        wallets = load_host_wallets()
-
-
-        # ====================================================
-        # FIND HOST WALLET
-        # ====================================================
-
-        for wallet in wallets:
-
-            try:
-
-                wallet_host_id = int(
-                    wallet.get(
-                        "hostId",
-                        0
-                    )
-                )
-
-            except (
-                TypeError,
-                ValueError
-            ):
-
-                wallet_host_id = 0
-
-
-            if wallet_host_id != host_id:
-
-                continue
-
-
-            # =================================================
-            # READ AVAILABLE BALANCE
-            # =================================================
+            if not wallet:
+                return jsonify({
+                    "success": False,
+                    "message": "Host wallet not found."
+                }), 404
 
             available_balance = int(
-
-                wallet.get(
-                    "availableBalance",
-                    0
-                )
-                or 0
-
+                wallet.get("availableBalance", 0) or 0
             )
-
-
-            # =================================================
-            # CHECK SUFFICIENT BALANCE
-            # =================================================
 
             if amount > available_balance:
-
                 return jsonify({
-
-                    "success":
-                        False,
-
-                    "message":
-                        "Insufficient balance."
-
+                    "success": False,
+                    "message": "Insufficient balance."
                 }), 400
 
+            if idempotency_key:
+                existing = get_existing_withdrawal_for_idempotency(wallet, idempotency_key)
+                if existing:
+                    same_request = (
+                        int(existing.get("amount", 0) or 0) == amount and
+                        str(existing.get("method", "")).strip() == method_name and
+                        str(existing.get("account", "")).strip() == account
+                    )
+                    if same_request:
+                        return jsonify({
+                            "success": True,
+                            "duplicate": True,
+                            "message": "Withdrawal already submitted.",
+                            "withdrawal": existing,
+                            "wallet": wallet
+                        }), 200
+                    return jsonify({
+                        "success": False,
+                        "message": "This idempotency key was already used for a different withdrawal request.",
+                        "existingWithdrawal": existing
+                    }), 409
 
-            # =================================================
-            # GENERATE WITHDRAWAL ID
-            #
-            # Keep the existing ID system for now so we don't
-            # break existing wallet transactions.
-            # =================================================
-
-            existing_withdrawals = (
-                wallet.get(
-                    "withdrawals",
-                    []
-                )
-                or []
+            existing_withdrawals = wallet.get("withdrawals", []) or []
+            withdrawal_id = len(existing_withdrawals) + 1
+            withdrawal_reference = (
+                f"HOST-WD-{host_id}-{int(datetime.now().timestamp() * 1000)}-{withdrawal_id}"
             )
-
 
             withdrawal = {
-
-                "id":
-                    len(
-                        existing_withdrawals
-                    ) + 1,
-
-                "amount":
-                    amount,
-
-                "method":
-                    method,
-
-                "account":
-                    account,
-
-                "status":
-                    "pending",
-
-                "date":
-                    datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    )
-
+                "id": withdrawal_id,
+                "reference": withdrawal_reference,
+                "amount": amount,
+                "method": method_name,
+                "account": account,
+                "status": "pending",
+                "providerStatus": "pending",
+                "idempotencyKey": idempotency_key or withdrawal_reference,
+                "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
 
-
-            # =================================================
-            # RESERVE THE MONEY
-            #
-            # availableBalance → pendingPayouts
-            # =================================================
-
-            wallet["availableBalance"] = (
-
-                available_balance
-                -
-                amount
-
-            )
-
-
-            wallet["pendingPayouts"] = (
-
-                int(
-                    wallet.get(
-                        "pendingPayouts",
-                        0
-                    )
-                    or 0
-                )
-                +
-                amount
-
-            )
-
-
-            # =================================================
-            # ADD WITHDRAWAL
-            # =================================================
-
-            wallet.setdefault(
-                "withdrawals",
-                []
-            ).append(
-                withdrawal
-            )
-
-
-            # =================================================
-            # ADD WALLET TRANSACTION
-            # =================================================
-
-            wallet.setdefault(
-                "transactions",
-                []
-            ).append({
-
-                "id":
-                    f"withdrawal_{withdrawal['id']}",
-
-                "type":
-                    "withdrawal",
-
-                "description":
-                    "Withdrawal request",
-
-                "amount":
-                    -amount,
-
-                "method":
-                    method,
-
-                "date":
-                    withdrawal["date"],
-
-                "status":
-                    "pending"
-
+            wallet["availableBalance"] = available_balance - amount
+            wallet["pendingPayouts"] = int(wallet.get("pendingPayouts", 0) or 0) + amount
+            wallet.setdefault("withdrawals", []).append(withdrawal)
+            wallet.setdefault("transactions", []).append({
+                "id": f"withdrawal_{withdrawal_id}",
+                "type": "withdrawal",
+                "description": "Withdrawal request",
+                "amount": -amount,
+                "method": method_name,
+                "date": withdrawal["date"],
+                "status": "pending"
             })
+            save_host_wallets(wallets)
 
+        create_notification(
+            host_id,
+            "Withdrawal Request Submitted",
+            f"Your withdrawal request of UGX {amount:,} has been submitted.",
+            "withdrawal",
+            "/host-wallet"
+        )
 
-            # =================================================
-            # SAVE WALLET
-            # =================================================
-
-            save_host_wallets(
-                wallets
-            )
-
-
-            # =================================================
-            # NOTIFY HOST
-            # =================================================
-
-            create_notification(
-
-                host_id,
-
-                "Withdrawal Request Submitted",
-
-                (
-                    f"Your withdrawal request "
-                    f"of UGX {amount:,} "
-                    f"has been submitted."
-                ),
-
-                "withdrawal",
-
-                "/host-wallet"
-
-            )
-
-
-            # =================================================
-            # NOTIFY ADMIN
-            # =================================================
-
-            create_notification(
-
-                "admin",
-
-                "New Withdrawal Request",
-
-                (
-                    f"A host requested "
-                    f"UGX {amount:,} withdrawal."
-                ),
-
-                "admin_withdrawal",
-
-                "/admin/withdrawals"
-
-            )
-
-
-            # =================================================
-            # RESPONSE
-            # =================================================
-
-            return jsonify({
-
-                "success":
-                    True,
-
-                "message":
-                    "Withdrawal request submitted.",
-
-                "wallet":
-                    wallet
-
-            }), 200
-
-
-        # ====================================================
-        # HOST WALLET NOT FOUND
-        # ====================================================
-
-        return jsonify({
-
-            "success":
-                False,
-
-            "message":
-                "Host wallet not found."
-
-        }), 404
-
-
-    except Exception as e:
-
-        print(
-            "HOST WITHDRAW ERROR:",
-            str(e)
+        create_notification(
+            "admin",
+            "New Withdrawal Request",
+            f"A host requested UGX {amount:,} withdrawal.",
+            "admin_withdrawal",
+            "/admin/withdrawals"
         )
 
         return jsonify({
+            "success": True,
+            "message": "Withdrawal request submitted.",
+            "withdrawal": withdrawal,
+            "wallet": wallet
+        }), 200
 
-            "success":
-                False,
-
-            "message":
-                "Unable to process withdrawal."
-
+    except Exception as e:
+        print("HOST WITHDRAW ERROR:", str(e))
+        return jsonify({
+            "success": False,
+            "message": "Unable to process withdrawal."
         }), 500
 
 
@@ -45065,104 +45024,195 @@ def withdraw_wallet():
         silent=True
     ) or {}
 
-
-    amount = int(
-        data.get(
-            "amount",
-            0
+    try:
+        amount = int(
+            data.get(
+                "amount",
+                0
+            ) or 0
         )
-    )
+    except (TypeError, ValueError):
+        amount = 0
 
+    method = str(
+        data.get(
+            "method",
+            ""
+        ) or ""
+    ).strip()
 
-    method = data.get(
-        "method"
-    )
+    account = str(
+        data.get(
+            "account",
+            ""
+        ) or ""
+    ).strip()
 
-
-    account = data.get(
-        "account"
-    )
-
-
-    wallet = load_wallet()
-
+    idempotency_key = str(
+        data.get(
+            "idempotencyKey",
+            data.get(
+                "idempotency_key",
+                ""
+            )
+        ) or ""
+    ).strip()
 
     if amount <= 0:
-
         return jsonify({
             "success": False,
             "message": "Enter a valid amount"
         }), 400
 
-
-    if amount > wallet.get(
-        "availableBalance",
-        0
-    ):
-
+    try:
+        method_name, _ = normalize_payout_method(method)
+    except ValueError:
         return jsonify({
             "success": False,
-            "message": "Insufficient balance"
+            "message": "Unsupported withdrawal method."
         }), 400
 
+    if not account:
+        return jsonify({
+            "success": False,
+            "message": "Withdrawal account is required."
+        }), 400
 
-    withdrawal = {
+    with eventwaa_file_lock("admin_wallet_finalization"):
+        wallet = load_wallet()
 
-        "id": len(
-            wallet.get(
-                "withdrawals",
-                []
-            )
-        ) + 1,
+        if idempotency_key:
+            existing = get_existing_withdrawal_for_idempotency(wallet, idempotency_key)
+            if existing:
+                same_request = (
+                    int(existing.get("amount", 0) or 0) == amount and
+                    str(existing.get("method", "")).strip() == method_name and
+                    str(existing.get("account", "")).strip() == account
+                )
+                if same_request:
+                    return jsonify({
+                        "success": True,
+                        "duplicate": True,
+                        "message": "Withdrawal already submitted.",
+                        "withdrawal": existing,
+                        "wallet": wallet
+                    }), 200
+                return jsonify({
+                    "success": False,
+                    "message": "This idempotency key was already used for a different withdrawal request.",
+                    "existingWithdrawal": existing
+                }), 409
 
-        "amount": amount,
+        if amount > wallet.get("availableBalance", 0):
+            return jsonify({
+                "success": False,
+                "message": "Insufficient balance"
+            }), 400
 
-        "method": method,
+        existing_withdrawals = wallet.get("withdrawals", []) or []
+        withdrawal_id = len(existing_withdrawals) + 1
+        reference = f"ADMIN-WD-{int(datetime.now().timestamp() * 1000)}-{withdrawal_id}"
+        withdrawal = {
+            "id": withdrawal_id,
+            "reference": reference,
+            "amount": amount,
+            "method": method_name,
+            "account": account,
+            "status": "pending",
+            "providerStatus": "pending",
+            "idempotencyKey": idempotency_key or reference,
+            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
 
-        "account": account,
+        wallet["availableBalance"] = int(wallet.get("availableBalance", 0) or 0) - amount
+        wallet["pendingPayouts"] = int(wallet.get("pendingPayouts", 0) or 0) + amount
+        wallet.setdefault("withdrawals", []).append(withdrawal)
+        wallet.setdefault("transactions", []).append({
+            "id": f"withdrawal_{withdrawal_id}",
+            "type": "withdrawal",
+            "description": "Admin withdrawal request",
+            "amount": -amount,
+            "method": method_name,
+            "date": withdrawal["date"],
+            "status": "pending"
+        })
+        save_wallet(wallet)
 
-        "status": "completed",
-
-        "date": datetime.now().strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
-
-    }
-
-
-    wallet["availableBalance"] -= amount
-
-    wallet["totalWithdrawn"] = (
-        wallet.get(
-            "totalWithdrawn",
-            0
-        )
-        + amount
+    transfer_result = create_flutterwave_transfer(
+        amount,
+        method_name,
+        account,
+        beneficiary_name="EventWaa Admin",
+        reference=reference
     )
 
+    if transfer_result.get("success"):
+        transfer_id = transfer_result.get("transferId")
+        provider_status = str(transfer_result.get("status", "PENDING")).upper()
+        if not transfer_id:
+            return jsonify({
+                "success": False,
+                "message": "Flutterwave did not return a transfer ID.",
+                "provider": transfer_result
+            }), 502
 
-    wallet.setdefault(
-        "withdrawals",
-        []
-    ).append(
-        withdrawal
-    )
+        with eventwaa_file_lock("admin_wallet_finalization"):
+            wallet = load_wallet()
+            for existing in wallet.get("withdrawals", []):
+                if str(existing.get("reference", "")) == str(reference):
+                    existing["flutterwaveTransferId"] = transfer_id
+                    existing["transferReference"] = transfer_result.get("reference", reference)
+                    existing["flutterwaveStatus"] = provider_status
+                    existing["providerStatus"] = provider_status
+                    existing["status"] = "processing"
+                    existing["providerAttemptedAt"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    break
+            save_wallet(wallet)
 
+        return jsonify({
+            "success": True,
+            "message": "Admin withdrawal submitted for processing.",
+            "status": "processing",
+            "withdrawal": existing,
+            "wallet": wallet
+        }), 200
 
-    save_wallet(
-        wallet
-    )
+    if transfer_result.get("message") and "Unable to connect" in str(transfer_result.get("message")):
+        with eventwaa_file_lock("admin_wallet_finalization"):
+            wallet = load_wallet()
+            for existing in wallet.get("withdrawals", []):
+                if str(existing.get("reference", "")) == str(reference):
+                    existing["providerStatus"] = "unknown"
+                    existing["status"] = "processing"
+                    existing["failureReason"] = transfer_result.get("message")
+                    break
+            save_wallet(wallet)
+        return jsonify({
+            "success": True,
+            "message": "Flutterwave request is still being reconciled.",
+            "status": "processing",
+            "provider": transfer_result
+        }), 202
 
+    with eventwaa_file_lock("admin_wallet_finalization"):
+        wallet = load_wallet()
+        for existing in wallet.get("withdrawals", []):
+            if str(existing.get("reference", "")) == str(reference):
+                wallet["pendingPayouts"] = max(0, int(wallet.get("pendingPayouts", 0) or 0) - amount)
+                wallet["availableBalance"] = int(wallet.get("availableBalance", 0) or 0) + amount
+                existing["status"] = "failed"
+                existing["providerStatus"] = "failed"
+                existing["accountingFinalized"] = True
+                existing["failureReason"] = transfer_result.get("message") or "Flutterwave transfer failed."
+                break
+        save_wallet(wallet)
 
     return jsonify({
-
-        "success": True,
-
-        "message": "Withdrawal request submitted",
-
+        "success": False,
+        "message": "Withdrawal failed and the funds were restored.",
+        "status": "failed",
         "wallet": wallet
-
-    })
+    }), 400
 
 # ============================================================
 # MESSAGING SYSTEM
@@ -46569,6 +46619,72 @@ def get_flutterwave_transfer_status(
 #   status-check route from processing the same withdrawal twice.
 # ============================================================
 
+def apply_withdrawal_finalization(
+    wallet,
+    withdrawal,
+    final_status,
+    flutterwave_transfer_id=None,
+    flutterwave_reference=None,
+    flutterwave_response=None
+):
+
+    if not isinstance(wallet, dict):
+        return {"success": False, "message": "Wallet not found."}
+
+    if not isinstance(withdrawal, dict):
+        return {"success": False, "message": "Withdrawal not found."}
+
+    if withdrawal.get("accountingFinalized", False):
+        return {"success": True, "alreadyFinalized": True, "status": withdrawal.get("status"), "withdrawal": withdrawal}
+
+    if withdrawal.get("status") in ("completed", "failed"):
+        withdrawal["accountingFinalized"] = True
+        return {"success": True, "alreadyFinalized": True, "status": withdrawal.get("status"), "withdrawal": withdrawal}
+
+    amount = int(withdrawal.get("amount", 0) or 0)
+    if amount <= 0:
+        return {"success": False, "message": "Invalid withdrawal amount."}
+
+    if flutterwave_transfer_id:
+        withdrawal["flutterwaveTransferId"] = flutterwave_transfer_id
+    if flutterwave_reference:
+        withdrawal["flutterwaveReference"] = flutterwave_reference
+    if flutterwave_response:
+        withdrawal["flutterwaveResponse"] = flutterwave_response
+
+    if final_status in ("successful", "completed"):
+        withdrawal["status"] = "completed"
+        withdrawal["providerStatus"] = "successful"
+        withdrawal["completedAt"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        wallet["pendingPayouts"] = max(0, int(wallet.get("pendingPayouts", 0) or 0) - amount)
+        wallet["totalWithdrawn"] = int(wallet.get("totalWithdrawn", 0) or 0) + amount
+        for transaction in wallet.get("transactions", []):
+            if str(transaction.get("id", "")) == str(f"withdrawal_{withdrawal.get('id', '')}"):
+                transaction["status"] = "completed"
+                transaction["completedAt"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                transaction["flutterwaveTransferId"] = withdrawal.get("flutterwaveTransferId")
+                break
+        withdrawal["accountingFinalized"] = True
+        return {"success": True, "status": "completed", "withdrawal": withdrawal, "wallet": wallet}
+
+    if final_status == "failed":
+        withdrawal["status"] = "failed"
+        withdrawal["providerStatus"] = "failed"
+        withdrawal["failedAt"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        wallet["pendingPayouts"] = max(0, int(wallet.get("pendingPayouts", 0) or 0) - amount)
+        wallet["availableBalance"] = int(wallet.get("availableBalance", 0) or 0) + amount
+        for transaction in wallet.get("transactions", []):
+            if str(transaction.get("id", "")) == str(f"withdrawal_{withdrawal.get('id', '')}"):
+                transaction["status"] = "failed"
+                transaction["failedAt"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                transaction["flutterwaveTransferId"] = withdrawal.get("flutterwaveTransferId")
+                break
+        withdrawal["accountingFinalized"] = True
+        return {"success": True, "status": "failed", "withdrawal": withdrawal, "wallet": wallet}
+
+    return {"success": False, "message": "Invalid withdrawal final status."}
+
+
 def finalize_host_withdrawal(
     host_id,
     withdrawal_id,
@@ -46578,530 +46694,89 @@ def finalize_host_withdrawal(
     flutterwave_response=None
 ):
 
-    wallets = load_host_wallets()
+    with eventwaa_file_lock("host_wallet_finalization"):
+        wallets = load_host_wallets()
 
-
-    for wallet in wallets:
-
-        try:
-
-            wallet_host_id = int(
-                wallet.get(
-                    "hostId",
-                    0
-                )
-            )
-
-        except (
-            TypeError,
-            ValueError
-        ):
-
-            wallet_host_id = 0
-
-
-        if wallet_host_id != int(
-            host_id
-        ):
-
-            continue
-
-
-        for withdrawal in wallet.get(
-            "withdrawals",
-            []
-        ):
-
+        for wallet in wallets:
             try:
+                wallet_host_id = int(wallet.get("hostId", 0))
+            except (TypeError, ValueError):
+                wallet_host_id = 0
 
-                current_id = int(
-                    withdrawal.get(
-                        "id",
-                        0
-                    )
-                )
-
-            except (
-                TypeError,
-                ValueError
-            ):
-
-                current_id = 0
-
-
-            if current_id != int(
-                withdrawal_id
-            ):
-
+            if wallet_host_id != int(host_id):
                 continue
 
+            for withdrawal in wallet.get("withdrawals", []):
+                try:
+                    current_id = int(withdrawal.get("id", 0))
+                except (TypeError, ValueError):
+                    current_id = 0
 
-            # =================================================
-            # PROTECT AGAINST DOUBLE FINALIZATION
-            # =================================================
+                if current_id != int(withdrawal_id):
+                    continue
 
-            if withdrawal.get(
-                "accountingFinalized",
-                False
-            ):
-
-                return {
-
-                    "success":
-                        True,
-
-                    "alreadyFinalized":
-                        True,
-
-                    "status":
-                        withdrawal.get(
-                            "status"
-                        ),
-
-                    "withdrawal":
-                        withdrawal
-
-                }
-
-
-            # =================================================
-            # SECOND SAFETY CHECK
-            # =================================================
-
-            if withdrawal.get(
-                "status"
-            ) in (
-                "completed",
-                "failed"
-            ):
-
-                withdrawal[
-                    "accountingFinalized"
-                ] = True
-
-
-                save_host_wallets(
-                    wallets
+                result = apply_withdrawal_finalization(
+                    wallet,
+                    withdrawal,
+                    final_status,
+                    flutterwave_transfer_id=flutterwave_transfer_id,
+                    flutterwave_reference=flutterwave_reference,
+                    flutterwave_response=flutterwave_response
                 )
 
+                if result.get("success"):
+                    save_host_wallets(wallets)
+                    if result.get("status") == "completed":
+                        create_notification(host_id, "Withdrawal Completed", f"Your UGX {int(withdrawal.get('amount', 0) or 0):,} withdrawal has been successfully processed.", "withdrawal_completed", "/host-wallet")
+                    elif result.get("status") == "failed":
+                        create_notification(host_id, "Withdrawal Failed", f"Your UGX {int(withdrawal.get('amount', 0) or 0):,} withdrawal could not be completed. The money has been returned to your available balance.", "withdrawal_failed", "/host-wallet")
+                    return result
 
-                return {
+                return result
 
-                    "success":
-                        True,
-
-                    "alreadyFinalized":
-                        True,
-
-                    "status":
-                        withdrawal.get(
-                            "status"
-                        ),
-
-                    "withdrawal":
-                        withdrawal
-
-                }
+        return {"success": False, "message": "Withdrawal not found."}
 
 
-            # =================================================
-            # GET AMOUNT
-            # =================================================
+def finalize_admin_withdrawal(
+    withdrawal_id,
+    final_status,
+    flutterwave_transfer_id=None,
+    flutterwave_reference=None,
+    flutterwave_response=None
+):
 
-            amount = int(
+    with eventwaa_file_lock("admin_wallet_finalization"):
+        wallet = load_wallet()
 
-                withdrawal.get(
-                    "amount",
-                    0
-                )
-                or 0
+        for withdrawal in wallet.get("withdrawals", []):
+            try:
+                current_id = int(withdrawal.get("id", 0))
+            except (TypeError, ValueError):
+                current_id = 0
 
+            if current_id != int(withdrawal_id):
+                continue
+
+            result = apply_withdrawal_finalization(
+                wallet,
+                withdrawal,
+                final_status,
+                flutterwave_transfer_id=flutterwave_transfer_id,
+                flutterwave_reference=flutterwave_reference,
+                flutterwave_response=flutterwave_response
             )
 
-
-            if amount <= 0:
-
-                return {
-
-                    "success":
-                        False,
-
-                    "message":
-                        "Invalid withdrawal amount."
-
-                }
-
-
-            # =================================================
-            # STORE FLUTTERWAVE INFORMATION
-            # =================================================
-
-            if flutterwave_transfer_id:
-
-                withdrawal[
-                    "flutterwaveTransferId"
-                ] = flutterwave_transfer_id
-
-
-            if flutterwave_reference:
-
-                withdrawal[
-                    "flutterwaveReference"
-                ] = flutterwave_reference
-
-
-            if flutterwave_response:
-
-                withdrawal[
-                    "flutterwaveResponse"
-                ] = flutterwave_response
-
-
-            # =================================================
-            # SUCCESSFUL
-            # =================================================
-
-            if final_status == "successful":
-
-                withdrawal["status"] = (
-                    "completed"
-                )
-
-
-                withdrawal["completedAt"] = (
-                    datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    )
-                )
-
-
-                # ---------------------------------------------
-                # REMOVE FROM PENDING PAYOUTS
-                # ---------------------------------------------
-
-                wallet["pendingPayouts"] = max(
-
-                    0,
-
-                    int(
-                        wallet.get(
-                            "pendingPayouts",
-                            0
-                        )
-                        or 0
-                    )
-                    -
-                    amount
-
-                )
-
-
-                # ---------------------------------------------
-                # ADD TO TOTAL WITHDRAWN
-                # ---------------------------------------------
-
-                wallet["totalWithdrawn"] = (
-
-                    int(
-                        wallet.get(
-                            "totalWithdrawn",
-                            0
-                        )
-                        or 0
-                    )
-                    +
-                    amount
-
-                )
-
-
-                # ---------------------------------------------
-                # UPDATE TRANSACTION
-                # ---------------------------------------------
-
-                transaction_found = False
-
-
-                for transaction in wallet.get(
-                    "transactions",
-                    []
-                ):
-
-                    if str(
-                        transaction.get(
-                            "id",
-                            ""
-                        )
-                    ) == str(
-                        f"withdrawal_{withdrawal_id}"
-                    ):
-
-                        transaction["status"] = (
-                            "completed"
-                        )
-
-                        transaction[
-                            "completedAt"
-                        ] = datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        )
-
-
-                        transaction[
-                            "flutterwaveTransferId"
-                        ] = withdrawal.get(
-                            "flutterwaveTransferId"
-                        )
-
-
-                        transaction_found = True
-
-                        break
-
-
-                # ---------------------------------------------
-                # MARK ACCOUNTING FINALIZED
-                # ---------------------------------------------
-
-                withdrawal[
-                    "accountingFinalized"
-                ] = True
-
-
-                # ---------------------------------------------
-                # SAVE
-                # ---------------------------------------------
-
-                save_host_wallets(
-                    wallets
-                )
-
-
-                # ---------------------------------------------
-                # NOTIFY HOST
-                # ---------------------------------------------
-
-                create_notification(
-
-                    host_id,
-
-                    "Withdrawal Completed",
-
-                    (
-                        f"Your UGX "
-                        f"{amount:,} withdrawal "
-                        f"has been successfully "
-                        f"processed."
-                    ),
-
-                    "withdrawal_completed",
-
-                    "/host-wallet"
-
-                )
-
-
-                return {
-
-                    "success":
-                        True,
-
-                    "status":
-                        "completed",
-
-                    "withdrawal":
-                        withdrawal,
-
-                    "wallet":
-                        wallet
-
-                }
-
-
-            # =================================================
-            # FAILED
-            # =================================================
-
-            if final_status == "failed":
-
-                withdrawal["status"] = (
-                    "failed"
-                )
-
-
-                withdrawal["failedAt"] = (
-                    datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    )
-                )
-
-
-                # ---------------------------------------------
-                # REMOVE FROM PENDING PAYOUTS
-                # ---------------------------------------------
-
-                wallet["pendingPayouts"] = max(
-
-                    0,
-
-                    int(
-                        wallet.get(
-                            "pendingPayouts",
-                            0
-                        )
-                        or 0
-                    )
-                    -
-                    amount
-
-                )
-
-
-                # ---------------------------------------------
-                # RETURN RESERVED MONEY
-                # ---------------------------------------------
-
-                wallet["availableBalance"] = (
-
-                    int(
-                        wallet.get(
-                            "availableBalance",
-                            0
-                        )
-                        or 0
-                    )
-                    +
-                    amount
-
-                )
-
-
-                # ---------------------------------------------
-                # UPDATE TRANSACTION
-                # ---------------------------------------------
-
-                for transaction in wallet.get(
-                    "transactions",
-                    []
-                ):
-
-                    if str(
-                        transaction.get(
-                            "id",
-                            ""
-                        )
-                    ) == str(
-                        f"withdrawal_{withdrawal_id}"
-                    ):
-
-                        transaction["status"] = (
-                            "failed"
-                        )
-
-                        transaction[
-                            "failedAt"
-                        ] = datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        )
-
-
-                        transaction[
-                            "flutterwaveTransferId"
-                        ] = withdrawal.get(
-                            "flutterwaveTransferId"
-                        )
-
-                        break
-
-
-                # ---------------------------------------------
-                # MARK ACCOUNTING FINALIZED
-                # ---------------------------------------------
-
-                withdrawal[
-                    "accountingFinalized"
-                ] = True
-
-
-                # ---------------------------------------------
-                # SAVE
-                # ---------------------------------------------
-
-                save_host_wallets(
-                    wallets
-                )
-
-
-                # ---------------------------------------------
-                # NOTIFY HOST
-                # ---------------------------------------------
-
-                create_notification(
-
-                    host_id,
-
-                    "Withdrawal Failed",
-
-                    (
-                        f"Your UGX "
-                        f"{amount:,} withdrawal "
-                        f"could not be completed. "
-                        f"The money has been returned "
-                        f"to your available balance."
-                    ),
-
-                    "withdrawal_failed",
-
-                    "/host-wallet"
-
-                )
-
-
-                return {
-
-                    "success":
-                        True,
-
-                    "status":
-                        "failed",
-
-                    "withdrawal":
-                        withdrawal,
-
-                    "wallet":
-                        wallet
-
-                }
-
-
-            # =================================================
-            # UNKNOWN FINAL STATUS
-            # =================================================
-
-            return {
-
-                "success":
-                    False,
-
-                "message":
-                    "Invalid withdrawal final status."
-
-            }
-
-
-    # ========================================================
-    # WITHDRAWAL NOT FOUND
-    # ========================================================
-
-    return {
-
-        "success":
-            False,
-
-        "message":
-            "Withdrawal not found."
-
-    }
+            if result.get("success"):
+                save_wallet(wallet)
+                if result.get("status") == "completed":
+                    create_notification("admin", "Admin Withdrawal Completed", f"An admin payout of UGX {int(withdrawal.get('amount', 0) or 0):,} was successfully completed.", "admin_withdrawal_completed", "/admin/withdrawals")
+                elif result.get("status") == "failed":
+                    create_notification("admin", "Admin Withdrawal Failed", f"An admin payout of UGX {int(withdrawal.get('amount', 0) or 0):,} failed and the funds were restored.", "admin_withdrawal_failed", "/admin/withdrawals")
+                return result
+
+            return result
+
+        return {"success": False, "message": "Withdrawal not found."}
 
 # ============================================================
 # INITIATE FLUTTERWAVE HOST WITHDRAWAL
@@ -47504,471 +47179,96 @@ def approve_host_withdrawal(
 ):
 
     try:
-
-        wallets = load_host_wallets()
-
-        users = load_json_file(
-            "users.json",
-            []
-        )
-
-
-        # ====================================================
-        # FIND HOST
-        # ====================================================
-
-        host = next(
-
-            (
-                user
-
-                for user in users
-
-                if int(
-                    user.get(
-                        "id",
-                        0
-                    )
-                )
-                ==
-                host_id
-
-            ),
-
-            None
-
-        )
-
-
+        users = load_json_file("users.json", [])
+        host = next((user for user in users if int(user.get("id", 0)) == host_id), None)
         if not host:
+            return jsonify({"success": False, "message": "Host not found."}), 404
 
-            return jsonify({
+        with eventwaa_file_lock("host_wallet_finalization"):
+            wallets = load_host_wallets()
+            wallet = None
+            withdrawal = None
+            for candidate in wallets:
+                if int(candidate.get("hostId", 0)) == host_id:
+                    wallet = candidate
+                    for item in candidate.get("withdrawals", []):
+                        if int(item.get("id", 0)) == withdrawal_id:
+                            withdrawal = item
+                            break
+                    break
 
-                "success":
-                    False,
+            if not wallet or not withdrawal:
+                return jsonify({"success": False, "message": "Withdrawal not found."}), 404
 
-                "message":
-                    "Host not found."
+            if withdrawal.get("status") != "pending":
+                return jsonify({"success": False, "message": "This withdrawal has already been processed.", "status": withdrawal.get("status")}), 400
 
-            }), 404
+            if withdrawal.get("flutterwaveTransferId"):
+                return jsonify({"success": False, "message": "Flutterwave transfer already exists.", "flutterwaveTransferId": withdrawal.get("flutterwaveTransferId")}), 409
 
+            amount = int(withdrawal.get("amount", 0) or 0)
+            if amount <= 0:
+                return jsonify({"success": False, "message": "Invalid withdrawal amount."}), 400
 
-        host_name = host.get(
-            "name",
-            "EventWaa Host"
+            if int(wallet.get("pendingPayouts", 0) or 0) < amount:
+                return jsonify({"success": False, "message": "Wallet pending payout balance is inconsistent."}), 400
+
+            withdrawal["status"] = "processing"
+            withdrawal["providerStatus"] = "pending"
+            withdrawal["approvedAt"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            save_host_wallets(wallets)
+
+        transfer_result = initiate_host_flutterwave_transfer(
+            withdrawal,
+            host_id,
+            withdrawal_id,
+            host.get("name", "EventWaa Host")
         )
 
-
-        # ====================================================
-        # FIND HOST WALLET
-        # ====================================================
-
-        for wallet in wallets:
-
-            if int(
-                wallet.get(
-                    "hostId",
-                    0
-                )
-            ) != host_id:
-
-                continue
-
-
-            # =================================================
-            # FIND WITHDRAWAL
-            # =================================================
-
-            for withdrawal in wallet.get(
-                "withdrawals",
-                []
-            ):
-
-                if int(
-                    withdrawal.get(
-                        "id",
-                        0
-                    )
-                ) != withdrawal_id:
-
-                    continue
-
-
-                # =============================================
-                # ONLY PENDING WITHDRAWALS CAN BE APPROVED
-                # =============================================
-
-                if withdrawal.get(
-                    "status"
-                ) != "pending":
-
-                    return jsonify({
-
-                        "success":
-                            False,
-
-                        "message":
-                            (
-                                "This withdrawal "
-                                "has already been processed."
-                            ),
-
-                        "status":
-                            withdrawal.get(
-                                "status"
-                            )
-
-                    }), 400
-
-
-                # =============================================
-                # GET AMOUNT
-                # =============================================
-
-                amount = int(
-
-                    withdrawal.get(
-                        "amount",
-                        0
-                    )
-
-                    or 0
-
-                )
-
-
-                if amount <= 0:
-
-                    return jsonify({
-
-                        "success":
-                            False,
-
-                        "message":
-                            "Invalid withdrawal amount."
-
-                    }), 400
-
-
-                # =============================================
-                # ENSURE PENDING PAYOUT EXISTS
-                # =============================================
-
-                pending_payouts = int(
-
-                    wallet.get(
-                        "pendingPayouts",
-                        0
-                    )
-
-                    or 0
-
-                )
-
-
-                if pending_payouts < amount:
-
-                    return jsonify({
-
-                        "success":
-                            False,
-
-                        "message":
-                            (
-                                "Wallet pending payout "
-                                "balance is inconsistent."
-                            )
-
-                    }), 400
-
-
-                # =============================================
-                # PREVENT DUPLICATE TRANSFER
-                #
-                # IMPORTANT:
-                # We now use ONLY flutterwaveTransferId.
-                # =============================================
-
-                if withdrawal.get(
-                    "flutterwaveTransferId"
-                ):
-
-                    return jsonify({
-
-                        "success":
-                            False,
-
-                        "message":
-                            (
-                                "Flutterwave transfer "
-                                "already exists."
-                            ),
-
-                        "flutterwaveTransferId":
-                            withdrawal.get(
-                                "flutterwaveTransferId"
-                            )
-
-                    }), 409
-
-
-                # =============================================
-                # INITIATE FLUTTERWAVE TRANSFER
-                # =============================================
-
-                transfer_result = (
-                    initiate_host_flutterwave_transfer(
-
-                        withdrawal,
-
-                        host_id,
-
-                        withdrawal_id,
-
-                        host_name
-
-                    )
-                )
-
-
-                if not transfer_result.get(
-                    "success",
-                    False
-                ):
-
-                    return jsonify({
-
-                        "success":
-                            False,
-
-                        "message":
-                            transfer_result.get(
-                                "message",
-                                "Unable to initiate payout."
-                            )
-
-                    }), 400
-
-
-                # =============================================
-                # GET FLUTTERWAVE TRANSFER ID
-                # =============================================
-
-                flutterwave_transfer_id = (
-                    transfer_result.get(
-                        "transferId"
-                    )
-                )
-
-
-                if not flutterwave_transfer_id:
-
-                    return jsonify({
-
-                        "success":
-                            False,
-
-                        "message":
-                            (
-                                "Flutterwave did not "
-                                "return a transfer ID."
-                            )
-
-                    }), 502
-
-
-                # =============================================
-                # STORE FLUTTERWAVE DETAILS
-                #
-                # ONE STANDARD FIELD:
-                #
-                # flutterwaveTransferId
-                # =============================================
-
-                withdrawal[
-                    "flutterwaveTransferId"
-                ] = flutterwave_transfer_id
-
-
-                withdrawal[
-                    "transferReference"
-                ] = (
-
-                    transfer_result.get(
-                        "reference"
-                    )
-
-                )
-
-
-                withdrawal[
-                    "flutterwaveStatus"
-                ] = (
-
-                    transfer_result.get(
-                        "status"
-                    )
-
-                )
-
-
-                # =============================================
-                # PROCESSING
-                # =============================================
-
-                withdrawal["status"] = (
-                    "processing"
-                )
-
-
-                withdrawal["approvedAt"] = (
-                    datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    )
-                )
-
-
-                # =============================================
-                # UPDATE WALLET TRANSACTION
-                # =============================================
-
-                for transaction in wallet.get(
-                    "transactions",
-                    []
-                ):
-
-                    if str(
-                        transaction.get(
-                            "id",
-                            ""
-                        )
-                    ) == str(
-                        f"withdrawal_{withdrawal_id}"
-                    ):
-
-                        transaction["status"] = (
-                            "processing"
-                        )
-
-                        # IMPORTANT:
-                        # Use the SAME field name here.
-                        transaction["flutterwaveTransferId"]= (
-                            withdrawal.get(
-                                "flutterwaveTransferId"
-                            )
-                        )
-
-
-                        transaction[
-                            "approvedAt"
-                        ] = withdrawal.get(
-                            "approvedAt"
-                        )
-
+        if not transfer_result.get("success", False):
+            with eventwaa_file_lock("host_wallet_finalization"):
+                wallets = load_host_wallets()
+                wallet = next((candidate for candidate in wallets if int(candidate.get("hostId", 0)) == host_id), None)
+                if wallet:
+                    for item in wallet.get("withdrawals", []):
+                        if int(item.get("id", 0)) == withdrawal_id:
+                            item["providerStatus"] = "unknown"
+                            item["status"] = "processing"
+                            item["failureReason"] = transfer_result.get("message") or "Flutterwave transfer request was inconclusive."
+                            break
+                    save_host_wallets(wallets)
+            return jsonify({"success": True, "message": transfer_result.get("message", "Flutterwave payout is being reconciled."), "status": "processing"}), 202
+
+        flutterwave_transfer_id = transfer_result.get("transferId")
+        if not flutterwave_transfer_id:
+            return jsonify({"success": False, "message": "Flutterwave did not return a transfer ID."}), 502
+
+        with eventwaa_file_lock("host_wallet_finalization"):
+            wallets = load_host_wallets()
+            wallet = next((candidate for candidate in wallets if int(candidate.get("hostId", 0)) == host_id), None)
+            if wallet:
+                for item in wallet.get("withdrawals", []):
+                    if int(item.get("id", 0)) == withdrawal_id:
+                        item["flutterwaveTransferId"] = flutterwave_transfer_id
+                        item["transferReference"] = transfer_result.get("reference")
+                        item["flutterwaveStatus"] = str(transfer_result.get("flutterwaveStatus", "PENDING")).upper()
+                        item["providerStatus"] = str(transfer_result.get("flutterwaveStatus", "PENDING")).upper()
+                        item["status"] = "processing"
+                        item["approvedAt"] = item.get("approvedAt") or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         break
+                save_host_wallets(wallets)
 
+        create_notification(host_id, "Withdrawal Processing", f"Your UGX {amount:,} withdrawal is now being processed.", "withdrawal_processing", "/host-wallet")
 
-                # =============================================
-                # SAVE WALLET
-                # =============================================
-
-                save_host_wallets(
-                    wallets
-                )
-
-
-                # =============================================
-                # NOTIFY HOST
-                # =============================================
-
-                create_notification(
-
-                    host_id,
-
-                    "Withdrawal Processing",
-
-                    (
-                        f"Your UGX "
-                        f"{amount:,} withdrawal "
-                        f"is now being processed."
-                    ),
-
-                    "withdrawal_processing",
-
-                    "/host-wallet"
-
-                )
-
-
-                # =============================================
-                # RESPONSE
-                # =============================================
-
-                return jsonify({
-
-                    "success":
-                        True,
-
-                    "message":
-                        (
-                            "Withdrawal approved and "
-                            "Flutterwave transfer initiated."
-                        ),
-
-                    "status":
-                        "processing",
-
-                    "flutterwaveTransferId":
-                        flutterwave_transfer_id,
-
-                    "withdrawal":
-                        withdrawal,
-
-                    "wallet":
-                        wallet
-
-                }), 200
-
-
-        # ====================================================
-        # WITHDRAWAL NOT FOUND
-        # ====================================================
-
-        return jsonify({
-
-            "success":
-                False,
-
-            "message":
-                "Withdrawal not found."
-
-        }), 404
-
+        return jsonify({"success": True, "message": "Withdrawal approved and Flutterwave transfer initiated.", "status": "processing", "flutterwaveTransferId": flutterwave_transfer_id, "withdrawal": item if 'item' in locals() else withdrawal, "wallet": wallet}), 200
 
     except Exception as e:
-
-        print(
-            "APPROVE HOST WITHDRAWAL ERROR:",
-            str(e)
-        )
-
-        return jsonify({
-
-            "success":
-                False,
-
-            "message":
-                "Unable to approve withdrawal."
-
-        }), 500
+        print("APPROVE HOST WITHDRAWAL ERROR:", str(e))
+        return jsonify({"success": False, "message": "Unable to approve withdrawal."}), 500
 
 
 # ============================================================
 # FLUTTERWAVE TRANSFER STATUS FALLBACK
-#
-# Used when the Flutterwave webhook has not arrived yet.
-# It checks the actual transfer status directly from
-# Flutterwave.
 # ============================================================
 
 @app.route(
@@ -48237,217 +47537,67 @@ def get_host_withdrawal_transfer_status(
             eventwaa_status = "processing"
 
 
-        # ====================================================
-        # UPDATE WITHDRAWAL STATUS
-        # ====================================================
+        checked_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        target_withdrawal["status"] = (
-            eventwaa_status
-        )
-
-
-        target_withdrawal["flutterwaveStatus"] = (
-            flutterwave_status
-        )
-
-
-        target_withdrawal["lastCheckedAt"] = (
-            datetime.now().strftime(
-                "%Y-%m-%d %H:%M:%S"
+        if eventwaa_status in ("completed", "failed"):
+            finalization = finalize_host_withdrawal(
+                host_id,
+                withdrawal_id,
+                "successful" if eventwaa_status == "completed" else "failed",
+                flutterwave_transfer_id=transfer_id,
+                flutterwave_reference=transfer_data.get("reference"),
+                flutterwave_response=flutterwave_data
             )
-        )
+            if not finalization.get("success"):
+                return jsonify(finalization), 404
 
+            target_withdrawal = finalization.get("withdrawal", target_withdrawal)
+            eventwaa_status = finalization.get("status", eventwaa_status)
+            if not finalization.get("alreadyFinalized"):
+                with eventwaa_file_lock("host_wallet_finalization"):
+                    wallets = load_host_wallets()
+                    for wallet in wallets:
+                        if int(wallet.get("hostId", 0)) != host_id:
+                            continue
+                        for withdrawal in wallet.get("withdrawals", []):
+                            if int(withdrawal.get("id", 0)) == withdrawal_id:
+                                withdrawal["flutterwaveStatus"] = flutterwave_status
+                                withdrawal["lastCheckedAt"] = checked_at
+                                if eventwaa_status == "failed":
+                                    withdrawal["failureReason"] = (
+                                        flutterwave_data.get("message")
+                                        or transfer_data.get("complete_message")
+                                        or "Flutterwave transfer failed."
+                                    )
+                                target_withdrawal = withdrawal
+                                break
+                        save_host_wallets(wallets)
+                        break
+        else:
+            with eventwaa_file_lock("host_wallet_finalization"):
+                wallets = load_host_wallets()
+                target_wallet = None
+                target_withdrawal = None
+                for wallet in wallets:
+                    if int(wallet.get("hostId", 0)) != host_id:
+                        continue
+                    target_wallet = wallet
+                    for withdrawal in wallet.get("withdrawals", []):
+                        if int(withdrawal.get("id", 0)) == withdrawal_id:
+                            target_withdrawal = withdrawal
+                            break
+                    break
 
-        # ====================================================
-        # FINALIZE SUCCESSFUL WITHDRAWAL
-        #
-        # IMPORTANT:
-        # Only finalize totalWithdrawn when the transfer
-        # is actually successful.
-        # ====================================================
+                if not target_wallet or not target_withdrawal:
+                    return jsonify({"success": False, "message": "Withdrawal not found."}), 404
 
-        if eventwaa_status == "completed":
-
-            if not target_withdrawal.get(
-                "accountingFinalized",
-                False
-            ):
-
-                amount = int(
-                    target_withdrawal.get(
-                        "amount",
-                        0
-                    )
-                    or 0
-                )
-
-
-                target_wallet["pendingPayouts"] = max(
-
-                    0,
-
-                    int(
-                        target_wallet.get(
-                            "pendingPayouts",
-                            0
-                        )
-                        or 0
-                    )
-                    -
-                    amount
-
-                )
-
-
-                target_wallet["totalWithdrawn"] = (
-
-                    int(
-                        target_wallet.get(
-                            "totalWithdrawn",
-                            0
-                        )
-                        or 0
-                    )
-                    +
-                    amount
-
-                )
-
-
-                target_withdrawal[
-                    "accountingFinalized"
-                ] = True
-
-
-                target_withdrawal[
-                    "reviewedAt"
-                ] = datetime.now().strftime(
-                    "%Y-%m-%d"
-                )
-
-
-                create_notification(
-
-                    host_id,
-
-                    "Withdrawal Completed",
-
-                    (
-                        f"Your UGX "
-                        f"{amount:,} withdrawal "
-                        f"has been completed."
-                    ),
-
-                    "withdrawal_completed",
-
-                    "/host-wallet"
-
-                )
-
-
-        # ====================================================
-        # FAILED TRANSFER
-        #
-        # Return the amount from pending back to
-        # available balance.
-        # ====================================================
-
-        elif eventwaa_status == "failed":
-
-            if not target_withdrawal.get(
-                "accountingFinalized",
-                False
-            ):
-
-                amount = int(
-                    target_withdrawal.get(
-                        "amount",
-                        0
-                    )
-                    or 0
-                )
-
-
-                target_wallet["pendingPayouts"] = max(
-
-                    0,
-
-                    int(
-                        target_wallet.get(
-                            "pendingPayouts",
-                            0
-                        )
-                        or 0
-                    )
-                    -
-                    amount
-
-                )
-
-
-                target_wallet["availableBalance"] = (
-
-                    int(
-                        target_wallet.get(
-                            "availableBalance",
-                            0
-                        )
-                        or 0
-                    )
-                    +
-                    amount
-
-                )
-
-
-                target_withdrawal[
-                    "accountingFinalized"
-                ] = True
-
-
-                target_withdrawal[
-                    "failureReason"
-                ] = (
-                    flutterwave_data.get(
-                        "message"
-                    )
-                    or
-                    transfer_data.get(
-                        "complete_message"
-                    )
-                    or
-                    "Flutterwave transfer failed."
-                )
-
-
-                create_notification(
-
-                    host_id,
-
-                    "Withdrawal Failed",
-
-                    (
-                        f"Your UGX "
-                        f"{amount:,} withdrawal "
-                        f"could not be completed. "
-                        f"The funds have been returned "
-                        f"to your available balance."
-                    ),
-
-                    "withdrawal_failed",
-
-                    "/host-wallet"
-
-                )
-
-
-        # ====================================================
-        # SAVE
-        # ====================================================
-
-        save_host_wallets(
-            wallets
-        )
+                if not target_withdrawal.get("accountingFinalized") and target_withdrawal.get("status") not in ("completed", "failed"):
+                    target_withdrawal["status"] = "processing"
+                    target_withdrawal["providerStatus"] = flutterwave_status or "processing"
+                target_withdrawal["flutterwaveStatus"] = flutterwave_status
+                target_withdrawal["lastCheckedAt"] = checked_at
+                eventwaa_status = target_withdrawal.get("status", "processing")
+                save_host_wallets(wallets)
 
 
         # ====================================================
@@ -48633,65 +47783,61 @@ def flutterwave_transfer_webhook():
 
 
         # ====================================================
-        # FIND HOST WITHDRAWAL
+        # FIND HOST OR ADMIN WITHDRAWAL
         # ====================================================
 
         wallets = load_host_wallets()
+        admin_wallet = load_wallet()
 
-
+        matched_kind = None
         matched_host_id = None
         matched_withdrawal_id = None
 
-
         for wallet in wallets:
+            for withdrawal in wallet.get("withdrawals", []):
+                saved_transfer_id = str(withdrawal.get("flutterwaveTransferId", ""))
+                saved_transfer_reference = str(withdrawal.get("transferReference", ""))
+                withdrawal_reference = str(withdrawal.get("reference", ""))
+                webhook_reference = str(transfer.get("reference", ""))
 
-            for withdrawal in wallet.get(
-                "withdrawals",
-                []
-            ):
-
-                saved_transfer_id = str(
-
-                    withdrawal.get(
-                        "flutterwaveTransferId",
-                        ""
+                if (
+                    saved_transfer_id == str(transfer_id)
+                    or (
+                        bool(webhook_reference)
+                        and webhook_reference in (withdrawal_reference, saved_transfer_reference)
                     )
-
-                )
-
-
-                if saved_transfer_id == str(
-                    transfer_id
                 ):
-
-                    matched_host_id = int(
-                        wallet.get(
-                            "hostId",
-                            0
-                        )
-                    )
-
-                    matched_withdrawal_id = int(
-                        withdrawal.get(
-                            "id",
-                            0
-                        )
-                    )
-
+                    matched_kind = "host"
+                    matched_host_id = int(wallet.get("hostId", 0))
+                    matched_withdrawal_id = int(withdrawal.get("id", 0))
                     break
 
-
-            if matched_host_id is not None:
-
+            if matched_kind is not None:
                 break
 
+        if matched_kind is None:
+            for withdrawal in admin_wallet.get("withdrawals", []):
+                saved_transfer_id = str(withdrawal.get("flutterwaveTransferId", ""))
+                saved_transfer_reference = str(withdrawal.get("transferReference", ""))
+                withdrawal_reference = str(withdrawal.get("reference", ""))
+                webhook_reference = str(transfer.get("reference", ""))
+
+                if (
+                    saved_transfer_id == str(transfer_id)
+                    or (
+                        bool(webhook_reference)
+                        and webhook_reference in (withdrawal_reference, saved_transfer_reference)
+                    )
+                ):
+                    matched_kind = "admin"
+                    matched_withdrawal_id = int(withdrawal.get("id", 0))
+                    break
 
         # ====================================================
         # UNKNOWN TRANSFER
         # ====================================================
 
-        if matched_host_id is None:
-
+        if matched_kind is None:
             print(
                 "UNKNOWN FLUTTERWAVE TRANSFER:",
                 transfer_id
@@ -48714,30 +47860,25 @@ def flutterwave_transfer_webhook():
 
         if transfer_status == "SUCCESSFUL":
 
-            result = finalize_host_withdrawal(
+            if matched_kind == "host":
+                result = finalize_host_withdrawal(
+                    matched_host_id,
+                    matched_withdrawal_id,
+                    "successful",
+                    flutterwave_transfer_id=transfer_id,
+                    flutterwave_reference=transfer.get("reference"),
+                    flutterwave_response=data
+                )
+            else:
+                result = finalize_admin_withdrawal(
+                    matched_withdrawal_id,
+                    "successful",
+                    flutterwave_transfer_id=transfer_id,
+                    flutterwave_reference=transfer.get("reference"),
+                    flutterwave_response=data
+                )
 
-                matched_host_id,
-
-                matched_withdrawal_id,
-
-                "successful",
-
-                flutterwave_transfer_id=
-                    transfer_id,
-
-                flutterwave_reference=
-                    transfer.get(
-                        "reference"
-                    ),
-
-                flutterwave_response=
-                    data
-
-            )
-
-            return jsonify(
-                result
-            ), 200
+            return jsonify(result), 200
 
 
         # ====================================================
@@ -48746,30 +47887,25 @@ def flutterwave_transfer_webhook():
 
         if transfer_status == "FAILED":
 
-            result = finalize_host_withdrawal(
+            if matched_kind == "host":
+                result = finalize_host_withdrawal(
+                    matched_host_id,
+                    matched_withdrawal_id,
+                    "failed",
+                    flutterwave_transfer_id=transfer_id,
+                    flutterwave_reference=transfer.get("reference"),
+                    flutterwave_response=data
+                )
+            else:
+                result = finalize_admin_withdrawal(
+                    matched_withdrawal_id,
+                    "failed",
+                    flutterwave_transfer_id=transfer_id,
+                    flutterwave_reference=transfer.get("reference"),
+                    flutterwave_response=data
+                )
 
-                matched_host_id,
-
-                matched_withdrawal_id,
-
-                "failed",
-
-                flutterwave_transfer_id=
-                    transfer_id,
-
-                flutterwave_reference=
-                    transfer.get(
-                        "reference"
-                    ),
-
-                flutterwave_response=
-                    data
-
-            )
-
-            return jsonify(
-                result
-            ), 200
+            return jsonify(result), 200
 
 
         # ====================================================
@@ -48844,6 +47980,11 @@ def verify_host_withdrawal(
     host_id,
     withdrawal_id
 ):
+
+    return get_host_withdrawal_transfer_status(
+        host_id,
+        withdrawal_id
+    )
 
     try:
 
