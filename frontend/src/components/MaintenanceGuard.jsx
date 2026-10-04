@@ -22,100 +22,145 @@ function MaintenanceGuard({ children }) {
         useState(true);
 
     /* ========================================================
-       ROUTE CHECKS
+       CURRENT ROUTE
     ======================================================== */
 
-    /*
-     * Admin must always be able to access
-     * the dashboard.
-     */
+    const pathname = location.pathname;
+
+    /* ========================================================
+       ADMIN ROUTES
+       
+       All admin routes must remain accessible while
+       maintenance mode is enabled.
+
+       This includes:
+       - Admin login gate
+       - Admin password recovery
+       - Admin dashboard
+       - Admin team portal
+       - Admin team login
+       - Admin team scanner
+       - Admin team lookup
+       - All /admin/* pages
+    ======================================================== */
 
     const isAdminRoute =
-        location.pathname.startsWith("/admin");
+        pathname === "/eventwaa-control" ||
+        pathname.startsWith("/admin");
 
-    /*
-     * Login and register must remain available.
-     * Otherwise users could be completely locked out.
-     */
+    /* ========================================================
+       NORMAL USER AUTH ROUTES
 
-    const isAuthRoute =
-        location.pathname === "/login" ||
-        location.pathname === "/register";
+       Users must still be able to log in/register so that
+       maintenance mode does not create an unnecessary
+       authentication dead-end.
+    ======================================================== */
+
+    const isUserAuthRoute =
+        pathname === "/login" ||
+        pathname === "/register";
+
+    /* ========================================================
+       ROUTES THAT BYPASS MAINTENANCE
+    ======================================================== */
+
+    const bypassMaintenance =
+        isAdminRoute ||
+        isUserAuthRoute;
 
     /* ========================================================
        CHECK MAINTENANCE STATUS
     ======================================================== */
 
     useEffect(() => {
+
         /*
-         * Never block the admin dashboard.
+         * Admin routes and authentication routes are NEVER
+         * blocked by maintenance mode.
          */
 
-        if (
-            isAdminRoute ||
-            isAuthRoute
-        ) {
+        if (bypassMaintenance) {
+
             setMaintenance(false);
             setChecking(false);
+
             return;
         }
 
         const checkMaintenance =
             async () => {
+
                 try {
+
+                    /* ====================================================
+                       CHECK BACKEND URL
+                    ==================================================== */
+
                     if (!BACKEND_URL) {
+
                         console.error(
                             "VITE_API_BASE_URL is not configured."
                         );
 
                         /*
-                         * If the API URL is missing,
-                         * don't put the whole site
-                         * into maintenance mode.
+                         * Do not lock the entire application if the
+                         * API URL is missing.
                          */
 
                         setMaintenance(false);
+                        setChecking(false);
+
                         return;
                     }
+
+                    /* ====================================================
+                       REQUEST PLATFORM SETTINGS
+                    ==================================================== */
 
                     const response =
                         await fetch(
                             `${BACKEND_URL}/admin/settings`
                         );
 
-                    /*
-                     * Settings endpoint should
-                     * normally return 200.
-                     */
+                    /* ====================================================
+                       SUCCESSFUL RESPONSE
+                    ==================================================== */
 
                     if (response.ok) {
+
                         const data =
                             await response.json();
 
                         setMaintenance(
                             data?.maintenanceMode === true
                         );
+
                     } else {
+
                         /*
-                         * If the settings endpoint
-                         * itself is unavailable,
-                         * don't automatically put
-                         * the whole frontend into
-                         * maintenance mode.
+                         * If the settings endpoint cannot be reached,
+                         * fail open rather than accidentally locking
+                         * the entire website.
                          */
 
                         setMaintenance(false);
                     }
 
                 } catch (error) {
-                    console.log(
+
+                    console.error(
                         "Unable to check maintenance status:",
                         error
                     );
 
+                    /*
+                     * Fail open if the settings request fails.
+                     */
+
                     setMaintenance(false);
 
                 } finally {
+
                     setChecking(false);
                 }
             };
@@ -123,19 +168,13 @@ function MaintenanceGuard({ children }) {
         checkMaintenance();
 
     }, [
-        location.pathname,
-        isAdminRoute,
-        isAuthRoute,
+        pathname,
+        bypassMaintenance,
     ]);
 
     /* ========================================================
        LOADING
     ======================================================== */
-
-    /*
-     * While checking the backend, don't render
-     * the normal application yet.
-     */
 
     if (checking) {
         return null;
