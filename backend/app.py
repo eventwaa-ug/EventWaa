@@ -10,6 +10,8 @@ import uuid
 import secrets
 import resend
 import traceback
+import psycopg
+from psycopg.rows import dict_row
 #print(secrets.token_urlsafe(32))
 import qrcode
 from io import BytesIO
@@ -20,6 +22,28 @@ from datetime import datetime, timedelta, timezone
 from flask_mail import Mail, Message
 from dotenv import load_dotenv
 load_dotenv()
+
+# ============================================================
+# SUPABASE POSTGRESQL CONFIGURATION
+# ============================================================
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not configured")
+
+
+@contextmanager
+def get_db_connection():
+    conn = psycopg.connect(
+        DATABASE_URL,
+        row_factory=dict_row
+    )
+    try:
+        yield conn
+    finally:
+        conn.close()
+
 from werkzeug.utils import secure_filename
 from functools import wraps
 
@@ -43,6 +67,8 @@ app = Flask(
     __name__,
     static_folder="uploads"
     )
+
+
 
 # ============================================================
 # CORS CONFIGURATION
