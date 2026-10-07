@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory, redirect
 from flask_cors import CORS
 import json
+import re
 import os
 import time
 import requests
@@ -6900,12 +6901,11 @@ def check_ticket_event_access(
 
 
 # ============================================================
-# ADMIN TEAM MEMBERS STORAGE
+# ADMIN TEAM MEMBERS STORAGE (PostgreSQL adapters)
 # ============================================================
 
 ADMIN_TEAM_MEMBERS_FILE = "admin_team_members.json"
 ADMIN_TEAM_ACCOUNTS_FILE = "admin_team_accounts.json"
-
 
 # ============================================================
 # FRONTEND URL
@@ -6922,23 +6922,7 @@ FRONTEND_URL = os.getenv(
 # ============================================================
 
 def ensure_admin_team_members_file():
-
-    if not os.path.exists(
-        ADMIN_TEAM_MEMBERS_FILE
-    ):
-
-        with open(
-            ADMIN_TEAM_MEMBERS_FILE,
-            "w",
-            encoding="utf-8"
-        ) as file:
-
-            json.dump(
-                [],
-                file,
-                indent=4,
-                ensure_ascii=False
-            )
+    return None
 
 
 # ============================================================
@@ -6946,60 +6930,15 @@ def ensure_admin_team_members_file():
 # ============================================================
 
 def load_admin_team_members():
-
-    ensure_admin_team_members_file()
-
-    try:
-
-        with open(
-            ADMIN_TEAM_MEMBERS_FILE,
-            "r",
-            encoding="utf-8"
-        ) as file:
-
-            data = json.load(file)
-
-        if not isinstance(
-            data,
-            list
-        ):
-
-            return []
-
-        return data
-
-    except Exception as e:
-
-        print(
-            "ADMIN TEAM MEMBERS LOAD ERROR:",
-            str(e)
-        )
-
-        return []
+    return load_json_file("admin_team_members.json", [])
 
 
 # ============================================================
 # SAVE ADMIN TEAM MEMBERS
 # ============================================================
 
-def save_admin_team_members(
-    members
-):
-
-    ensure_admin_team_members_file()
-
-    with open(
-        ADMIN_TEAM_MEMBERS_FILE,
-        "w",
-        encoding="utf-8"
-    ) as file:
-
-        json.dump(
-            members,
-            file,
-            indent=4,
-            ensure_ascii=False
-        )
+def save_admin_team_members(data):
+    return save_json_file("admin_team_members.json", data)
 
 
 # ============================================================
@@ -7007,23 +6946,7 @@ def save_admin_team_members(
 # ============================================================
 
 def ensure_admin_team_accounts_file():
-
-    if not os.path.exists(
-        ADMIN_TEAM_ACCOUNTS_FILE
-    ):
-
-        with open(
-            ADMIN_TEAM_ACCOUNTS_FILE,
-            "w",
-            encoding="utf-8"
-        ) as file:
-
-            json.dump(
-                [],
-                file,
-                indent=4,
-                ensure_ascii=False
-            )
+    return None
 
 
 # ============================================================
@@ -7031,60 +6954,15 @@ def ensure_admin_team_accounts_file():
 # ============================================================
 
 def load_admin_team_accounts():
-
-    ensure_admin_team_accounts_file()
-
-    try:
-
-        with open(
-            ADMIN_TEAM_ACCOUNTS_FILE,
-            "r",
-            encoding="utf-8"
-        ) as file:
-
-            data = json.load(file)
-
-        if not isinstance(
-            data,
-            list
-        ):
-
-            return []
-
-        return data
-
-    except Exception as e:
-
-        print(
-            "ADMIN TEAM ACCOUNTS LOAD ERROR:",
-            str(e)
-        )
-
-        return []
+    return load_json_file("admin_team_accounts.json", [])
 
 
 # ============================================================
 # SAVE ADMIN TEAM ACCOUNTS
 # ============================================================
 
-def save_admin_team_accounts(
-    accounts
-):
-
-    ensure_admin_team_accounts_file()
-
-    with open(
-        ADMIN_TEAM_ACCOUNTS_FILE,
-        "w",
-        encoding="utf-8"
-    ) as file:
-
-        json.dump(
-            accounts,
-            file,
-            indent=4,
-            ensure_ascii=False
-        )
+def save_admin_team_accounts(data):
+    return save_json_file("admin_team_accounts.json", data)
 
 
 # ============================================================
@@ -7092,42 +6970,7 @@ def save_admin_team_accounts(
 # ============================================================
 
 def load_events():
-
-    try:
-
-        if not os.path.exists(
-            "events.json"
-        ):
-            return []
-
-        with open(
-            "events.json",
-            "r",
-            encoding="utf-8"
-        ) as f:
-
-            data = json.load(f)
-
-            if isinstance(
-                data,
-                list
-            ):
-                return data
-
-            return []
-
-    except (
-        FileNotFoundError,
-        json.JSONDecodeError,
-        OSError
-    ) as e:
-
-        print(
-            "LOAD EVENTS ERROR:",
-            str(e)
-        )
-
-        return []
+    return load_json_file("events.json", [])
 
 # ============================================================
 # AUTO-COMPLETE FINISHED TEAM MEMBER ASSIGNMENTS
@@ -8212,24 +8055,8 @@ def auto_complete_finished_team_assignments():
 # SAVE ADMIN TEAM MEMBERS
 # ============================================================
 
-def save_admin_team_members(
-    members
-):
-
-    ensure_admin_team_members_file()
-
-    with open(
-        ADMIN_TEAM_MEMBERS_FILE,
-        "w",
-        encoding="utf-8"
-    ) as file:
-
-        json.dump(
-            members,
-            file,
-            indent=4,
-            ensure_ascii=False
-        )
+def save_admin_team_members(data):
+    return save_json_file("admin_team_members.json", data)
 
 # ============================================================
 # TEAM MEMBER ASSIGNMENT HELPERS
@@ -8645,62 +8472,17 @@ ADMIN_TEAM_ACCOUNTS_FILE = "admin_team_accounts.json"
 # ENSURE HOST TEAM ACCOUNTS FILE EXISTS
 # ============================================================
 def ensure_team_accounts_file():
-    if not os.path.exists(
-        TEAM_ACCOUNTS_FILE
-    ):
-        with open(
-            TEAM_ACCOUNTS_FILE,
-            "w",
-            encoding="utf-8"
-        ) as file:
-            json.dump(
-                [],
-                file,
-                indent=4,
-                ensure_ascii=False
-            )
+    return None
 # ============================================================
 # LOAD HOST TEAM ACCOUNTS
 # ============================================================
 def load_team_accounts():
-    ensure_team_accounts_file()
-    try:
-        with open(
-            TEAM_ACCOUNTS_FILE,
-            "r",
-            encoding="utf-8"
-        ) as file:
-            data = json.load(file)
-        if not isinstance(
-            data,
-            list
-        ):
-            return []
-        return data
-    except Exception as e:
-        print(
-            "HOST TEAM ACCOUNTS LOAD ERROR:",
-            str(e)
-        )
-        return []
+    return load_json_file("team_accounts.json", [])
 # ============================================================
 # SAVE HOST TEAM ACCOUNTS
 # ============================================================
-def save_team_accounts(
-    accounts
-):
-    ensure_team_accounts_file()
-    with open(
-        TEAM_ACCOUNTS_FILE,
-        "w",
-        encoding="utf-8"
-    ) as file:
-        json.dump(
-            accounts,
-            file,
-            indent=4,
-            ensure_ascii=False
-        )
+def save_team_accounts(data):
+    return save_json_file("team_accounts.json", data)
 
 
 
@@ -12890,30 +12672,25 @@ def get_current_admin_password_hash():
 
     try:
 
-        if os.path.exists(
-            ADMIN_PASSWORD_FILE
-        ):
+        # The former admin_auth.json record is now kept in the
+        # metadata of the single admin_settings PostgreSQL row.
+        settings = load_admin_settings()
 
-            admin_data = load_json_file(
-                ADMIN_PASSWORD_FILE,
-                {}
-            )
+        saved_hash = str(
+            settings.get(
+                "password_hash",
+                ""
+            ) or ""
+        ).strip()
 
-            saved_hash = str(
-                admin_data.get(
-                    "password_hash",
-                    ""
-                ) or ""
-            ).strip()
+        if saved_hash:
 
-            if saved_hash:
-
-                return saved_hash
+            return saved_hash
 
     except Exception as error:
 
         print(
-            "ADMIN PASSWORD FILE ERROR:",
+            "ADMIN PASSWORD DATABASE ERROR:",
             str(error)
         )
 
@@ -12928,18 +12705,14 @@ def save_admin_password_hash(
     password_hash
 ):
 
-    save_json_file(
-        ADMIN_PASSWORD_FILE,
-        {
-            "password_hash":
-                password_hash,
-
-            "updated_at":
-                datetime.now(
-                    timezone.utc
-                ).isoformat()
-        }
-    )
+    # Preserve the existing admin_settings row and store the
+    # password hash inside its PostgreSQL metadata JSONB column.
+    settings = load_admin_settings()
+    settings["password_hash"] = password_hash
+    settings["passwordUpdatedAt"] = datetime.now(
+        timezone.utc
+    ).isoformat()
+    save_admin_settings(settings)
 
 # ============================================================
 # ADMIN LOGIN
@@ -13675,40 +13448,12 @@ ADMIN_PASSWORD_RESETS_FILE = (
 # LOAD ADMIN PASSWORD RESET SESSIONS
 # ============================================================
 def load_admin_password_resets():
-    try:
-        data = load_json_file(
-            ADMIN_PASSWORD_RESETS_FILE,
-            []
-        )
-        if not isinstance(data, list):
-            return []
-        return data
-    except Exception as error:
-        print(
-            "LOAD ADMIN PASSWORD RESETS ERROR:",
-            str(error)
-        )
-        return []
+    return load_json_file("admin_password_resets.json", [])
 # ============================================================
 # SAVE ADMIN PASSWORD RESET SESSIONS
 # ============================================================
-def save_admin_password_resets(resets):
-    try:
-        if not isinstance(
-            resets,
-            list
-        ):
-            resets = []
-        save_json_file(
-            ADMIN_PASSWORD_RESETS_FILE,
-            resets
-        )
-    except Exception as error:
-        print(
-            "SAVE ADMIN PASSWORD RESETS ERROR:",
-            str(error)
-        )
-        raise # ============================================================
+def save_admin_password_resets(data):
+    return save_json_file("admin_password_resets.json", data)
 # ADMIN PASSWORD RECOVERY STORAGE
 # ============================================================
 ADMIN_PASSWORD_RESETS_FILE = (
@@ -13718,40 +13463,12 @@ ADMIN_PASSWORD_RESETS_FILE = (
 # LOAD ADMIN PASSWORD RESET SESSIONS
 # ============================================================
 def load_admin_password_resets():
-    try:
-        data = load_json_file(
-            ADMIN_PASSWORD_RESETS_FILE,
-            []
-        )
-        if not isinstance(data, list):
-            return []
-        return data
-    except Exception as error:
-        print(
-            "LOAD ADMIN PASSWORD RESETS ERROR:",
-            str(error)
-        )
-        return []
+    return load_json_file("admin_password_resets.json", [])
 # ============================================================
 # SAVE ADMIN PASSWORD RESET SESSIONS
 # ============================================================
-def save_admin_password_resets(resets):
-    try:
-        if not isinstance(
-            resets,
-            list
-        ):
-            resets = []
-        save_json_file(
-            ADMIN_PASSWORD_RESETS_FILE,
-            resets
-        )
-    except Exception as error:
-        print(
-            "SAVE ADMIN PASSWORD RESETS ERROR:",
-            str(error)
-        )
-        raise
+def save_admin_password_resets(data):
+    return save_json_file("admin_password_resets.json", data)
 
 # ============================================================
 # VERIFY ADMIN PASSWORD RESET OTP
@@ -14532,75 +14249,15 @@ ANNOUNCEMENTS_FILE = "announcements.json"
 
 
 def ensure_announcements_file():
-
-    if not os.path.exists(
-        ANNOUNCEMENTS_FILE
-    ):
-
-        with open(
-            ANNOUNCEMENTS_FILE,
-            "w",
-            encoding="utf-8"
-        ) as file:
-
-            json.dump(
-                [],
-                file,
-                indent=4,
-                ensure_ascii=False
-            )
+    return None
 
 
 def load_announcements():
-
-    ensure_announcements_file()
-
-    try:
-
-        with open(
-            ANNOUNCEMENTS_FILE,
-            "r",
-            encoding="utf-8"
-        ) as file:
-
-            data = json.load(file)
-
-        if not isinstance(
-            data,
-            list
-        ):
-            return []
-
-        return data
-
-    except Exception as error:
-
-        print(
-            "ANNOUNCEMENTS LOAD ERROR:",
-            str(error)
-        )
-
-        return []
+    return load_json_file("announcements.json", [])
 
 
-def save_announcements(
-    announcements
-):
-
-    ensure_announcements_file()
-
-    with open(
-        ANNOUNCEMENTS_FILE,
-        "w",
-        encoding="utf-8"
-    ) as file:
-
-        json.dump(
-            announcements,
-            file,
-            indent=4,
-            ensure_ascii=False
-        )
+def save_announcements(data):
+    return save_json_file("announcements.json", data)
 
 
 # ============================================================
@@ -14611,75 +14268,15 @@ USERS_FILE = "users.json"
 
 
 def ensure_users_file():
-
-    if not os.path.exists(
-        USERS_FILE
-    ):
-
-        with open(
-            USERS_FILE,
-            "w",
-            encoding="utf-8"
-        ) as file:
-
-            json.dump(
-                [],
-                file,
-                indent=4,
-                ensure_ascii=False
-            )
+    return None
 
 
 def load_users():
-
-    ensure_users_file()
-
-    try:
-
-        with open(
-            USERS_FILE,
-            "r",
-            encoding="utf-8"
-        ) as file:
-
-            data = json.load(file)
-
-        if not isinstance(
-            data,
-            list
-        ):
-            return []
-
-        return data
-
-    except Exception as error:
-
-        print(
-            "USERS LOAD ERROR:",
-            str(error)
-        )
-
-        return []
+    return load_json_file("users.json", [])
 
 
-def save_users(
-    users
-):
-
-    ensure_users_file()
-
-    with open(
-        USERS_FILE,
-        "w",
-        encoding="utf-8"
-    ) as file:
-
-        json.dump(
-            users,
-            file,
-            indent=4,
-            ensure_ascii=False
-        )
+def save_users(data):
+    return save_json_file("users.json", data)
 
 # ============================================================
 # ADMIN SETTINGS
@@ -14735,29 +14332,8 @@ DEFAULT_ADMIN_SETTINGS = {
 
 
 def load_admin_settings():
-
-    settings = DEFAULT_ADMIN_SETTINGS.copy()
-
-    if os.path.exists(ADMIN_SETTINGS_FILE):
-
-        try:
-
-            with open(
-                ADMIN_SETTINGS_FILE,
-                "r",
-                encoding="utf-8"
-            ) as file:
-
-                saved_settings = json.load(file)
-
-                if isinstance(saved_settings, dict):
-                    settings.update(saved_settings)
-
-        except (json.JSONDecodeError, OSError):
-
-            print("WARNING: Could not read admin_settings.json")
-
-    return settings
+    rows = load_json_file("admin_settings.json", [])
+    return rows[0] if rows else DEFAULT_ADMIN_SETTINGS.copy()
 
 # ============================================================
 # PASSWORD RECOVERY HELPERS
@@ -14813,65 +14389,17 @@ def generate_reset_token():
     return secrets.token_urlsafe(32)
 
 
-def save_admin_settings(settings):
-
-    current_settings = DEFAULT_ADMIN_SETTINGS.copy()
-
-    if isinstance(settings, dict):
-        current_settings.update(settings)
-
-    # Event approval is permanently disabled.
-    current_settings["eventApproval"] = False
-
-    with open(
-        ADMIN_SETTINGS_FILE,
-        "w",
-        encoding="utf-8"
-    ) as file:
-
-        json.dump(
-            current_settings,
-            file,
-            indent=4
-        )
-
-    return current_settings
+def save_admin_settings(data):
+    return save_json_file("admin_settings.json", data)
 
 
 REVIEWS_FILE = "reviews.json"
 
 def load_reviews():
+    return load_json_file("reviews.json", [])
 
-    if not os.path.exists(REVIEWS_FILE):
-
-        return []
-
-    try:
-
-        with open(REVIEWS_FILE, "r", encoding="utf-8") as file:
-
-            data = json.load(file)
-
-        return data if isinstance(data, list) else []
-
-    except (json.JSONDecodeError, OSError):
-
-        return []
-
-def save_reviews(reviews):
-
-    with open(REVIEWS_FILE, "w", encoding="utf-8") as file:
-
-        json.dump(
-
-            reviews,
-
-            file,
-
-            indent=4,
-
-            ensure_ascii=False
-        )
+def save_reviews(data):
+    return save_json_file("reviews.json", data)
 @app.route("/reviews", methods=["GET"])
 def get_reviews():
 
@@ -14962,22 +14490,7 @@ def create_review():
     # FIND EVENT
     # ---------------------------------------------------------
 
-    events_file = "events.json"
-
-    if not os.path.exists(events_file):
-        return jsonify({
-            "success": False,
-            "message": "Events database not found."
-        }), 500
-
-    try:
-        with open(events_file, "r", encoding="utf-8") as file:
-            events = json.load(file)
-    except (json.JSONDecodeError, OSError):
-        return jsonify({
-            "success": False,
-            "message": "Unable to load events."
-        }), 500
+    events = load_json_file("events.json", [])
 
     event = next(
         (
@@ -15045,60 +14558,19 @@ def get_platform_stats():
         # LOAD USERS
         # =====================================================
 
-        users = []
-
-        if os.path.exists("users.json"):
-
-            with open(
-                "users.json",
-                "r",
-                encoding="utf-8"
-            ) as file:
-
-                users = json.load(file)
-
-            if not isinstance(users, list):
-                users = []
-
+        users = load_json_file("users.json", [])
 
         # =====================================================
         # LOAD EVENTS
         # =====================================================
 
-        events = []
-
-        if os.path.exists("events.json"):
-
-            with open(
-                "events.json",
-                "r",
-                encoding="utf-8"
-            ) as file:
-
-                events = json.load(file)
-
-            if not isinstance(events, list):
-                events = []
-
+        events = load_json_file("events.json", [])
 
         # =====================================================
         # LOAD BOOKINGS
         # =====================================================
 
-        bookings = []
-
-        if os.path.exists("bookings.json"):
-
-            with open(
-                "bookings.json",
-                "r",
-                encoding="utf-8"
-            ) as file:
-
-                bookings = json.load(file)
-
-            if not isinstance(bookings, list):
-                bookings = []
+        bookings = load_json_file("bookings.json", [])
 
 
         # =====================================================
@@ -16373,42 +15845,554 @@ def platform_maintenance_check():
 # HELPER FUNCTIONS
 # ============================================================
 
-def load_json_file(filename, default=None):
+# ============================================================
+# POSTGRESQL PERSISTENCE ADAPTER
+# ============================================================
+# The legacy route code still uses load_json_file/save_json_file names.
+# These names are now compatibility adapters only: they NEVER touch disk.
+# Every logical JSON entity maps to an approved PostgreSQL table.
 
-    if default is None:
-        default = []
+JSON_TABLE_MAP = {
+    "users.json": "users",
+    "events.json": "events",
+    "bookings.json": "bookings",
+    "payments.json": "payments",
+    "refunds.json": "refunds",
+    "host_applications.json": "host_applications",
+    "attendance.json": "attendance",
+    "messages.json": "messages",
+    "host_wallets.json": "host_wallets",
+    "notifications.json": "notifications",
+    "event_reports.json": "event_reports",
+    "wallet.json": "admin_wallet",
+    "admin_settings.json": "admin_settings",
+    "reviews.json": "reviews",
+    "announcements.json": "announcements",
+    "password_resets.json": "password_resets",
+    "admin_password_resets.json": "password_resets",
+    "team_members.json": "team_members",
+    "team_accounts.json": "team_accounts",
+    "team_sessions.json": "team_sessions",
+    "admin_team_members.json": "admin_team_members",
+    "admin_team_accounts.json": "admin_team_accounts",
+    "idempotency_keys.json": "idempotency_keys",
+    # The old admin password file is now persisted in the approved
+    # admin_settings record (or its metadata column when present).
+    "admin_auth.json": "admin_settings",
+}
 
-    if not os.path.exists(filename):
-        return default
 
+_DB_COLUMN_CACHE = {}
+_DB_META_COLUMN_CACHE = {}
+
+
+def _camel_to_snake(name):
+    name = str(name)
+    name = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name)
+    return name.replace("-", "_").lower()
+
+
+def _snake_to_camel(name):
+    parts = str(name).split("_")
+    if not parts:
+        return str(name)
+    return parts[0] + "".join(p[:1].upper() + p[1:] for p in parts[1:])
+
+
+def _table_name_for_file(filename):
+    table = JSON_TABLE_MAP.get(str(filename))
+    if not table:
+        raise RuntimeError(
+            f"Legacy JSON persistence is not approved: {filename}"
+        )
+    return table
+
+
+def _table_columns(cur, table):
+    if table in _DB_COLUMN_CACHE:
+        return _DB_COLUMN_CACHE[table]
+    cur.execute(
+        """
+        SELECT column_name, data_type, udt_name, is_nullable, column_default
+        FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = %s
+        ORDER BY ordinal_position
+        """,
+        (table,)
+    )
+    rows = cur.fetchall()
+    if not rows:
+        raise RuntimeError(f"Approved PostgreSQL table does not exist: {table}")
+    columns = {r["column_name"]: r for r in rows}
+    _DB_COLUMN_CACHE[table] = columns
+    meta = next(
+        (c for c in ("metadata", "data", "payload") if c in columns),
+        None
+    )
+    _DB_META_COLUMN_CACHE[table] = meta
+    return columns
+
+
+def _json_safe(value):
+    if isinstance(value, (datetime,)):
+        return value.isoformat()
+    if isinstance(value, dict):
+        return {str(k): _json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_safe(v) for v in value]
+    return value
+
+
+def _coerce_db_value(value, column):
+    if value is None:
+        return None
+    udt = str(column.get("udt_name") or "")
+    dtype = str(column.get("data_type") or "")
+    if dtype in {"json", "jsonb"}:
+        return json.dumps(_json_safe(value), default=str)
+    if udt in {"bool", "boolean"} and isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "on"}
+    return value
+
+
+def _row_to_legacy(row, table):
+    if not row:
+        return None
+    meta_col = _DB_META_COLUMN_CACHE.get(table)
+    result = {}
+    if meta_col and isinstance(row.get(meta_col), dict):
+        result.update(row[meta_col])
+    for key, value in row.items():
+        if key == meta_col:
+            continue
+        if value is None:
+            continue
+        if isinstance(value, (dict, list)):
+            result[_snake_to_camel(key)] = value
+        else:
+            result[_snake_to_camel(key)] = value
+    return result
+
+
+def _record_db_values(record, columns, meta_col):
+    values = {}
+    if not isinstance(record, dict):
+        return values
+    for key, value in record.items():
+        column = key if key in columns else _camel_to_snake(key)
+        if column in columns and column != meta_col:
+            values[column] = _coerce_db_value(value, columns[column])
+    if meta_col:
+        values[meta_col] = json.dumps(_json_safe(record), default=str)
+    return values
+
+
+def _legacy_scalar(value):
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.strftime("%Y-%m-%d %H:%M:%S")
+    if hasattr(value, "isoformat") and not isinstance(value, str):
+        try:
+            return value.isoformat()
+        except Exception:
+            return value
     try:
+        if value == int(value):
+            return int(value)
+    except (TypeError, ValueError):
+        pass
+    return value
 
-        with open(
-            filename,
-            "r",
-            encoding="utf-8"
-        ) as file:
 
-            return json.load(file)
+def _ticket_row_to_legacy(row):
+    if not row:
+        return None
+    public_ticket_id = row.get("ticket_id")
+    ticket = {
+        "id": row.get("id"),
+        "ticketId": public_ticket_id,
+        "ticketNumber": _legacy_scalar(row.get("ticket_number")),
+        "ticketType": row.get("ticket_type_snapshot"),
+        "checkedIn": bool(row.get("checked_in")),
+        "checkInCount": int(row.get("check_in_count") or 0),
+        "checkInLimit": 1,
+        "refundStatus": row.get("refund_status"),
+        "valid": row.get("valid") if row.get("valid") is not None else True,
+        "cancelled": bool(row.get("cancelled")),
+        "createdAt": _legacy_scalar(row.get("created_at")),
+    }
+    if row.get("price") is not None:
+        ticket["price"] = _legacy_scalar(row.get("price"))
+    if row.get("cancelled_at") is not None:
+        ticket["cancelledAt"] = _legacy_scalar(row.get("cancelled_at"))
+    return ticket
 
-    except (json.JSONDecodeError, OSError):
 
+def _booking_row_to_legacy_shape(row, ticket_rows):
+    if not row:
+        return None
+
+    buyer_name = row.get("buyer_name_snapshot") or ""
+    buyer_email = row.get("buyer_email_snapshot") or ""
+    ticket_price = _legacy_scalar(row.get("ticket_price"))
+    quantity = int(row.get("quantity") or 1)
+    subtotal = _legacy_scalar(row.get("subtotal"))
+    if subtotal is None and ticket_price is not None:
+        subtotal = ticket_price * quantity
+    customer_total = _legacy_scalar(row.get("customer_total"))
+    eventwaa_ticket_amount = _legacy_scalar(row.get("eventwaa_ticket_amount"))
+    eventwaa_amount = _legacy_scalar(row.get("eventwaa_amount"))
+    tickets = [
+        ticket
+        for ticket in (_ticket_row_to_legacy(item) for item in (ticket_rows or []))
+        if ticket is not None
+    ]
+
+    booking = {
+        "id": row.get("id"),
+        "eventId": row.get("event_id"),
+        "eventTitle": row.get("event_title_snapshot") or "",
+        "eventDate": _legacy_scalar(row.get("event_date_snapshot")) or "",
+        "eventTime": row.get("event_time_snapshot") or "",
+        "eventVenue": row.get("event_venue_snapshot") or "",
+        "eventCity": row.get("event_city_snapshot") or "",
+        "buyer": {
+            "name": buyer_name,
+            "email": buyer_email,
+        },
+        "buyerName": buyer_name,
+        "buyerEmail": buyer_email,
+        "ticketType": row.get("ticket_type_snapshot") or "Regular",
+        "ticketTypeId": row.get("ticket_type_id"),
+        "ticketPrice": ticket_price,
+        "quantity": quantity,
+        "subtotal": subtotal,
+        "serviceFee": _legacy_scalar(row.get("service_fee")),
+        "serviceFeePercent": _legacy_scalar(row.get("service_fee_percent")),
+        "customerTotal": customer_total,
+        "totalPrice": subtotal if subtotal is not None else 0,
+        "commissionPercent": _legacy_scalar(row.get("commission_percent")),
+        "commissionAmount": _legacy_scalar(row.get("commission_amount")),
+        "hostAmount": _legacy_scalar(row.get("host_amount")),
+        "eventwaaTicketAmount": eventwaa_ticket_amount,
+        "eventWaaTicketAmount": eventwaa_ticket_amount,
+        "eventwaaAmount": eventwaa_amount,
+        "eventWaaAmount": eventwaa_amount,
+        "serviceFeeRetained": row.get("service_fee_retained"),
+        "transactionId": row.get("transaction_id"),
+        "txRef": row.get("tx_ref"),
+        "paymentProvider": row.get("payment_provider"),
+        "paymentId": row.get("payment_id"),
+        "ownerUserId": row.get("owner_user_id"),
+        "userId": row.get("owner_user_id"),
+        "refundStatus": row.get("refund_status"),
+        "emailSent": bool(row.get("email_sent")),
+        "emailSentAt": _legacy_scalar(row.get("email_sent_at")),
+        "emailError": row.get("email_error"),
+        "createdAt": _legacy_scalar(row.get("created_at")),
+        "updatedAt": _legacy_scalar(row.get("updated_at")),
+        "tickets": tickets,
+        "status": "valid",
+    }
+
+    if tickets:
+        booking["ticketId"] = tickets[0].get("ticketId")
+        if all(ticket.get("cancelled") for ticket in tickets):
+            booking["cancelled"] = True
+            booking["valid"] = False
+            booking["ticketValid"] = False
+            booking["status"] = "cancelled"
+        else:
+            booking["cancelled"] = False
+            booking["valid"] = True
+            booking["ticketValid"] = True
+
+    return booking
+
+
+BOOKING_LEGACY_TO_COLUMN = {
+    "id": "id",
+    "eventId": "event_id",
+    "userId": "owner_user_id",
+    "ownerUserId": "owner_user_id",
+    "paymentId": "payment_id",
+    "eventTitle": "event_title_snapshot",
+    "eventDate": "event_date_snapshot",
+    "eventTime": "event_time_snapshot",
+    "eventVenue": "event_venue_snapshot",
+    "eventCity": "event_city_snapshot",
+    "ticketType": "ticket_type_snapshot",
+    "ticketTypeId": "ticket_type_id",
+    "ticketPrice": "ticket_price",
+    "quantity": "quantity",
+    "subtotal": "subtotal",
+    "serviceFee": "service_fee",
+    "serviceFeePercent": "service_fee_percent",
+    "customerTotal": "customer_total",
+    "commissionPercent": "commission_percent",
+    "commissionAmount": "commission_amount",
+    "hostAmount": "host_amount",
+    "eventwaaTicketAmount": "eventwaa_ticket_amount",
+    "eventWaaTicketAmount": "eventwaa_ticket_amount",
+    "eventwaaAmount": "eventwaa_amount",
+    "eventWaaAmount": "eventwaa_amount",
+    "serviceFeeRetained": "service_fee_retained",
+    "transactionId": "transaction_id",
+    "txRef": "tx_ref",
+    "paymentProvider": "payment_provider",
+    "refundStatus": "refund_status",
+    "emailSent": "email_sent",
+    "emailSentAt": "email_sent_at",
+    "emailError": "email_error",
+    "createdAt": "created_at",
+    "updatedAt": "updated_at",
+}
+
+
+def _booking_record_db_values(record, columns):
+    values = {}
+    if not isinstance(record, dict):
+        return values
+
+    for legacy_key, column in BOOKING_LEGACY_TO_COLUMN.items():
+        if column not in columns:
+            continue
+        if legacy_key not in record:
+            continue
+        values[column] = _coerce_db_value(record.get(legacy_key), columns[column])
+
+    buyer = record.get("buyer")
+    if isinstance(buyer, dict):
+        if "buyer_name_snapshot" in columns and "name" in buyer:
+            values["buyer_name_snapshot"] = buyer.get("name")
+        if "buyer_email_snapshot" in columns and "email" in buyer:
+            values["buyer_email_snapshot"] = buyer.get("email")
+    else:
+        if "buyer_name_snapshot" in columns and "buyerName" in record:
+            values["buyer_name_snapshot"] = record.get("buyerName")
+        if "buyer_email_snapshot" in columns and "buyerEmail" in record:
+            values["buyer_email_snapshot"] = record.get("buyerEmail")
+
+    return values
+
+
+def load_bookings():
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM bookings ORDER BY id")
+            booking_rows = cur.fetchall()
+            if not booking_rows:
+                return []
+
+            booking_ids = [row["id"] for row in booking_rows if row.get("id") is not None]
+            tickets_by_booking = {booking_id: [] for booking_id in booking_ids}
+            if booking_ids:
+                placeholders = ",".join(["%s"] * len(booking_ids))
+                cur.execute(
+                    f"""
+                    SELECT *
+                    FROM tickets
+                    WHERE booking_id IN ({placeholders})
+                    ORDER BY booking_id, id
+                    """,
+                    tuple(booking_ids),
+                )
+                for ticket_row in cur.fetchall():
+                    tickets_by_booking.setdefault(
+                        ticket_row.get("booking_id"),
+                        [],
+                    ).append(ticket_row)
+
+            return [
+                _booking_row_to_legacy_shape(
+                    row,
+                    tickets_by_booking.get(row.get("id"), []),
+                )
+                for row in booking_rows
+            ]
+
+
+def save_bookings(data):
+    if not isinstance(data, list):
+        data = [data] if isinstance(data, dict) else []
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            columns = _table_columns(cur, "bookings")
+            pk = "id" if "id" in columns else None
+
+            for record in data:
+                values = _booking_record_db_values(record, columns)
+                if not values:
+                    continue
+
+                if pk and values.get(pk) is not None:
+                    cur.execute(
+                        'SELECT 1 FROM bookings WHERE id = %s LIMIT 1',
+                        (values[pk],),
+                    )
+                    exists = cur.fetchone() is not None
+                    if exists:
+                        assignments = [k for k in values if k != pk]
+                        if assignments:
+                            cur.execute(
+                                "UPDATE bookings SET "
+                                + ", ".join(f'"{k}" = %s' for k in assignments)
+                                + " WHERE id = %s",
+                                tuple(values[k] for k in assignments) + (values[pk],),
+                            )
+                    else:
+                        cols = list(values)
+                        cur.execute(
+                            "INSERT INTO bookings ("
+                            + ", ".join(f'"{k}"' for k in cols)
+                            + ") VALUES ("
+                            + ",".join(["%s"] * len(cols))
+                            + ")",
+                            tuple(values[k] for k in cols),
+                        )
+                else:
+                    cols = list(values)
+                    cur.execute(
+                        "INSERT INTO bookings ("
+                        + ", ".join(f'"{k}"' for k in cols)
+                        + ") VALUES ("
+                        + ",".join(["%s"] * len(cols))
+                        + ")",
+                        tuple(values[k] for k in cols),
+                    )
+
+            conn.commit()
+
+
+def load_json_file(filename, default=None):
+    if str(filename) == "bookings.json":
+        return load_bookings()
+    default = [] if default is None else default
+    table = _table_name_for_file(filename)
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                columns = _table_columns(cur, table)
+                meta_col = _DB_META_COLUMN_CACHE.get(table)
+                cur.execute(f'SELECT * FROM "{table}" ORDER BY id') if "id" in columns else cur.execute(f'SELECT * FROM "{table}"')
+                rows = cur.fetchall()
+                return [_row_to_legacy(row, table) for row in rows]
+    except Exception as e:
+        print(f"POSTGRES LOAD ERROR [{filename}]:", str(e))
         return default
 
 
 def save_json_file(filename, data):
+    if str(filename) == "bookings.json":
+        return save_bookings(data)
+    table = _table_name_for_file(filename)
+    if not isinstance(data, list):
+        data = [data] if isinstance(data, dict) else []
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                columns = _table_columns(cur, table)
+                meta_col = _DB_META_COLUMN_CACHE.get(table)
+                pk = "id" if "id" in columns else None
 
-    with open(
-        filename,
-        "w",
-        encoding="utf-8"
-    ) as file:
+                # These are singleton PostgreSQL records. Legacy callers
+                # pass a plain object without an id, so update the existing
+                # row instead of inserting duplicate settings/wallet rows.
+                singleton_table = table in {
+                    "admin_settings",
+                    "admin_wallet"
+                }
 
-        json.dump(
-            data,
-            file,
-            indent=4
-        )
+                seen_ids = set()
+                for record in data:
+                    values = _record_db_values(record, columns, meta_col)
+                    if not values:
+                        continue
+
+                    if singleton_table and pk:
+                        cur.execute(
+                            f'SELECT id FROM "{table}" ORDER BY id LIMIT 1 FOR UPDATE'
+                        )
+                        existing = cur.fetchone()
+                        if existing:
+                            row_id = existing["id"]
+                            assignments = [k for k in values if k != pk]
+                            if assignments:
+                                cur.execute(
+                                    f'UPDATE "{table}" SET ' +
+                                    ', '.join(f'"{k}" = %s' for k in assignments) +
+                                    ' WHERE id = %s',
+                                    tuple(values[k] for k in assignments) + (row_id,)
+                                )
+                            seen_ids.add(str(row_id))
+                            continue
+
+                        # No singleton row exists yet. Let PostgreSQL create
+                        # its id unless the caller explicitly supplied one.
+                        cols = list(values)
+                        cur.execute(
+                            f'INSERT INTO "{table}" (' +
+                            ', '.join(f'"{k}"' for k in cols) +
+                            ') VALUES (' + ','.join(['%s'] * len(cols)) + ') RETURNING id',
+                            tuple(values[k] for k in cols)
+                        )
+                        created = cur.fetchone()
+                        if created:
+                            seen_ids.add(str(created["id"]))
+                        continue
+
+                    if pk and values.get(pk) is not None:
+                        seen_ids.add(str(values[pk]))
+                        cur.execute(
+                            f'SELECT 1 FROM "{table}" WHERE id = %s LIMIT 1',
+                            (values[pk],)
+                        )
+                        exists = cur.fetchone() is not None
+                        if exists:
+                            assignments = [k for k in values if k != pk]
+                            if assignments:
+                                cur.execute(
+                                    f'UPDATE "{table}" SET ' +
+                                    ', '.join(f'"{k}" = %s' for k in assignments) +
+                                    ' WHERE id = %s',
+                                    tuple(values[k] for k in assignments) + (values[pk],)
+                                )
+                        else:
+                            cols = list(values)
+                            cur.execute(
+                                f'INSERT INTO "{table}" (' +
+                                ', '.join(f'"{k}"' for k in cols) +
+                                ') VALUES (' + ','.join(['%s'] * len(cols)) + ')',
+                                tuple(values[k] for k in cols)
+                            )
+                    else:
+                        cols = list(values)
+                        cur.execute(
+                            f'INSERT INTO "{table}" (' +
+                            ', '.join(f'"{k}"' for k in cols) +
+                            ') VALUES (' + ','.join(['%s'] * len(cols)) + ')',
+                            tuple(values[k] for k in cols)
+                        )
+
+                # Preserve legacy full-collection deletion semantics for
+                # normal collection tables. Singleton settings/wallet rows
+                # are intentionally never deleted by an empty legacy list.
+                if pk and not singleton_table:
+                    if seen_ids:
+                        placeholders = ",".join(["%s"] * len(seen_ids))
+                        cur.execute(
+                            f'DELETE FROM "{table}" WHERE id NOT IN ({placeholders})',
+                            tuple(seen_ids)
+                        )
+                    elif data == []:
+                        cur.execute(f'DELETE FROM "{table}"')
+
+                conn.commit()
+    except Exception as e:
+        print(f"POSTGRES SAVE ERROR [{filename}]:", str(e))
+        raise
 
 # ============================================================
 # PAYMENT FILE HELPERS
@@ -16418,17 +16402,11 @@ PAYMENTS_FILE = "payments.json"
 
 
 def load_payments():
-    return load_json_file(
-        PAYMENTS_FILE,
-        []
-    )
+    return load_json_file("payments.json", [])
 
 
-def save_payments(payments):
-    save_json_file(
-        PAYMENTS_FILE,
-        payments
-    )
+def save_payments(data):
+    return save_json_file("payments.json", data)
 # ============================================================
 # VERIFY FLUTTERWAVE PAYMENT
 # ============================================================
@@ -18049,1497 +18027,1079 @@ def complete_verified_eventwaa_payment(
     provider,
     paid_amount
 ):
+    """
+    PostgreSQL-backed payment fulfillment.
 
-    try:
-        with eventwaa_file_lock("admin_wallet_finalization"):
-            with eventwaa_file_lock("host_wallet_finalization"):
-                with eventwaa_file_lock("payment_fulfillment"):
-                    return _complete_verified_eventwaa_payment_locked(
-                        payment,
-                        payments,
-                        transaction_id,
-                        provider,
-                        paid_amount
-                    )
-    except TimeoutError as error:
+    Provider verification is intentionally performed by the caller before
+    this function. This function is the single database transaction that
+    turns a verified payment into a booking, tickets, inventory allocation,
+    and accounting entries.
+
+    The public signature is preserved so Flutterwave and PesaPal callers do
+    not need to change during this migration.
+    """
+
+    provider = str(provider or "").strip().lower()
+    transaction_id = str(transaction_id or "").strip()
+
+    if provider not in ("flutterwave", "pesapal"):
         return {
             "success": False,
-            "message": str(error),
-            "retryable": True
-        }, 503
-
-
-def _complete_verified_eventwaa_payment_locked(
-    payment,
-    payments,
-    transaction_id,
-    provider,
-    paid_amount
-):
-
-    now = datetime.now().strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-
-    provider = str(
-        provider
-        or
-        ""
-    ).strip().lower()
-
-    # ========================================================
-    # BASIC PROVIDER VALIDATION
-    # ========================================================
-
-    if provider not in (
-        "flutterwave",
-        "pesapal"
-    ):
-
-        return {
-            "success": False,
-            "message":
-                "Unsupported payment provider."
+            "message": "Unsupported payment provider."
         }, 400
-
-    # ========================================================
-    # FIND PAYMENT AGAIN
-    #
-    # Important because this function can be called from:
-    #
-    # - Flutterwave verification
-    # - PesaPal callback
-    # - PesaPal IPN
-    #
-    # Always work against the payment stored in JSON.
-    # ========================================================
-
-    tx_ref = str(
-        payment.get(
-            "txRef",
-            ""
-        )
-    )
-
-    stored_payment = find_payment_by_tx_ref(
-        payments,
-        tx_ref
-    )
-
-    if not stored_payment:
-
-        return {
-            "success": False,
-            "message":
-                "Payment record no longer exists.",
-            "code":
-                "PAYMENT_NOT_FOUND"
-        }, 404
-
-    payment = stored_payment
-
-    # ========================================================
-    # FINAL DOUBLE-PAYMENT PROTECTION
-    # ========================================================
-
-    if payment.get(
-        "processed",
-        False
-    ):
-
-        return {
-            "success": True,
-            "message": (
-                "Payment has already been "
-                "processed."
-            ),
-            "alreadyProcessed": True,
-            "bookingId":
-                payment.get(
-                    "bookingId"
-                ),
-            "payment":
-                payment
-        }, 200
-
-    # ========================================================
-    # PROVIDER TRANSACTION ID
-    #
-    # Flutterwave:
-    #   Flutterwave transaction ID
-    #
-    # PesaPal:
-    #   PesaPal order tracking ID
-    # ========================================================
-
-    transaction_id = str(
-        transaction_id
-        or
-        ""
-    ).strip()
 
     if not transaction_id:
-
         return {
             "success": False,
-            "message":
-                "Payment transaction ID is missing."
+            "message": "Payment transaction ID is missing."
         }, 400
 
-    # ========================================================
-    # CHECK TRANSACTION ID AGAINST PAYMENTS
-    # ========================================================
-
-    existing_payment = (
-        find_payment_by_transaction_id(
-            payments,
-            transaction_id
-        )
-    )
-
-    if existing_payment:
-
-        if (
-            str(
-                existing_payment.get(
-                    "txRef",
-                    ""
-                )
-            )
-            ==
-            str(
-                payment.get(
-                    "txRef",
-                    ""
-                )
-            )
-            and
-            existing_payment.get(
-                "processed",
-                False
-            )
-        ):
-
-            return {
-                "success": True,
-                "message": (
-                    "This payment has already "
-                    "been processed."
-                ),
-                "alreadyProcessed": True,
-                "bookingId":
-                    existing_payment.get(
-                        "bookingId"
-                    ),
-                "payment":
-                    existing_payment
-            }, 200
-
-        # ----------------------------------------------------
-        # A transaction ID belonging to another EventWaa
-        # payment must never be reused.
-        # ----------------------------------------------------
-
-        if str(
-            existing_payment.get(
-                "txRef",
-                ""
-            )
-        ) != str(
-            payment.get(
-                "txRef",
-                ""
-            )
-        ):
-
-            return {
-                "success": False,
-                "message": (
-                    "Payment transaction ID "
-                    "is already associated with "
-                    "another EventWaa payment."
-                ),
-                "code":
-                    "TRANSACTION_ALREADY_USED"
-            }, 409
-
-    # ========================================================
-    # LOAD EVENT
-    # ========================================================
-
-    events = load_json_file(
-        "events.json",
-        []
-    )
-
-    if not isinstance(
-        events,
-        list
-    ):
-
-        events = []
-
-    event = None
-
-    for current_event in events:
-
-        if not isinstance(
-            current_event,
-            dict
-        ):
-
-            continue
-
-        if str(
-            current_event.get(
-                "id"
-            )
-        ) == str(
-            payment.get(
-                "eventId"
-            )
-        ):
-
-            event = current_event
-
-            break
-
-    if not event:
-
-        return {
-            "success": False,
-            "message": (
-                "Event associated with "
-                "payment was not found."
-            )
-        }, 404
-
-    # ========================================================
-    # IDENTIFY OFFICIAL EVENTWAA EVENT
-    #
-    # Official events:
-    #
-    # - adminEvent = true
-    # - EventWaa is the financial owner
-    # - no host wallet is required
-    #
-    # Keep this compatible with the existing event structure.
-    # ========================================================
-
-    is_official_event = (
-        str(
-            event.get(
-                "adminEvent",
-                False
-            )
-        ).strip().lower()
-        == "true"
-    )
-
-    # ========================================================
-    # BLOCK PAYMENT FULFILLMENT FOR CANCELLED EVENTS
-    #
-    # A customer may have started payment while the event was
-    # active and the event may then be cancelled before
-    # verification.
-    #
-    # Never create a booking for a cancelled event.
-    # ========================================================
-
-    if str(
-        event.get(
-            "status",
-            ""
-        )
-    ).strip().lower() == "cancelled":
-
-        payment["status"] = (
-            "event_cancelled"
-        )
-
-        payment["eventCancelled"] = True
-
-        payment["eventCancelledAt"] = (
-            now
-        )
-
-        payment["bookingCreated"] = False
-
-        save_payments(
-            payments
-        )
-
-        return {
-
-            "success": False,
-
-            "message": (
-                "This event has been cancelled. "
-                "The payment cannot be converted "
-                "into a booking."
-            ),
-
-            "code":
-                "EVENT_CANCELLED",
-
-            "eventCancelled":
-                True,
-
-            "bookingCreated":
-                False,
-
-            "paymentNeedsRefund":
-                True,
-
-            "transactionId":
-                transaction_id,
-
-            "txRef":
-                payment.get(
-                    "txRef"
-                ),
-
-            "provider":
-                provider,
-
-            "amount":
-                paid_amount
-
-        }, 409
-
-    # ========================================================
-    # LOAD BOOKINGS
-    # ========================================================
-
-    bookings = load_json_file(
-        "bookings.json",
-        []
-    )
-
-    if not isinstance(
-        bookings,
-        list
-    ):
-
-        bookings = []
-
-    # ========================================================
-    # EXTRA DUPLICATE PROTECTION
-    #
-    # Check whether this provider transaction is already
-    # attached to a booking.
-    # ========================================================
-
-    for existing_booking in bookings:
-
-        existing_transaction_id = str(
-            existing_booking.get(
-                "transactionId",
-                ""
-            )
-        )
-
-        if existing_transaction_id == transaction_id:
-
-            payment["processed"] = True
-
-            payment["bookingId"] = (
-                existing_booking.get(
-                    "id"
-                )
-            )
-
-            payment["processedAt"] = (
-                now
-            )
-
-            save_payments(
-                payments
-            )
-
-            return {
-                "success": True,
-                "message": (
-                    "Payment was already "
-                    "converted into a booking."
-                ),
-                "alreadyProcessed": True,
-                "bookingId":
-                    existing_booking.get(
-                        "id"
-                    )
-            }, 200
-
-    # ========================================================
-    # FIND TICKET
-    # ========================================================
-
-    ticket_type = str(
-        payment.get(
-            "ticketType",
-            ""
-        )
+    tx_ref = str(
+        (payment or {}).get("txRef")
+        or (payment or {}).get("tx_ref")
+        or ""
     ).strip()
 
-    selected_ticket = None
-
-    for ticket in event.get(
-        "tickets",
-        []
-    ):
-
-        if str(
-            ticket.get(
-                "name",
-                ""
-            )
-        ).strip().lower() == ticket_type.lower():
-
-            selected_ticket = ticket
-
-            break
-
-    if not selected_ticket:
-
+    if not tx_ref:
         return {
             "success": False,
-            "message": (
-                "Ticket type no longer exists."
-            )
-        }, 404
-
-    # ========================================================
-    # CHECK INVENTORY AGAIN
-    # ========================================================
-
-    quantity = int(
-        payment.get(
-            "quantity",
-            1
-        )
-        or 1
-    )
-
-    if quantity < 1:
-
-        return {
-            "success": False,
-            "message":
-                "Invalid ticket quantity."
+            "message": "Payment transaction reference is missing.",
+            "code": "PAYMENT_REFERENCE_MISSING"
         }, 400
 
-    remaining = int(
-        selected_ticket.get(
-            "remaining",
-            selected_ticket.get(
-                "quantity",
-                0
-            )
-        )
-        or 0
-    )
+    request_data = {
+        "provider": provider,
+        "tx_ref": tx_ref,
+        "transaction_id": transaction_id,
+        "event_id": (payment or {}).get("eventId"),
+        "ticket_type_id": (payment or {}).get("ticketTypeId"),
+        "owner_user_id": (payment or {}).get("ownerUserId"),
+        "quantity": (payment or {}).get("quantity", 1),
+        "amount": (payment or {}).get("amount"),
+        "currency": (payment or {}).get("currency", "UGX")
+    }
+    request_hash = make_request_hash(request_data)
 
-    if remaining < quantity:
+    def as_int(value, default=0):
+        try:
+            return int(float(value or default))
+        except (TypeError, ValueError):
+            return default
 
-        return {
-            "success": False,
-            "message": (
-                "There are no longer enough "
-                "tickets available."
-            )
-        }, 400
+    def as_float(value, default=0):
+        try:
+            return float(value or default)
+        except (TypeError, ValueError):
+            return default
 
-    # ========================================================
-    # CHECK VERIFIED AMOUNT
-    # ========================================================
-
-    expected_amount = int(
-        payment.get(
-            "amount",
-            0
-        )
-        or 0
-    )
+    def time_text(value):
+        if value is None:
+            return ""
+        return str(value).split(".", 1)[0]
 
     try:
+        with get_db_connection() as conn:
+            # All fulfillment state changes happen in this one transaction.
+            with conn.transaction():
+                cur = conn.cursor()
 
-        paid_amount = int(
-            float(
-                paid_amount
-                or
-                0
-            )
-        )
-
-    except (
-        TypeError,
-        ValueError
-    ):
-
-        paid_amount = 0
-
-    if paid_amount != expected_amount:
-
-        return {
-            "success": False,
-            "message": (
-                "Verified payment amount does "
-                "not match the EventWaa payment."
-            ),
-            "expectedAmount":
-                expected_amount,
-            "paidAmount":
-                paid_amount
-        }, 400
-
-    # ========================================================
-    # CALCULATE TICKET SUBTOTAL
-    # ========================================================
-
-    ticket_subtotal = int(
-        payment.get(
-            "subtotal",
-            0
-        )
-        or
-        0
-    )
-
-    if ticket_subtotal <= 0:
-
-        return {
-            "success": False,
-            "message":
-                "Invalid ticket subtotal."
-        }, 400
-
-    # ========================================================
-    # SERVICE FEE
-    #
-    # EventWaa retains the service fee.
-    # It is NOT part of the host earning.
-    # ========================================================
-
-    service_fee_amount = int(
-        payment.get(
-            "serviceFee",
-            0
-        )
-        or
-        0
-    )
-
-    # ========================================================
-    # LOAD PLATFORM SETTINGS
-    #
-    # IMPORTANT:
-    #
-    # Do NOT hard-code the commission percentage.
-    #
-    # The percentage used at purchase time is stored on the
-    # booking so future refunds/cancellations can use the
-    # original accounting.
-    # ========================================================
-
-    settings = load_admin_settings()
-
-    try:
-
-        commission_percent = float(
-            settings.get(
-                "commission",
-                10
-            )
-            or
-            0
-        )
-
-    except (
-        TypeError,
-        ValueError
-    ):
-
-        commission_percent = 10.0
-
-    commission_percent = max(
-        0,
-        min(
-            100,
-            commission_percent
-        )
-    )
-
-    # ========================================================
-    # CALCULATE ORIGINAL FINANCIAL SPLIT
-    #
-    # NORMAL HOST EVENT:
-    #
-    # Ticket subtotal
-    #       ↓
-    # Commission + Host earning
-    #
-    # EventWaa:
-    #   commission + service fee
-    #
-    # Host:
-    #   subtotal - commission
-    #
-    # OFFICIAL EVENTWAA EVENT:
-    #
-    # EventWaa owns the event.
-    #
-    # EventWaa:
-    #   full ticket subtotal + service fee
-    #
-    # Host:
-    #   0
-    # ========================================================
-
-    if is_official_event:
-
-        commission_amount = 0
-
-        host_amount = 0
-
-        eventwaa_ticket_amount = (
-            ticket_subtotal
-        )
-
-    else:
-
-        commission_amount = int(
-            round(
-                ticket_subtotal
-                *
-                commission_percent
-                /
-                100
-            )
-        )
-
-        host_amount = (
-            ticket_subtotal
-            -
-            commission_amount
-        )
-
-        eventwaa_ticket_amount = (
-            commission_amount
-        )
-
-    eventwaa_earning = (
-        eventwaa_ticket_amount
-        +
-        service_fee_amount
-    )
-
-    # ========================================================
-    # CREATE BOOKING ID
-    # ========================================================
-
-    next_booking_id = (
-        max(
-            [
-                int(
-                    booking.get(
-                        "id",
-                        0
-                    )
+                # --------------------------------------------------------
+                # Serialize concurrent attempts for the same provider
+                # transaction. This is database-level protection and does
+                # not depend on a filesystem lock or a single Gunicorn
+                # worker.
+                # --------------------------------------------------------
+                cur.execute(
+                    "SELECT pg_advisory_xact_lock(hashtext(%s))",
+                    (f"eventwaa-payment:{provider}:{transaction_id}",)
                 )
-                for booking in bookings
-                if str(
-                    booking.get(
-                        "id",
-                        ""
-                    )
-                ).isdigit()
-            ],
-            default=0
-        )
-        +
-        1
-    )
 
-    # ========================================================
-    # CREATE INDIVIDUAL TICKETS
-    #
-    # ONE PAYMENT
-    #       ↓
-    # ONE BOOKING
-    #       ↓
-    # QUANTITY INDIVIDUAL TICKETS
-    #
-    # ONE INDIVIDUAL TICKET = ONE ENTRY
-    # ========================================================
-
-    tickets = []
-
-    ticket_timestamp = int(
-        datetime.now().timestamp() * 1000
-    )
-
-    for ticket_number in range(
-        1,
-        quantity + 1
-    ):
-
-        ticket_id = (
-            f"EW-"
-            f"{ticket_timestamp}"
-            f"-"
-            f"{next_booking_id}"
-            f"-"
-            f"{ticket_number}"
-        )
-
-        individual_ticket = {
-
-            "ticketId":
-                ticket_id,
-
-            "ticketNumber":
-                ticket_number,
-
-            "ticketType":
-                ticket_type,
-
-            "checkedIn":
-                False,
-
-            "checkedInAt":
-                None,
-
-            # ONE TICKET = ONE ENTRY
-            "checkInCount":
-                0,
-
-            "checkInLimit":
-                1,
-
-            "checkInHistory":
-                [],
-
-            "refundStatus":
-                None,
-
-            "createdAt":
-                now
-        }
-
-        tickets.append(
-            individual_ticket
-        )
-
-    # ========================================================
-    # CREATE BOOKING
-    #
-    # IMPORTANT:
-    #
-    # Store the original accounting values.
-    #
-    # Future cancellation/refund code should use these
-    # fields instead of recalculating from current settings.
-    # ========================================================
-
-    booking = {
-
-        "id":
-            next_booking_id,
-
-        # ====================================================
-        # EVENT INFORMATION
-        # ====================================================
-
-        "eventId":
-            event.get(
-                "id"
-            ),
-
-        "eventTitle":
-            event.get(
-                "title",
-                ""
-            ),
-
-        "eventDate":
-            event.get(
-                "date",
-                ""
-            ),
-
-        "eventTime":
-            (
-                f"{event.get('startTime', '')}"
-                f" - "
-                f"{event.get('endTime', '')}"
-            ).strip(" -"),
-
-        "eventVenue":
-            event.get(
-                "venue",
-                ""
-            ),
-
-        "eventCity":
-            event.get(
-                "city",
-                ""
-            ),
-
-        "adminEvent":
-            is_official_event,
-
-        # ====================================================
-        # BUYER
-        # ====================================================
-
-        "buyer":
-            payment.get(
-                "buyer",
-                {}
-            ),
-
-        "ownerUserId":
-            payment.get("ownerUserId"),
-
-        # ====================================================
-        # PURCHASE DETAILS
-        # ====================================================
-
-        "ticketType":
-            ticket_type,
-
-        "ticketPrice":
-            int(
-                payment.get(
-                    "ticketPrice",
-                    0
+                # --------------------------------------------------------
+                # Find the authoritative PostgreSQL payment by tx_ref.
+                # PesaPal tracking IDs are also supported as a fallback.
+                # --------------------------------------------------------
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM payments
+                    WHERE tx_ref = %s
+                    LIMIT 1
+                    FOR UPDATE
+                    """,
+                    (tx_ref,)
                 )
-                or
-                0
-            ),
+                db_payment = cur.fetchone()
 
-        "quantity":
-            quantity,
+                if not db_payment and provider == "pesapal":
+                    cur.execute(
+                        """
+                        SELECT *
+                        FROM payments
+                        WHERE pesapal_order_tracking_id = %s
+                        LIMIT 1
+                        FOR UPDATE
+                        """,
+                        (transaction_id,)
+                    )
+                    db_payment = cur.fetchone()
 
-        "subtotal":
-            ticket_subtotal,
+                if not db_payment:
+                    return {
+                        "success": False,
+                        "message": "Payment record no longer exists.",
+                        "code": "PAYMENT_NOT_FOUND"
+                    }, 404
 
-        "serviceFee":
-            service_fee_amount,
+                db_payment_id = db_payment["id"]
+                db_tx_ref = str(db_payment.get("tx_ref") or tx_ref)
 
-        "serviceFeePercent":
-            float(
-                payment.get(
-                    "serviceFeePercent",
+                # --------------------------------------------------------
+                # PostgreSQL idempotency record.
+                # --------------------------------------------------------
+                cur.execute(
+                    """
+                    INSERT INTO idempotency_keys
+                        (key, scope, request_hash, status, created_at,
+                         created_at_timestamp, updated_at)
+                    VALUES
+                        (%s, 'payment_fulfillment', %s, 'processing',
+                         NOW(), EXTRACT(EPOCH FROM NOW()), NOW())
+                    ON CONFLICT (scope, key) DO NOTHING
+                    RETURNING *
+                    """,
+                    (db_tx_ref, request_hash)
+                )
+                idempotency_record = cur.fetchone()
+
+                if not idempotency_record:
+                    cur.execute(
+                        """
+                        SELECT *
+                        FROM idempotency_keys
+                        WHERE scope = 'payment_fulfillment'
+                          AND key = %s
+                        FOR UPDATE
+                        """,
+                        (db_tx_ref,)
+                    )
+                    idempotency_record = cur.fetchone()
+
+                    if not idempotency_record:
+                        return {
+                            "success": False,
+                            "message": "Unable to establish payment idempotency state.",
+                            "retryable": True
+                        }, 503
+
+                    if str(idempotency_record.get("request_hash") or "") != request_hash:
+                        return {
+                            "success": False,
+                            "message": "This payment reference was already used for a different request.",
+                            "code": "IDEMPOTENCY_KEY_REUSED"
+                        }, 409
+
+                    stored_body = idempotency_record.get("response_body")
+                    stored_status = idempotency_record.get("response_status")
+                    stored_status = as_int(stored_status, 200)
+
+                    if stored_body is not None and str(
+                        idempotency_record.get("status") or ""
+                    ) == "completed":
+                        return stored_body, stored_status
+
+                    if str(idempotency_record.get("status") or "") == "processing":
+                        return {
+                            "success": False,
+                            "message": "This payment is already being processed.",
+                            "processing": True,
+                            "idempotent": True
+                        }, 409
+
+                    # A failed prior fulfillment is replayed rather than
+                    # silently creating a second accounting operation.
+                    if stored_body is not None:
+                        return stored_body, stored_status
+
+                # --------------------------------------------------------
+                # A payment already marked processed is safe to replay.
+                # --------------------------------------------------------
+                if db_payment.get("processed"):
+                    booking_id = db_payment.get("booking_id")
+                    if booking_id is not None:
+                        cur.execute(
+                            "SELECT * FROM bookings WHERE id = %s",
+                            (booking_id,)
+                        )
+                        existing_booking = cur.fetchone()
+                    else:
+                        existing_booking = None
+
+                    response = {
+                        "success": True,
+                        "message": "Payment has already been processed.",
+                        "alreadyProcessed": True,
+                        "bookingId": booking_id,
+                        "paymentId": db_payment_id
+                    }
+
+                    cur.execute(
+                        """
+                        UPDATE idempotency_keys
+                        SET status = 'completed',
+                            resource_id = %s,
+                            response_status = 200,
+                            response_body = %s::jsonb,
+                            updated_at = NOW()
+                        WHERE scope = 'payment_fulfillment'
+                          AND key = %s
+                        """,
+                        (booking_id, json.dumps(response, default=str), db_tx_ref)
+                    )
+                    return response, 200
+
+                # --------------------------------------------------------
+                # Provider transaction cannot belong to another payment.
+                # --------------------------------------------------------
+                if provider == "pesapal":
+                    cur.execute(
+                        """
+                        SELECT id, tx_ref, processed, booking_id
+                        FROM payments
+                        WHERE provider = 'pesapal'
+                          AND pesapal_order_tracking_id = %s
+                          AND id <> %s
+                        LIMIT 1
+                        FOR UPDATE
+                        """,
+                        (transaction_id, db_payment_id)
+                    )
+                else:
+                    cur.execute(
+                        """
+                        SELECT id, tx_ref, processed, booking_id
+                        FROM payments
+                        WHERE provider = %s
+                          AND transaction_id = %s
+                          AND id <> %s
+                        LIMIT 1
+                        FOR UPDATE
+                        """,
+                        (provider, transaction_id, db_payment_id)
+                    )
+                duplicate_transaction = cur.fetchone()
+
+                if duplicate_transaction:
+                    response = {
+                        "success": False,
+                        "message": (
+                            "Payment transaction ID is already associated "
+                            "with another EventWaa payment."
+                        ),
+                        "code": "TRANSACTION_ALREADY_USED"
+                    }
+                    cur.execute(
+                        """
+                        UPDATE idempotency_keys
+                        SET status = 'failed',
+                            response_status = 409,
+                            response_body = %s::jsonb,
+                            updated_at = NOW()
+                        WHERE scope = 'payment_fulfillment'
+                          AND key = %s
+                        """,
+                        (json.dumps(response), db_tx_ref)
+                    )
+                    return response, 409
+
+                # --------------------------------------------------------
+                # Authoritative payment values.
+                # --------------------------------------------------------
+                event_id = db_payment.get("event_id")
+                quantity = as_int(db_payment.get("quantity"), 1)
+                if quantity < 1:
+                    response = {
+                        "success": False,
+                        "message": "Invalid ticket quantity."
+                    }
+                    cur.execute(
+                        """
+                        UPDATE idempotency_keys
+                        SET status = 'failed', response_status = 400,
+                            response_body = %s::jsonb, updated_at = NOW()
+                        WHERE scope = 'payment_fulfillment' AND key = %s
+                        """,
+                        (json.dumps(response), db_tx_ref)
+                    )
+                    return response, 400
+
+                expected_amount = as_int(db_payment.get("amount"))
+                verified_amount = as_int(paid_amount)
+                if verified_amount != expected_amount:
+                    response = {
+                        "success": False,
+                        "message": "Verified payment amount does not match the EventWaa payment.",
+                        "expectedAmount": expected_amount,
+                        "paidAmount": verified_amount
+                    }
+                    cur.execute(
+                        """
+                        UPDATE idempotency_keys
+                        SET status = 'failed', response_status = 400,
+                            response_body = %s::jsonb, updated_at = NOW()
+                        WHERE scope = 'payment_fulfillment' AND key = %s
+                        """,
+                        (json.dumps(response), db_tx_ref)
+                    )
+                    return response, 400
+
+                # --------------------------------------------------------
+                # Event and cancellation state come from PostgreSQL.
+                # --------------------------------------------------------
+                cur.execute(
+                    "SELECT * FROM events WHERE id = %s FOR UPDATE",
+                    (event_id,)
+                )
+                event = cur.fetchone()
+                if not event:
+                    response = {
+                        "success": False,
+                        "message": "Event associated with payment was not found."
+                    }
+                    cur.execute(
+                        """
+                        UPDATE idempotency_keys
+                        SET status = 'failed', response_status = 404,
+                            response_body = %s::jsonb, updated_at = NOW()
+                        WHERE scope = 'payment_fulfillment' AND key = %s
+                        """,
+                        (json.dumps(response), db_tx_ref)
+                    )
+                    return response, 404
+
+                if str(event.get("status") or "").strip().lower() == "cancelled":
+                    cur.execute(
+                        """
+                        UPDATE payments
+                        SET status = 'event_cancelled',
+                            updated_at = NOW()
+                        WHERE id = %s
+                        """,
+                        (db_payment_id,)
+                    )
+                    response = {
+                        "success": False,
+                        "message": (
+                            "This event has been cancelled. The payment cannot "
+                            "be converted into a booking."
+                        ),
+                        "code": "EVENT_CANCELLED",
+                        "eventCancelled": True,
+                        "bookingCreated": False,
+                        "paymentNeedsRefund": True,
+                        "transactionId": transaction_id,
+                        "txRef": db_tx_ref,
+                        "provider": provider,
+                        "amount": verified_amount
+                    }
+                    cur.execute(
+                        """
+                        UPDATE idempotency_keys
+                        SET status = 'failed', response_status = 409,
+                            response_body = %s::jsonb, updated_at = NOW()
+                        WHERE scope = 'payment_fulfillment' AND key = %s
+                        """,
+                        (json.dumps(response), db_tx_ref)
+                    )
+                    return response, 409
+
+                # --------------------------------------------------------
+                # Resolve ticket type from DB. Historical payments may not
+                # have ticket_type_id, so fall back to the stored ticket
+                # type name from the verified payment request.
+                # --------------------------------------------------------
+                ticket_type_id = db_payment.get("ticket_type_id")
+                ticket_type_name = str(
+                    (payment or {}).get("ticketType")
+                    or ""
+                ).strip()
+
+                if ticket_type_id is not None:
+                    cur.execute(
+                        """
+                        SELECT * FROM event_ticket_types
+                        WHERE id = %s AND event_id = %s
+                        FOR UPDATE
+                        """,
+                        (ticket_type_id, event_id)
+                    )
+                else:
+                    cur.execute(
+                        """
+                        SELECT * FROM event_ticket_types
+                        WHERE event_id = %s
+                          AND LOWER(name) = LOWER(%s)
+                        ORDER BY id
+                        LIMIT 1
+                        FOR UPDATE
+                        """,
+                        (event_id, ticket_type_name)
+                    )
+                ticket_type = cur.fetchone()
+
+                if not ticket_type:
+                    response = {
+                        "success": False,
+                        "message": "Ticket type no longer exists.",
+                        "code": "TICKET_TYPE_NOT_FOUND"
+                    }
+                    cur.execute(
+                        """
+                        UPDATE idempotency_keys
+                        SET status = 'failed', response_status = 404,
+                            response_body = %s::jsonb, updated_at = NOW()
+                        WHERE scope = 'payment_fulfillment' AND key = %s
+                        """,
+                        (json.dumps(response), db_tx_ref)
+                    )
+                    return response, 404
+
+                ticket_type_id = ticket_type["id"]
+                ticket_type_name = ticket_type["name"]
+                ticket_price = as_int(ticket_type["price"])
+                ticket_subtotal = as_int(db_payment.get("subtotal"))
+                service_fee_amount = as_int(db_payment.get("service_fee"))
+
+                if ticket_subtotal <= 0:
+                    response = {
+                        "success": False,
+                        "message": "Invalid ticket subtotal."
+                    }
+                    cur.execute(
+                        """
+                        UPDATE idempotency_keys
+                        SET status = 'failed', response_status = 400,
+                            response_body = %s::jsonb, updated_at = NOW()
+                        WHERE scope = 'payment_fulfillment' AND key = %s
+                        """,
+                        (json.dumps(response), db_tx_ref)
+                    )
+                    return response, 400
+
+                # --------------------------------------------------------
+                # Resolve buyer/user. Existing historical rows may have a
+                # null owner_user_id, so the verified payment's owner ID or
+                # exact buyer email is used only when needed.
+                # --------------------------------------------------------
+                owner_user_id = db_payment.get("owner_user_id")
+                if owner_user_id is None:
+                    owner_user_id = (payment or {}).get("ownerUserId")
+
+                if owner_user_id is not None:
+                    try:
+                        owner_user_id = int(owner_user_id)
+                    except (TypeError, ValueError):
+                        owner_user_id = None
+
+                if owner_user_id is not None:
+                    cur.execute(
+                        "SELECT id, name, email FROM users WHERE id = %s",
+                        (owner_user_id,)
+                    )
+                    buyer_user = cur.fetchone()
+                else:
+                    buyer_user = None
+
+                buyer = (payment or {}).get("buyer") or {}
+                buyer_email = str(
+                    db_payment.get("buyer_email")
+                    or buyer.get("email")
+                    or ""
+                ).strip().lower()
+
+                if not buyer_user and buyer_email:
+                    cur.execute(
+                        """
+                        SELECT id, name, email
+                        FROM users
+                        WHERE LOWER(email) = %s
+                        LIMIT 1
+                        """,
+                        (buyer_email,)
+                    )
+                    buyer_user = cur.fetchone()
+                    if buyer_user:
+                        owner_user_id = buyer_user["id"]
+
+                if not buyer_user:
+                    response = {
+                        "success": False,
+                        "message": "Payment owner could not be resolved to an EventWaa user.",
+                        "code": "PAYMENT_OWNER_NOT_FOUND"
+                    }
+                    cur.execute(
+                        """
+                        UPDATE idempotency_keys
+                        SET status = 'failed', response_status = 400,
+                            response_body = %s::jsonb, updated_at = NOW()
+                        WHERE scope = 'payment_fulfillment' AND key = %s
+                        """,
+                        (json.dumps(response), db_tx_ref)
+                    )
+                    return response, 400
+
+                buyer_name = str(
+                    db_payment.get("buyer_name")
+                    or buyer.get("name")
+                    or buyer_user.get("name")
+                    or "Guest"
+                ).strip()
+                buyer_email = str(
+                    db_payment.get("buyer_email")
+                    or buyer.get("email")
+                    or buyer_user.get("email")
+                    or ""
+                ).strip()
+
+                # Keep the payment owner authoritative for future refunds.
+                cur.execute(
+                    """
+                    UPDATE payments
+                    SET owner_user_id = %s,
+                        ticket_type_id = %s,
+                        updated_at = NOW()
+                    WHERE id = %s
+                    """,
+                    (owner_user_id, ticket_type_id, db_payment_id)
+                )
+
+                # --------------------------------------------------------
+                # Current commission setting comes from PostgreSQL.
+                # --------------------------------------------------------
+                cur.execute(
+                    """
+                    SELECT commission_percent, currency
+                    FROM admin_settings
+                    ORDER BY id
+                    LIMIT 1
+                    """
+                )
+                settings_row = cur.fetchone() or {}
+                commission_percent = as_float(
+                    settings_row.get("commission_percent"),
+                    10
+                )
+                commission_percent = max(0.0, min(100.0, commission_percent))
+
+                is_official_event = bool(event.get("admin_event"))
+                if is_official_event:
+                    commission_amount = 0
+                    host_amount = 0
+                    eventwaa_ticket_amount = ticket_subtotal
+                else:
+                    commission_amount = int(
+                        round(ticket_subtotal * commission_percent / 100)
+                    )
+                    host_amount = ticket_subtotal - commission_amount
+                    eventwaa_ticket_amount = commission_amount
+
+                eventwaa_earning = eventwaa_ticket_amount + service_fee_amount
+                currency = str(
+                    db_payment.get("currency")
+                    or settings_row.get("currency")
+                    or "UGX"
+                ).upper()
+
+                # --------------------------------------------------------
+                # Validate accounting destinations BEFORE inventory is
+                # changed. Any failure after inventory allocation must be
+                # an exception/rollback, never a normal return.
+                # --------------------------------------------------------
+                host_id = event.get("host_id")
+                if not is_official_event and host_id is None:
+                    response = {
+                        "success": False,
+                        "message": "Event host ID is invalid.",
+                        "code": "EVENT_HOST_NOT_FOUND"
+                    }
+                    cur.execute(
+                        """
+                        UPDATE idempotency_keys
+                        SET status = 'failed', response_status = 400,
+                            response_body = %s::jsonb, updated_at = NOW()
+                        WHERE scope = 'payment_fulfillment' AND key = %s
+                        """,
+                        (json.dumps(response), db_tx_ref)
+                    )
+                    return response, 400
+
+                cur.execute(
+                    "SELECT id FROM admin_wallet WHERE id = 1 FOR UPDATE"
+                )
+                if not cur.fetchone():
+                    response = {
+                        "success": False,
+                        "message": "EventWaa admin wallet is not configured.",
+                        "code": "ADMIN_WALLET_NOT_FOUND"
+                    }
+                    cur.execute(
+                        """
+                        UPDATE idempotency_keys
+                        SET status = 'failed', response_status = 500,
+                            response_body = %s::jsonb, updated_at = NOW()
+                        WHERE scope = 'payment_fulfillment' AND key = %s
+                        """,
+                        (json.dumps(response), db_tx_ref)
+                    )
+                    return response, 500
+
+                # --------------------------------------------------------
+                # ATOMIC INVENTORY ALLOCATION.
+                # This is the authoritative ticket inventory; events has no
+                # tickets_sold/revenue columns in the current schema.
+                # --------------------------------------------------------
+                cur.execute(
+                    """
+                    UPDATE event_ticket_types
+                    SET remaining = remaining - %s,
+                        updated_at = NOW()
+                    WHERE id = %s
+                      AND remaining >= %s
+                    RETURNING remaining
+                    """,
+                    (quantity, ticket_type_id, quantity)
+                )
+                inventory_row = cur.fetchone()
+
+                if not inventory_row:
+                    response = {
+                        "success": False,
+                        "message": "There are no longer enough tickets available.",
+                        "code": "INSUFFICIENT_INVENTORY",
+                        "paymentNeedsRefund": True,
+                        "transactionId": transaction_id,
+                        "txRef": db_tx_ref,
+                        "provider": provider,
+                        "amount": verified_amount
+                    }
+                    cur.execute(
+                        """
+                        UPDATE idempotency_keys
+                        SET status = 'failed', response_status = 409,
+                            response_body = %s::jsonb, updated_at = NOW()
+                        WHERE scope = 'payment_fulfillment' AND key = %s
+                        """,
+                        (json.dumps(response), db_tx_ref)
+                    )
+                    return response, 409
+
+                # --------------------------------------------------------
+                # Create booking using PostgreSQL-generated ID.
+                # --------------------------------------------------------
+                event_date = event.get("date")
+                event_date_snapshot = (
+                    event_date.isoformat() if event_date is not None else None
+                )
+                event_time_snapshot = time_text(event.get("start_time"))
+                end_time_snapshot = time_text(event.get("end_time"))
+                if end_time_snapshot:
+                    event_time_snapshot = (
+                        f"{event_time_snapshot} - {end_time_snapshot}"
+                    )
+
+                customer_total = expected_amount
+                total_price = ticket_price * quantity
+                service_fee_percent = as_float(
+                    db_payment.get("service_fee_percent"),
                     5
                 )
-                or
-                0
-            ),
 
-        "customerTotal":
-            int(
-                payment.get(
-                    "amount",
-                    0
+                cur.execute(
+                    """
+                    INSERT INTO bookings (
+                        event_id, owner_user_id, payment_id,
+                        event_title_snapshot, event_date_snapshot,
+                        event_time_snapshot, event_venue_snapshot,
+                        event_city_snapshot, buyer_name_snapshot,
+                        buyer_email_snapshot, ticket_type_snapshot,
+                        ticket_type_id, ticket_price, quantity, subtotal,
+                        service_fee, service_fee_percent, customer_total,
+                        commission_percent, commission_amount, host_amount,
+                        eventwaa_ticket_amount, eventwaa_amount,
+                        service_fee_retained, transaction_id, tx_ref,
+                        payment_provider, refund_status, email_sent,
+                        created_at, updated_at
+                    )
+                    VALUES (
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, NULL, FALSE,
+                        NOW(), NOW()
+                    )
+                    RETURNING id
+                    """,
+                    (
+                        event_id,
+                        owner_user_id,
+                        db_payment_id,
+                        event.get("title") or "",
+                        event_date_snapshot,
+                        event_time_snapshot,
+                        event.get("venue") or "",
+                        event.get("city") or "",
+                        buyer_name,
+                        buyer_email,
+                        ticket_type_name,
+                        ticket_type_id,
+                        ticket_price,
+                        quantity,
+                        ticket_subtotal,
+                        service_fee_amount,
+                        service_fee_percent,
+                        customer_total,
+                        commission_percent,
+                        commission_amount,
+                        host_amount,
+                        eventwaa_ticket_amount,
+                        eventwaa_earning,
+                        True,
+                        transaction_id,
+                        db_tx_ref,
+                        provider
+                    )
                 )
-                or
-                0
-            ),
+                booking_id = cur.fetchone()["id"]
 
-        "totalPrice":
-            int(
-                payment.get(
-                    "ticketPrice",
-                    0
+                # --------------------------------------------------------
+                # Individual tickets. One ticket = one entry.
+                # --------------------------------------------------------
+                ticket_timestamp = int(datetime.now().timestamp() * 1000)
+                ticket_payloads = []
+                for ticket_number in range(1, quantity + 1):
+                    ticket_id = (
+                        f"EW-{ticket_timestamp}-{booking_id}-{ticket_number}"
+                    )
+                    cur.execute(
+                        """
+                        INSERT INTO tickets (
+                            booking_id, event_id, ticket_type_id, ticket_id,
+                            ticket_number, ticket_type_snapshot, price,
+                            valid, cancelled, checked_in, check_in_count,
+                            check_in_limit, refund_status, refund_amount,
+                            refund_fee, created_at
+                        )
+                        VALUES (
+                            %s, %s, %s, %s, %s, %s, %s,
+                            TRUE, FALSE, FALSE, 0, 1, NULL, 0, 0, NOW()
+                        )
+                        RETURNING id
+                        """,
+                        (
+                            booking_id,
+                            event_id,
+                            ticket_type_id,
+                            ticket_id,
+                            str(ticket_number),
+                            ticket_type_name,
+                            ticket_price
+                        )
+                    )
+                    ticket_db_id = cur.fetchone()["id"]
+                    ticket_payloads.append({
+                        "id": ticket_db_id,
+                        "ticketId": ticket_id,
+                        "ticketNumber": ticket_number,
+                        "ticketType": ticket_type_name,
+                        "checkedIn": False,
+                        "checkInCount": 0,
+                        "checkInLimit": 1,
+                        "refundStatus": None
+                    })
+
+                # --------------------------------------------------------
+                # Host wallet accounting.
+                # --------------------------------------------------------
+                if not is_official_event:
+                    host_id = event.get("host_id")
+                    cur.execute(
+                        """
+                        SELECT * FROM host_wallets
+                        WHERE user_id = %s
+                        LIMIT 1
+                        FOR UPDATE
+                        """,
+                        (host_id,)
+                    )
+                    host_wallet = cur.fetchone()
+
+                    if not host_wallet:
+                        cur.execute(
+                            """
+                            INSERT INTO host_wallets (
+                                user_id, available_balance, pending_balance,
+                                total_earned, total_withdrawn, currency,
+                                status, created_at, updated_at
+                            )
+                            VALUES (%s, 0, 0, 0, 0, %s, 'active', NOW(), NOW())
+                            RETURNING *
+                            """,
+                            (host_id, currency)
+                        )
+                        host_wallet = cur.fetchone()
+
+                    host_before = as_int(host_wallet.get("available_balance"))
+                    host_after = host_before + host_amount
+                    cur.execute(
+                        """
+                        UPDATE host_wallets
+                        SET available_balance = %s,
+                            total_earned = total_earned + %s,
+                            updated_at = NOW()
+                        WHERE id = %s
+                        """,
+                        (host_after, host_amount, host_wallet["id"])
+                    )
+
+                    cur.execute(
+                        """
+                        INSERT INTO wallet_transactions (
+                            wallet_id, user_id, event_id, booking_id,
+                            payment_id, type, amount, currency, status,
+                            description, reference, balance_before,
+                            balance_after, created_at, metadata
+                        )
+                        VALUES (
+                            %s, %s, %s, %s, %s, 'sale', %s, %s,
+                            'completed', %s, %s, %s, %s, NOW(), %s::jsonb
+                        )
+                        """,
+                        (
+                            host_wallet["id"],
+                            host_id,
+                            event_id,
+                            booking_id,
+                            db_payment_id,
+                            host_amount,
+                            currency,
+                            f"Ticket sale for {event.get('title') or 'EventWaa event'}",
+                            transaction_id,
+                            host_before,
+                            host_after,
+                            json.dumps({
+                                "tx_ref": db_tx_ref,
+                                "provider": provider,
+                                "ticket_subtotal": ticket_subtotal,
+                                "commission": commission_amount,
+                                "commission_percent": commission_percent
+                            })
+                        )
+                    )
+
+                # --------------------------------------------------------
+                # EventWaa/admin wallet accounting.
+                # --------------------------------------------------------
+                cur.execute(
+                    "SELECT * FROM admin_wallet WHERE id = 1 FOR UPDATE"
                 )
-                or
-                0
-            )
-            *
-            quantity,
+                admin_wallet = cur.fetchone()
+                admin_before = as_int(admin_wallet.get("available_balance"))
+                admin_after = admin_before + eventwaa_earning
 
-        # ====================================================
-        # ORIGINAL ACCOUNTING
-        #
-        # THESE VALUES MUST NOT BE RECALCULATED DURING
-        # FUTURE REFUNDS/CANCELLATIONS.
-        # ====================================================
-
-        "commissionPercent":
-            commission_percent,
-
-        "commissionAmount":
-            commission_amount,
-
-        "hostAmount":
-            host_amount,
-
-        "eventWaaTicketAmount":
-            eventwaa_ticket_amount,
-
-        "eventWaaAmount":
-            eventwaa_earning,
-
-        "serviceFeeRetained":
-            True,
-
-        # ====================================================
-        # PAYMENT INFORMATION
-        # ====================================================
-
-        "transactionId":
-            transaction_id,
-
-        "txRef":
-            payment.get(
-                "txRef"
-            ),
-
-        "paymentProvider":
-            provider,
-
-        # ====================================================
-        # INDIVIDUAL TICKETS
-        # ====================================================
-
-        "tickets":
-            tickets,
-
-        # ====================================================
-        # REFUND STATUS
-        # ====================================================
-
-        "refundStatus":
-            None,
-
-        # ====================================================
-        # EMAIL STATUS
-        # ====================================================
-
-        "emailSent":
-            False,
-
-        "emailSentAt":
-            None,
-
-        "emailError":
-            None,
-
-        # ====================================================
-        # CREATED TIME
-        # ====================================================
-
-        "createdAt":
-            now
-    }
-
-    # ========================================================
-    # ADD BOOKING
-    # ========================================================
-
-    bookings.append(
-        booking
-    )
-
-    # ========================================================
-    # UPDATE EVENT INVENTORY
-    # ========================================================
-
-    selected_ticket["remaining"] = (
-        remaining
-        -
-        quantity
-    )
-
-    event["ticketsSold"] = (
-        int(
-            event.get(
-                "ticketsSold",
-                0
-            )
-            or
-            0
-        )
-        +
-        quantity
-    )
-
-    event["revenue"] = (
-        int(
-            event.get(
-                "revenue",
-                0
-            )
-            or
-            0
-        )
-        +
-        ticket_subtotal
-    )
-
-    # ========================================================
-    # HOST WALLET
-    #
-    # OFFICIAL EVENTWAA EVENTS DO NOT REQUIRE A HOST WALLET.
-    # ========================================================
-
-    wallets = load_host_wallets()
-
-    host_id = event.get(
-        "hostId"
-    )
-
-    host_wallet = None
-
-    if not is_official_event:
-
-        try:
-
-            host_id = int(
-                host_id
-            )
-
-        except (
-            TypeError,
-            ValueError
-        ):
-
-            return {
-                "success": False,
-                "message": (
-                    "Event host ID is invalid."
+                cur.execute(
+                    """
+                    UPDATE admin_wallet
+                    SET available_balance = %s,
+                        total_revenue = total_revenue + %s,
+                        updated_at = NOW()
+                    WHERE id = %s
+                    """,
+                    (admin_after, eventwaa_earning, admin_wallet["id"])
                 )
-            }, 400
 
-        # ----------------------------------------------------
-        # FIND HOST WALLET
-        # ----------------------------------------------------
-
-        for wallet in wallets:
-
-            try:
-
-                wallet_host_id = int(
-                    wallet.get(
-                        "hostId",
-                        0
+                cur.execute(
+                    """
+                    INSERT INTO admin_wallet_transactions (
+                        wallet_id, event_id, booking_id, payment_id,
+                        type, amount, currency, status, description,
+                        reference, balance_before, balance_after,
+                        created_at, metadata
+                    )
+                    VALUES (
+                        %s, %s, %s, %s, 'sale', %s, %s, 'completed',
+                        %s, %s, %s, %s, NOW(), %s::jsonb
+                    )
+                    """,
+                    (
+                        admin_wallet["id"],
+                        event_id,
+                        booking_id,
+                        db_payment_id,
+                        eventwaa_earning,
+                        currency,
+                        f"EventWaa payment for {event.get('title') or 'EventWaa event'}",
+                        transaction_id,
+                        admin_before,
+                        admin_after,
+                        json.dumps({
+                            "tx_ref": db_tx_ref,
+                            "provider": provider,
+                            "ticket_subtotal": ticket_subtotal,
+                            "commission": commission_amount,
+                            "commission_percent": commission_percent,
+                            "service_fee": service_fee_amount,
+                            "admin_event": is_official_event
+                        })
                     )
                 )
 
-            except (
-                TypeError,
-                ValueError
-            ):
-
-                wallet_host_id = 0
-
-            if wallet_host_id == host_id:
-
-                host_wallet = wallet
-
-                break
-
-        # ----------------------------------------------------
-        # CREATE HOST WALLET IF NEEDED
-        # ----------------------------------------------------
-
-        if not host_wallet:
-
-            host_wallet = {
-
-                "hostId":
-                    host_id,
-
-                "availableBalance":
-                    0,
-
-                "pendingPayouts":
-                    0,
-
-                "totalEarned":
-                    0,
-
-                "totalWithdrawn":
-                    0,
-
-                "withdrawals":
-                    [],
-
-                "scheduledPayouts":
-                    [],
-
-                "transactions":
-                    [],
-
-                "refunds":
-                    0
-            }
-
-            wallets.append(
-                host_wallet
-            )
-
-    # ========================================================
-    # EVENTWAA ADMIN WALLET
-    # ========================================================
-
-    admin_wallet = load_wallet()
-
-    # ========================================================
-    # ADD EVENTWAA MONEY
-    #
-    # Normal event:
-    #   commission + service fee
-    #
-    # Official EventWaa event:
-    #   full ticket subtotal + service fee
-    # ========================================================
-
-    admin_wallet["availableBalance"] = (
-
-        int(
-            admin_wallet.get(
-                "availableBalance",
-                0
-            )
-            or
-            0
-        )
-        +
-        eventwaa_earning
-    )
-
-    # ========================================================
-    # TOTAL COMMISSION
-    # ========================================================
-
-    admin_wallet["totalCommission"] = (
-
-        int(
-            admin_wallet.get(
-                "totalCommission",
-                0
-            )
-            or
-            0
-        )
-        +
-        commission_amount
-    )
-
-    # ========================================================
-    # TOTAL SERVICE FEES
-    # ========================================================
-
-    admin_wallet["totalServiceFees"] = (
-
-        int(
-            admin_wallet.get(
-                "totalServiceFees",
-                0
-            )
-            or
-            0
-        )
-        +
-        service_fee_amount
-    )
-
-    # ========================================================
-    # TOTAL EVENTWAA REVENUE
-    # ========================================================
-
-    admin_wallet["totalRevenue"] = (
-
-        int(
-            admin_wallet.get(
-                "totalRevenue",
-                0
-            )
-            or
-            0
-        )
-        +
-        eventwaa_earning
-    )
-
-    # ========================================================
-    # EVENTWAA TRANSACTION HISTORY
-    # ========================================================
-
-    admin_wallet.setdefault(
-        "transactions",
-        []
-    )
-
-    admin_wallet["transactions"].insert(
-
-        0,
-
-        {
-
-            "type":
-                "sale",
-
-            "eventId":
-                event.get(
-                    "id"
-                ),
-
-            "eventTitle":
-                event.get(
-                    "title",
-                    ""
-                ),
-
-            "transactionId":
-                transaction_id,
-
-            "txRef":
-                payment.get(
-                    "txRef"
-                ),
-
-            "paymentProvider":
-                provider,
-
-            "ticketSubtotal":
-                ticket_subtotal,
-
-            "commission":
-                commission_amount,
-
-            "commissionPercent":
-                commission_percent,
-
-            "serviceFee":
-                service_fee_amount,
-
-            "amount":
-                eventwaa_earning,
-
-            "customerPaid":
-                int(
-                    payment.get(
-                        "amount",
-                        0
+                # --------------------------------------------------------
+                # Platform revenue record.
+                # --------------------------------------------------------
+                cur.execute(
+                    """
+                    INSERT INTO platform_revenue (
+                        event_id, booking_id, payment_id, type, amount,
+                        currency, status, description, reference,
+                        created_at, metadata
                     )
-                    or
-                    0
-                ),
-
-            "adminEvent":
-                is_official_event,
-
-            "date":
-                now
-        }
-    )
-
-    save_wallet(
-        admin_wallet
-    )
-
-    # ========================================================
-    # ADD HOST AVAILABLE BALANCE
-    #
-    # Official EventWaa events have no host earning.
-    # ========================================================
-
-    if not is_official_event:
-
-        host_wallet["availableBalance"] = (
-
-            int(
-                host_wallet.get(
-                    "availableBalance",
-                    0
+                    VALUES (
+                        %s, %s, %s, 'sale', %s, %s, 'completed',
+                        %s, %s, NOW(), %s::jsonb
+                    )
+                    """,
+                    (
+                        event_id,
+                        booking_id,
+                        db_payment_id,
+                        eventwaa_earning,
+                        currency,
+                        f"EventWaa revenue for {event.get('title') or 'EventWaa event'}",
+                        transaction_id,
+                        json.dumps({
+                            "tx_ref": db_tx_ref,
+                            "provider": provider,
+                            "ticket_subtotal": ticket_subtotal,
+                            "commission": commission_amount,
+                            "service_fee": service_fee_amount,
+                            "admin_event": is_official_event
+                        })
+                    )
                 )
-                or
-                0
-            )
-            +
-            host_amount
-        )
 
-        host_wallet["totalEarned"] = (
-
-            int(
-                host_wallet.get(
-                    "totalEarned",
-                    0
+                # --------------------------------------------------------
+                # Final payment state. This is inside the same transaction
+                # as inventory, booking, tickets, and accounting.
+                # --------------------------------------------------------
+                cur.execute(
+                    """
+                    UPDATE payments
+                    SET owner_user_id = %s,
+                        ticket_type_id = %s,
+                        booking_id = %s,
+                        status = 'successful',
+                        processed = TRUE,
+                        transaction_id = %s,
+                        paid_amount = %s,
+                        provider = %s,
+                        processed_at = NOW(),
+                        updated_at = NOW()
+                    WHERE id = %s
+                    """,
+                    (
+                        owner_user_id,
+                        ticket_type_id,
+                        booking_id,
+                        transaction_id,
+                        verified_amount,
+                        provider,
+                        db_payment_id
+                    )
                 )
-                or
-                0
-            )
-            +
-            host_amount
+
+                booking_response = {
+                    "id": booking_id,
+                    "eventId": event_id,
+                    "eventTitle": event.get("title") or "",
+                    "eventDate": event_date_snapshot or "",
+                    "eventTime": event_time_snapshot,
+                    "eventVenue": event.get("venue") or "",
+                    "eventCity": event.get("city") or "",
+                    "adminEvent": is_official_event,
+                    "buyer": {
+                        "name": buyer_name,
+                        "email": buyer_email
+                    },
+                    "ownerUserId": owner_user_id,
+                    "ticketType": ticket_type_name,
+                    "ticketPrice": ticket_price,
+                    "quantity": quantity,
+                    "subtotal": ticket_subtotal,
+                    "serviceFee": service_fee_amount,
+                    "serviceFeePercent": service_fee_percent,
+                    "customerTotal": customer_total,
+                    "totalPrice": total_price,
+                    "commissionPercent": commission_percent,
+                    "commissionAmount": commission_amount,
+                    "hostAmount": host_amount,
+                    "eventWaaTicketAmount": eventwaa_ticket_amount,
+                    "eventWaaAmount": eventwaa_earning,
+                    "serviceFeeRetained": True,
+                    "transactionId": transaction_id,
+                    "txRef": db_tx_ref,
+                    "paymentProvider": provider,
+                    "tickets": ticket_payloads,
+                    "refundStatus": None,
+                    "emailSent": False,
+                    "emailSentAt": None,
+                    "emailError": None
+                }
+
+                response = {
+                    "success": True,
+                    "message": "Payment verified and booking created successfully.",
+                    "alreadyProcessed": False,
+                    "bookingId": booking_id,
+                    "transactionId": transaction_id,
+                    "txRef": db_tx_ref,
+                    "provider": provider,
+                    "amount": verified_amount,
+                    "currency": currency,
+                    "booking": booking_response
+                }
+
+                # Mark the idempotency operation complete before COMMIT.
+                cur.execute(
+                    """
+                    UPDATE idempotency_keys
+                    SET status = 'completed',
+                        resource_id = %s,
+                        response_status = 200,
+                        response_body = %s::jsonb,
+                        updated_at = NOW()
+                    WHERE scope = 'payment_fulfillment'
+                      AND key = %s
+                    """,
+                    (
+                        booking_id,
+                        json.dumps(response, default=str),
+                        db_tx_ref
+                    )
+                )
+
+                return response, 200
+
+    except Exception as error:
+        print(
+            "EVENTWAA POSTGRES PAYMENT FULFILLMENT ERROR:",
+            type(error).__name__,
+            str(error)
         )
+        traceback.print_exc()
+        return {
+            "success": False,
+            "message": "Payment fulfillment could not be completed.",
+            "retryable": True
+        }, 500
 
-        # ====================================================
-        # HOST WALLET TRANSACTION HISTORY
-        # ====================================================
-
-        host_wallet.setdefault(
-            "transactions",
-            []
-        )
-
-        host_wallet["transactions"].insert(
-
-            0,
-
-            {
-
-                "type":
-                    "sale",
-
-                "eventId":
-                    event.get(
-                        "id"
-                    ),
-
-                "eventTitle":
-                    event.get(
-                        "title",
-                        ""
-                    ),
-
-                "transactionId":
-                    transaction_id,
-
-                "txRef":
-                    payment.get(
-                        "txRef"
-                    ),
-
-                "paymentProvider":
-                    provider,
-
-                "ticketSubtotal":
-                    ticket_subtotal,
-
-                "commission":
-                    commission_amount,
-
-                "commissionPercent":
-                    commission_percent,
-
-                "amount":
-                    host_amount,
-
-                "date":
-                    now
-            }
-        )
-
-    # ========================================================
-    # SAVE HOST WALLETS
-    #
-    # Saving is harmless for official events because wallets
-    # remains the existing wallet list.
-    # ========================================================
-
-    save_host_wallets(
-        wallets
-    )
-
-    # ========================================================
-    # MARK PAYMENT PROCESSED
-    # ========================================================
-
-    payment["processed"] = True
-
-    payment["bookingId"] = (
-        next_booking_id
-    )
-
-    payment["processedAt"] = (
-        now
-    )
-
-    payment["status"] = (
-        "successful"
-    )
-
-    payment["transactionId"] = (
-        transaction_id
-    )
-
-    payment["paidAmount"] = (
-        paid_amount
-    )
-
-    payment["provider"] = (
-        provider
-    )
-
-    # ========================================================
-    # SAVE EVERYTHING
-    # ========================================================
-
-    save_json_file(
-        "bookings.json",
-        bookings
-    )
-
-    save_json_file(
-        "events.json",
-        events
-    )
-
-    save_host_wallets(
-        wallets
-    )
-
-    save_payments(
-        payments
-    )
-
-    # ========================================================
-    # FINAL SUCCESS RESPONSE
-    # ========================================================
-
-    return {
-
-        "success":
-            True,
-
-        "message":
-            "Payment verified and booking created successfully.",
-
-        "alreadyProcessed":
-            False,
-
-        "bookingId":
-            next_booking_id,
-
-        "transactionId":
-            transaction_id,
-
-        "txRef":
-            payment.get(
-                "txRef"
-            ),
-
-        "provider":
-            provider,
-
-        "amount":
-            paid_amount,
-
-        "currency":
-            payment.get(
-                "currency",
-                "UGX"
-            ),
-
-        "booking":
-            booking
-
-    }, 200
 
 # ============================================================
 # FLUTTERWAVE TRANSACTION REFERENCE
@@ -19604,19 +19164,11 @@ def find_payment_by_transaction_id(
 # ============================================================
 
 def load_applications():
-
-    return load_json_file(
-        HOST_APPLICATIONS_FILE,
-        []
-    )
+    return load_json_file("host_applications.json", [])
 
 
-def save_applications(applications):
-
-    save_json_file(
-        HOST_APPLICATIONS_FILE,
-        applications
-    )
+def save_applications(data):
+    return save_json_file("host_applications.json", data)
 
 
 # ============================================================
@@ -19624,19 +19176,11 @@ def save_applications(applications):
 # ============================================================
 
 def load_attendance():
-
-    return load_json_file(
-        ATTENDANCE_FILE,
-        []
-    )
+    return load_json_file("attendance.json", [])
 
 
-def save_attendance(attendance):
-
-    save_json_file(
-        ATTENDANCE_FILE,
-        attendance
-    )
+def save_attendance(data):
+    return save_json_file("attendance.json", data)
 
 
 # ============================================================
@@ -19644,19 +19188,11 @@ def save_attendance(attendance):
 # ============================================================
 
 def load_messages():
-
-    return load_json_file(
-        MESSAGES_FILE,
-        []
-    )
+    return load_json_file("messages.json", [])
 
 
-def save_messages(messages):
-
-    save_json_file(
-        MESSAGES_FILE,
-        messages
-    )
+def save_messages(data):
+    return save_json_file("messages.json", data)
 
 
 # ============================================================
@@ -19664,19 +19200,11 @@ def save_messages(messages):
 # ============================================================
 
 def load_host_wallets():
-
-    return load_json_file(
-        HOST_WALLETS_FILE,
-        []
-    )
+    return load_json_file("host_wallets.json", [])
 
 
-def save_host_wallets(wallets):
-
-    save_json_file(
-        HOST_WALLETS_FILE,
-        wallets
-    )
+def save_host_wallets(data):
+    return save_json_file("host_wallets.json", data)
 
 
 # ============================================================
@@ -19684,19 +19212,11 @@ def save_host_wallets(wallets):
 # ============================================================
 
 def load_notifications():
-
-    return load_json_file(
-        NOTIFICATIONS_FILE,
-        []
-    )
+    return load_json_file("notifications.json", [])
 
 
-def save_notifications(notifications):
-
-    save_json_file(
-        NOTIFICATIONS_FILE,
-        notifications
-    )
+def save_notifications(data):
+    return save_json_file("notifications.json", data)
 
 
 # ============================================================
@@ -19704,116 +19224,31 @@ def save_notifications(notifications):
 # ============================================================
 
 def load_event_reports():
-
-    return load_json_file(
-        EVENT_REPORTS_FILE,
-        []
-    )
+    return load_json_file("event_reports.json", [])
 
 
-def save_event_reports(reports):
-
-    save_json_file(
-        EVENT_REPORTS_FILE,
-        reports
-    )
+def save_event_reports(data):
+    return save_json_file("event_reports.json", data)
 
 
 # ============================================================
 # EVENTWAA ADMIN WALLET
 # ============================================================
 
-def save_wallet(wallet):
-
-    save_json_file(
-        WALLET_FILE,
-        wallet
-    )
+def save_wallet(data):
+    return save_json_file("wallet.json", data)
 
 
 def load_wallet():
-
-    if os.path.exists(WALLET_FILE):
-
-        wallet = load_json_file(
-            WALLET_FILE,
-            {}
-        )
-
-        # Upgrade older wallet files safely.
-
-        wallet.setdefault(
-            "availableBalance",
-            0
-        )
-
-        wallet.setdefault(
-            "pendingPayouts",
-            0
-        )
-
-        wallet.setdefault(
-            "totalCommission",
-            0
-        )
-
-        wallet.setdefault(
-            "totalServiceFees",
-            0
-        )
-
-        wallet.setdefault(
-            "totalRevenue",
-            0
-        )
-
-        wallet.setdefault(
-            "totalWithdrawn",
-            0
-        )
-
-        wallet.setdefault(
-            "withdrawals",
-            []
-        )
-
-        wallet.setdefault(
-            "transactions",
-            []
-        )
-
-        save_wallet(wallet)
-
-        return wallet
-
-
-    # ========================================================
-    # CREATE NEW EVENTWAA WALLET
-    # ========================================================
-
-    wallet = {
-
+    rows = load_json_file("wallet.json", [])
+    return rows[0] if rows else {
         "availableBalance": 0,
-
         "pendingPayouts": 0,
-
         "totalCommission": 0,
-
         "totalServiceFees": 0,
-
         "totalRevenue": 0,
-
-        "totalWithdrawn": 0,
-
-        "withdrawals": [],
-
         "transactions": []
-
     }
-
-    save_wallet(wallet)
-
-    return wallet
 
 
 # ============================================================
@@ -20472,35 +19907,19 @@ TEAM_SESSIONS_FILE = "team_sessions.json"
 # ============================================================
 
 def load_team_members():
-
-    return load_json_file(
-        TEAM_MEMBERS_FILE,
-        []
-    )
+    return load_json_file("team_members.json", [])
 
 
-def save_team_members(team_members):
-
-    save_json_file(
-        TEAM_MEMBERS_FILE,
-        team_members
-    )
+def save_team_members(data):
+    return save_json_file("team_members.json", data)
 
 
 def load_team_sessions():
-
-    return load_json_file(
-        TEAM_SESSIONS_FILE,
-        []
-    )
+    return load_json_file("team_sessions.json", [])
 
 
-def save_team_sessions(sessions):
-
-    save_json_file(
-        TEAM_SESSIONS_FILE,
-        sessions
-    )
+def save_team_sessions(data):
+    return save_json_file("team_sessions.json", data)
 
 
 
@@ -20552,25 +19971,15 @@ def get_idempotency_file_path():
 # ============================================================
 
 def load_idempotency_records():
-
-    return load_json_file(
-        IDEMPOTENCY_FILE,
-        []
-    )
+    return load_json_file("idempotency_keys.json", [])
 
 
 # ============================================================
 # SAVE IDEMPOTENCY RECORDS
 # ============================================================
 
-def save_idempotency_records(
-    records
-):
-
-    save_json_file(
-        IDEMPOTENCY_FILE,
-        records
-    )
+def save_idempotency_records(data):
+    return save_json_file("idempotency_keys.json", data)
 
 
 # ============================================================
@@ -46055,31 +45464,8 @@ def delete_message(message_id):
     methods=["GET"]
 )
 def get_followers(host_id):
-
-    follows = load_json_file(
-        "follows.json",
-        []
-    )
-
-
-    followers = [
-
-        follow
-
-        for follow in follows
-
-        if str(
-            follow.get("hostId")
-        )
-        ==
-        str(host_id)
-
-    ]
-
-
-    return jsonify({
-        "count": len(followers)
-    })
+    # Follower persistence is not part of the approved PostgreSQL schema.
+    return jsonify({"count": 0})
 
 
 # ============================================================
