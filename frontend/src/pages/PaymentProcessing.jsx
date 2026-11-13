@@ -42,7 +42,7 @@ function PaymentProcessing() {
 
         <p>
           We're confirming your payment
-          with Flutterwave.
+          with PesaPal.
         </p>
 
         <p>

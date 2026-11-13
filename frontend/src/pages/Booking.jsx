@@ -312,9 +312,9 @@ function Booking() {
   // ==========================================================
   // HANDLE PAYMENT
   //
-  // Flutterwave is PRIMARY.
+  // PesaPal is PRIMARY.
   //
-  // PesaPal is FALLBACK ONLY if Flutterwave initialization
+  // Flutterwave is FALLBACK ONLY if PesaPal initialization
   // fails before the customer is redirected to checkout.
   // ==========================================================
   const handlePayment = async () => {
@@ -352,42 +352,42 @@ function Booking() {
     let paymentResult = null;
     try {
       // ======================================================
-      // 1. TRY FLUTTERWAVE FIRST
+      // 1. TRY PESAPAL FIRST
       // ======================================================
       try {
         paymentResult =
-          await initializeFlutterwave();
+          await initializePesapal();
         console.log(
-          "PAYMENT PROVIDER: FLUTTERWAVE"
+          "PAYMENT PROVIDER: PESAPAL"
         );
-      } catch (flutterwaveError) {
+      } catch (pesapalError) {
         // ----------------------------------------------------
-        // Flutterwave failed BEFORE checkout.
+        // PesaPal failed BEFORE checkout.
         //
-        // Safe to try PesaPal because the customer has not
-        // been redirected to Flutterwave.
+        // Safe to try Flutterwave because the customer has not
+        // been redirected to PesaPal.
         // ----------------------------------------------------
         console.warn(
-          "FLUTTERWAVE INITIALIZATION FAILED. TRYING PESAPAL:",
-          flutterwaveError
+          "PESAPAL INITIALIZATION FAILED. TRYING FLUTTERWAVE:",
+          pesapalError
         );
         try {
           paymentResult =
-            await initializePesapal();
+            await initializeFlutterwave();
           console.log(
-            "PAYMENT PROVIDER: PESAPAL FALLBACK"
+            "PAYMENT PROVIDER: FLUTTERWAVE FALLBACK"
           );
-        } catch (pesapalError) {
+        } catch (flutterwaveError) {
           console.error(
-            "PESAPAL FALLBACK ALSO FAILED:",
-            pesapalError
+            "FLUTTERWAVE FALLBACK ALSO FAILED:",
+            flutterwaveError
           );
           throw new Error(
-            `Payment could not be started. Flutterwave: ${
-              flutterwaveError.message ||
-              "initialization failed"
-            }. PesaPal fallback: ${
+            `Payment could not be started. PesaPal: ${
               pesapalError.message ||
+              "initialization failed"
+            }. Flutterwave fallback: ${
+              flutterwaveError.message ||
               "initialization failed"
             }.`
           );
