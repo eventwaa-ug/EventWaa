@@ -13,6 +13,7 @@ import resend
 import traceback
 import psycopg
 from psycopg.rows import dict_row
+from psycopg.types.json import Jsonb
 #print(secrets.token_urlsafe(32))
 import qrcode
 from io import BytesIO
@@ -3635,57 +3636,8 @@ def verify_admin_team_token(token):
             token_member_id or "NONE"
         )
 
-        # ====================================================
-        # LOAD TEAM ACCOUNTS
-        #
-        # Admin Team accounts are stored in the shared
-        # team_accounts.json file.
-        # ====================================================
-
-        team_accounts = load_admin_team_accounts()
-
-        if not isinstance(
-            team_accounts,
-            list
-        ):
-            team_accounts = []
-
-        # ====================================================
-        # FIND ACCOUNT BY EMAIL
-        # ====================================================
-
-        account = None
-
-        for item in team_accounts:
-
-            if not isinstance(
-                item,
-                dict
-            ):
-                continue
-
-            item_email = str(
-                item.get(
-                    "email",
-                    ""
-                ) or ""
-            ).strip().lower()
-
-            if (
-                item_email
-                ==
-                token_email
-            ):
-
-                account = item
-
-                break
-
-        # ====================================================
-        # ACCOUNT NOT FOUND
-        # ====================================================
-
-        if account is None:
+        auth_record = _get_admin_team_auth_record(token_email)
+        if not auth_record:
 
             print(
                 "ADMIN TEAM TOKEN REJECTED: "
@@ -3694,6 +3646,19 @@ def verify_admin_team_token(token):
             )
 
             return None
+
+        if str(auth_record.get("user_status") or "active").lower() != "active":
+            return None
+
+        current_member = auth_record["member"]
+        account = {
+            "id": f"ADMIN-TEAM-{current_member.get('id')}",
+            "memberId": current_member.get("id"),
+            "name": current_member.get("name", ""),
+            "email": current_member.get("email", ""),
+            "role": current_member.get("role", "Event Staff"),
+            "status": current_member.get("status", "Active"),
+        }
 
         # ====================================================
         # ACCOUNT STATUS
@@ -3737,97 +3702,8 @@ def verify_admin_team_token(token):
         ).strip()
 
         # ====================================================
-        # LOAD ADMIN TEAM MEMBER RECORD
-        #
-        # This is important because the login process may
-        # create the token using the ID from this record.
-        # ====================================================
-
-        admin_members = (
-            load_admin_team_members()
-        )
-
-        if not isinstance(
-            admin_members,
-            list
-        ):
-            admin_members = []
-
-        current_member = None
-
-        # ====================================================
-        # FIND CURRENT ADMIN MEMBER
-        #
-        # Priority:
-        #
-        # 1. token memberId
-        # 2. email
-        # ====================================================
-
-        for member in admin_members:
-
-            if not isinstance(
-                member,
-                dict
-            ):
-                continue
-
-            member_id = str(
-                member.get(
-                    "id",
-                    ""
-                ) or ""
-            ).strip()
-
-            member_member_id = str(
-                member.get(
-                    "memberId",
-                    ""
-                ) or ""
-            ).strip()
-
-            member_email = str(
-                member.get(
-                    "email",
-                    ""
-                ) or ""
-            ).strip().lower()
-
-            # ------------------------------------------------
-            # MATCH TOKEN MEMBER ID
-            # ------------------------------------------------
-
-            if (
-                token_member_id
-                and
-                token_member_id
-                in (
-                    member_id,
-                    member_member_id
-                )
-            ):
-
-                current_member = member
-
-                break
-
-            # ------------------------------------------------
-            # FALLBACK TO EMAIL
-            # ------------------------------------------------
-
-            if (
-                not current_member
-                and
-                member_email
-                and
-                member_email
-                ==
-                token_email
-            ):
-
-                current_member = member
-
-                break
+        # Membership is resolved through admin_team.user_id.
+        # current_member was loaded from the joined PostgreSQL row.
 
         # ====================================================
         # VALIDATE MEMBER ID
@@ -6397,6 +6273,13 @@ def find_admin_team_member_by_identity(
             ""
         ).strip()
 
+        linked_user_id = str(
+            member.get(
+                "userId",
+                ""
+            ) or ""
+        ).strip()
+
         current_email = str(
             member.get(
                 "email",
@@ -6412,6 +6295,18 @@ def find_admin_team_member_by_identity(
             current_id
             ==
             member_id
+        ):
+
+            return member
+
+        if (
+            user_id
+            and
+            linked_user_id
+            and
+            linked_user_id
+            ==
+            user_id
         ):
 
             return member
@@ -6904,9 +6799,6 @@ def check_ticket_event_access(
 # ADMIN TEAM MEMBERS STORAGE (PostgreSQL adapters)
 # ============================================================
 
-ADMIN_TEAM_MEMBERS_FILE = "admin_team_members.json"
-ADMIN_TEAM_ACCOUNTS_FILE = "admin_team_accounts.json"
-
 # ============================================================
 # FRONTEND URL
 # ============================================================
@@ -6930,7 +6822,13 @@ def ensure_admin_team_members_file():
 # ============================================================
 
 def load_admin_team_members():
-    return load_json_file("admin_team_members.json", [])
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            rows = _admin_team_select(cur)
+    return [
+        _admin_team_row_to_legacy(row)
+        for row in rows
+    ]
 
 
 # ============================================================
@@ -6938,7 +6836,15 @@ def load_admin_team_members():
 # ============================================================
 
 def save_admin_team_members(data):
-    return save_json_file("admin_team_members.json", data)
+    records = data if isinstance(data, list) else [data]
+    saved = []
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            for record in records:
+                if isinstance(record, dict):
+                    saved.append(_persist_admin_team_member(record, cur))
+        conn.commit()
+    return saved
 
 
 # ============================================================
@@ -6954,7 +6860,24 @@ def ensure_admin_team_accounts_file():
 # ============================================================
 
 def load_admin_team_accounts():
-    return load_json_file("admin_team_accounts.json", [])
+    accounts = []
+    for member in load_admin_team_members():
+        if not member.get("userId"):
+            continue
+        accounts.append({
+            "id": f"ADMIN-TEAM-{member.get('id')}",
+            "memberId": member.get("id"),
+            "name": member.get("name", ""),
+            "email": member.get("email", ""),
+            "role": member.get("role", "Event Staff"),
+            "host": member.get("host", ""),
+            "hostId": member.get("hostId", ""),
+            "event": member.get("event", ""),
+            "eventId": member.get("eventId", ""),
+            "status": member.get("status", "Active"),
+            "teamType": "admin",
+        })
+    return accounts
 
 
 # ============================================================
@@ -6962,15 +6885,817 @@ def load_admin_team_accounts():
 # ============================================================
 
 def save_admin_team_accounts(data):
-    return save_json_file("admin_team_accounts.json", data)
+    raise RuntimeError(
+        "Admin-team accounts are stored through users and admin_team."
+    )
 
 
 # ============================================================
-# LOAD EVENTS
+# EVENTS — POSTGRESQL COMPATIBILITY ADAPTER
+# ============================================================
+#
+# The application still expects the legacy event shape:
+#
+#     event["tickets"] = [...]
+#
+# PostgreSQL stores ticket types separately in:
+#
+#     events
+#     event_ticket_types
+#
+# This adapter reconstructs the legacy shape without storing
+# the nested tickets inside the events table.
+#
+# IMPORTANT:
+# event_ticket_types remains the authoritative ticket inventory.
+# Payment fulfillment must continue using event_ticket_types.
 # ============================================================
 
 def load_events():
-    return load_json_file("events.json", [])
+
+    try:
+
+        with get_db_connection() as conn:
+
+            with conn.cursor() as cur:
+
+                # ----------------------------------------------------
+                # LOAD EVENTS
+                # ----------------------------------------------------
+
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM events
+                    ORDER BY id
+                    """
+                )
+
+                event_rows = cur.fetchall()
+
+                if not event_rows:
+                    return []
+
+                # ----------------------------------------------------
+                # LOAD ALL TICKET TYPES IN ONE QUERY
+                #
+                # Do NOT query ticket types once per event.
+                # ----------------------------------------------------
+
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM event_ticket_types
+                    ORDER BY event_id, id
+                    """
+                )
+
+                ticket_rows = cur.fetchall()
+
+                # ----------------------------------------------------
+                # GROUP TICKETS BY EVENT ID
+                # ----------------------------------------------------
+
+                tickets_by_event = {}
+
+                for ticket_row in ticket_rows:
+
+                    ticket_event_id = ticket_row.get(
+                        "event_id"
+                    )
+
+                    if ticket_event_id is None:
+                        continue
+
+                    event_key = str(
+                        ticket_event_id
+                    )
+
+                    ticket = {
+                        "id": ticket_row.get("id"),
+                        "name": ticket_row.get("name", ""),
+                        "price": ticket_row.get("price", 0),
+                        "quantity": ticket_row.get("quantity", 0),
+                        "remaining": ticket_row.get("remaining", 0)
+                    }
+
+                    # ------------------------------------------------
+                    # Preserve useful optional ticket fields when
+                    # those columns exist in the database.
+                    # ------------------------------------------------
+
+                    if "description" in ticket_row:
+                        ticket["description"] = (
+                            ticket_row.get("description")
+                            or ""
+                        )
+
+                    if "currency" in ticket_row:
+                        ticket["currency"] = (
+                            ticket_row.get("currency")
+                            or ""
+                        )
+
+                    if "created_at" in ticket_row:
+                        ticket["createdAt"] = (
+                            ticket_row.get("created_at")
+                        )
+
+                    if "updated_at" in ticket_row:
+                        ticket["updatedAt"] = (
+                            ticket_row.get("updated_at")
+                        )
+
+                    # ------------------------------------------------
+                    # Calculate sold from authoritative inventory.
+                    #
+                    # sold = quantity - remaining
+                    #
+                    # Never allow a negative value.
+                    # ------------------------------------------------
+
+                    try:
+
+                        quantity_value = int(
+                            ticket.get(
+                                "quantity",
+                                0
+                            )
+                            or 0
+                        )
+
+                    except (
+                        TypeError,
+                        ValueError
+                    ):
+
+                        quantity_value = 0
+
+                    try:
+
+                        remaining_value = int(
+                            ticket.get(
+                                "remaining",
+                                0
+                            )
+                            or 0
+                        )
+
+                    except (
+                        TypeError,
+                        ValueError
+                    ):
+
+                        remaining_value = 0
+
+                    sold_value = (
+                        quantity_value -
+                        remaining_value
+                    )
+
+                    if sold_value < 0:
+                        sold_value = 0
+
+                    ticket["sold"] = sold_value
+
+                    tickets_by_event.setdefault(
+                        event_key,
+                        []
+                    ).append(
+                        ticket
+                    )
+
+                # ----------------------------------------------------
+                # REBUILD LEGACY EVENT OBJECTS
+                # ----------------------------------------------------
+
+                events = []
+
+                for event_row in event_rows:
+
+                    event = _row_to_legacy(
+                        event_row,
+                        "events"
+                    )
+
+                    if not event:
+                        continue
+
+                    event_id = event_row.get(
+                        "id"
+                    )
+
+                    event["tickets"] = (
+                        tickets_by_event.get(
+                            str(event_id),
+                            []
+                        )
+                    )
+
+                    # ------------------------------------------------
+                    # Legacy compatibility:
+                    #
+                    # Some older routes expect these fields.
+                    # Only create them when useful.
+                    # ------------------------------------------------
+
+                    if "eventPoster" not in event:
+
+                        event_poster = (
+                            event.get(
+                                "image"
+                            )
+                            or event.get(
+                                "event_poster"
+                            )
+                            or ""
+                        )
+
+                        event["eventPoster"] = (
+                            event_poster
+                        )
+
+                    if "image" not in event:
+
+                        event["image"] = (
+                            event.get(
+                                "eventPoster",
+                                ""
+                            )
+                            or ""
+                        )
+
+                    # ------------------------------------------------
+                    # Derive ticketsSold from authoritative ticket
+                    # inventory when the events table does not carry
+                    # a reliable value.
+                    # ------------------------------------------------
+
+                    if (
+                        not event.get(
+                            "ticketsSold"
+                        )
+                    ):
+
+                        event["ticketsSold"] = sum(
+                            int(
+                                ticket.get(
+                                    "sold",
+                                    0
+                                )
+                                or 0
+                            )
+                            for ticket in event["tickets"]
+                        )
+
+                    events.append(
+                        event
+                    )
+
+                return events
+
+    except Exception as e:
+
+        # ------------------------------------------------------------
+        # IMPORTANT:
+        # Unlike the generic compatibility loader, an events database
+        # failure must NOT look like "there are zero events".
+        # ------------------------------------------------------------
+
+        print(
+            "POSTGRES EVENT LOAD ERROR:",
+            str(e)
+        )
+
+        raise
+
+# ============================================================
+# SAVE EVENTS
+# ============================================================
+#
+# Saves:
+#
+#     events
+#     event_ticket_types
+#
+# separately while allowing existing route code to continue
+# working with the legacy:
+#
+#     event["tickets"]
+#
+# structure.
+#
+# IMPORTANT:
+# We NEVER delete all ticket types for an event.
+#
+# Existing ticket types may already have bookings/tickets
+# referencing them.
+# ============================================================
+def save_events(data):
+    if not isinstance(data, list):
+        data = (
+            [data]
+            if isinstance(data, dict)
+            else []
+        )
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                event_columns = _table_columns(
+                    cur,
+                    "events"
+                )
+                ticket_columns = _table_columns(
+                    cur,
+                    "event_ticket_types"
+                )
+                event_meta_col = (
+                    _DB_META_COLUMN_CACHE.get(
+                        "events"
+                    )
+                )
+                ticket_meta_col = (
+                    _DB_META_COLUMN_CACHE.get(
+                        "event_ticket_types"
+                    )
+                )
+                # ====================================================
+                # SAVE EACH EVENT
+                # ====================================================
+                for event in data:
+                    if not isinstance(
+                        event,
+                        dict
+                    ):
+                        continue
+                    event_values = _record_db_values(
+                        event,
+                        event_columns,
+                        event_meta_col
+                    )
+                    # ------------------------------------------------
+                    # The nested legacy tickets[] does NOT belong in
+                    # the events table.
+                    # ------------------------------------------------
+                    event_values.pop(
+                        "tickets",
+                        None
+                    )
+                    if not event_values:
+                        continue
+                    event_id = event_values.get(
+                        "id"
+                    )
+                    # ------------------------------------------------
+                    # Existing event
+                    # ------------------------------------------------
+                    if event_id is not None:
+                        cur.execute(
+                            """
+                            SELECT id
+                            FROM events
+                            WHERE id = %s
+                            FOR UPDATE
+                            """,
+                            (
+                                event_id,
+                            )
+                        )
+                        existing_event = (
+                            cur.fetchone()
+                        )
+                        if existing_event:
+                            assignments = [
+                                column
+                                for column in event_values
+                                if column != "id"
+                            ]
+                            if assignments:
+                                cur.execute(
+                                    """
+                                    UPDATE events
+                                    SET
+                                    """
+                                    +
+                                    ", ".join(
+                                        f'"{column}" = %s'
+                                        for column in assignments
+                                    )
+                                    +
+                                    """
+                                    WHERE id = %s
+                                    """,
+                                    tuple(
+                                        event_values[column]
+                                        for column in assignments
+                                    )
+                                    +
+                                    (
+                                        event_id,
+                                    )
+                                )
+                        else:
+                            columns_to_insert = list(
+                                event_values.keys()
+                            )
+                            cur.execute(
+                                """
+                                INSERT INTO events (
+                                """
+                                +
+                                ", ".join(
+                                    f'"{column}"'
+                                    for column in columns_to_insert
+                                )
+                                +
+                                """
+                                )
+                                VALUES (
+                                """
+                                +
+                                ", ".join(
+                                    "%s"
+                                    for _ in columns_to_insert
+                                )
+                                +
+                                """
+                                )
+                                """,
+                                tuple(
+                                    event_values[column]
+                                    for column in columns_to_insert
+                                )
+                            )
+                    else:
+                        # ------------------------------------------------
+                        # No ID supplied.
+                        #
+                        # The live events.id column has no database
+                        # default, so generate an explicit ID.
+                        # ------------------------------------------------
+                        cur.execute(
+                            """
+                            SELECT COALESCE(MAX(id), 0) + 1 AS next_id
+                            FROM events
+                            FOR UPDATE
+                            """
+                        )
+                        next_event = cur.fetchone()
+                        event_id = int(
+                            next_event["next_id"]
+                        )
+                        event_values["id"] = event_id
+                        columns_to_insert = list(
+                            event_values.keys()
+                        )
+                        cur.execute(
+                            """
+                            INSERT INTO events (
+                            """
+                            +
+                            ", ".join(
+                                f'"{column}"'
+                                for column in columns_to_insert
+                            )
+                            +
+                            """
+                            )
+                            VALUES (
+                            """
+                            +
+                            ", ".join(
+                                "%s"
+                                for _ in columns_to_insert
+                            )
+                            +
+                            """
+                            )
+                            """,
+                            tuple(
+                                event_values[column]
+                                for column in columns_to_insert
+                            )
+                        )
+                        event["id"] = event_id
+                    # =================================================
+                    # TICKET TYPES
+                    # =================================================
+                    tickets = event.get(
+                        "tickets",
+                        []
+                    )
+                    if not isinstance(
+                        tickets,
+                        list
+                    ):
+                        tickets = []
+                    if event_id is None:
+                        raise RuntimeError(
+                            "Cannot save ticket types "
+                            "without an event ID."
+                        )
+                    # -------------------------------------------------
+                    # Save each ticket type.
+                    #
+                    # Existing IDs are preferred.
+                    # Otherwise we match by name.
+                    # -------------------------------------------------
+                    for ticket in tickets:
+                        if not isinstance(
+                            ticket,
+                            dict
+                        ):
+                            continue
+                        ticket_name = str(
+                            ticket.get(
+                                "name",
+                                ""
+                            )
+                            or ""
+                        ).strip()
+                        if not ticket_name:
+                            continue
+                        ticket_id = ticket.get(
+                            "id"
+                        )
+                        # ---------------------------------------------
+                        # Quantity
+                        # ---------------------------------------------
+                        try:
+                            quantity = int(
+                                float(
+                                    ticket.get(
+                                        "quantity",
+                                        0
+                                    )
+                                    or 0
+                                )
+                            )
+                        except (
+                            TypeError,
+                            ValueError
+                        ):
+                            quantity = 0
+                        # ---------------------------------------------
+                        # Remaining
+                        #
+                        # Existing route logic already calculates
+                        # remaining safely.
+                        # ---------------------------------------------
+                        try:
+                            remaining = int(
+                                float(
+                                    ticket.get(
+                                        "remaining",
+                                        quantity
+                                    )
+                                    or 0
+                                )
+                            )
+                        except (
+                            TypeError,
+                            ValueError
+                        ):
+                            remaining = quantity
+                        if remaining < 0:
+                            remaining = 0
+                        if remaining > quantity:
+                            remaining = quantity
+                        # ---------------------------------------------
+                        # Price
+                        # ---------------------------------------------
+                        try:
+                            price = int(
+                                float(
+                                    ticket.get(
+                                        "price",
+                                        0
+                                    )
+                                    or 0
+                                )
+                            )
+                        except (
+                            TypeError,
+                            ValueError
+                        ):
+                            price = 0
+                        # ---------------------------------------------
+                        # Build values dynamically against the actual
+                        # PostgreSQL columns.
+                        # ---------------------------------------------
+                        ticket_values = {}
+                        if "id" in ticket_columns:
+                            if ticket_id is not None:
+                                try:
+                                    ticket_values[
+                                        "id"
+                                    ] = int(
+                                        ticket_id
+                                    )
+                                except (
+                                    TypeError,
+                                    ValueError
+                                ):
+                                    ticket_id = None
+                        if "event_id" in ticket_columns:
+                            ticket_values[
+                                "event_id"
+                            ] = event_id
+                        if "name" in ticket_columns:
+                            ticket_values[
+                                "name"
+                            ] = ticket_name
+                        if "price" in ticket_columns:
+                            ticket_values[
+                                "price"
+                            ] = price
+                        if "quantity" in ticket_columns:
+                            ticket_values[
+                                "quantity"
+                            ] = quantity
+                        if "remaining" in ticket_columns:
+                            ticket_values[
+                                "remaining"
+                            ] = remaining
+                        if (
+                            "description"
+                            in ticket_columns
+                            and
+                            ticket.get(
+                                "description"
+                            ) is not None
+                        ):
+                            ticket_values[
+                                "description"
+                            ] = ticket.get(
+                                "description"
+                            )
+                        if (
+                            "currency"
+                            in ticket_columns
+                            and
+                            ticket.get(
+                                "currency"
+                            ) is not None
+                        ):
+                            ticket_values[
+                                "currency"
+                            ] = ticket.get(
+                                "currency"
+                            )
+                        # ---------------------------------------------
+                        # UPDATE BY ID
+                        # ---------------------------------------------
+                        existing_ticket = None
+                        if ticket_id is not None:
+                            cur.execute(
+                                """
+                                SELECT *
+                                FROM event_ticket_types
+                                WHERE id = %s
+                                  AND event_id = %s
+                                FOR UPDATE
+                                """,
+                                (
+                                    ticket_id,
+                                    event_id
+                                )
+                            )
+                            existing_ticket = (
+                                cur.fetchone()
+                            )
+                        # ---------------------------------------------
+                        # FALLBACK: MATCH BY NAME
+                        #
+                        # This is required because existing event
+                        # editing code currently sends ticket objects
+                        # without the database ID.
+                        # ---------------------------------------------
+                        if not existing_ticket:
+                            cur.execute(
+                                """
+                                SELECT *
+                                FROM event_ticket_types
+                                WHERE event_id = %s
+                                  AND LOWER(name) = LOWER(%s)
+                                ORDER BY id
+                                LIMIT 1
+                                FOR UPDATE
+                                """,
+                                (
+                                    event_id,
+                                    ticket_name
+                                )
+                            )
+                            existing_ticket = (
+                                cur.fetchone()
+                            )
+                        # ---------------------------------------------
+                        # UPDATE EXISTING TICKET TYPE
+                        # ---------------------------------------------
+                        if existing_ticket:
+                            existing_ticket_id = (
+                                existing_ticket["id"]
+                            )
+                            assignments = [
+                                column
+                                for column in ticket_values
+                                if column not in {
+                                    "id",
+                                    "event_id"
+                                }
+                            ]
+                            if assignments:
+                                cur.execute(
+                                    """
+                                    UPDATE event_ticket_types
+                                    SET
+                                    """
+                                    +
+                                    ", ".join(
+                                        f'"{column}" = %s'
+                                        for column in assignments
+                                    )
+                                    +
+                                    """
+                                    WHERE id = %s
+                                      AND event_id = %s
+                                    """,
+                                    tuple(
+                                        ticket_values[column]
+                                        for column in assignments
+                                    )
+                                    +
+                                    (
+                                        existing_ticket_id,
+                                        event_id
+                                    )
+                                )
+                            ticket["id"] = (
+                                existing_ticket_id
+                            )
+                        # ---------------------------------------------
+                        # CREATE NEW TICKET TYPE
+                        # ---------------------------------------------
+                        else:
+                            # The live event_ticket_types.id column
+                            # also has no database default.
+                            cur.execute(
+                                """
+                                SELECT COALESCE(MAX(id), 0) + 1 AS next_id
+                                FROM event_ticket_types
+                                FOR UPDATE
+                                """
+                            )
+                            next_ticket = cur.fetchone()
+                            ticket_id = int(
+                                next_ticket["next_id"]
+                            )
+                            ticket_values["id"] = (
+                                ticket_id
+                            )
+                            insert_columns = list(
+                                ticket_values.keys()
+                            )
+                            cur.execute(
+                                """
+                                INSERT INTO event_ticket_types (
+                                """
+                                +
+                                ", ".join(
+                                    f'"{column}"'
+                                    for column in insert_columns
+                                )
+                                +
+                                """
+                                )
+                                VALUES (
+                                """
+                                +
+                                ", ".join(
+                                    "%s"
+                                    for _ in insert_columns
+                                )
+                                +
+                                """
+                                )
+                                """,
+                                tuple(
+                                    ticket_values[column]
+                                    for column in insert_columns
+                                )
+                            )
+                            ticket["id"] = ticket_id
+                # ====================================================
+                # COMMIT
+                # ====================================================
+                conn.commit()
+    except Exception as e:
+        print(
+            "POSTGRES EVENT SAVE ERROR:",
+            str(e)
+        )
+        raise
 
 # ============================================================
 # AUTO-COMPLETE FINISHED TEAM MEMBER ASSIGNMENTS
@@ -7006,6 +7731,15 @@ def auto_complete_finished_team_assignments():
 
         members = load_admin_team_members()
         events = load_events()
+        original_members = {
+            str(member.get("id")): json.dumps(
+                member,
+                sort_keys=True,
+                default=str,
+            )
+            for member in members
+            if isinstance(member, dict)
+        }
 
         now = datetime.now()
 
@@ -8033,8 +8767,15 @@ def auto_complete_finished_team_assignments():
 
         if changed:
 
+            changed_members = [
+                member
+                for member in members
+                if isinstance(member, dict)
+                and json.dumps(member, sort_keys=True, default=str)
+                != original_members.get(str(member.get("id")))
+            ]
             save_admin_team_members(
-                members
+                changed_members
             )
 
         return members
@@ -8051,13 +8792,6 @@ def auto_complete_finished_team_assignments():
 
         return load_admin_team_members()
     
-# ============================================================
-# SAVE ADMIN TEAM MEMBERS
-# ============================================================
-
-def save_admin_team_members(data):
-    return save_json_file("admin_team_members.json", data)
-
 # ============================================================
 # TEAM MEMBER ASSIGNMENT HELPERS
 # ============================================================
@@ -8130,47 +8864,6 @@ def get_completed_team_member_assignments(member):
     ]
 
 # ============================================================
-# GENERATE TEAM MEMBER ID
-# ============================================================
-
-def generate_team_member_id(
-    members
-):
-
-    existing_ids = []
-
-    for member in members:
-
-        try:
-
-            existing_ids.append(
-                int(
-                    member.get(
-                        "id",
-                        0
-                    )
-                )
-            )
-
-        except (
-            ValueError,
-            TypeError
-        ):
-
-            continue
-
-
-    if existing_ids:
-
-        return max(
-            existing_ids
-        ) + 1
-
-
-    return 1
-
-
-# ============================================================
 # FIND TEAM MEMBER BY ID
 # ============================================================
 
@@ -8178,47 +8871,24 @@ def find_admin_team_member_by_id(
     member_id
 ):
 
-    members = load_admin_team_members()
-
     try:
-
         requested_id = int(
             member_id
         )
-
     except (
         ValueError,
         TypeError
     ):
-
         return None
 
-
-    for member in members:
-
-        try:
-
-            current_id = int(
-                member.get(
-                    "id",
-                    0
-                )
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            rows = _admin_team_select(
+                cur,
+                "at.id = %s",
+                (requested_id,),
             )
-
-        except (
-            ValueError,
-            TypeError
-        ):
-
-            continue
-
-
-        if current_id == requested_id:
-
-            return member
-
-
-    return None
+    return _admin_team_row_to_legacy(rows[0]) if rows else None
 
 
 # ============================================================
@@ -8239,28 +8909,19 @@ def find_admin_team_member_by_email(
         return None
 
 
-    members = load_admin_team_members()
-
-
-    for member in members:
-
-        member_email = str(
-            member.get(
-                "email",
-                ""
-            ) or ""
-        ).strip().lower()
-
-
-        if (
-            member_email ==
-            normalized_email
-        ):
-
-            return member
-
-
-    return None
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            rows = _admin_team_select(
+                cur,
+                "(lower(btrim(u.email)) = %s OR "
+                "lower(btrim(at.metadata->>'email')) = %s)",
+                (normalized_email, normalized_email),
+            )
+    if len(rows) > 1:
+        raise RuntimeError(
+            "Multiple admin-team memberships match this email."
+        )
+    return _admin_team_row_to_legacy(rows[0]) if rows else None
 
 
 # ============================================================
@@ -8272,58 +8933,36 @@ def update_admin_team_member_record(
     updates
 ):
 
-    members = load_admin_team_members()
-
-
     try:
-
         requested_id = int(
             member_id
         )
-
     except (
         ValueError,
         TypeError
     ):
-
         return None
 
-
-    for member in members:
-
-        try:
-
-            current_id = int(
-                member.get(
-                    "id",
-                    0
-                )
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            rows = _admin_team_select(
+                cur,
+                "at.id = %s",
+                (requested_id,),
+                for_update=True,
             )
-
-        except (
-            ValueError,
-            TypeError
-        ):
-
-            continue
-
-
-        if current_id == requested_id:
-
-            member.update(
-                updates
+            if not rows:
+                return None
+            member = _admin_team_row_to_legacy(rows[0])
+            member.update(updates)
+            _persist_admin_team_member(member, cur)
+            refreshed = _admin_team_select(
+                cur,
+                "at.id = %s",
+                (requested_id,),
             )
-
-
-            save_admin_team_members(
-                members
-            )
-
-
-            return member
-
-
-    return None
+        conn.commit()
+    return _admin_team_row_to_legacy(refreshed[0]) if refreshed else None
 
 
 # ============================================================
@@ -8464,10 +9103,6 @@ def create_admin_team_invitation_link(
 # HOST TEAM ACCOUNTS STORAGE
 # ============================================================
 TEAM_ACCOUNTS_FILE = "team_accounts.json"
-# ============================================================
-# ADMIN TEAM ACCOUNTS STORAGE
-# ============================================================
-ADMIN_TEAM_ACCOUNTS_FILE = "admin_team_accounts.json"
 # ============================================================
 # ENSURE HOST TEAM ACCOUNTS FILE EXISTS
 # ============================================================
@@ -9115,14 +9750,6 @@ def create_admin_team_member():
                             "This team member is already assigned to this event."
                     }), 409
         # ====================================================
-        # GENERATE MEMBER ID
-        # ====================================================
-        member_id = (
-            generate_team_member_id(
-                members
-            )
-        )
-        # ====================================================
         # CREATE INITIAL ASSIGNMENT
         # ====================================================
         assignments = []
@@ -9143,8 +9770,6 @@ def create_admin_team_member():
         # CREATE MEMBER
         # ====================================================
         member = {
-            "id":
-                member_id,
             "name":
                 name,
             "email":
@@ -9175,14 +9800,9 @@ def create_admin_team_member():
                 datetime.now().isoformat()
         }
         # ====================================================
-        # SAVE MEMBER
+        # INSERT MEMBER WITH A DATABASE-GENERATED ID
         # ====================================================
-        members.append(
-            member
-        )
-        save_admin_team_members(
-            members
-        )
+        member = save_admin_team_members(member)[0]
         # ====================================================
         # SUCCESS
         # ====================================================
@@ -9342,243 +9962,40 @@ def update_admin_team_member(
 def delete_admin_team_member(
     member_id
 ):
-
     try:
-
-        # ====================================================
-        # LOAD TEAM MEMBERS
-        # ====================================================
-
-        members = (
-            load_admin_team_members()
-        )
-
-
-        # ====================================================
-        # FIND MEMBER
-        # ====================================================
-
-        member_to_delete = None
-
-        remaining_members = []
-
-
-        for member in members:
-
-            try:
-
-                current_id = int(
-                    member.get(
-                        "id",
-                        0
-                    )
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                rows = _admin_team_select(
+                    cur,
+                    "at.id = %s",
+                    (member_id,),
+                    for_update=True,
                 )
-
-            except (
-                ValueError,
-                TypeError
-            ):
-
-                current_id = 0
-
-
-            if current_id == int(
-                member_id
-            ):
-
-                member_to_delete = member
-
-            else:
-
-                remaining_members.append(
-                    member
+                if not rows:
+                    return jsonify({
+                        "success": False,
+                        "message": "Team member not found."
+                    }), 404
+                removed_account = bool(rows[0].get("user_id"))
+                cur.execute(
+                    "DELETE FROM admin_team WHERE id = %s",
+                    (member_id,),
                 )
-
-
-        # ====================================================
-        # MEMBER NOT FOUND
-        # ====================================================
-
-        if member_to_delete is None:
-
-            return jsonify({
-
-                "success":
-                    False,
-
-                "message":
-                    "Team member not found."
-
-            }), 404
-
-
-        # ====================================================
-        # GET MEMBER EMAIL
-        # ====================================================
-
-        member_email = str(
-            member_to_delete.get(
-                "email",
-                ""
-            ) or ""
-        ).strip().lower()
-
-
-        # ====================================================
-        # REMOVE TEAM MEMBER
-        # ====================================================
-
-        save_admin_team_members(
-            remaining_members
-        )
-
-
-        # ====================================================
-        # REVOKE ASSOCIATED TEAM ACCOUNT
-        #
-        # The team account belongs to this team member.
-        #
-        # Removing the team member should therefore also
-        # remove their ability to log in.
-        # ====================================================
-
-        team_accounts = (
-            load_team_accounts()
-        )
-
-
-        remaining_accounts = []
-
-        removed_account = False
-
-
-        for account in team_accounts:
-
-            account_member_id = (
-                account.get(
-                    "memberId"
-                )
-            )
-
-
-            account_email = str(
-                account.get(
-                    "email",
-                    ""
-                ) or ""
-            ).strip().lower()
-
-
-            same_member = False
-
-            same_email = False
-
-
-            # ------------------------------------------------
-            # Match by member ID
-            # ------------------------------------------------
-
-            try:
-
-                same_member = (
-                    int(account_member_id)
-                    ==
-                    int(member_id)
-                )
-
-            except (
-                ValueError,
-                TypeError
-            ):
-
-                same_member = False
-
-
-            # ------------------------------------------------
-            # Match by email as an additional safeguard
-            # ------------------------------------------------
-
-            if (
-                member_email
-                and
-                account_email
-                ==
-                member_email
-            ):
-
-                same_email = True
-
-
-            # ------------------------------------------------
-            # Remove associated account
-            # ------------------------------------------------
-
-            if (
-                same_member
-                or
-                same_email
-            ):
-
-                removed_account = True
-
-                print(
-                    "ADMIN TEAM ACCOUNT REVOKED:",
-                    account_email
-                )
-
-                continue
-
-
-            remaining_accounts.append(
-                account
-            )
-
-
-        # ====================================================
-        # SAVE TEAM ACCOUNTS
-        # ====================================================
-
-        if removed_account:
-
-            save_team_accounts(
-                remaining_accounts
-            )
-
-
-        # ====================================================
-        # SUCCESS
-        # ====================================================
+            conn.commit()
 
         return jsonify({
-
-            "success":
-                True,
-
-            "message":
-                "Team member removed successfully.",
-
-            "teamAccountRevoked":
-                removed_account
-
+            "success": True,
+            "message": "Team member removed successfully.",
+            "teamAccountRevoked": removed_account
         }), 200
-
-
     except Exception as e:
-
         print(
             "DELETE ADMIN TEAM MEMBER ERROR:",
             str(e)
         )
-
-
         return jsonify({
-
-            "success":
-                False,
-
-            "message":
-                "Unable to remove team member."
-
+            "success": False,
+            "message": "Unable to remove team member."
         }), 500
 
 
@@ -9653,27 +10070,13 @@ def send_admin_team_member_invitation(
         # CHECK EXISTING ADMIN ACCOUNT
         # ----------------------------------------------------
 
-        admin_team_accounts = (
-            load_admin_team_accounts()
-        )
-
-        for account in admin_team_accounts:
-
-            existing_email = str(
-                account.get(
-                    "email",
-                    ""
-                ) or ""
-            ).strip().lower()
-
-            if existing_email == email:
-
-                return jsonify({
-                    "success": False,
-                    "message":
-                        "An admin team account already exists "
-                        "for this email."
-                }), 409
+        if _get_admin_team_auth_record(email):
+            return jsonify({
+                "success": False,
+                "message":
+                    "An admin team account already exists "
+                    "for this email."
+            }), 409
 
         # ----------------------------------------------------
         # CREATE TOKEN
@@ -10521,11 +10924,181 @@ def validate_admin_team_invitation(
 # }
 # ============================================================
 
+def _accept_admin_team_invitation_transaction(data):
+    token = str((data or {}).get("token") or "").strip()
+    password = str((data or {}).get("password") or "")
+    if not token:
+        return jsonify({
+            "success": False,
+            "message": "Invitation token is required."
+        }), 400
+
+    invitation_data = verify_admin_team_invitation_token(token)
+    if not invitation_data:
+        return jsonify({
+            "success": False,
+            "message": "This invitation is invalid or has expired."
+        }), 400
+    if len(password) < 8:
+        return jsonify({
+            "success": False,
+            "message": "Password must be at least 8 characters."
+        }), 400
+
+    member_id = invitation_data.get("member_id")
+    invited_email = str(invitation_data.get("email") or "").strip().lower()
+    if not member_id or not invited_email:
+        return jsonify({
+            "success": False,
+            "message": "This invitation is invalid or has expired."
+        }), 400
+
+    password_hash = generate_password_hash(password)
+    now = datetime.now(timezone.utc)
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT pg_advisory_xact_lock(hashtext(%s))",
+                    (invited_email,),
+                )
+                rows = _admin_team_select(
+                    cur,
+                    "at.id = %s",
+                    (int(member_id),),
+                    for_update=True,
+                )
+                if not rows:
+                    return jsonify({
+                        "success": False,
+                        "message": "Team member account could not be found."
+                    }), 404
+
+                member = _admin_team_row_to_legacy(rows[0])
+                member_email = str(member.get("email") or "").strip().lower()
+                if member_email != invited_email:
+                    return jsonify({
+                        "success": False,
+                        "message": "Invitation email does not match the team member."
+                    }), 400
+                if member.get("invitationStatus") == "Accepted" or member.get("userId"):
+                    return jsonify({
+                        "success": False,
+                        "message": "This invitation has already been accepted."
+                    }), 409
+                if str(member.get("invitationStatus") or "").lower() != "pending":
+                    return jsonify({
+                        "success": False,
+                        "message": "This invitation is no longer pending."
+                    }), 409
+                if str(member.get("status") or "").lower() == "disabled":
+                    return jsonify({
+                        "success": False,
+                        "message": "This team member account is disabled."
+                    }), 403
+
+                expiry = member.get("invitationExpiresAt")
+                if expiry:
+                    try:
+                        expiry_dt = datetime.fromisoformat(
+                            str(expiry).replace("Z", "+00:00")
+                        )
+                        if expiry_dt.tzinfo is None:
+                            expiry_dt = expiry_dt.replace(tzinfo=timezone.utc)
+                        if expiry_dt < now:
+                            return jsonify({
+                                "success": False,
+                                "message": "This invitation is invalid or has expired."
+                            }), 400
+                    except (TypeError, ValueError):
+                        return jsonify({
+                            "success": False,
+                            "message": "This invitation is invalid or has expired."
+                        }), 400
+
+                cur.execute(
+                    "SELECT id FROM users WHERE lower(btrim(email)) = %s LIMIT 1",
+                    (invited_email,),
+                )
+                if cur.fetchone():
+                    return jsonify({
+                        "success": False,
+                        "message": (
+                            "An account already exists for this email. "
+                            "Manual account linking is required."
+                        )
+                    }), 409
+
+                user_id = _insert_admin_team_user(
+                    cur,
+                    member.get("name", ""),
+                    invited_email,
+                    password_hash,
+                )
+                member["invitationStatus"] = "Accepted"
+                member["accountCreated"] = True
+                member["invitationAcceptedAt"] = now.isoformat()
+                metadata = Jsonb(_admin_team_metadata(member))
+                update_sql = (
+                    "UPDATE admin_team SET user_id = %s, metadata = %s"
+                )
+                params = [user_id, metadata]
+                columns = _table_columns(cur, "admin_team")
+                if "updated_at" in columns:
+                    update_sql += ", updated_at = %s"
+                    params.append(now)
+                update_sql += " WHERE id = %s"
+                params.append(int(member_id))
+                cur.execute(update_sql, tuple(params))
+
+                refreshed = _admin_team_select(
+                    cur,
+                    "at.id = %s",
+                    (int(member_id),),
+                )
+                if not refreshed:
+                    raise RuntimeError("Accepted membership could not be reloaded.")
+                accepted_member = _admin_team_row_to_legacy(refreshed[0])
+            conn.commit()
+    except psycopg.errors.UniqueViolation:
+        return jsonify({
+            "success": False,
+            "message": (
+                "An account already exists for this email. "
+                "Manual account linking is required."
+            )
+        }), 409
+    except Exception as e:
+        print("ACCEPT ADMIN TEAM INVITATION ERROR:", str(e))
+        return jsonify({
+            "success": False,
+            "message": "Unable to create team account."
+        }), 500
+
+    account = {
+        "id": f"ADMIN-TEAM-{accepted_member.get('id')}",
+        "name": accepted_member.get("name", ""),
+        "email": accepted_member.get("email", ""),
+        "role": accepted_member.get("role", "Event Staff"),
+        "host": accepted_member.get("host", ""),
+        "event": accepted_member.get("event", ""),
+    }
+    return jsonify({
+        "success": True,
+        "message": "Team account created successfully.",
+        "account": account,
+        "member": accepted_member,
+    }), 201
+
+
 @app.route(
     "/admin/team-invitation",
     methods=["POST"]
 )
 def accept_admin_team_invitation():
+    return _accept_admin_team_invitation_transaction(
+        request.get_json(silent=True) or {}
+    )
 
     try:
 
@@ -10755,17 +11328,6 @@ def accept_admin_team_invitation():
 
 
         # ----------------------------------------------------
-        # HASH PASSWORD
-        # ----------------------------------------------------
-
-        password_hash = (
-            generate_password_hash(
-                password
-            )
-        )
-
-
-        # ----------------------------------------------------
         # CREATE TEAM ACCOUNT
         # ----------------------------------------------------
 
@@ -10785,9 +11347,6 @@ def accept_admin_team_invitation():
 
             "email":
                 member_email,
-
-            "password":
-                password_hash,
 
             "role":
                 member.get(
@@ -11506,7 +12065,7 @@ def assign_admin_team_member(
             member_index
         ] = member
         save_admin_team_members(
-            members
+            member
         )
         # ====================================================
         # LOG
@@ -11777,7 +12336,7 @@ def complete_admin_team_member_assignment(
             member_index
         ] = member
         save_admin_team_members(
-            members
+            member
         )
         return jsonify({
             "success":
@@ -11810,11 +12369,150 @@ def complete_admin_team_member_assignment(
 # use this endpoint to sign in.
 # ============================================================
 
+def _admin_team_login_response(data):
+    data = data or {}
+    email = str(data.get("email") or "").strip().lower()
+    password = str(data.get("password") or "")
+    if not email:
+        return jsonify({
+            "success": False,
+            "message": "Email address is required."
+        }), 400
+    if not password:
+        return jsonify({
+            "success": False,
+            "message": "Password is required."
+        }), 400
+
+    auth_record = _get_admin_team_auth_record(email)
+    if not auth_record:
+        return jsonify({
+            "success": False,
+            "message": "Invalid email or password."
+        }), 401
+
+    member = auth_record["member"]
+    if str(member.get("status") or "Active").strip().lower() != "active":
+        return jsonify({
+            "success": False,
+            "message": (
+                "Your team account has been disabled. "
+                "Please contact the administrator."
+            )
+        }), 403
+    if str(auth_record.get("user_status") or "active").lower() != "active":
+        return jsonify({
+            "success": False,
+            "message": (
+                "Your team account has been disabled. "
+                "Please contact the administrator."
+            )
+        }), 403
+
+    password_hash = auth_record.get("password_hash")
+    if not password_hash:
+        return jsonify({
+            "success": False,
+            "message": "This team account has not been configured correctly."
+        }), 500
+    if not check_password_hash(password_hash, password):
+        return jsonify({
+            "success": False,
+            "message": "Invalid email or password."
+        }), 401
+
+    assignments = member.get("assignments", [])
+    if not isinstance(assignments, list):
+        assignments = []
+    assignment_history = member.get(
+        "assignmentHistory",
+        member.get("previousAssignments", []),
+    )
+    if not isinstance(assignment_history, list):
+        assignment_history = []
+
+    current_assignment = member.get("currentAssignment")
+    if not isinstance(current_assignment, dict):
+        current_assignment = next(
+            (
+                item for item in assignments
+                if isinstance(item, dict)
+                and str(item.get("status") or "").lower() == "active"
+            ),
+            None,
+        )
+
+    current_event = ""
+    current_event_id = ""
+    current_host = ""
+    current_host_id = ""
+    current_role = str(member.get("role") or "Event Staff")
+    if isinstance(current_assignment, dict):
+        current_event = str(
+            current_assignment.get("eventName")
+            or current_assignment.get("event")
+            or ""
+        )
+        current_event_id = str(current_assignment.get("eventId") or "")
+        current_host = str(
+            current_assignment.get("hostName")
+            or current_assignment.get("host")
+            or ""
+        )
+        current_host_id = str(current_assignment.get("hostId") or "")
+        current_role = str(current_assignment.get("role") or current_role)
+    else:
+        current_event = str(member.get("event") or "")
+        current_event_id = str(member.get("eventId") or "")
+        current_host = str(member.get("host") or "")
+        current_host_id = str(member.get("hostId") or "")
+        if current_event or current_event_id:
+            current_assignment = {
+                "eventId": current_event_id,
+                "eventName": current_event,
+                "hostId": current_host_id,
+                "hostName": current_host,
+                "role": current_role,
+                "status": "Active",
+            }
+
+    safe_account = {
+        "id": f"ADMIN-TEAM-{member.get('id')}",
+        "memberId": member.get("id"),
+        "name": member.get("name", ""),
+        "email": member.get("email", ""),
+        "role": current_role,
+        "host": current_host,
+        "hostId": current_host_id,
+        "event": current_event,
+        "eventId": current_event_id,
+        "status": member.get("status", "Active"),
+        "currentAssignment": current_assignment,
+        "assignments": assignments,
+        "assignmentHistory": assignment_history,
+    }
+    token = create_team_token(
+        safe_account,
+        member_id=member.get("id"),
+        name=member.get("name", ""),
+        team_type="admin",
+    )
+    return jsonify({
+        "success": True,
+        "message": "Team login successful.",
+        "token": token,
+        "account": safe_account,
+    }), 200
+
+
 @app.route(
     "/admin/team-login",
     methods=["POST"]
 )
 def admin_team_login():
+    return _admin_team_login_response(
+        request.get_json(silent=True) or {}
+    )
 
     try:
 
@@ -11984,7 +12682,6 @@ def admin_team_login():
         print("LOGIN EMAIL:", email)
         print("PASSWORD ENTERED:", bool(password))
         print("STORED PASSWORD EXISTS:", bool(stored_password))
-        print("STORED PASSWORD PREFIX:", str(stored_password)[:20])
 
         if not stored_password:
             print("ADMIN TEAM LOGIN FAILED: NO STORED PASSWORD")
@@ -12622,7 +13319,7 @@ def toggle_admin_team_member_status(
 
 
         save_admin_team_members(
-            members
+            member
         )
 
 
@@ -15873,8 +16570,6 @@ JSON_TABLE_MAP = {
     "team_members.json": "team_members",
     "team_accounts.json": "team_accounts",
     "team_sessions.json": "team_sessions",
-    "admin_team_members.json": "admin_team_members",
-    "admin_team_accounts.json": "admin_team_accounts",
     "idempotency_keys.json": "idempotency_keys",
     # The old admin password file is now persisted in the approved
     # admin_settings record (or its metadata column when present).
@@ -15985,6 +16680,288 @@ def _record_db_values(record, columns, meta_col):
     if meta_col:
         values[meta_col] = json.dumps(_json_safe(record), default=str)
     return values
+
+
+def _admin_team_metadata(member):
+    metadata = dict(member.get("metadata") or {})
+    metadata.update({
+        key: value
+        for key, value in member.items()
+        if key not in {
+            "id",
+            "memberId",
+            "userId",
+            "metadata",
+            "role",
+            "password",
+            "password_hash",
+            "passwordHash",
+            "hashedPassword",
+            "token",
+            "invitationToken",
+            "invitation_token",
+            "invitationSecret",
+            "invitation_secret",
+            "invitationLink",
+            "invitation_link",
+        }
+    })
+    for key in (
+        "password",
+        "password_hash",
+        "passwordHash",
+        "hashedPassword",
+        "token",
+        "invitationToken",
+        "invitation_token",
+        "invitationSecret",
+        "invitation_secret",
+        "invitationLink",
+        "invitation_link",
+    ):
+        metadata.pop(key, None)
+    return metadata
+
+
+def _admin_team_row_to_legacy(row):
+    if not row:
+        return None
+
+    metadata = row.get("metadata") or {}
+    if isinstance(metadata, str):
+        try:
+            metadata = json.loads(metadata)
+        except (TypeError, ValueError):
+            metadata = {}
+    if not isinstance(metadata, dict):
+        metadata = {}
+
+    member = dict(metadata)
+    member.update({
+        "id": row.get("id"),
+        "memberId": row.get("id"),
+        "userId": row.get("user_id"),
+        "role": row.get("role") or metadata.get("role", "Event Staff"),
+        "name": row.get("linked_user_name") or metadata.get("name", ""),
+        "email": row.get("linked_user_email") or metadata.get("email", ""),
+        "status": row.get("status") or metadata.get("status", "Active"),
+        "accountCreated": bool(row.get("user_id")),
+    })
+    if row.get("created_at") is not None:
+        member.setdefault("createdAt", _legacy_scalar(row["created_at"]))
+    if row.get("updated_at") is not None:
+        member.setdefault("updatedAt", _legacy_scalar(row["updated_at"]))
+    if row.get("permissions") is not None:
+        member["permissions"] = row["permissions"]
+
+    for key in (
+        "password",
+        "password_hash",
+        "passwordHash",
+        "hashedPassword",
+        "token",
+        "invitationToken",
+        "invitation_token",
+        "invitationSecret",
+        "invitation_secret",
+        "invitationLink",
+        "invitation_link",
+    ):
+        member.pop(key, None)
+    return member
+
+
+def _admin_team_select(cur, where_sql="", params=(), for_update=False):
+    columns = _table_columns(cur, "admin_team")
+    if "user_id" not in columns or "role" not in columns or "metadata" not in columns:
+        raise RuntimeError(
+            "admin_team must contain user_id, role, and metadata columns."
+        )
+
+    lock_clause = " FOR UPDATE OF at" if for_update else ""
+    cur.execute(
+        """
+        SELECT at.*,
+               u.name AS linked_user_name,
+               u.email AS linked_user_email,
+               u.status AS linked_user_status
+        FROM admin_team AS at
+        LEFT JOIN users AS u ON u.id = at.user_id
+        """
+        + (f" WHERE {where_sql}" if where_sql else "")
+        + lock_clause,
+        params,
+    )
+    return cur.fetchall()
+
+
+def _admin_team_write_values(member, columns):
+    metadata = _admin_team_metadata(member)
+    values = {
+        "role": member.get("role", "Event Staff"),
+        "metadata": Jsonb(metadata),
+    }
+    if "permissions" in columns and "permissions" in member:
+        if columns["permissions"].get("data_type") in {"json", "jsonb"}:
+            values["permissions"] = Jsonb(member["permissions"])
+        else:
+            values["permissions"] = _coerce_db_value(
+                member["permissions"],
+                columns["permissions"],
+            )
+    if "status" in columns:
+        values["status"] = member.get("status", "Active")
+    if "updated_at" in columns:
+        values["updated_at"] = datetime.now(timezone.utc)
+    return values
+
+
+def _persist_admin_team_member(member, cur=None):
+    if not isinstance(member, dict):
+        raise TypeError("Admin team member must be a mapping.")
+
+    if cur is None:
+        with get_db_connection() as conn:
+            with conn.cursor() as db_cur:
+                saved = _persist_admin_team_member(member, db_cur)
+            conn.commit()
+        member.update(saved)
+        return saved
+
+    columns = _table_columns(cur, "admin_team")
+    if not {"id", "user_id", "role", "metadata"}.issubset(columns):
+        raise RuntimeError(
+            "admin_team must contain id, user_id, role, and metadata columns."
+        )
+    values = _admin_team_write_values(member, columns)
+    member_id = member.get("id")
+
+    if member_id is None:
+        insert_values = {"user_id": None, **values}
+        if "status" in columns and "status" not in insert_values:
+            insert_values["status"] = "Active"
+        if "created_at" in columns:
+            insert_values["created_at"] = datetime.now(timezone.utc)
+        insert_columns = ["id", *insert_values]
+        for _ in range(5):
+            generated_id = secrets.randbelow((1 << 63) - 1) + 1
+            row_values = {"id": generated_id, **insert_values}
+            cur.execute(
+                'INSERT INTO admin_team (' +
+                ", ".join(f'"{name}"' for name in insert_columns) +
+                ") VALUES (" +
+                ", ".join(["%s"] * len(insert_columns)) +
+                ") ON CONFLICT (id) DO NOTHING RETURNING id",
+                tuple(row_values[name] for name in insert_columns),
+            )
+            inserted = cur.fetchone()
+            if inserted:
+                member_id = inserted["id"]
+                break
+        else:
+            raise RuntimeError(
+                "Unable to allocate a unique admin_team.id after five attempts."
+            )
+    else:
+        update_columns = list(values)
+        cur.execute(
+            "UPDATE admin_team SET " +
+            ", ".join(f'"{name}" = %s' for name in update_columns) +
+            " WHERE id = %s RETURNING id",
+            tuple(values[name] for name in update_columns) + (member_id,),
+        )
+        if cur.fetchone() is None:
+            return None
+
+    saved = dict(member)
+    saved["id"] = member_id
+    saved["memberId"] = member_id
+    saved.pop("password", None)
+    saved.pop("password_hash", None)
+    saved.pop("passwordHash", None)
+    saved.pop("hashedPassword", None)
+    saved.pop("token", None)
+    saved.pop("invitationToken", None)
+    saved.pop("invitation_token", None)
+    saved.pop("invitationSecret", None)
+    saved.pop("invitation_secret", None)
+    saved.pop("invitationLink", None)
+    saved.pop("invitation_link", None)
+    return saved
+
+
+def _get_admin_team_auth_record(email):
+    normalized_email = str(email or "").strip().lower()
+    if not normalized_email:
+        return None
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            member_rows = _admin_team_select(
+                cur,
+                "lower(btrim(u.email)) = %s AND at.user_id IS NOT NULL",
+                (normalized_email,),
+            )
+            if not member_rows:
+                return None
+            if len(member_rows) != 1:
+                raise RuntimeError(
+                    "Multiple admin-team memberships match this email."
+                )
+            row = member_rows[0]
+            cur.execute(
+                "SELECT password_hash FROM users WHERE id = %s",
+                (row["user_id"],),
+            )
+            user_row = cur.fetchone()
+
+    member = _admin_team_row_to_legacy(row)
+    return {
+        "member": member,
+        "password_hash": user_row["password_hash"] if user_row else None,
+        "user_status": row.get("linked_user_status"),
+    }
+
+
+def _insert_admin_team_user(cur, name, email, password_hash):
+    columns = _table_columns(cur, "users")
+    required = {"id", "name", "email", "password_hash", "role", "status"}
+    if not required.issubset(columns):
+        raise RuntimeError(
+            "users must contain id, name, email, password_hash, role, and status."
+        )
+
+    insert_values = {
+        "name": name,
+        "email": email,
+        "password_hash": password_hash,
+        "role": "user",
+        "status": "active",
+    }
+    if "verified_host" in columns:
+        insert_values["verified_host"] = False
+    if "host_mode" in columns:
+        insert_values["host_mode"] = False
+    if "google_account" in columns:
+        insert_values["google_account"] = False
+    insert_columns = ["id", *insert_values]
+
+    for _ in range(5):
+        user_id = secrets.randbelow((1 << 63) - 1) + 1
+        values = {"id": user_id, **insert_values}
+        cur.execute(
+            "INSERT INTO users (" +
+            ", ".join(f'"{column}"' for column in insert_columns) +
+            ") VALUES (" +
+            ", ".join(["%s"] * len(insert_columns)) +
+            ") ON CONFLICT (id) DO NOTHING RETURNING id",
+            tuple(values[column] for column in insert_columns),
+        )
+        inserted = cur.fetchone()
+        if inserted:
+            return inserted["id"]
+
+    raise RuntimeError("Unable to allocate a unique users.id.")
 
 
 def _legacy_scalar(value):
@@ -16214,61 +17191,268 @@ def load_bookings():
 
 
 def save_bookings(data):
+    """
+    Save booking records and persist explicit ticket refund/cancellation
+    changes to the normalized PostgreSQL tickets table.
+
+    This function intentionally does not rewrite the full ticket collection
+    from a potentially stale nested booking snapshot.
+    """
     if not isinstance(data, list):
         data = [data] if isinstance(data, dict) else []
 
     with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            columns = _table_columns(cur, "bookings")
-            pk = "id" if "id" in columns else None
+        try:
+            with conn.cursor() as cur:
+                booking_columns = _table_columns(cur, "bookings")
+                ticket_columns = _table_columns(cur, "tickets")
 
-            for record in data:
-                values = _booking_record_db_values(record, columns)
-                if not values:
-                    continue
-
-                if pk and values.get(pk) is not None:
-                    cur.execute(
-                        'SELECT 1 FROM bookings WHERE id = %s LIMIT 1',
-                        (values[pk],),
+                if "id" not in booking_columns:
+                    raise RuntimeError(
+                        "Cannot save bookings: bookings.id column is missing."
                     )
-                    exists = cur.fetchone() is not None
-                    if exists:
-                        assignments = [k for k in values if k != pk]
-                        if assignments:
+
+                for record in data:
+                    if not isinstance(record, dict):
+                        continue
+
+                    values = _booking_record_db_values(
+                        record,
+                        booking_columns,
+                    )
+
+                    if not values:
+                        continue
+
+                    booking_db_id = values.get("id")
+                    if booking_db_id is None:
+                        # Do not create an unidentified booking silently.
+                        raise RuntimeError(
+                            "Cannot save booking without its database ID."
+                        )
+
+                    # Lock the existing booking row before updating it.
+                    cur.execute(
+                        """
+                        SELECT id
+                        FROM bookings
+                        WHERE id = %s
+                        FOR UPDATE
+                        """,
+                        (booking_db_id,),
+                    )
+                    booking_exists = cur.fetchone() is not None
+
+                    if booking_exists:
+                        update_columns = [
+                            column
+                            for column in values
+                            if column != "id"
+                        ]
+
+                        if update_columns:
                             cur.execute(
                                 "UPDATE bookings SET "
-                                + ", ".join(f'"{k}" = %s' for k in assignments)
-                                + " WHERE id = %s",
-                                tuple(values[k] for k in assignments) + (values[pk],),
+                                + ", ".join(
+                                    f'"{column}" = %s'
+                                    for column in update_columns
+                                )
+                                + ' WHERE "id" = %s',
+                                tuple(
+                                    values[column]
+                                    for column in update_columns
+                                )
+                                + (booking_db_id,),
                             )
                     else:
-                        cols = list(values)
+                        insert_columns = list(values)
+
                         cur.execute(
                             "INSERT INTO bookings ("
-                            + ", ".join(f'"{k}"' for k in cols)
+                            + ", ".join(
+                                f'"{column}"'
+                                for column in insert_columns
+                            )
                             + ") VALUES ("
-                            + ",".join(["%s"] * len(cols))
+                            + ", ".join(["%s"] * len(insert_columns))
                             + ")",
-                            tuple(values[k] for k in cols),
+                            tuple(
+                                values[column]
+                                for column in insert_columns
+                            ),
                         )
-                else:
-                    cols = list(values)
-                    cur.execute(
-                        "INSERT INTO bookings ("
-                        + ", ".join(f'"{k}"' for k in cols)
-                        + ") VALUES ("
-                        + ",".join(["%s"] * len(cols))
-                        + ")",
-                        tuple(values[k] for k in cols),
-                    )
+
+                    nested_tickets = record.get("tickets")
+                    if not isinstance(nested_tickets, list):
+                        continue
+
+                    booking_refund_id = record.get("refundId")
+                    booking_refund_amount = record.get("refundAmount")
+                    booking_refund_fee = record.get("refundFee")
+                    booking_refunded_at = record.get("refundedAt")
+
+                    for ticket in nested_tickets:
+                        if not isinstance(ticket, dict):
+                            continue
+
+                        ticket_refund_status = ticket.get("refundStatus")
+                        ticket_valid = ticket.get("valid")
+                        ticket_cancelled = ticket.get("cancelled")
+
+                        has_refund_change = (
+                            ticket_refund_status not in (None, "")
+                            or ticket_valid is False
+                            or ticket_cancelled is True
+                        )
+
+                        if not has_refund_change:
+                            continue
+
+                        ticket_db_id = ticket.get("id")
+                        public_ticket_id = ticket.get("ticketId")
+
+                        # tickets.id is numeric; older public ticket codes
+                        # may appear in a legacy ticket's "id" field.
+                        if ticket_db_id is not None:
+                            try:
+                                ticket_db_id = int(ticket_db_id)
+                            except (TypeError, ValueError):
+                                if not public_ticket_id:
+                                    public_ticket_id = ticket_db_id
+                                ticket_db_id = None
+
+                        if ticket_db_id is None and not public_ticket_id:
+                            # Do not guess which ticket row should be changed.
+                            continue
+
+                        ticket_values = {}
+
+                        if (
+                            "refund_status" in ticket_columns
+                            and ticket_refund_status is not None
+                        ):
+                            ticket_values["refund_status"] = (
+                                ticket_refund_status
+                            )
+
+                        if (
+                            "valid" in ticket_columns
+                            and ticket_valid is not None
+                        ):
+                            ticket_values["valid"] = bool(ticket_valid)
+
+                        if (
+                            "cancelled" in ticket_columns
+                            and ticket_cancelled is not None
+                        ):
+                            ticket_values["cancelled"] = bool(
+                                ticket_cancelled
+                            )
+
+                        refund_id_value = ticket.get(
+                            "refundId",
+                            booking_refund_id,
+                        )
+                        if (
+                            "refund_id" in ticket_columns
+                            and refund_id_value is not None
+                        ):
+                            ticket_values["refund_id"] = refund_id_value
+
+                        refund_amount_value = ticket.get("refundAmount")
+                        if (
+                            refund_amount_value is None
+                            and len(nested_tickets) == 1
+                        ):
+                            refund_amount_value = booking_refund_amount
+
+                        if (
+                            "refund_amount" in ticket_columns
+                            and refund_amount_value is not None
+                        ):
+                            ticket_values["refund_amount"] = (
+                                refund_amount_value
+                            )
+
+                        refund_fee_value = ticket.get("refundFee")
+                        if (
+                            refund_fee_value is None
+                            and len(nested_tickets) == 1
+                        ):
+                            refund_fee_value = booking_refund_fee
+
+                        if (
+                            "refund_fee" in ticket_columns
+                            and refund_fee_value is not None
+                        ):
+                            ticket_values["refund_fee"] = refund_fee_value
+
+                        cancelled_at_value = ticket.get(
+                            "cancelledAt",
+                            booking_refunded_at,
+                        )
+                        if (
+                            "cancelled_at" in ticket_columns
+                            and cancelled_at_value is not None
+                        ):
+                            ticket_values["cancelled_at"] = (
+                                cancelled_at_value
+                            )
+
+                        if not ticket_values:
+                            continue
+
+                        # Match by the normalized numeric ID where possible.
+                        # Always scope the update to this booking.
+                        if ticket_db_id is not None:
+                            cur.execute(
+                                """
+                                UPDATE tickets
+                                SET
+                                """
+                                + ", ".join(
+                                    f'"{column}" = %s'
+                                    for column in ticket_values
+                                )
+                                + """
+                                WHERE booking_id = %s
+                                  AND id = %s
+                                """,
+                                tuple(ticket_values.values())
+                                + (booking_db_id, ticket_db_id),
+                            )
+                        else:
+                            cur.execute(
+                                """
+                                UPDATE tickets
+                                SET
+                                """
+                                + ", ".join(
+                                    f'"{column}" = %s'
+                                    for column in ticket_values
+                                )
+                                + """
+                                WHERE booking_id = %s
+                                  AND ticket_id = %s
+                                """,
+                                tuple(ticket_values.values())
+                                + (booking_db_id, public_ticket_id),
+                            )
 
             conn.commit()
+
+        except Exception:
+            conn.rollback()
+            raise
 
 
 def load_json_file(filename, default=None):
     if str(filename) == "bookings.json":
         return load_bookings()
+
+    if str(filename) == "events.json":
+        return load_events()
+
     default = [] if default is None else default
     table = _table_name_for_file(filename)
     try:
@@ -16281,12 +17465,19 @@ def load_json_file(filename, default=None):
                 return [_row_to_legacy(row, table) for row in rows]
     except Exception as e:
         print(f"POSTGRES LOAD ERROR [{filename}]:", str(e))
-        return default
+        raise RuntimeError(
+            f"PostgreSQL load failed for {filename!r} "
+            f"(table {table!r})"
+        ) from e
 
 
 def save_json_file(filename, data):
     if str(filename) == "bookings.json":
         return save_bookings(data)
+
+    if str(filename) == "events.json":
+        return save_events(data)
+
     table = _table_name_for_file(filename)
     if not isinstance(data, list):
         data = [data] if isinstance(data, dict) else []
@@ -16379,15 +17570,11 @@ def save_json_file(filename, data):
                 # Preserve legacy full-collection deletion semantics for
                 # normal collection tables. Singleton settings/wallet rows
                 # are intentionally never deleted by an empty legacy list.
-                if pk and not singleton_table:
-                    if seen_ids:
-                        placeholders = ",".join(["%s"] * len(seen_ids))
-                        cur.execute(
-                            f'DELETE FROM "{table}" WHERE id NOT IN ({placeholders})',
-                            tuple(seen_ids)
-                        )
-                    elif data == []:
-                        cur.execute(f'DELETE FROM "{table}"')
+                # DATA SAFETY:
+                # Legacy collection saves must not delete records merely
+                # because they are missing from the supplied list.
+                # Use explicit, targeted DELETE operations for intentional
+                # deletions after verifying the record and its relationships.
 
                 conn.commit()
     except Exception as e:
@@ -16395,18 +17582,744 @@ def save_json_file(filename, data):
         raise
 
 # ============================================================
-# PAYMENT FILE HELPERS
+# PAYMENT POSTGRESQL HELPERS
+# ============================================================
+#
+# payments.json is now a PostgreSQL compatibility name only.
+#
+# IMPORTANT:
+# Payment writes must be targeted.
+#
+# We must NEVER load the entire payments collection, modify one
+# payment in memory, and then save the whole collection back.
+#
+# That old JSON pattern could allow one request to overwrite
+# changes made by another request.
 # ============================================================
 
 PAYMENTS_FILE = "payments.json"
 
 
 def load_payments():
-    return load_json_file("payments.json", [])
+    """
+    Compatibility reader.
+
+    Payment records are loaded from PostgreSQL through the
+    existing persistence adapter. No JSON file is accessed.
+    """
+    return load_json_file(
+        "payments.json",
+        []
+    )
 
 
-def save_payments(data):
-    return save_json_file("payments.json", data)
+def find_payment_by_tx_ref(
+    payments,
+    tx_ref
+):
+    """
+    Find a payment in an already-loaded compatibility list.
+
+    Used by verification code that needs to inspect a payment
+    before entering the authoritative fulfillment transaction.
+    """
+    target = str(
+        tx_ref or ""
+    ).strip()
+
+    for payment in payments or []:
+        if str(
+            payment.get(
+                "txRef",
+                ""
+            )
+        ).strip() == target:
+            return payment
+
+    return None
+
+
+def find_payment_by_transaction_id(
+    payments,
+    transaction_id
+):
+    """
+    Find a Flutterwave payment by provider transaction ID.
+
+    This is a compatibility lookup only.
+
+    The authoritative duplicate-protection check remains inside
+    complete_verified_eventwaa_payment(), where the payment row
+    is protected by the PostgreSQL transaction/advisory lock.
+    """
+    target = str(
+        transaction_id or ""
+    ).strip()
+
+    if not target:
+        return None
+
+    for payment in payments or []:
+        if str(
+            payment.get(
+                "transactionId",
+                ""
+            )
+        ).strip() == target:
+            return payment
+
+    return None
+
+
+def _payment_row_to_legacy(row):
+    """
+    Convert a PostgreSQL payments row into the legacy payment
+    shape expected by existing route code.
+
+    This intentionally maps normalized database columns back
+    to the camelCase names used by older route logic.
+    """
+    if not row:
+        return None
+
+    payment = {}
+
+    payment["id"] = row.get("id")
+    payment["provider"] = row.get("provider")
+    payment["txRef"] = row.get("tx_ref")
+    payment["transactionId"] = row.get("transaction_id")
+    payment["pesapalOrderTrackingId"] = row.get(
+        "pesapal_order_tracking_id"
+    )
+    payment["pesapalMerchantReference"] = row.get(
+        "pesapal_merchant_reference"
+    )
+    payment["eventId"] = row.get("event_id")
+    payment["ownerUserId"] = row.get("owner_user_id")
+    payment["ticketTypeId"] = row.get("ticket_type_id")
+    payment["quantity"] = row.get("quantity")
+    payment["ticketPrice"] = row.get("ticket_price")
+    payment["subtotal"] = row.get("subtotal")
+    payment["serviceFee"] = row.get("service_fee")
+    payment["serviceFeePercent"] = row.get(
+        "service_fee_percent"
+    )
+    payment["amount"] = row.get("amount")
+    payment["currency"] = row.get("currency")
+    payment["status"] = row.get("status")
+    payment["paidAmount"] = row.get("paid_amount")
+    payment["processed"] = row.get("processed")
+    payment["bookingId"] = row.get("booking_id")
+    payment["processedAt"] = row.get("processed_at")
+    payment["createdAt"] = row.get("created_at")
+    payment["updatedAt"] = row.get("updated_at")
+
+    provider_response = row.get(
+        "provider_response"
+    )
+
+    if isinstance(provider_response, dict):
+        payment.update(
+            provider_response
+        )
+
+    payment["buyer"] = {
+        "name": row.get("buyer_name"),
+        "email": row.get("buyer_email"),
+        "phone": row.get("phone_number")
+    }
+
+    return payment
+
+
+def create_pending_payment(
+    payment_record
+):
+    """
+    Create exactly one pending payment in PostgreSQL.
+
+    The database schema currently does not provide a default
+    sequence for payments.id, so ID generation is serialized
+    with a PostgreSQL transaction advisory lock.
+
+    This prevents two simultaneous payment initializations from
+    choosing the same MAX(id) + 1 value.
+    """
+
+    if not isinstance(
+        payment_record,
+        dict
+    ):
+        raise ValueError(
+            "Payment record must be a dictionary."
+        )
+
+    tx_ref = str(
+        payment_record.get(
+            "txRef",
+            ""
+        )
+        or ""
+    ).strip()
+
+    if not tx_ref:
+        raise ValueError(
+            "Payment txRef is required."
+        )
+
+    provider = str(
+        payment_record.get(
+            "provider",
+            "flutterwave"
+        )
+        or "flutterwave"
+    ).strip().lower()
+
+    if provider not in {
+        "flutterwave",
+        "pesapal"
+    }:
+        raise ValueError(
+            "Unsupported payment provider."
+        )
+
+    buyer = (
+        payment_record.get(
+            "buyer"
+        )
+        or {}
+    )
+
+    owner_user_id = payment_record.get(
+        "ownerUserId"
+    )
+
+    event_id = payment_record.get(
+        "eventId"
+    )
+
+    quantity = payment_record.get(
+        "quantity"
+    )
+
+    ticket_price = payment_record.get(
+        "ticketPrice"
+    )
+
+    subtotal = payment_record.get(
+        "subtotal"
+    )
+
+    service_fee = payment_record.get(
+        "serviceFee"
+    )
+
+    service_fee_percent = payment_record.get(
+        "serviceFeePercent"
+    )
+
+    amount = payment_record.get(
+        "amount",
+        0
+    )
+
+    currency = str(
+        payment_record.get(
+            "currency",
+            "UGX"
+        )
+        or "UGX"
+    ).upper()
+
+    status = str(
+        payment_record.get(
+            "status",
+            "pending"
+        )
+        or "pending"
+    )
+
+    with get_db_connection() as conn:
+
+        with conn.cursor() as cur:
+
+            # ------------------------------------------------
+            # Serialize payment ID generation.
+            # ------------------------------------------------
+
+            cur.execute(
+                """
+                SELECT pg_advisory_xact_lock(
+                    hashtext('eventwaa-payment-id')
+                )
+                """
+            )
+
+            # ------------------------------------------------
+            # Prevent duplicate EventWaa transaction references.
+            #
+            # We intentionally check this inside the same
+            # transaction as the insert.
+            # ------------------------------------------------
+
+            cur.execute(
+                """
+                SELECT id
+                FROM payments
+                WHERE tx_ref = %s
+                LIMIT 1
+                FOR UPDATE
+                """,
+                (tx_ref,)
+            )
+
+            existing = cur.fetchone()
+
+            if existing:
+
+                raise ValueError(
+                    "A payment with this transaction reference "
+                    "already exists."
+                )
+
+            # ------------------------------------------------
+            # Generate the next numeric payment ID safely.
+            # ------------------------------------------------
+
+            cur.execute(
+                """
+                SELECT COALESCE(
+                    MAX(id),
+                    0
+                ) + 1 AS next_id
+                FROM payments
+                """
+            )
+
+            next_id_row = cur.fetchone()
+
+            payment_id = int(
+                next_id_row["next_id"]
+            )
+
+            # ------------------------------------------------
+            # Provider-specific identifiers.
+            # ------------------------------------------------
+
+            pesapal_tracking_id = (
+                payment_record.get(
+                    "pesapalOrderTrackingId"
+                )
+            )
+
+            pesapal_merchant_reference = (
+                payment_record.get(
+                    "pesapalMerchantReference"
+                )
+            )
+
+            transaction_id = (
+                payment_record.get(
+                    "transactionId"
+                )
+            )
+
+            # ------------------------------------------------
+            # Preserve additional legacy provider data in the
+            # normalized provider_response JSONB column.
+            # ------------------------------------------------
+
+            provider_response = {}
+
+            for key in (
+                "eventTitle",
+                "ticketType",
+                "paymentMethod",
+                "phoneNumber",
+                "pesapalStatusCode",
+                "pesapalConfirmationCode"
+            ):
+                if key in payment_record:
+                    provider_response[key] = (
+                        payment_record.get(key)
+                    )
+
+            cur.execute(
+                """
+                INSERT INTO payments (
+                    id,
+                    provider,
+                    tx_ref,
+                    transaction_id,
+                    pesapal_order_tracking_id,
+                    pesapal_merchant_reference,
+                    event_id,
+                    owner_user_id,
+                    quantity,
+                    buyer_name,
+                    buyer_email,
+                    phone_number,
+                    ticket_price,
+                    subtotal,
+                    service_fee,
+                    service_fee_percent,
+                    amount,
+                    currency,
+                    status,
+                    paid_amount,
+                    processed,
+                    booking_id,
+                    provider_response,
+                    created_at,
+                    updated_at
+                )
+                VALUES (
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    FALSE,
+                    NULL,
+                    %s::jsonb,
+                    NOW(),
+                    NOW()
+                )
+                RETURNING *
+                """,
+                (
+                    payment_id,
+                    provider,
+                    tx_ref,
+                    transaction_id,
+                    pesapal_tracking_id,
+                    pesapal_merchant_reference,
+                    event_id,
+                    owner_user_id,
+                    quantity,
+                    buyer.get("name"),
+                    buyer.get("email"),
+                    buyer.get(
+                        "phone",
+                        payment_record.get(
+                            "phoneNumber"
+                        )
+                    ),
+                    ticket_price,
+                    subtotal,
+                    service_fee,
+                    service_fee_percent,
+                    amount,
+                    currency,
+                    status,
+                    None,
+                    json.dumps(
+                        _json_safe(
+                            provider_response
+                        ),
+                        default=str
+                    )
+                )
+            )
+
+            created_row = cur.fetchone()
+
+        conn.commit()
+
+    return _payment_row_to_legacy(
+        created_row
+    )
+
+
+def update_payment_provider_details(
+    tx_ref,
+    provider=None,
+    pesapal_order_tracking_id=None,
+    pesapal_merchant_reference=None,
+    pesapal_confirmation_code=None,
+    pesapal_status_code=None,
+    transaction_id=None,
+    provider_response=None
+):
+    """
+    Update only provider-specific payment information.
+
+    This function deliberately does NOT overwrite:
+        processed
+        booking_id
+        status
+        amount
+        wallet accounting
+        inventory
+
+    Those fields belong to the fulfillment transaction.
+    """
+
+    tx_ref = str(
+        tx_ref or ""
+    ).strip()
+
+    if not tx_ref:
+        raise ValueError(
+            "Payment txRef is required."
+        )
+
+    updates = []
+    params = []
+
+    if provider is not None:
+        updates.append(
+            "provider = %s"
+        )
+        params.append(
+            str(provider).strip().lower()
+        )
+
+    if pesapal_order_tracking_id is not None:
+        updates.append(
+            "pesapal_order_tracking_id = %s"
+        )
+        params.append(
+            str(
+                pesapal_order_tracking_id
+            ).strip()
+        )
+
+    if pesapal_merchant_reference is not None:
+        updates.append(
+            "pesapal_merchant_reference = %s"
+        )
+        params.append(
+            str(
+                pesapal_merchant_reference
+            ).strip()
+        )
+
+    response_patch = {}
+
+    if isinstance(
+        provider_response,
+        dict
+    ):
+        response_patch.update(
+            provider_response
+        )
+
+    if pesapal_confirmation_code is not None:
+        response_patch[
+            "pesapalConfirmationCode"
+        ] = str(
+            pesapal_confirmation_code
+        ).strip()
+
+    if pesapal_status_code is not None:
+        response_patch[
+            "pesapalStatusCode"
+        ] = pesapal_status_code
+
+    if response_patch:
+        updates.append(
+            """
+            provider_response =
+                COALESCE(
+                    provider_response,
+                    '{}'::jsonb
+                )
+                || %s::jsonb
+            """
+        )
+        params.append(
+            json.dumps(
+                _json_safe(
+                    response_patch
+                ),
+                default=str
+            )
+        )
+
+    if transaction_id is not None:
+        updates.append(
+            "transaction_id = %s"
+        )
+        params.append(
+            str(
+                transaction_id
+            ).strip()
+        )
+
+    if not updates:
+        return False
+
+    updates.append(
+        "updated_at = NOW()"
+    )
+
+    params.append(
+        tx_ref
+    )
+
+    with get_db_connection() as conn:
+
+        with conn.cursor() as cur:
+
+            cur.execute(
+                """
+                UPDATE payments
+                SET
+                """
+                + ", ".join(
+                    updates
+                )
+                + """
+                WHERE tx_ref = %s
+                RETURNING id
+                """,
+                tuple(params)
+            )
+
+            row = cur.fetchone()
+
+        conn.commit()
+
+    if not row:
+        raise ValueError(
+            "Payment not found."
+        )
+
+    return True
+
+
+def update_payment_status(tx_ref, status, provider_response=None):
+    tx_ref = str(tx_ref or "").strip()
+    if not tx_ref:
+        raise ValueError("Payment transaction reference is required.")
+
+    response_patch = {}
+    if isinstance(provider_response, dict):
+        response_patch.update(provider_response)
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            if response_patch:
+                cur.execute(
+                    """
+                    UPDATE payments
+                    SET status = CASE
+                            WHEN processed IS TRUE THEN status
+                            ELSE %s
+                        END,
+                        provider_response =
+                            COALESCE(provider_response, '{}'::jsonb)
+                            || %s::jsonb,
+                        updated_at = NOW()
+                    WHERE tx_ref = %s
+                    RETURNING id
+                    """,
+                    (
+                        str(status),
+                        json.dumps(_json_safe(response_patch), default=str),
+                        tx_ref,
+                    ),
+                )
+            else:
+                cur.execute(
+                    """
+                    UPDATE payments
+                    SET status = CASE
+                            WHEN processed IS TRUE THEN status
+                            ELSE %s
+                        END,
+                        updated_at = NOW()
+                    WHERE tx_ref = %s
+                    RETURNING id
+                    """,
+                    (str(status), tx_ref),
+                )
+
+            row = cur.fetchone()
+
+        conn.commit()
+
+    if not row:
+        raise ValueError("Payment not found.")
+
+    return True
+
+def delete_pending_payment(
+    tx_ref
+):
+    """
+    Remove a payment that never successfully reached the
+    external payment provider.
+
+    Only an unprocessed payment may be deleted.
+    """
+
+    tx_ref = str(
+        tx_ref or ""
+    ).strip()
+
+    if not tx_ref:
+        raise ValueError(
+            "Payment txRef is required."
+        )
+
+    with get_db_connection() as conn:
+
+        with conn.cursor() as cur:
+
+            cur.execute(
+                """
+                DELETE FROM payments
+                WHERE tx_ref = %s
+                  AND processed = FALSE
+                RETURNING id
+                """,
+                (tx_ref,)
+            )
+
+            row = cur.fetchone()
+
+        conn.commit()
+
+    return bool(row)
+
+
+def update_pesapal_payment_status(
+    tx_ref,
+    status,
+    status_code=None
+):
+    """
+    Convenience wrapper for PesaPal status changes.
+    """
+
+    return update_payment_status(
+        tx_ref=tx_ref,
+        status=status,
+        provider_response={
+            "pesapalStatusCode": status_code
+        }
+        if status_code is not None
+        else None
+    )
+
+    
 # ============================================================
 # VERIFY FLUTTERWAVE PAYMENT
 # ============================================================
@@ -17846,29 +19759,33 @@ def process_verified_payment(
     # ========================================================
     # CHECK FLUTTERWAVE STATUS
     # ========================================================
+
     flutterwave_status = (
         flutterwave_payment.get(
             "status"
         )
     )
+
     if flutterwave_status != "successful":
-        payment["status"] = (
+
+        failed_status = (
             flutterwave_status
             or
             "failed"
         )
-        payment["transactionId"] = (
-            transaction_id
+
+        update_payment_status(
+            tx_ref=tx_ref,
+            status=failed_status,
+            provider_response={
+                "transactionId": transaction_id,
+                "provider": payment.get(
+                    "provider",
+                    "flutterwave"
+                )
+            }
         )
-        payment["provider"] = (
-            payment.get(
-                "provider",
-                "flutterwave"
-            )
-        )
-        save_payments(
-            payments
-        )
+
         return {
             "success": False,
             "message": (
@@ -19196,16 +21113,628 @@ def save_messages(data):
 
 
 # ============================================================
-# HOST WALLETS
+# HOST WALLETS — POSTGRESQL COMPATIBILITY LAYER
 # ============================================================
 
+def _host_wallet_legacy_transaction(row):
+    """
+    Convert a PostgreSQL wallet transaction into the legacy
+    transaction shape expected by the existing EventWaa routes.
+    """
+    if not row:
+        return None
+
+    metadata = row.get("metadata")
+
+    if not isinstance(metadata, dict):
+        metadata = {}
+
+    transaction = dict(metadata)
+
+    transaction.setdefault(
+        "id",
+        row.get("id")
+    )
+
+    transaction.setdefault(
+        "type",
+        row.get("type")
+    )
+
+    transaction.setdefault(
+        "amount",
+        row.get("amount", 0)
+    )
+
+    transaction.setdefault(
+        "status",
+        row.get("status", "completed")
+    )
+
+    transaction.setdefault(
+        "description",
+        row.get("description")
+    )
+
+    transaction.setdefault(
+        "reference",
+        row.get("reference")
+    )
+
+    transaction.setdefault(
+        "date",
+        row.get("created_at")
+        .isoformat()
+        if row.get("created_at")
+        else None
+    )
+
+    if row.get("event_id") is not None:
+        transaction.setdefault(
+            "eventId",
+            row.get("event_id")
+        )
+
+    if row.get("booking_id") is not None:
+        transaction.setdefault(
+            "bookingId",
+            row.get("booking_id")
+        )
+
+    if row.get("payment_id") is not None:
+        transaction.setdefault(
+            "paymentId",
+            row.get("payment_id")
+        )
+
+    if row.get("refund_id") is not None:
+        transaction.setdefault(
+            "refundId",
+            row.get("refund_id")
+        )
+
+    if row.get("balance_before") is not None:
+        transaction.setdefault(
+            "balanceBefore",
+            row.get("balance_before")
+        )
+
+    if row.get("balance_after") is not None:
+        transaction.setdefault(
+            "balanceAfter",
+            row.get("balance_after")
+        )
+
+    return transaction
+
+
+def _host_wallet_legacy_withdrawal(row):
+    """
+    Convert a PostgreSQL withdrawal into the legacy withdrawal
+    shape expected by the existing host/admin withdrawal routes.
+    """
+    if not row:
+        return None
+
+    metadata = row.get("metadata")
+
+    if not isinstance(metadata, dict):
+        metadata = {}
+
+    withdrawal = dict(metadata)
+
+    withdrawal.setdefault(
+        "id",
+        row.get("id")
+    )
+
+    withdrawal.setdefault(
+        "amount",
+        row.get("amount", 0)
+    )
+
+    withdrawal.setdefault(
+        "status",
+        row.get("status", "pending")
+    )
+
+    withdrawal.setdefault(
+        "method",
+        row.get("method")
+    )
+
+    withdrawal.setdefault(
+        "account",
+        row.get("account_number")
+    )
+
+    withdrawal.setdefault(
+        "accountName",
+        row.get("account_name")
+    )
+
+    withdrawal.setdefault(
+        "provider",
+        row.get("provider")
+    )
+
+    withdrawal.setdefault(
+        "providerReference",
+        row.get("provider_reference")
+    )
+
+    withdrawal.setdefault(
+        "idempotencyKey",
+        row.get("idempotency_key")
+    )
+
+    withdrawal.setdefault(
+        "failureReason",
+        row.get("failure_reason")
+    )
+
+    withdrawal.setdefault(
+        "requestedAt",
+        row.get("requested_at")
+        .isoformat()
+        if row.get("requested_at")
+        else None
+    )
+
+    withdrawal.setdefault(
+        "processedAt",
+        row.get("processed_at")
+        .isoformat()
+        if row.get("processed_at")
+        else None
+    )
+
+    withdrawal.setdefault(
+        "processedBy",
+        row.get("processed_by")
+    )
+
+    return withdrawal
+
+
 def load_host_wallets():
-    return load_json_file("host_wallets.json", [])
+    """
+    Load all host wallets from PostgreSQL and reconstruct the
+    legacy EventWaa wallet shape expected by existing routes.
+
+    PostgreSQL is authoritative.
+    No host_wallets.json file is read.
+    """
+
+    with get_db_connection() as conn:
+
+        with conn.cursor() as cur:
+
+            cur.execute(
+                """
+                SELECT
+                    id,
+                    user_id,
+                    available_balance,
+                    pending_balance,
+                    total_earned,
+                    total_withdrawn,
+                    currency,
+                    status,
+                    created_at,
+                    updated_at,
+                    metadata
+                FROM host_wallets
+                ORDER BY id
+                """
+            )
+
+            wallet_rows = cur.fetchall()
+
+            cur.execute(
+                """
+                SELECT
+                    id,
+                    wallet_id,
+                    user_id,
+                    event_id,
+                    booking_id,
+                    payment_id,
+                    refund_id,
+                    type,
+                    amount,
+                    currency,
+                    status,
+                    description,
+                    reference,
+                    balance_before,
+                    balance_after,
+                    created_at,
+                    metadata
+                FROM wallet_transactions
+                ORDER BY created_at DESC, id DESC
+                """
+            )
+
+            transaction_rows = cur.fetchall()
+
+            cur.execute(
+                """
+                SELECT
+                    id,
+                    user_id,
+                    wallet_id,
+                    amount,
+                    currency,
+                    status,
+                    method,
+                    provider,
+                    provider_reference,
+                    account_name,
+                    account_number,
+                    requested_at,
+                    processed_at,
+                    processed_by,
+                    failure_reason,
+                    idempotency_key,
+                    metadata
+                FROM withdrawals
+                ORDER BY requested_at DESC, id DESC
+                """
+            )
+
+            withdrawal_rows = cur.fetchall()
+
+    transactions_by_wallet = {}
+
+    for row in transaction_rows:
+
+        wallet_id = row.get(
+            "wallet_id"
+        )
+
+        if wallet_id is None:
+            continue
+
+        transactions_by_wallet.setdefault(
+            int(wallet_id),
+            []
+        ).append(
+            _host_wallet_legacy_transaction(row)
+        )
+
+    withdrawals_by_wallet = {}
+
+    for row in withdrawal_rows:
+
+        wallet_id = row.get(
+            "wallet_id"
+        )
+
+        if wallet_id is None:
+            continue
+
+        withdrawals_by_wallet.setdefault(
+            int(wallet_id),
+            []
+        ).append(
+            _host_wallet_legacy_withdrawal(row)
+        )
+
+    wallets = []
+
+    for row in wallet_rows:
+
+        wallet_id = int(
+            row["id"]
+        )
+
+        metadata = row.get(
+            "metadata"
+        )
+
+        if not isinstance(
+            metadata,
+            dict
+        ):
+            metadata = {}
+
+        wallet = dict(metadata)
+
+        wallet["id"] = wallet_id
+
+        wallet["hostId"] = int(
+            row["user_id"]
+        )
+
+        wallet["availableBalance"] = (
+            row.get("available_balance", 0)
+            or 0
+        )
+
+        wallet["pendingPayouts"] = (
+            row.get("pending_balance", 0)
+            or 0
+        )
+
+        wallet["totalEarned"] = (
+            row.get("total_earned", 0)
+            or 0
+        )
+
+        wallet["totalWithdrawn"] = (
+            row.get("total_withdrawn", 0)
+            or 0
+        )
+
+        wallet.setdefault(
+            "scheduledPayouts",
+            []
+        )
+
+        wallet["transactions"] = (
+            transactions_by_wallet.get(
+                wallet_id,
+                []
+            )
+        )
+
+        wallet["withdrawals"] = (
+            withdrawals_by_wallet.get(
+                wallet_id,
+                []
+            )
+        )
+
+        wallets.append(
+            wallet
+        )
+
+    return wallets
 
 
 def save_host_wallets(data):
-    return save_json_file("host_wallets.json", data)
+    """
+    Persist host wallet balances and legacy-compatible wallet
+    metadata to PostgreSQL.
 
+    IMPORTANT:
+    This function deliberately does NOT recreate the old
+    whole-table JSON behavior.
+
+    Core balances are written to host_wallets.
+    Existing transaction/withdrawal records are represented
+    by their normalized PostgreSQL tables.
+    """
+
+    if data is None:
+        data = []
+
+    if not isinstance(
+        data,
+        list
+    ):
+        raise ValueError(
+            "Host wallets must be a list."
+        )
+
+    with get_db_connection() as conn:
+
+        with conn.cursor() as cur:
+
+            for wallet in data:
+
+                if not isinstance(
+                    wallet,
+                    dict
+                ):
+                    continue
+
+                host_id = wallet.get(
+                    "hostId"
+                )
+
+                if host_id is None:
+                    continue
+
+                try:
+                    host_id = int(
+                        host_id
+                    )
+                except (
+                    TypeError,
+                    ValueError
+                ):
+                    continue
+
+                cur.execute(
+                    """
+                    SELECT
+                        id
+                    FROM host_wallets
+                    WHERE user_id = %s
+                    FOR UPDATE
+                    """,
+                    (
+                        host_id,
+                    )
+                )
+
+                existing = cur.fetchone()
+
+                metadata = {}
+
+                raw_metadata = wallet.get(
+                    "metadata"
+                )
+
+                if isinstance(
+                    raw_metadata,
+                    dict
+                ):
+                    metadata.update(
+                        raw_metadata
+                    )
+
+                metadata.pop(
+                    "transactions",
+                    None
+                )
+
+                metadata.pop(
+                    "withdrawals",
+                    None
+                )
+
+                metadata.pop(
+                    "scheduledPayouts",
+                    None
+                )
+
+                metadata.pop(
+                    "availableBalance",
+                    None
+                )
+
+                metadata.pop(
+                    "pendingPayouts",
+                    None
+                )
+
+                metadata.pop(
+                    "totalEarned",
+                    None
+                )
+
+                metadata.pop(
+                    "totalWithdrawn",
+                    None
+                )
+
+                if existing:
+
+                    wallet_id = int(
+                        existing["id"]
+                    )
+
+                    cur.execute(
+                        """
+                        UPDATE host_wallets
+                        SET
+                            available_balance = %s,
+                            pending_balance = %s,
+                            total_earned = %s,
+                            total_withdrawn = %s,
+                            metadata = %s::jsonb,
+                            updated_at = NOW()
+                        WHERE id = %s
+                        """,
+                        (
+                            wallet.get(
+                                "availableBalance",
+                                0
+                            ) or 0,
+
+                            wallet.get(
+                                "pendingPayouts",
+                                0
+                            ) or 0,
+
+                            wallet.get(
+                                "totalEarned",
+                                0
+                            ) or 0,
+
+                            wallet.get(
+                                "totalWithdrawn",
+                                0
+                            ) or 0,
+
+                            json.dumps(
+                                metadata,
+                                default=str
+                            ),
+
+                            wallet_id
+                        )
+                    )
+
+                else:
+
+                    cur.execute(
+                        """
+                        SELECT
+                            COALESCE(
+                                MAX(id),
+                                0
+                            ) + 1 AS next_id
+                        FROM host_wallets
+                        FOR UPDATE
+                        """
+                    )
+
+                    wallet_id = int(
+                        cur.fetchone()["next_id"]
+                    )
+
+                    cur.execute(
+                        """
+                        INSERT INTO host_wallets (
+                            id,
+                            user_id,
+                            available_balance,
+                            pending_balance,
+                            total_earned,
+                            total_withdrawn,
+                            currency,
+                            status,
+                            metadata
+                        )
+                        VALUES (
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            %s,
+                            'UGX',
+                            'active',
+                            %s::jsonb
+                        )
+                        """,
+                        (
+                            wallet_id,
+
+                            host_id,
+
+                            wallet.get(
+                                "availableBalance",
+                                0
+                            ) or 0,
+
+                            wallet.get(
+                                "pendingPayouts",
+                                0
+                            ) or 0,
+
+                            wallet.get(
+                                "totalEarned",
+                                0
+                            ) or 0,
+
+                            wallet.get(
+                                "totalWithdrawn",
+                                0
+                            ) or 0,
+
+                            json.dumps(
+                                metadata,
+                                default=str
+                            )
+                        )
+                    )
+
+        conn.commit()
 
 # ============================================================
 # NOTIFICATIONS
@@ -24055,13 +26584,10 @@ def initialize_pesapal_payment():
                 None
         }
 
-        payments.append(
+        payments_record = create_pending_payment(
             payment_record
         )
-
-        save_payments(
-            payments
-        )
+        
 
         # ====================================================
         # CREATE PESAPAL ORDER
@@ -24084,16 +26610,8 @@ def initialize_pesapal_payment():
             # Remove the pending payment because
             # no PesaPal order was successfully created.
 
-            payments = [
-                p
-                for p in payments
-                if str(
-                    p.get("txRef", "")
-                ) != str(tx_ref)
-            ]
-
-            save_payments(
-                payments
+            delete_pending_payment(
+                tx_ref
             )
 
             return jsonify({
@@ -24108,28 +26626,15 @@ def initialize_pesapal_payment():
         # STORE PESAPAL IDs
         # ====================================================
 
-        for payment in payments:
-
-            if str(
-                payment.get("txRef", "")
-            ) == str(tx_ref):
-
-                payment[
-                    "pesapalOrderTrackingId"
-                ] = pesapal_order[
-                    "order_tracking_id"
-                ]
-
-                payment[
-                    "pesapalMerchantReference"
-                ] = pesapal_order[
-                    "merchant_reference"
-                ]
-
-                break
-
-        save_payments(
-            payments
+        update_payment_provider_details(
+            tx_ref=tx_ref,
+            provider="pesapal",
+            pesapal_order_tracking_id=pesapal_order[
+                "order_tracking_id"
+            ],
+            pesapal_merchant_reference=pesapal_order[
+                "merchant_reference"
+            ]
         )
 
         # ====================================================
@@ -24312,24 +26817,19 @@ def verify_pesapal_payment(
             status_code
         ) != "1":
 
-            payment["status"] = (
-                pesapal_payment.get(
-                    "payment_status_description"
-                )
-                or
-                (
-                    "failed"
-                    if str(status_code) == "2"
-                    else "pending"
-                )
-            )
-
-            payment[
-                "pesapalStatusCode"
-            ] = status_code
-
-            save_payments(
-                payments
+            update_pesapal_payment_status(
+                tx_ref=payment.get("txRef"),
+                status=(
+                    pesapal_payment.get(
+                        "payment_status_description"
+                    )
+                    or (
+                        "failed"
+                        if str(status_code) == "2"
+                        else "pending"
+                    )
+                ),
+                status_code=status_code
             )
 
             return jsonify({
@@ -24465,58 +26965,81 @@ def verify_pesapal_payment(
         )
 
 
-        # ====================================================
-        # STORE PESAPAL REFUND IDENTIFIER
-        #
-        # PesaPal uses confirmation_code to identify the
-        # original payment when requesting a refund.
-        # ====================================================
+        # ============================================================
+        # PERSIST PESAPAL PROVIDER DETAILS WITHOUT OVERWRITING
+        # AUTHORITATIVE POSTGRESQL FULFILLMENT STATE
+        # ============================================================
 
         pesapal_confirmation_code = str(
-            pesapal_payment.get(
-                "confirmation_code",
-                ""
-            ) or ""
+            pesapal_payment.get("confirmation_code", "")
+            or ""
         ).strip()
 
+        try:
+            db_conn = get_db_connection()
 
-        if not pesapal_confirmation_code:
+            with db_conn:
+                with db_conn.cursor() as cur:
 
+                    # Store provider-specific response details only.
+                    # IMPORTANT:
+                    # Do NOT call save_payments(payments) here because
+                    # complete_verified_eventwaa_payment() has already
+                    # committed the authoritative payment/booking state.
+                    provider_details = {
+                        "pesapalOrderTrackingId": str(order_tracking_id),
+                        "provider": "pesapal",
+                    }
+
+                    if pesapal_confirmation_code:
+                        provider_details["pesapalConfirmationCode"] = (
+                            pesapal_confirmation_code
+                        )
+                        print(
+                            "PESAPAL CONFIRMATION CODE STORED:",
+                            pesapal_confirmation_code
+                        )
+                    else:
+                        print(
+                            "PESAPAL WARNING: confirmation_code was not returned."
+                        )
+
+                    cur.execute(
+                        """
+                        UPDATE payments
+                        SET
+                            provider = 'pesapal',
+                            pesapal_order_tracking_id = %s,
+                            provider_response =
+                                COALESCE(provider_response, '{}'::jsonb)
+                                || %s::jsonb,
+                            updated_at = NOW()
+                        WHERE tx_ref = %s
+                        RETURNING id
+                        """,
+                        (
+                            str(order_tracking_id),
+                            json.dumps(provider_details),
+                            str(payment.get("txRef", "") or "").strip(),
+                        ),
+                    )
+
+                    updated_payment = cur.fetchone()
+
+                    if not updated_payment:
+                        raise RuntimeError(
+                            "Unable to persist PesaPal provider details: "
+                            "payment record was not found."
+                        )
+
+        except Exception as exc:
             print(
-                "PESAPAL WARNING: "
-                "confirmation_code was not returned."
+                "PESAPAL WARNING: fulfillment succeeded, but provider "
+                "details could not be persisted:",
+                exc
             )
 
-        else:
-
-            payment[
-                "pesapalConfirmationCode"
-            ] = pesapal_confirmation_code
-
-            print(
-                "PESAPAL CONFIRMATION CODE STORED:",
-                pesapal_confirmation_code
-            )
-
-
-        payment[
-            "pesapalOrderTrackingId"
-        ] = str(
-            order_tracking_id
-        )
-
-        payment[
-            "provider"
-        ] = "pesapal"
-
-
-        save_payments(
-            payments
-        )
-
-        return jsonify(
-            result
-        ), fulfillment_status
+        return jsonify(result), fulfillment_status
 
     except Exception as e:
 
@@ -24886,7 +27409,7 @@ def pesapal_callback():
             "3"
         ):
 
-            payment["status"] = (
+            failed_status = (
                 pesapal_payment.get(
                     "payment_status_description"
                 )
@@ -24894,12 +27417,17 @@ def pesapal_callback():
                 "failed"
             )
 
-            payment[
-                "pesapalStatusCode"
-            ] = status_code
+            update_pesapal_payment_status(
+                tx_ref=tx_ref,
+                status=failed_status,
+                status_code=status_code
+            )
 
-            save_payments(
-                payments
+            return redirect(
+                f"{FRONTEND_URL}"
+                "/payment-success"
+                "?provider=pesapal"
+                "&status=failed"
             )
 
             return redirect(
@@ -24913,7 +27441,7 @@ def pesapal_callback():
         # PAYMENT STILL PENDING
         # ====================================================
 
-        payment["status"] = (
+        pending_status = (
             pesapal_payment.get(
                 "payment_status_description"
             )
@@ -24921,12 +27449,10 @@ def pesapal_callback():
             "pending"
         )
 
-        payment[
-            "pesapalStatusCode"
-        ] = status_code
-
-        save_payments(
-            payments
+        update_pesapal_payment_status(
+            tx_ref=tx_ref,
+            status=pending_status,
+            status_code=status_code
         )
 
         return redirect(
@@ -25382,20 +27908,21 @@ def pesapal_ipn():
             "3"
         ):
 
-            payment["status"] = (
-                pesapal_payment.get(
-                    "payment_status_description"
-                )
-                or
-                "failed"
-            )
-
-            payment[
-                "pesapalStatusCode"
-            ] = status_code
-
-            save_payments(
-                payments
+            update_pesapal_payment_status(
+                tx_ref=str(
+                    payment.get(
+                        "txRef",
+                        ""
+                    )
+                ),
+                status=(
+                    pesapal_payment.get(
+                        "payment_status_description"
+                    )
+                    or
+                    "failed"
+                ),
+                status_code=status_code
             )
 
         # ====================================================
@@ -25404,20 +27931,22 @@ def pesapal_ipn():
 
         else:
 
-            payment["status"] = (
-                pesapal_payment.get(
-                    "payment_status_description"
-                )
-                or
-                "pending"
-            )
 
-            payment[
-                "pesapalStatusCode"
-            ] = status_code
-
-            save_payments(
-                payments
+            update_pesapal_payment_status(
+                tx_ref=str(
+                    payment.get(
+                        "txRef",
+                        ""
+                    )
+                ),
+                status=(
+                    pesapal_payment.get(
+                        "payment_status_description"
+                    )
+                    or
+                    "pending"
+                ),
+                status_code=status_code
             )
 
         # ====================================================
@@ -25826,81 +28355,41 @@ def initialize_payment():
 
 
         # ====================================================
-        # LOAD PAYMENTS
-        # ====================================================
-
-        payments = load_payments()
-
-
-        # ====================================================
         # CREATE EVENTWAA PAYMENT RECORD
         # ====================================================
-
-        next_payment_id = (
-            max(
-                [
-                    int(
-                        p.get(
-                            "id",
-                            0
-                        )
-                    )
-                    for p in payments
-                    if str(
-                        p.get(
-                            "id",
-                            ""
-                        )
-                    ).isdigit()
-                ],
-                default=0
-            )
-            + 1
-        )
-
+        #
+        # Payment persistence is PostgreSQL-native.
+        # We do NOT load the entire payment collection and
+        # rewrite it.
+        # ====================================================
 
         payment_record = {
+            "txRef": tx_ref,
 
-            "id":
-                next_payment_id,
+            "provider": "flutterwave",
 
-            "txRef":
-                tx_ref,
+            "transactionId": None,
 
-            "transactionId":
-                None,
+            "eventId": event_id,
 
-            "eventId":
-                event_id,
+            "eventTitle": event.get(
+                "title",
+                ""
+            ),
 
-            "eventTitle":
-                event.get(
-                    "title",
-                    ""
-                ),
+            "ticketType": ticket_type,
 
-            "ticketType":
-                ticket_type,
-
-            "quantity":
-                quantity,
+            "quantity": quantity,
 
             "buyer": {
-
-                "name":
-                    buyer_name,
-
-                "email":
-                    buyer_email
-
+                "name": buyer_name,
+                "email": buyer_email
             },
 
             "ownerUserId":
-                authenticated_user.get("id") if authenticated_user else None,
-
-            # =================================================
-            # PAYMENT METHOD INFORMATION
-            # =================================================
+                authenticated_user.get("id")
+                if authenticated_user
+                else None,
 
             "paymentMethod":
                 payment_method,
@@ -25944,19 +28433,11 @@ def initialize_payment():
 
             "processedAt":
                 None
-
         }
 
-
-        payments.append(
+        create_pending_payment(
             payment_record
         )
-
-
-        save_payments(
-            payments
-        )
-
 
         # ====================================================
         # FLUTTERWAVE PAYMENT OPTIONS
@@ -26129,22 +28610,8 @@ def initialize_payment():
             # REMOVE PENDING PAYMENT RECORD
             # ------------------------------------------------
 
-            payments = load_payments()
-
-            payments = [
-
-                p
-
-                for p in payments
-
-                if p.get(
-                    "txRef"
-                ) != tx_ref
-
-            ]
-
-            save_payments(
-                payments
+            delete_pending_payment(
+                tx_ref
             )
 
 
@@ -26188,22 +28655,8 @@ def initialize_payment():
             # REMOVE PENDING PAYMENT
             # ------------------------------------------------
 
-            payments = load_payments()
-
-            payments = [
-
-                p
-
-                for p in payments
-
-                if p.get(
-                    "txRef"
-                ) != tx_ref
-
-            ]
-
-            save_payments(
-                payments
+            create_pending_payment(
+                payment_record
             )
 
 
@@ -33338,19 +35791,64 @@ def admin_cancel_event(event_id):
 # PROTECTION:
 # - client Idempotency-Key
 # - request hash
-# - refund creation lock
+# - PostgreSQL booking row lock
+# - PostgreSQL client idempotency key
 # - booking refundStatus immediately becomes pending
 # - server-generated UUID refund operation key
 # - duplicate refund protection
 #
 # IMPORTANT:
 # The client Idempotency-Key protects the HTTP refund-request
-# operation.
+# operation through the PostgreSQL unique scope/key index.
 #
 # refund["idempotencyKey"] is a separate server-generated key
 # used by process_eventwaa_refund() for the actual provider
 # refund operation.
 # ============================================================
+
+@contextmanager
+def _refund_creation_transaction(booking_id):
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            try:
+                try:
+                    db_booking_id = int(booking_id)
+                except (TypeError, ValueError):
+                    db_booking_id = None
+
+                booking = None
+                if db_booking_id is not None:
+                    cur.execute(
+                        """
+                        SELECT *
+                        FROM bookings
+                        WHERE id = %s
+                        FOR UPDATE
+                        """,
+                        (db_booking_id,),
+                    )
+                    booking_row = cur.fetchone()
+                    if booking_row:
+                        cur.execute(
+                            """
+                            SELECT *
+                            FROM tickets
+                            WHERE booking_id = %s
+                            ORDER BY id
+                            """,
+                            (db_booking_id,),
+                        )
+                        booking = _booking_row_to_legacy_shape(
+                            booking_row,
+                            cur.fetchall(),
+                        )
+
+                yield conn, cur, booking
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
+
 
 @app.route(
     "/refunds",
@@ -33406,9 +35904,6 @@ def create_refund():
 
     # If the client does not provide a key, generate one.
     #
-    # The booking/refund lock and refundStatus field already
-    # protect against duplicate refund creation.
-    #
     # We do NOT use bookingId as the fallback idempotency key
     # because a temporary validation failure must not permanently
     # block a later valid refund request for the same booking.
@@ -33425,143 +35920,113 @@ def create_refund():
     try:
 
         # ====================================================
-        # REFUND CREATION LOCK
-        #
-        # Only the creation/checking phase is locked.
-        #
-        # The provider processor obtains its own lock later.
+        # LOCK AND LOAD THE BOOKING IN THE REFUND TRANSACTION
         # ====================================================
 
-        with eventwaa_file_lock(
-            "refund-create"
-        ):
+        with _refund_creation_transaction(
+            booking_id
+        ) as (refund_conn, refund_cur, booking):
 
             # ==================================================
-            # IDEMPOTENCY CHECK
+            # BOOKING WAS LOADED UNDER FOR UPDATE
             # ==================================================
 
-            existing_idempotency = (
-                find_idempotency_record(
-                    client_idempotency_key,
-                    "refund-request"
-                )
-            )
-
-            if existing_idempotency:
-
-                stored_hash = str(
-                    existing_idempotency.get(
-                        "requestHash",
-                        ""
+            if booking:
+                actor_role = refund_actor.get("role")
+                actor_user = refund_actor.get("user", {})
+                if actor_role == "user":
+                    owns_booking = (
+                        str(booking.get("ownerUserId", "")) == str(actor_user.get("id", ""))
+                        or str((booking.get("buyer") or {}).get("email", booking.get("email", ""))).strip().lower()
+                        == str(actor_user.get("email", "")).strip().lower()
                     )
-                )
+                    if not owns_booking:
+                        return jsonify({"success": False, "message": "Booking not found."}), 404
+                elif actor_role != "admin":
+                    return jsonify({"success": False, "message": "Only the booking owner or an administrator may request this refund."}), 403
 
-                if (
-                    stored_hash
-                    and
-                    stored_hash
-                    != request_hash
-                ):
-
-                    return jsonify({
-
-                        "success":
-                            False,
-
-                        "message":
-                            (
-                                "This Idempotency-Key "
-                                "has already been used "
-                                "for a different refund "
-                                "request."
-                            ),
-
-                        "idempotencyConflict":
-                            True
-
-                    }), 409
-
-                return idempotency_response(
-                    existing_idempotency
-                )
-
-            # ==================================================
-            # LOAD BOOKINGS
-            # ==================================================
-
-            bookings = load_json_file(
-                "bookings.json",
-                []
-            )
-
-            booking = None
-
-            for current_booking in bookings:
-
-                if str(
-                    current_booking.get(
-                        "id"
+            # Claim the client key only after authentication and ownership
+            # checks, but before refund-state and eligibility processing.
+            with get_db_connection() as idempotency_conn:
+                with idempotency_conn.cursor() as idempotency_cur:
+                    idempotency_cur.execute(
+                        """
+                        INSERT INTO idempotency_keys (
+                            key, scope, request_hash, status, created_at,
+                            created_at_timestamp, updated_at
+                        )
+                        VALUES (
+                            %s, 'refund-request', %s, 'processing',
+                            NOW(), EXTRACT(EPOCH FROM NOW()), NOW()
+                        )
+                        ON CONFLICT (scope, key) DO NOTHING
+                        RETURNING key
+                        """,
+                        (
+                            client_idempotency_key,
+                            request_hash,
+                        ),
                     )
-                ) == str(
-                    booking_id
-                ):
+                    idempotency_claim = idempotency_cur.fetchone()
 
-                    booking = current_booking
+                    if not idempotency_claim:
+                        idempotency_cur.execute(
+                            """
+                            SELECT *
+                            FROM idempotency_keys
+                            WHERE scope = 'refund-request'
+                              AND key = %s
+                            FOR UPDATE
+                            """,
+                            (client_idempotency_key,),
+                        )
+                        existing_row = idempotency_cur.fetchone()
+                        if not existing_row:
+                            raise RuntimeError(
+                                "Unable to establish refund request idempotency state."
+                            )
 
-                    break
+                        existing_idempotency = {
+                            "key": existing_row.get("key"),
+                            "scope": existing_row.get("scope"),
+                            "requestHash": existing_row.get("request_hash"),
+                            "status": existing_row.get("status"),
+                            "responseStatus": existing_row.get("response_status"),
+                            "responseBody": existing_row.get("response_body"),
+                            "resourceId": existing_row.get("resource_id"),
+                        }
+                        idempotency_conn.commit()
+
+                        stored_hash = str(
+                            existing_idempotency.get("requestHash") or ""
+                        )
+                        if stored_hash and stored_hash != request_hash:
+                            return jsonify({
+                                "success": False,
+                                "message": (
+                                    "This Idempotency-Key has already been used "
+                                    "for a different refund request."
+                                ),
+                                "idempotencyConflict": True,
+                            }), 409
+
+                        return idempotency_response(existing_idempotency)
+
+                    idempotency_conn.commit()
 
             if not booking:
-
                 response_body = {
-
-                    "success":
-                        False,
-
-                    "message":
-                        "Booking not found."
-
+                    "success": False,
+                    "message": "Booking not found.",
                 }
-
-                create_idempotency_record(
-
-                    client_idempotency_key,
-
-                    "refund-request",
-
-                    request_hash,
-
-                    status="failed"
-                )
-
                 update_idempotency_record(
-
                     client_idempotency_key,
-
                     "refund-request",
-
                     status="failed",
-
                     response_status=404,
-
-                    response_body=response_body
+                    response_body=response_body,
                 )
-
-                return jsonify(
-                    response_body
-                ), 404
-
-            actor_role = refund_actor.get("role")
-            actor_user = refund_actor.get("user", {})
-            if actor_role == "user":
-                owns_booking = (
-                    str(booking.get("ownerUserId", "")) == str(actor_user.get("id", ""))
-                    or str((booking.get("buyer") or {}).get("email", booking.get("email", ""))).strip().lower()
-                    == str(actor_user.get("email", "")).strip().lower()
-                )
-                if not owns_booking:
-                    return jsonify({"success": False, "message": "Booking not found."}), 404
-            elif actor_role != "admin":
-                return jsonify({"success": False, "message": "Only the booking owner or an administrator may request this refund."}), 403
+                return jsonify(response_body), 404
 
             # ==================================================
             # PREVENT DUPLICATE REFUNDS
@@ -33581,6 +36046,18 @@ def create_refund():
                 "refunded",
                 "rejected"
             ):
+                refund_cur.execute(
+                    """
+                    SELECT id
+                    FROM refunds
+                    WHERE booking_id = %s
+                    ORDER BY id DESC
+                    LIMIT 1
+                    """,
+                    (booking["id"],),
+                )
+                existing_refund = refund_cur.fetchone()
+                refund_conn.commit()
 
                 response_body = {
 
@@ -33601,9 +36078,7 @@ def create_refund():
                         current_refund_status,
 
                     "refundId":
-                        booking.get(
-                            "refundId"
-                        )
+                        existing_refund.get("id") if existing_refund else None
 
                 }
 
@@ -33629,35 +36104,16 @@ def create_refund():
                     response_status=409,
 
                     response_body=response_body,
-
                     resource_id=str(
-                        booking.get(
-                            "refundId",
-                            ""
-                        )
+                        existing_refund.get("id")
+                        if existing_refund
+                        else ""
                     )
                 )
 
                 return jsonify(
                     response_body
                 ), 409
-
-            # ==================================================
-            # CREATE IDEMPOTENCY RECORD
-            #
-            # The record is created before business mutation.
-            # ==================================================
-
-            create_idempotency_record(
-
-                client_idempotency_key,
-
-                "refund-request",
-
-                request_hash,
-
-                status="processing"
-            )
 
             # ==================================================
             # ADMIN REFUND SETTINGS
@@ -34118,49 +36574,6 @@ def create_refund():
                 ), 400
 
             # ==================================================
-            # LOAD REFUNDS
-            # ==================================================
-
-            refunds = load_json_file(
-                "refunds.json",
-                []
-            )
-
-            # ==================================================
-            # SAFE BUSINESS REFUND ID
-            # ==================================================
-
-            existing_ids = []
-
-            for existing_refund in refunds:
-
-                try:
-
-                    existing_ids.append(
-                        int(
-                            existing_refund.get(
-                                "id",
-                                0
-                            )
-                        )
-                    )
-
-                except (
-                    ValueError,
-                    TypeError
-                ):
-
-                    continue
-
-            refund_id = (
-                max(existing_ids)
-                +
-                1
-                if existing_ids
-                else 1
-            )
-
-            # ==================================================
             # SERVER-GENERATED REFUND OPERATION KEY
             #
             # THIS IS NOT THE AUTO-INCREMENT REFUND ID.
@@ -34203,9 +36616,6 @@ def create_refund():
 
             refund = {
 
-                "id":
-                    refund_id,
-
                 "idempotencyKey":
                     refund_operation_key,
 
@@ -34215,9 +36625,7 @@ def create_refund():
                     ),
 
                 "ticketId":
-                    booking.get(
-                        "ticketId"
-                    ),
+                    booking.get("ticketId"),
 
                 "eventId":
                     booking.get(
@@ -34290,36 +36698,136 @@ def create_refund():
             # SAVE REFUND
             # ==================================================
 
-            refunds.append(
-                refund
+            refund_columns = _table_columns(refund_cur, "refunds")
+            refund_meta_column = _DB_META_COLUMN_CACHE.get("refunds")
+            refund_values = _record_db_values(
+                refund,
+                refund_columns,
+                refund_meta_column,
             )
 
-            # IMPORTANT:
-            # Mark the booking pending BEFORE leaving the lock.
-            #
-            # This prevents a second refund request from entering
-            # between creation and processing.
-            booking["refundStatus"] = (
-                "pending"
-            )
+            if "payment_id" in refund_columns:
+                refund_values["payment_id"] = booking.get("paymentId")
 
-            booking["refundId"] = (
-                refund_id
-            )
+            if "user_id" in refund_columns:
+                refund_values["user_id"] = booking.get("ownerUserId")
 
-            booking["refundRequestedAt"] = (
-                created_at
-            )
+            if "ticket_id" in refund_columns:
+                ticket_rows = booking.get("tickets") or []
+                db_ticket_ids = [
+                    ticket.get("id")
+                    for ticket in ticket_rows
+                    if isinstance(ticket, dict) and ticket.get("id") is not None
+                ]
+                refund_values["ticket_id"] = (
+                    db_ticket_ids[0]
+                    if len(db_ticket_ids) == 1
+                    else None
+                )
 
-            save_json_file(
-                "refunds.json",
-                refunds
-            )
+            if not refund_values:
+                raise RuntimeError(
+                    "Cannot create refund: no compatible PostgreSQL columns were found."
+                )
 
-            save_json_file(
-                "bookings.json",
-                bookings
+            insert_columns = list(refund_values)
+            refund_cur.execute(
+                'INSERT INTO refunds ('
+                + ", ".join(f'"{column}"' for column in insert_columns)
+                + ") VALUES ("
+                + ", ".join(["%s"] * len(insert_columns))
+                + ") ON CONFLICT (idempotency_key) "
+                "WHERE idempotency_key IS NOT NULL DO NOTHING "
+                "RETURNING id",
+                tuple(refund_values[column] for column in insert_columns),
             )
+            inserted_refund = refund_cur.fetchone()
+
+            if inserted_refund:
+                refund_id = inserted_refund["id"]
+            else:
+                refund_cur.execute(
+                    """
+                    SELECT id, booking_id
+                    FROM refunds
+                    WHERE idempotency_key = %s
+                    """,
+                    (refund_operation_key,),
+                )
+                existing_refund = refund_cur.fetchone()
+                if (
+                    not existing_refund
+                    or str(existing_refund.get("booking_id"))
+                    != str(booking["id"])
+                ):
+                    raise RuntimeError(
+                        "Refund idempotency key conflicted with another refund."
+                    )
+
+                response_body = {
+                    "success": False,
+                    "duplicate": True,
+                    "message": (
+                        "This booking already has a refund request or has "
+                        "already been processed."
+                    ),
+                    "refundStatus": current_refund_status or "pending",
+                    "refundId": existing_refund["id"],
+                }
+                create_idempotency_record(
+                    client_idempotency_key,
+                    "refund-request",
+                    request_hash,
+                    status="succeeded",
+                )
+                update_idempotency_record(
+                    client_idempotency_key,
+                    "refund-request",
+                    status="succeeded",
+                    response_status=409,
+                    response_body=response_body,
+                    resource_id=str(existing_refund["id"]),
+                )
+                return jsonify(response_body), 409
+
+            refund["id"] = refund_id
+            refund["idempotencyKey"] = refund_operation_key
+            refund["bookingId"] = booking["id"]
+            refund["ticketId"] = booking.get("ticketId")
+            refund["eventId"] = booking.get("eventId")
+            refund["eventTitle"] = booking.get(
+                "eventTitle",
+                event.get("title"),
+            )
+            refund["hostId"] = host_id
+            refund["hostEmail"] = host_email
+            refund["hostName"] = host_name
+            refund["ticketType"] = booking.get("ticketType")
+            refund["originalAmount"] = original_amount
+            refund["refundFeePercent"] = refund_fee_percent
+            refund["refundFee"] = refund_fee
+            refund["refundAmount"] = refund_amount
+            refund["createdAt"] = created_at
+            booking["refundStatus"] = "pending"
+            booking["refundId"] = refund_id
+            booking["refundRequestedAt"] = created_at
+
+            refund_cur.execute(
+                """
+                UPDATE bookings
+                SET refund_status = %s
+                WHERE id = %s
+                """,
+                ("pending", booking["id"]),
+            )
+            if refund_cur.rowcount != 1:
+                raise RuntimeError(
+                    "Booking refund status could not be updated."
+                )
+
+            # Persist the refund and booking state together before
+            # sending notifications or starting provider processing.
+            refund_conn.commit()
 
             # ==================================================
             # MANUAL REVIEW RESPONSE
@@ -34398,7 +36906,7 @@ def create_refund():
         # ====================================================
         # AUTO APPROVAL
         #
-        # We are OUTSIDE refund-create lock here.
+        # We are outside the booking transaction here.
         #
         # process_eventwaa_refund() obtains its own lock.
         # ====================================================
@@ -38588,37 +41096,456 @@ def _verify_entry_locked(entry_id):
             }), 400
 
     # ========================================================
-    # ALREADY CHECKED IN
+    # PAID TICKET CHECK-IN
+    #
+    # PostgreSQL is the authoritative source for paid-ticket
+    # check-in state.
+    #
+    # ONE TICKET = ONE SUCCESSFUL ENTRY.
+    #
+    # The ticket row is locked before its state is checked.
+    # This prevents two scanners from successfully using the
+    # same ticket at the same time.
     # ========================================================
-
     if found_ticket is not None:
-
-        if found_ticket.get(
-            "checkedIn",
-            False
-        ):
-
+        ticket_public_id = str(
+            found_ticket.get(
+                "ticketId",
+                ""
+            )
+            or ""
+        ).strip()
+        if not ticket_public_id:
+            return jsonify({
+                "success": False,
+                "message": "Ticket ID is invalid."
+            }), 400
+        try:
+            with get_db_connection() as conn:
+                with conn.transaction():
+                    cur = conn.cursor()
+                    # ------------------------------------------------
+                    # LOCK THE AUTHORITATIVE TICKET ROW
+                    # ------------------------------------------------
+                    cur.execute(
+                        """
+                        SELECT
+                            id,
+                            booking_id,
+                            event_id,
+                            ticket_type_id,
+                            ticket_id,
+                            ticket_number,
+                            ticket_type_snapshot,
+                            price,
+                            valid,
+                            cancelled,
+                            checked_in,
+                            check_in_count,
+                            check_in_limit,
+                            refund_status,
+                            refund_id,
+                            refund_amount,
+                            refund_fee,
+                            created_at,
+                            cancelled_at
+                        FROM tickets
+                        WHERE ticket_id = %s
+                        LIMIT 1
+                        FOR UPDATE
+                        """,
+                        (
+                            ticket_public_id,
+                        )
+                    )
+                    db_ticket = cur.fetchone()
+                    if not db_ticket:
+                        return jsonify({
+                            "success": False,
+                            "message": "Ticket not found."
+                        }), 404
+                    # ------------------------------------------------
+                    # NORMALIZE DATABASE ROW
+                    #
+                    # The database cursor returns a dictionary in
+                    # EventWaa's PostgreSQL setup.
+                    # ------------------------------------------------
+                    if not isinstance(
+                        db_ticket,
+                        dict
+                    ):
+                        return jsonify({
+                            "success": False,
+                            "message": "Invalid ticket database record."
+                        }), 500
+                    db_ticket_id = db_ticket.get(
+                        "id"
+                    )
+                    db_event_id = str(
+                        db_ticket.get(
+                            "event_id",
+                            ""
+                        )
+                        or ""
+                    ).strip()
+                    db_public_ticket_id = str(
+                        db_ticket.get(
+                            "ticket_id",
+                            ""
+                        )
+                        or ""
+                    ).strip()
+                    # ------------------------------------------------
+                    # EVENT OWNERSHIP
+                    # ------------------------------------------------
+                    if (
+                        found_event_id
+                        and
+                        db_event_id
+                        != str(found_event_id).strip()
+                    ):
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "This ticket does not belong "
+                                "to the selected event."
+                        }), 403
+                    # ------------------------------------------------
+                    # TICKET VALIDITY
+                    # ------------------------------------------------
+                    if db_ticket.get(
+                        "valid"
+                    ) is False:
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "This ticket is invalid."
+                        }), 400
+                    if db_ticket.get(
+                        "cancelled"
+                    ) is True:
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "This ticket has been cancelled."
+                        }), 400
+                    # ------------------------------------------------
+                    # REFUND CHECK
+                    # ------------------------------------------------
+                    db_refund_status = str(
+                        db_ticket.get(
+                            "refund_status",
+                            ""
+                        )
+                        or ""
+                    ).strip().lower()
+                    if db_refund_status in (
+                        "refunded",
+                        "approved",
+                        "completed"
+                    ):
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "This ticket has been refunded."
+                        }), 400
+                    # ------------------------------------------------
+                    # ONE-ENTRY RULE
+                    #
+                    # EventWaa tickets always have check_in_limit=1.
+                    # ------------------------------------------------
+                    check_in_limit = db_ticket.get(
+                        "check_in_limit",
+                        1
+                    )
+                    try:
+                        check_in_limit = int(
+                            check_in_limit
+                        )
+                    except (
+                        TypeError,
+                        ValueError
+                    ):
+                        check_in_limit = 1
+                    if check_in_limit != 1:
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "Invalid ticket check-in limit."
+                        }), 400
+                    check_in_count = db_ticket.get(
+                        "check_in_count",
+                        0
+                    )
+                    try:
+                        check_in_count = int(
+                            check_in_count
+                        )
+                    except (
+                        TypeError,
+                        ValueError
+                    ):
+                        check_in_count = 0
+                    # ------------------------------------------------
+                    # ALREADY USED
+                    # ------------------------------------------------
+                    if (
+                        db_ticket.get(
+                            "checked_in"
+                        ) is True
+                        or
+                        check_in_count >= 1
+                    ):
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "This ticket has already been used."
+                        }), 400
+                    # ------------------------------------------------
+                    # CHECK-IN METHOD
+                    # ------------------------------------------------
+                    if is_main_admin:
+                        check_in_method = "admin_scanner"
+                    elif is_host_user:
+                        check_in_method = "host_scanner"
+                    elif is_host_team:
+                        check_in_method = "host_team_scanner"
+                    elif is_admin_team:
+                        check_in_method = "admin_team_scanner"
+                    else:
+                        check_in_method = "scanner"
+                    # ------------------------------------------------
+                    # CHECK WHO PERFORMED THE SCAN
+                    #
+                    # Normal users have numeric user IDs.
+                    # Team accounts may have non-numeric member IDs,
+                    # so those are safely recorded as NULL here.
+                    # ------------------------------------------------
+                    checked_in_by = None
+                    try:
+                        authenticated_user_id = (
+                            user.get(
+                                "id"
+                            )
+                        )
+                        if authenticated_user_id is not None:
+                            checked_in_by = int(
+                                authenticated_user_id
+                            )
+                    except (
+                        TypeError,
+                        ValueError
+                    ):
+                        checked_in_by = None
+                    # ------------------------------------------------
+                    # UPDATE THE AUTHORITATIVE TICKET
+                    #
+                    # The WHERE clause is intentionally defensive.
+                    # Even after FOR UPDATE, the ticket must still
+                    # satisfy the one-entry conditions.
+                    # ------------------------------------------------
+                    cur.execute(
+                        """
+                        UPDATE tickets
+                        SET
+                            checked_in = TRUE,
+                            check_in_count = 1
+                        WHERE id = %s
+                          AND event_id = %s
+                          AND checked_in = FALSE
+                          AND check_in_count < check_in_limit
+                          AND check_in_limit = 1
+                        RETURNING
+                            id,
+                            ticket_id,
+                            checked_in,
+                            check_in_count,
+                            check_in_limit
+                        """,
+                        (
+                            db_ticket_id,
+                            db_event_id
+                        )
+                    )
+                    updated_ticket = cur.fetchone()
+                    if not updated_ticket:
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "This ticket has already been used."
+                        }), 400
+                    if not isinstance(
+                        updated_ticket,
+                        dict
+                    ):
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "Ticket check-in update failed."
+                        }), 500
+                    # ------------------------------------------------
+                    # RECORD THE CHECK-IN
+                    #
+                    # check_ins.ticket_id references the numeric
+                    # tickets.id, NOT the public EW-* ticket ID.
+                    # ------------------------------------------------
+                    metadata = {
+                        "publicTicketId":
+                            db_public_ticket_id,
+                        "entryId":
+                            normalized_entry_id,
+                        "scannerRole":
+                            role
+                    }
+                    cur.execute(
+                        """
+                        INSERT INTO check_ins (
+                            event_id,
+                            ticket_id,
+                            attendance_pass_id,
+                            checked_in_by,
+                            checked_in_at,
+                            method,
+                            device_id,
+                            metadata
+                        )
+                        VALUES (
+                            %s,
+                            %s,
+                            NULL,
+                            %s,
+                            NOW(),
+                            %s,
+                            %s,
+                            %s::jsonb
+                        )
+                        RETURNING
+                            id,
+                            checked_in_at
+                        """,
+                        (
+                            db_event_id,
+                            db_ticket_id,
+                            checked_in_by,
+                            check_in_method,
+                            None,
+                            json.dumps(
+                                metadata,
+                                default=str
+                            )
+                        )
+                    )
+                    check_in_record = cur.fetchone()
+                    if not check_in_record:
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "Check-in record could not be created."
+                        }), 500
+                    if not isinstance(
+                        check_in_record,
+                        dict
+                    ):
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "Invalid check-in database record."
+                        }), 500
+                    checked_in_at = (
+                        check_in_record.get(
+                            "checked_in_at"
+                        )
+                    )
+                    if checked_in_at:
+                        checked_in_at_text = str(
+                            checked_in_at
+                        )
+                    else:
+                        checked_in_at_text = current_time
+                # Transaction commits here.
+            # --------------------------------------------------------
+            # RESPONSE DATA
+            # --------------------------------------------------------
+            event_title = str(
+                selected_event.get(
+                    "title",
+                    found_booking.get(
+                        "eventTitle",
+                        found_booking.get(
+                            "title",
+                            ""
+                        )
+                    )
+                )
+                or ""
+            ).strip()
+            buyer = found_ticket.get(
+                "buyer",
+                found_booking.get(
+                    "buyer",
+                    {}
+                )
+            )
+            if not isinstance(
+                buyer,
+                dict
+            ):
+                buyer = {}
+            # Keep the compatibility object updated only in memory
+            # for the response. PostgreSQL remains authoritative.
+            found_ticket["checkedIn"] = True
+            found_ticket["checkedInAt"] = (
+                checked_in_at_text
+            )
+            return jsonify({
+                "success": True,
+                "message":
+                    "Ticket verified successfully.",
+                "type": "paid",
+                "entryId":
+                    normalized_entry_id,
+                "event": {
+                    "eventId":
+                        db_event_id,
+                    "eventTitle":
+                        event_title
+                },
+                "ticket": {
+                    "ticketId":
+                        db_public_ticket_id,
+                    "eventId":
+                        db_event_id,
+                    "eventTitle":
+                        event_title,
+                    "ticketType":
+                        found_ticket.get(
+                            "ticketType",
+                            "Paid ticket"
+                        ),
+                    "buyer":
+                        buyer,
+                    "checkedIn":
+                        True,
+                    "checkedInAt":
+                        checked_in_at_text,
+                    "checkInCount":
+                        1,
+                    "checkInLimit":
+                        1
+                }
+            }), 200
+        except Exception as e:
+            print(
+                "EVENTWAA TICKET CHECK-IN ERROR:",
+                str(e)
+            )
             return jsonify({
                 "success": False,
                 "message":
-                    "This ticket has already been used."
-            }), 400
-
-    else:
-
-        if found_attendee.get(
-            "checkedIn",
-            False
-        ):
-
-            return jsonify({
-                "success": False,
-                "message":
-                    "This attendance pass has already been used."
-            }), 400
-
+                    "Ticket check-in failed."
+            }), 500
     # ========================================================
-    # MARK ONE ENTRY AS USED
+    # MARK FREE PASS AS USED
     # ========================================================
 
     if found_ticket is not None:
@@ -38684,60 +41611,475 @@ def _verify_entry_locked(entry_id):
         }), 200
 
     # ========================================================
-    # MARK FREE PASS AS USED
+    # MARK ONE PAID TICKET ENTRY AS USED
+    #
+    # PostgreSQL is now the authoritative source for paid
+    # ticket check-in state.
+    #
+    # ONE TICKET = ONE SUCCESSFUL ENTRY.
+    #
+    # We lock the ticket row before checking its state so two
+    # scanners cannot successfully use the same ticket at
+    # the same time.
     # ========================================================
 
-    found_attendee["checkedIn"] = True
+    if found_ticket is not None:
 
-    found_attendee["checkedInAt"] = (
-        current_time
-    )
+        ticket_public_id = str(
+            found_ticket.get(
+                "ticketId",
+                ""
+            )
+            or ""
+        ).strip()
 
-    save_json_file(
-        "attendance.json",
-        attendance
-    )
+        if not ticket_public_id:
 
-    event_title = str(
-        found_attendee.get(
-            "eventTitle",
-            ""
-        )
-        or ""
-    ).strip()
+            return jsonify({
+                "success": False,
+                "message": "Ticket ID is invalid."
+            }), 400
 
-    buyer = {
-        "name": found_attendee.get(
-            "name",
-            ""
-        ),
-        "email": found_attendee.get(
-            "email",
-            ""
-        )
-    }
+        try:
 
-    return jsonify({
-        "success": True,
-        "message":
-            "Attendance pass verified successfully.",
-        "type": "free",
-        "entryId": normalized_entry_id,
-        "event": {
-            "eventId": found_event_id,
-            "eventTitle": event_title
-        },
-        "attendee": {
-            "ticketId": normalized_entry_id,
-            "eventId": found_event_id,
-            "eventTitle": event_title,
-            "ticketType": "Free attendance pass",
-            "buyer": buyer,
-            "checkedIn": True,
-            "checkedInAt": current_time
-        }
-    }), 200
+            with get_db_connection() as conn:
 
+                with conn.cursor() as cur:
+
+                    # --------------------------------------------
+                    # LOCK THE AUTHORITATIVE TICKET ROW
+                    # --------------------------------------------
+
+                    cur.execute(
+                        """
+                        SELECT
+                            id,
+                            booking_id,
+                            event_id,
+                            ticket_id,
+                            valid,
+                            cancelled,
+                            checked_in,
+                            check_in_count,
+                            check_in_limit,
+                            refund_status
+                        FROM tickets
+                        WHERE ticket_id = %s
+                        FOR UPDATE
+                        """,
+                        (
+                            ticket_public_id,
+                        )
+                    )
+
+                    db_ticket = cur.fetchone()
+
+                    if not db_ticket:
+
+                        conn.rollback()
+
+                        return jsonify({
+                            "success": False,
+                            "message": "Ticket not found."
+                        }), 404
+
+                    db_ticket_event_id = str(
+                        db_ticket.get(
+                            "event_id",
+                            ""
+                        )
+                        or ""
+                    ).strip()
+
+                    # --------------------------------------------
+                    # EVENT OWNERSHIP CHECK
+                    #
+                    # Never allow a ticket from another event
+                    # to be checked in.
+                    # --------------------------------------------
+
+                    if (
+                        event_id
+                        and
+                        db_ticket_event_id != str(
+                            event_id
+                        ).strip()
+                    ):
+
+                        conn.rollback()
+
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "This ticket does not belong "
+                                "to this event."
+                        }), 403
+
+                    # --------------------------------------------
+                    # VALIDITY CHECK
+                    # --------------------------------------------
+
+                    if (
+                        db_ticket.get(
+                            "valid"
+                        ) is False
+                        or
+                        db_ticket.get(
+                            "cancelled"
+                        ) is True
+                    ):
+
+                        conn.rollback()
+
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "This ticket is invalid or cancelled."
+                        }), 400
+
+                    # --------------------------------------------
+                    # REFUND CHECK
+                    # --------------------------------------------
+
+                    db_refund_status = str(
+                        db_ticket.get(
+                            "refund_status",
+                            ""
+                        )
+                        or ""
+                    ).strip().lower()
+
+                    if db_refund_status in {
+                        "refunded",
+                        "approved",
+                        "completed"
+                    }:
+
+                        conn.rollback()
+
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "This ticket has been refunded."
+                        }), 400
+
+                    # --------------------------------------------
+                    # CHECK-IN LIMIT
+                    #
+                    # The database is authoritative here.
+                    #
+                    # EventWaa rule:
+                    #
+                    #     ONE ticket = ONE entry
+                    # --------------------------------------------
+
+                    check_in_count = int(
+                        db_ticket.get(
+                            "check_in_count",
+                            0
+                        )
+                        or 0
+                    )
+
+                    check_in_limit = int(
+                        db_ticket.get(
+                            "check_in_limit",
+                            1
+                        )
+                        or 1
+                    )
+
+                    # Never allow a missing/invalid limit to
+                    # accidentally create multiple entries.
+
+                    if check_in_limit != 1:
+
+                        conn.rollback()
+
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "This ticket has an invalid "
+                                "entry limit."
+                        }), 409
+
+                    if check_in_count >= check_in_limit:
+
+                        conn.rollback()
+
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "This ticket has already been used.",
+                            "alreadyCheckedIn": True
+                        }), 400
+
+                    # --------------------------------------------
+                    # SECOND SAFETY CHECK
+                    # --------------------------------------------
+
+                    if bool(
+                        db_ticket.get(
+                            "checked_in",
+                            False
+                        )
+                    ):
+
+                        conn.rollback()
+
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "This ticket has already been used.",
+                            "alreadyCheckedIn": True
+                        }), 400
+
+                    # --------------------------------------------
+                    # UPDATE AUTHORITATIVE TICKET
+                    # --------------------------------------------
+
+                    cur.execute(
+                        """
+                        UPDATE tickets
+                        SET
+                            checked_in = TRUE,
+                            check_in_count = 1
+                        WHERE id = %s
+                          AND event_id = %s
+                          AND checked_in = FALSE
+                          AND check_in_count < check_in_limit
+                        RETURNING
+                            id,
+                            booking_id,
+                            event_id,
+                            ticket_id,
+                            checked_in,
+                            check_in_count,
+                            check_in_limit
+                        """,
+                        (
+                            db_ticket["id"],
+                            db_ticket["event_id"]
+                        )
+                    )
+
+                    updated_ticket = cur.fetchone()
+
+                    if not updated_ticket:
+
+                        conn.rollback()
+
+                        return jsonify({
+                            "success": False,
+                            "message":
+                                "This ticket has already been used.",
+                            "alreadyCheckedIn": True
+                        }), 400
+
+                    # --------------------------------------------
+                    # CREATE CHECK-IN AUDIT RECORD
+                    #
+                    # check_ins.ticket_id references the numeric
+                    # tickets.id, NOT the public EW-* ticket ID.
+                    # --------------------------------------------
+
+                    checked_in_by = None
+
+                    try:
+
+                        authenticated_user_id = user.get(
+                            "id"
+                        )
+
+                        if authenticated_user_id is not None:
+
+                            checked_in_by = int(
+                                authenticated_user_id
+                            )
+
+                    except (
+                        TypeError,
+                        ValueError
+                    ):
+
+                        checked_in_by = None
+
+                    check_in_method = (
+                        "admin_scanner"
+                        if is_main_admin
+                        else (
+                            "host_scanner"
+                            if is_host_user
+                            else "team_scanner"
+                        )
+                    )
+
+                    device_id = str(
+                        data.get(
+                            "deviceId",
+                            ""
+                        )
+                        or ""
+                    ).strip()
+
+                    metadata = {
+                        "publicTicketId":
+                            ticket_public_id,
+                        "actorRole":
+                            role,
+                        "teamType":
+                            team_type,
+                        "eventId":
+                            db_ticket["event_id"]
+                    }
+
+                    cur.execute(
+                        """
+                        INSERT INTO check_ins (
+                            event_id,
+                            ticket_id,
+                            attendance_pass_id,
+                            checked_in_by,
+                            checked_in_at,
+                            method,
+                            device_id,
+                            metadata
+                        )
+                        VALUES (
+                            %s,
+                            %s,
+                            NULL,
+                            %s,
+                            NOW(),
+                            %s,
+                            %s,
+                            %s::jsonb
+                        )
+                        RETURNING
+                            id,
+                            checked_in_at
+                        """,
+                        (
+                            db_ticket["event_id"],
+                            db_ticket["id"],
+                            checked_in_by,
+                            check_in_method,
+                            device_id or None,
+                            json.dumps(
+                                metadata
+                            )
+                        )
+                    )
+
+                    check_in_record = (
+                        cur.fetchone()
+                    )
+
+                    conn.commit()
+
+            # --------------------------------------------
+            # RESPONSE DATA
+            #
+            # Keep the legacy response shape so the existing
+            # frontend scanner does not need to change.
+            # --------------------------------------------
+
+            found_ticket["checkedIn"] = True
+
+            found_ticket["checkInCount"] = 1
+
+            found_ticket["checkInLimit"] = 1
+
+            found_ticket["checkedInAt"] = (
+                check_in_record.get(
+                    "checked_in_at"
+                ).isoformat()
+                if check_in_record
+                and check_in_record.get(
+                    "checked_in_at"
+                )
+                else current_time
+            )
+
+            event_title = str(
+                found_booking.get(
+                    "eventTitle",
+                    found_booking.get(
+                        "title",
+                        ""
+                    )
+                )
+                or ""
+            ).strip()
+
+            buyer = found_ticket.get(
+                "buyer",
+                found_booking.get(
+                    "buyer",
+                    {}
+                )
+            )
+
+            if not isinstance(
+                buyer,
+                dict
+            ):
+
+                buyer = {}
+
+            return jsonify({
+                "success": True,
+                "message":
+                    "Ticket verified successfully.",
+                "type":
+                    "paid",
+                "entryId":
+                    ticket_public_id,
+                "event": {
+                    "eventId":
+                        db_ticket_event_id,
+                    "eventTitle":
+                        event_title
+                },
+                "ticket": {
+                    "ticketId":
+                        ticket_public_id,
+                    "eventId":
+                        db_ticket_event_id,
+                    "eventTitle":
+                        event_title,
+                    "ticketType":
+                        found_ticket.get(
+                            "ticketType",
+                            "Paid ticket"
+                        ),
+                    "buyer":
+                        buyer,
+                    "checkedIn":
+                        True,
+                    "checkedInAt":
+                        found_ticket.get(
+                            "checkedInAt"
+                        ),
+                    "checkInCount":
+                        1,
+                    "checkInLimit":
+                        1
+                }
+            }), 200
+
+        except Exception as error:
+
+            print(
+                "POSTGRES TICKET CHECK-IN ERROR:",
+                repr(error)
+            )
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "Unable to verify this ticket."
+            }), 500
 # ============================================================
 # GET TEAM MEMBER ACCESSIBLE EVENT IDS
 #
@@ -44149,65 +47491,380 @@ def get_admin_announcements():
 )
 def get_host_wallet(host_id):
 
-    wallets = load_host_wallets()
+    try:
 
+        conn = get_db_connection()
 
-    for wallet in wallets:
+        try:
 
-        if int(
-            wallet.get("hostId", 0)
-        ) == host_id:
-            wallet.setdefault(
-                "transactions",
-                []
+            cur = conn.cursor()
+
+            # =================================================
+            # GET EXISTING HOST WALLET
+            # =================================================
+
+            cur.execute(
+                """
+                SELECT
+                    id,
+                    user_id,
+                    available_balance,
+                    pending_balance,
+                    total_earned,
+                    total_withdrawn,
+                    metadata
+                FROM host_wallets
+                WHERE user_id = %s
+                LIMIT 1
+                """,
+                (host_id,)
             )
-            wallet.setdefault(
-                "withdrawals",
-                []
+
+            row = cur.fetchone()
+
+            # =================================================
+            # CREATE WALLET IF IT DOES NOT EXIST
+            # =================================================
+
+            if not row:
+
+                cur.execute(
+                    """
+                    SELECT id
+                    FROM users
+                    WHERE id = %s
+                    LIMIT 1
+                    """,
+                    (host_id,)
+                )
+
+                user_row = cur.fetchone()
+
+                if not user_row:
+
+                    conn.rollback()
+
+                    return jsonify({
+                        "success": False,
+                        "message": "Host not found."
+                    }), 404
+
+                cur.execute(
+                    """
+                    SELECT pg_advisory_xact_lock(
+                        hashtext(%s)
+                    )
+                    """,
+                    (
+                        f"eventwaa-host-wallet:{host_id}",
+                    )
+                )
+
+                # Re-check after acquiring the lock.
+                cur.execute(
+                    """
+                    SELECT
+                        id,
+                        user_id,
+                        available_balance,
+                        pending_balance,
+                        total_earned,
+                        total_withdrawn,
+                        metadata
+                    FROM host_wallets
+                    WHERE user_id = %s
+                    LIMIT 1
+                    FOR UPDATE
+                    """,
+                    (host_id,)
+                )
+
+                row = cur.fetchone()
+
+                if not row:
+
+                    cur.execute(
+                        """
+                        SELECT COALESCE(
+                            MAX(id),
+                            0
+                        ) + 1
+                        FROM host_wallets
+                        """
+                    )
+
+                    wallet_id_row = cur.fetchone()
+
+                    if hasattr(
+                        wallet_id_row,
+                        "get"
+                    ):
+                        wallet_id = int(
+                            wallet_id_row.get(
+                                "?column?",
+                                1
+                            )
+                            or 1
+                        )
+                    else:
+                        wallet_id = int(
+                            wallet_id_row[0]
+                            or 1
+                        )
+
+                    cur.execute(
+                        """
+                        INSERT INTO host_wallets (
+                            id,
+                            user_id,
+                            available_balance,
+                            pending_balance,
+                            total_earned,
+                            total_withdrawn,
+                            metadata
+                        )
+                        VALUES (
+                            %s,
+                            %s,
+                            0,
+                            0,
+                            0,
+                            0,
+                            %s::jsonb
+                        )
+                        RETURNING
+                            id,
+                            user_id,
+                            available_balance,
+                            pending_balance,
+                            total_earned,
+                            total_withdrawn,
+                            metadata
+                        """,
+                        (
+                            wallet_id,
+                            host_id,
+                            json.dumps(
+                                {}
+                            )
+                        )
+                    )
+
+                    row = cur.fetchone()
+
+            # =================================================
+            # NORMALIZE ROW
+            # =================================================
+
+            if hasattr(row, "keys"):
+
+                wallet_row = dict(row)
+
+            else:
+
+                columns = [
+                    description[0]
+                    for description in cur.description
+                ]
+
+                wallet_row = dict(
+                    zip(
+                        columns,
+                        row
+                    )
+                )
+
+            wallet_id = wallet_row["id"]
+
+            metadata = (
+                wallet_row.get(
+                    "metadata"
+                )
+                or {}
             )
-            wallet.setdefault(
-                "scheduledPayouts",
-                []
+
+            if not isinstance(
+                metadata,
+                dict
+            ):
+                metadata = {}
+
+            # =================================================
+            # LOAD TRANSACTIONS
+            # =================================================
+
+            cur.execute(
+                """
+                SELECT *
+                FROM wallet_transactions
+                WHERE wallet_id = %s
+                ORDER BY created_at DESC, id DESC
+                """,
+                (wallet_id,)
             )
+
+            transaction_rows = cur.fetchall()
+
+            transactions = []
+
+            for transaction_row in transaction_rows:
+
+                if hasattr(
+                    transaction_row,
+                    "keys"
+                ):
+
+                    transaction = dict(
+                        transaction_row
+                    )
+
+                else:
+
+                    transaction_columns = [
+                        description[0]
+                        for description in cur.description
+                    ]
+
+                    transaction = dict(
+                        zip(
+                            transaction_columns,
+                            transaction_row
+                        )
+                    )
+
+                transactions.append(
+                    _host_wallet_legacy_transaction(
+                        transaction
+                    )
+                )
+
+            # =================================================
+            # LOAD WITHDRAWALS
+            # =================================================
+
+            cur.execute(
+                """
+                SELECT *
+                FROM withdrawals
+                WHERE wallet_id = %s
+                ORDER BY requested_at DESC, id DESC
+                """,
+                (wallet_id,)
+            )
+
+            withdrawal_rows = cur.fetchall()
+
+            withdrawals = []
+
+            for withdrawal_row in withdrawal_rows:
+
+                if hasattr(
+                    withdrawal_row,
+                    "keys"
+                ):
+
+                    withdrawal = dict(
+                        withdrawal_row
+                    )
+
+                else:
+
+                    withdrawal_columns = [
+                        description[0]
+                        for description in cur.description
+                    ]
+
+                    withdrawal = dict(
+                        zip(
+                            withdrawal_columns,
+                            withdrawal_row
+                        )
+                    )
+
+                withdrawals.append(
+                    _host_wallet_legacy_withdrawal(
+                        withdrawal
+                    )
+                )
+
+            # =================================================
+            # BUILD LEGACY-COMPATIBLE RESPONSE
+            # =================================================
+
+            wallet = {
+                "id":
+                    wallet_id,
+
+                "hostId":
+                    host_id,
+
+                "availableBalance":
+                    wallet_row.get(
+                        "available_balance",
+                        0
+                    ) or 0,
+
+                "pendingPayouts":
+                    wallet_row.get(
+                        "pending_balance",
+                        0
+                    ) or 0,
+
+                "totalEarned":
+                    wallet_row.get(
+                        "total_earned",
+                        0
+                    ) or 0,
+
+                "totalWithdrawn":
+                    wallet_row.get(
+                        "total_withdrawn",
+                        0
+                    ) or 0,
+
+                "withdrawals":
+                    withdrawals,
+
+                "scheduledPayouts":
+                    metadata.get(
+                        "scheduledPayouts",
+                        []
+                    ),
+
+                "transactions":
+                    transactions
+            }
+
+            conn.commit()
 
             return jsonify(wallet)
 
+        except Exception:
 
-    new_wallet = {
+            conn.rollback()
+            raise
 
-        "hostId": host_id,
+        finally:
 
-        "availableBalance": 0,
+            try:
+                cur.close()
+            except Exception:
+                pass
 
-        "pendingPayouts": 0,
+            conn.close()
 
-        "totalEarned": 0,
+    except Exception as e:
 
-        "totalWithdrawn": 0,
+        print(
+            "GET HOST WALLET ERROR:",
+            str(e)
+        )
 
-        "withdrawals": [],
-
-        "scheduledPayouts": [],
-
-        "transactions": []
-
-    }
-
-
-    wallets.append(
-        new_wallet
-    )
-
-
-    save_host_wallets(
-        wallets
-    )
-
-
-    return jsonify(
-        new_wallet
-    )
-
+        return jsonify({
+            "success": False,
+            "message":
+                "Unable to load host wallet."
+        }), 500
 # ============================================================
 # FLUTTERWAVE TRANSFER / PAYOUT HELPER
 # ============================================================
@@ -44669,7 +48326,6 @@ def get_flutterwave_transfer(
 # Money is reserved BEFORE admin approval so the host
 # cannot request the same money twice.
 # ============================================================
-
 @app.route(
     "/host/wallet/withdraw/<int:host_id>",
     methods=["POST"]
@@ -44690,7 +48346,10 @@ def host_withdraw(user, host_id):
         ):
             return jsonify({
                 "success": False,
-                "message": "You are not authorized to withdraw from this host wallet."
+                "message": (
+                    "You are not authorized to withdraw "
+                    "from this host wallet."
+                )
             }), 403
 
         try:
@@ -44698,8 +48357,7 @@ def host_withdraw(user, host_id):
                 data.get(
                     "amount",
                     0
-                )
-                or 0
+                ) or 0
             )
         except (
             TypeError,
@@ -44711,16 +48369,14 @@ def host_withdraw(user, host_id):
             data.get(
                 "method",
                 ""
-            )
-            or ""
+            ) or ""
         ).strip()
 
         account = str(
             data.get(
                 "account",
                 ""
-            )
-            or ""
+            ) or ""
         ).strip()
 
         idempotency_key = str(
@@ -44730,122 +48386,579 @@ def host_withdraw(user, host_id):
                     "idempotency_key",
                     ""
                 )
-            )
-            or ""
+            ) or ""
         ).strip()
 
         if amount <= 0:
             return jsonify({
                 "success": False,
-                "message": "Enter a valid withdrawal amount."
+                "message": (
+                    "Enter a valid withdrawal amount."
+                )
             }), 400
 
         if not method:
             return jsonify({
                 "success": False,
-                "message": "Withdrawal method is required."
+                "message": (
+                    "Withdrawal method is required."
+                )
             }), 400
 
         try:
-            method_name, _ = normalize_payout_method(method)
+
+            method_name, _ = normalize_payout_method(
+                method
+            )
+
         except ValueError:
+
             return jsonify({
                 "success": False,
-                "message": "Unsupported withdrawal method."
+                "message": (
+                    "Unsupported withdrawal method."
+                )
             }), 400
 
         if not account:
             return jsonify({
                 "success": False,
-                "message": "Withdrawal account is required."
+                "message": (
+                    "Withdrawal account is required."
+                )
             }), 400
 
-        with eventwaa_file_lock("host_wallet_finalization"):
-            wallets = load_host_wallets()
-            wallet = None
+        # ========================================================
+        # POSTGRESQL TRANSACTION
+        # ========================================================
 
-            for candidate in wallets:
-                try:
-                    if int(candidate.get("hostId", 0)) == int(host_id):
-                        wallet = candidate
-                        break
-                except (TypeError, ValueError):
-                    continue
+        with get_db_connection() as conn:
 
-            if not wallet:
-                return jsonify({
-                    "success": False,
-                    "message": "Host wallet not found."
-                }), 404
+            with conn.cursor() as cur:
 
-            available_balance = int(
-                wallet.get("availableBalance", 0) or 0
-            )
+                # ------------------------------------------------
+                # Serialize withdrawal requests for this host.
+                # ------------------------------------------------
 
-            if amount > available_balance:
-                return jsonify({
-                    "success": False,
-                    "message": "Insufficient balance."
-                }), 400
-
-            if idempotency_key:
-                existing = get_existing_withdrawal_for_idempotency(wallet, idempotency_key)
-                if existing:
-                    same_request = (
-                        int(existing.get("amount", 0) or 0) == amount and
-                        str(existing.get("method", "")).strip() == method_name and
-                        str(existing.get("account", "")).strip() == account
+                cur.execute(
+                    """
+                    SELECT pg_advisory_xact_lock(
+                        hashtext(%s)
                     )
-                    if same_request:
-                        return jsonify({
-                            "success": True,
-                            "duplicate": True,
-                            "message": "Withdrawal already submitted.",
-                            "withdrawal": existing,
-                            "wallet": wallet
-                        }), 200
+                    """,
+                    (
+                        f"eventwaa-host-withdraw:{host_id}",
+                    )
+                )
+
+                # ------------------------------------------------
+                # Load and lock the host wallet.
+                # ------------------------------------------------
+
+                cur.execute(
+                    """
+                    SELECT
+                        id,
+                        user_id,
+                        available_balance,
+                        pending_balance,
+                        total_earned,
+                        total_withdrawn,
+                        currency,
+                        status
+                    FROM host_wallets
+                    WHERE user_id = %s
+                    FOR UPDATE
+                    """,
+                    (
+                        host_id,
+                    )
+                )
+
+                wallet_row = cur.fetchone()
+
+                if not wallet_row:
+
                     return jsonify({
                         "success": False,
-                        "message": "This idempotency key was already used for a different withdrawal request.",
-                        "existingWithdrawal": existing
-                    }), 409
+                        "message": (
+                            "Host wallet not found."
+                        )
+                    }), 404
 
-            existing_withdrawals = wallet.get("withdrawals", []) or []
-            withdrawal_id = len(existing_withdrawals) + 1
-            withdrawal_reference = (
-                f"HOST-WD-{host_id}-{int(datetime.now().timestamp() * 1000)}-{withdrawal_id}"
-            )
+                wallet_id = int(
+                    wallet_row["id"]
+                )
 
-            withdrawal = {
-                "id": withdrawal_id,
-                "reference": withdrawal_reference,
-                "amount": amount,
-                "method": method_name,
-                "account": account,
-                "status": "pending",
-                "providerStatus": "pending",
-                "idempotencyKey": idempotency_key or withdrawal_reference,
-                "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
+                available_balance = int(
+                    wallet_row.get(
+                        "available_balance",
+                        0
+                    ) or 0
+                )
 
-            wallet["availableBalance"] = available_balance - amount
-            wallet["pendingPayouts"] = int(wallet.get("pendingPayouts", 0) or 0) + amount
-            wallet.setdefault("withdrawals", []).append(withdrawal)
-            wallet.setdefault("transactions", []).append({
-                "id": f"withdrawal_{withdrawal_id}",
-                "type": "withdrawal",
-                "description": "Withdrawal request",
-                "amount": -amount,
-                "method": method_name,
-                "date": withdrawal["date"],
-                "status": "pending"
-            })
-            save_host_wallets(wallets)
+                pending_balance = int(
+                    wallet_row.get(
+                        "pending_balance",
+                        0
+                    ) or 0
+                )
+
+                total_withdrawn = int(
+                    wallet_row.get(
+                        "total_withdrawn",
+                        0
+                    ) or 0
+                )
+
+                # ------------------------------------------------
+                # Idempotency check.
+                # ------------------------------------------------
+
+                if idempotency_key:
+
+                    cur.execute(
+                        """
+                        SELECT
+                            id,
+                            amount,
+                            status,
+                            method,
+                            account_number,
+                            idempotency_key,
+                            provider_reference,
+                            requested_at
+                        FROM withdrawals
+                        WHERE
+                            user_id = %s
+                            AND idempotency_key = %s
+                        LIMIT 1
+                        """,
+                        (
+                            host_id,
+                            idempotency_key
+                        )
+                    )
+
+                    existing = cur.fetchone()
+
+                    if existing:
+
+                        same_request = (
+                            int(
+                                existing.get(
+                                    "amount",
+                                    0
+                                ) or 0
+                            ) == amount
+                            and
+                            str(
+                                existing.get(
+                                    "method",
+                                    ""
+                                ) or ""
+                            ).strip()
+                            == method_name
+                            and
+                            str(
+                                existing.get(
+                                    "account_number",
+                                    ""
+                                ) or ""
+                            ).strip()
+                            == account
+                        )
+
+                        if same_request:
+
+                            existing_withdrawal = {
+                                "id": int(
+                                    existing["id"]
+                                ),
+                                "amount": (
+                                    existing["amount"]
+                                ),
+                                "method": (
+                                    existing["method"]
+                                ),
+                                "account": (
+                                    existing["account_number"]
+                                ),
+                                "status": (
+                                    existing["status"]
+                                ),
+                                "idempotencyKey": (
+                                    existing[
+                                        "idempotency_key"
+                                    ]
+                                ),
+                                "providerReference": (
+                                    existing[
+                                        "provider_reference"
+                                    ]
+                                ),
+                                "date": (
+                                    existing[
+                                        "requested_at"
+                                    ].isoformat()
+                                    if existing[
+                                        "requested_at"
+                                    ]
+                                    else None
+                                )
+                            }
+
+                            wallet_response = {
+                                "hostId": host_id,
+                                "availableBalance": (
+                                    available_balance
+                                ),
+                                "pendingPayouts": (
+                                    pending_balance
+                                ),
+                                "totalEarned": (
+                                    wallet_row[
+                                        "total_earned"
+                                    ]
+                                    or 0
+                                ),
+                                "totalWithdrawn": (
+                                    total_withdrawn
+                                )
+                            }
+
+                            return jsonify({
+                                "success": True,
+                                "duplicate": True,
+                                "message": (
+                                    "Withdrawal already submitted."
+                                ),
+                                "withdrawal":
+                                    existing_withdrawal,
+                                "wallet":
+                                    wallet_response
+                            }), 200
+
+                        return jsonify({
+                            "success": False,
+                            "message": (
+                                "This idempotency key was "
+                                "already used for a different "
+                                "withdrawal request."
+                            )
+                        }), 409
+
+                # ------------------------------------------------
+                # Balance validation.
+                # ------------------------------------------------
+
+                if amount > available_balance:
+
+                    return jsonify({
+                        "success": False,
+                        "message": (
+                            "Insufficient balance."
+                        )
+                    }), 400
+
+                # ------------------------------------------------
+                # Generate withdrawal ID safely.
+                # ------------------------------------------------
+
+                cur.execute(
+                    """
+                    SELECT
+                        COALESCE(
+                            MAX(id),
+                            0
+                        ) + 1 AS next_id
+                    FROM withdrawals
+                    """
+                )
+
+                withdrawal_id = int(
+                    cur.fetchone()["next_id"]
+                )
+
+                withdrawal_reference = (
+                    f"HOST-WD-{host_id}-"
+                    f"{int(datetime.now().timestamp() * 1000)}-"
+                    f"{withdrawal_id}"
+                )
+
+                final_idempotency_key = (
+                    idempotency_key
+                    or
+                    withdrawal_reference
+                )
+
+                requested_at = datetime.now()
+
+                # ------------------------------------------------
+                # Insert normalized withdrawal.
+                # ------------------------------------------------
+
+                withdrawal_metadata = {
+                    "reference":
+                        withdrawal_reference,
+
+                    "providerStatus":
+                        "pending",
+
+                    "account":
+                        account
+                }
+
+                cur.execute(
+                    """
+                    INSERT INTO withdrawals (
+                        id,
+                        user_id,
+                        wallet_id,
+                        amount,
+                        currency,
+                        status,
+                        method,
+                        provider,
+                        provider_reference,
+                        account_name,
+                        account_number,
+                        requested_at,
+                        idempotency_key,
+                        metadata
+                    )
+                    VALUES (
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        'UGX',
+                        'pending',
+                        %s,
+                        NULL,
+                        NULL,
+                        NULL,
+                        %s,
+                        %s,
+                        %s,
+                        %s::jsonb
+                    )
+                    """,
+                    (
+                        withdrawal_id,
+                        host_id,
+                        wallet_id,
+                        amount,
+                        method_name,
+                        account,
+                        requested_at,
+                        final_idempotency_key,
+                        json.dumps(
+                            withdrawal_metadata,
+                            default=str
+                        )
+                    )
+                )
+
+                # ------------------------------------------------
+                # Generate wallet transaction ID safely.
+                # ------------------------------------------------
+
+                cur.execute(
+                    """
+                    SELECT
+                        COALESCE(
+                            MAX(id),
+                            0
+                        ) + 1 AS next_id
+                    FROM wallet_transactions
+                    """
+                )
+
+                transaction_id = int(
+                    cur.fetchone()["next_id"]
+                )
+
+                balance_before = (
+                    available_balance
+                )
+
+                balance_after = (
+                    available_balance
+                    -
+                    amount
+                )
+
+                # ------------------------------------------------
+                # Insert normalized wallet transaction.
+                # ------------------------------------------------
+
+                transaction_metadata = {
+                    "method":
+                        method_name,
+
+                    "account":
+                        account,
+
+                    "withdrawalId":
+                        withdrawal_id,
+
+                    "withdrawalReference":
+                        withdrawal_reference
+                }
+
+                cur.execute(
+                    """
+                    INSERT INTO wallet_transactions (
+                        id,
+                        wallet_id,
+                        user_id,
+                        type,
+                        amount,
+                        currency,
+                        status,
+                        description,
+                        reference,
+                        balance_before,
+                        balance_after,
+                        created_at,
+                        metadata
+                    )
+                    VALUES (
+                        %s,
+                        %s,
+                        %s,
+                        'withdrawal',
+                        %s,
+                        'UGX',
+                        'pending',
+                        'Withdrawal request',
+                        %s,
+                        %s,
+                        %s,
+                        %s,
+                        %s::jsonb
+                    )
+                    """,
+                    (
+                        transaction_id,
+                        wallet_id,
+                        host_id,
+                        -amount,
+                        withdrawal_reference,
+                        balance_before,
+                        balance_after,
+                        requested_at,
+                        json.dumps(
+                            transaction_metadata,
+                            default=str
+                        )
+                    )
+                )
+
+                # ------------------------------------------------
+                # Update wallet balances atomically.
+                # ------------------------------------------------
+
+                new_available_balance = (
+                    available_balance
+                    -
+                    amount
+                )
+
+                new_pending_balance = (
+                    pending_balance
+                    +
+                    amount
+                )
+
+                cur.execute(
+                    """
+                    UPDATE host_wallets
+                    SET
+                        available_balance = %s,
+                        pending_balance = %s,
+                        updated_at = NOW()
+                    WHERE id = %s
+                    """,
+                    (
+                        new_available_balance,
+                        new_pending_balance,
+                        wallet_id
+                    )
+                )
+
+            # ----------------------------------------------------
+            # Commit EVERYTHING together.
+            # ----------------------------------------------------
+
+            conn.commit()
+
+        # ========================================================
+        # RESPONSE OBJECTS
+        # ========================================================
+
+        withdrawal = {
+            "id":
+                withdrawal_id,
+
+            "reference":
+                withdrawal_reference,
+
+            "amount":
+                amount,
+
+            "method":
+                method_name,
+
+            "account":
+                account,
+
+            "status":
+                "pending",
+
+            "providerStatus":
+                "pending",
+
+            "idempotencyKey":
+                final_idempotency_key,
+
+            "date":
+                requested_at.strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+        }
+
+        wallet = {
+            "hostId":
+                host_id,
+
+            "availableBalance":
+                new_available_balance,
+
+            "pendingPayouts":
+                new_pending_balance,
+
+            "totalEarned":
+                wallet_row[
+                    "total_earned"
+                ] or 0,
+
+            "totalWithdrawn":
+                total_withdrawn
+        }
+
+        # ========================================================
+        # NOTIFICATIONS
+        # ========================================================
 
         create_notification(
             host_id,
             "Withdrawal Request Submitted",
-            f"Your withdrawal request of UGX {amount:,} has been submitted.",
+            (
+                f"Your withdrawal request of "
+                f"UGX {amount:,} has been submitted."
+            ),
             "withdrawal",
             "/host-wallet"
         )
@@ -44853,25 +48966,38 @@ def host_withdraw(user, host_id):
         create_notification(
             "admin",
             "New Withdrawal Request",
-            f"A host requested UGX {amount:,} withdrawal.",
+            (
+                f"A host requested "
+                f"UGX {amount:,} withdrawal."
+            ),
             "admin_withdrawal",
             "/admin/withdrawals"
         )
 
         return jsonify({
             "success": True,
-            "message": "Withdrawal request submitted.",
-            "withdrawal": withdrawal,
-            "wallet": wallet
+            "message": (
+                "Withdrawal request submitted."
+            ),
+            "withdrawal":
+                withdrawal,
+            "wallet":
+                wallet
         }), 200
 
     except Exception as e:
-        print("HOST WITHDRAW ERROR:", str(e))
+
+        print(
+            "HOST WITHDRAW ERROR:",
+            str(e)
+        )
+
         return jsonify({
             "success": False,
-            "message": "Unable to process withdrawal."
+            "message": (
+                "Unable to process withdrawal."
+            )
         }), 500
-
 
 # ============================================================
 # ADMIN WALLET
@@ -46456,6 +50582,280 @@ def get_flutterwave_transfer_status(
     }
 
 
+def finalize_admin_withdrawal(
+    withdrawal_id,
+    final_status,
+    flutterwave_transfer_id=None,
+    flutterwave_reference=None,
+    flutterwave_response=None
+):
+    """
+    Finalize an admin withdrawal in PostgreSQL.
+
+    Successful payout:
+      - Decrease pending balance.
+      - Increase total withdrawn.
+      - Mark withdrawal completed.
+
+    Failed payout:
+      - Decrease pending balance.
+      - Restore available balance.
+      - Mark withdrawal failed.
+
+    Uses row locks and metadata to prevent duplicate accounting.
+    """
+
+    from decimal import Decimal
+
+    final_status = str(final_status or "").strip().lower()
+
+    if final_status in ("success", "successful", "completed"):
+        target_status = "completed"
+    elif final_status == "failed":
+        target_status = "failed"
+    else:
+        return {
+            "success": False,
+            "message": "Invalid withdrawal final status."
+        }
+
+    try:
+        withdrawal_id = int(withdrawal_id)
+
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+
+                # Serialize attempts to finalize the same withdrawal.
+                cur.execute(
+                    "SELECT pg_advisory_xact_lock(hashtext(%s))",
+                    (f"eventwaa-admin-withdrawal-finalize:{withdrawal_id}",)
+                )
+
+                # Lock the admin withdrawal record.
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM admin_withdrawals
+                    WHERE id = %s
+                    FOR UPDATE
+                    """,
+                    (withdrawal_id,)
+                )
+                withdrawal = cur.fetchone()
+
+                if not withdrawal:
+                    return {
+                        "success": False,
+                        "message": "Admin withdrawal not found."
+                    }
+
+                metadata = withdrawal.get("metadata") or {}
+                if not isinstance(metadata, dict):
+                    metadata = {}
+
+                current_status = str(
+                    withdrawal.get("status") or ""
+                ).strip().lower()
+
+                # A duplicate webhook must never move money twice.
+                if (
+                    metadata.get("accountingFinalized")
+                    or current_status in ("completed", "failed")
+                ):
+                    return {
+                        "success": True,
+                        "alreadyFinalized": True,
+                        "status": current_status,
+                        "withdrawal": withdrawal
+                    }
+
+                amount = Decimal(str(withdrawal.get("amount") or 0))
+                wallet_id = withdrawal.get("wallet_id")
+
+                if amount <= 0 or not wallet_id:
+                    return {
+                        "success": False,
+                        "message": "Invalid withdrawal amount or wallet."
+                    }
+
+                # Lock the actual PostgreSQL admin wallet.
+                cur.execute(
+                    """
+                    SELECT id, available_balance, pending_balance,
+                           total_withdrawn, currency
+                    FROM admin_wallet
+                    WHERE id = %s
+                    FOR UPDATE
+                    """,
+                    (wallet_id,)
+                )
+                wallet = cur.fetchone()
+
+                if not wallet:
+                    return {
+                        "success": False,
+                        "message": "Admin wallet not found."
+                    }
+
+                available_before = Decimal(
+                    str(wallet.get("available_balance") or 0)
+                )
+                pending_before = Decimal(
+                    str(wallet.get("pending_balance") or 0)
+                )
+
+                if pending_before < amount:
+                    return {
+                        "success": False,
+                        "message": (
+                            "Pending balance is less than the withdrawal. "
+                            "No accounting changes were made."
+                        )
+                    }
+
+                if target_status == "completed":
+                    cur.execute(
+                        """
+                        UPDATE admin_wallet
+                        SET pending_balance = pending_balance - %s,
+                            total_withdrawn = total_withdrawn + %s,
+                            updated_at = NOW()
+                        WHERE id = %s
+                        """,
+                        (amount, amount, wallet_id)
+                    )
+                    available_after = available_before
+                    transaction_type = "withdrawal_completed"
+                    description = "Admin withdrawal completed"
+
+                else:
+                    cur.execute(
+                        """
+                        UPDATE admin_wallet
+                        SET pending_balance = pending_balance - %s,
+                            available_balance = available_balance + %s,
+                            updated_at = NOW()
+                        WHERE id = %s
+                        """,
+                        (amount, amount, wallet_id)
+                    )
+                    available_after = available_before + amount
+                    transaction_type = "withdrawal_failed_refund"
+                    description = "Failed admin withdrawal funds restored"
+
+                # Store provider details and the idempotency marker.
+                metadata.update({
+                    "accountingFinalized": True,
+                    "flutterwaveTransferId": flutterwave_transfer_id,
+                    "flutterwaveReference": flutterwave_reference,
+                    "flutterwaveStatus": target_status,
+                    "flutterwaveResponse": flutterwave_response,
+                })
+
+                cur.execute(
+                    """
+                    UPDATE admin_withdrawals
+                    SET status = %s,
+                        provider_reference = COALESCE(%s, provider_reference),
+                        processed_at = NOW(),
+                        failure_reason = CASE
+                            WHEN %s = 'failed' THEN %s
+                            ELSE NULL
+                        END,
+                        metadata = %s::jsonb
+                    WHERE id = %s
+                    """,
+                    (
+                        target_status,
+                        flutterwave_transfer_id,
+                        target_status,
+                        (
+                            str((flutterwave_response or {}).get("message") or
+                                "Flutterwave reported transfer failure")
+                            if target_status == "failed"
+                            and isinstance(flutterwave_response, dict)
+                            else (
+                                "Flutterwave reported transfer failure"
+                                if target_status == "failed"
+                                else None
+                            )
+                        ),
+                        json.dumps(metadata, default=str),
+                        withdrawal_id
+                    )
+                )
+
+                # Record the accounting result in PostgreSQL.
+                cur.execute(
+                    """
+                    INSERT INTO admin_wallet_transactions (
+                        wallet_id, type, amount, currency, status,
+                        description, reference, balance_before,
+                        balance_after, created_at, metadata
+                    )
+                    VALUES (
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, NOW(), %s::jsonb
+                    )
+                    """,
+                    (
+                        wallet_id,
+                        transaction_type,
+                        amount,
+                        withdrawal.get("currency") or "UGX",
+                        target_status,
+                        description,
+                        str(
+                            flutterwave_transfer_id
+                            or flutterwave_reference
+                            or f"ADMIN-WITHDRAWAL-{withdrawal_id}"
+                        ),
+                        available_before,
+                        available_after,
+                        json.dumps({
+                            "adminWithdrawalId": withdrawal_id,
+                            "flutterwaveTransferId": flutterwave_transfer_id,
+                            "flutterwaveReference": flutterwave_reference
+                        }, default=str)
+                    )
+                )
+
+        # The database transaction has committed successfully here.
+        try:
+            if target_status == "completed":
+                create_notification(
+                    "admin",
+                    "Admin Withdrawal Completed",
+                    f"An admin payout of UGX {int(amount):,} was completed.",
+                    "admin_withdrawal_completed",
+                    "/admin/withdrawals"
+                )
+            else:
+                create_notification(
+                    "admin",
+                    "Admin Withdrawal Failed",
+                    f"An admin payout of UGX {int(amount):,} failed. "
+                    "The funds were restored to the available balance.",
+                    "admin_withdrawal_failed",
+                    "/admin/withdrawals"
+                )
+        except Exception as notification_error:
+            print("ADMIN WITHDRAWAL NOTIFICATION ERROR:", notification_error)
+
+        return {
+            "success": True,
+            "status": target_status,
+            "withdrawalId": withdrawal_id,
+            "message": f"Admin withdrawal marked {target_status}."
+        }
+
+    except Exception as e:
+        print("FINALIZE ADMIN WITHDRAWAL ERROR:", str(e))
+        return {
+            "success": False,
+            "message": "Unable to finalize admin withdrawal."
+        }
+
 # ============================================================
 # FINALIZE HOST WITHDRAWAL
 #
@@ -46542,6 +50942,7 @@ def apply_withdrawal_finalization(
     return {"success": False, "message": "Invalid withdrawal final status."}
 
 
+
 def finalize_host_withdrawal(
     host_id,
     withdrawal_id,
@@ -46594,47 +50995,775 @@ def finalize_host_withdrawal(
         return {"success": False, "message": "Withdrawal not found."}
 
 
-def finalize_admin_withdrawal(
+def finalize_host_withdrawal(
+    host_id,
     withdrawal_id,
     final_status,
     flutterwave_transfer_id=None,
     flutterwave_reference=None,
     flutterwave_response=None
 ):
+    """
+    Finalize a host withdrawal directly in PostgreSQL.
 
-    with eventwaa_file_lock("admin_wallet_finalization"):
-        wallet = load_wallet()
+    SUCCESS:
+        pending_balance decreases
+        total_withdrawn increases
+        withdrawal becomes completed
+        wallet transaction becomes completed
 
-        for withdrawal in wallet.get("withdrawals", []):
-            try:
-                current_id = int(withdrawal.get("id", 0))
-            except (TypeError, ValueError):
-                current_id = 0
+    FAILED:
+        pending_balance decreases
+        available_balance is restored
+        withdrawal becomes failed
+        wallet transaction becomes failed
 
-            if current_id != int(withdrawal_id):
-                continue
+    The operation is idempotent and protected by a database
+    transaction/advisory lock.
+    """
 
-            result = apply_withdrawal_finalization(
-                wallet,
-                withdrawal,
-                final_status,
-                flutterwave_transfer_id=flutterwave_transfer_id,
-                flutterwave_reference=flutterwave_reference,
-                flutterwave_response=flutterwave_response
+    final_status = str(
+        final_status or ""
+    ).strip().lower()
+
+    if final_status in (
+        "successful",
+        "success",
+        "completed"
+    ):
+        target_status = "completed"
+
+    elif final_status == "failed":
+        target_status = "failed"
+
+    else:
+        return {
+            "success": False,
+            "message": (
+                "Invalid withdrawal final status."
+            )
+        }
+
+    try:
+
+        with get_db_connection() as conn:
+
+            with conn.cursor() as cur:
+
+                # ==================================================
+                # SERIALIZE FINALIZATION FOR THIS WITHDRAWAL
+                # ==================================================
+
+                cur.execute(
+                    """
+                    SELECT pg_advisory_xact_lock(
+                        hashtext(%s)
+                    )
+                    """,
+                    (
+                        f"eventwaa-host-withdrawal-finalize:"
+                        f"{host_id}:{withdrawal_id}",
+                    )
+                )
+
+                # ==================================================
+                # LOCK WITHDRAWAL
+                # ==================================================
+
+                cur.execute(
+                    """
+                    SELECT
+                        id,
+                        user_id,
+                        wallet_id,
+                        amount,
+                        currency,
+                        status,
+                        method,
+                        provider,
+                        provider_reference,
+                        account_name,
+                        account_number,
+                        requested_at,
+                        processed_at,
+                        processed_by,
+                        failure_reason,
+                        idempotency_key,
+                        metadata
+                    FROM withdrawals
+                    WHERE
+                        id = %s
+                        AND user_id = %s
+                    FOR UPDATE
+                    """,
+                    (
+                        withdrawal_id,
+                        host_id
+                    )
+                )
+
+                withdrawal_row = cur.fetchone()
+
+                if not withdrawal_row:
+
+                    return {
+                        "success": False,
+                        "message":
+                            "Withdrawal not found."
+                    }
+
+                amount = int(
+                    withdrawal_row.get(
+                        "amount",
+                        0
+                    ) or 0
+                )
+
+                if amount <= 0:
+
+                    return {
+                        "success": False,
+                        "message":
+                            "Invalid withdrawal amount."
+                    }
+
+                metadata = withdrawal_row.get(
+                    "metadata"
+                )
+
+                if not isinstance(
+                    metadata,
+                    dict
+                ):
+                    metadata = {}
+
+             
+                # ==================================================
+                # IDEMPOTENCY CHECK
+                # ==================================================
+
+                already_finalized = bool(
+                    metadata.get("accountingFinalized", False)
+                )
+
+                existing_status = str(
+                    withdrawal_row.get("status", "") or ""
+                ).strip().lower()
+
+                # A completed or failed withdrawal must never have its
+                # wallet balance changed again on a retry.
+                if existing_status in ("completed", "failed"):
+                    existing_withdrawal = (
+                        _host_wallet_legacy_withdrawal(
+                            withdrawal_row
+                        )
+                    )
+
+                    return {
+                        "success": True,
+                        "alreadyFinalized": True,
+                        "status": existing_status,
+                        "withdrawal": existing_withdrawal,
+                    }
+
+                # Metadata and status disagree. Stop without changing balances.
+                if already_finalized:
+                    return {
+                        "success": False,
+                        "alreadyFinalized": False,
+                        "requiresReconciliation": True,
+                        "status": existing_status,
+                        "message": (
+                            "Withdrawal accounting is marked finalized, "
+                            "but its status is not completed or failed. "
+                            "No wallet balances were changed. Reconciliation "
+                            "is required before retrying."
+                        ),
+                    }
+                
+                # ==================================================
+                # LOCK HOST WALLET
+                # ==================================================
+
+                wallet_id = withdrawal_row.get(
+                    "wallet_id"
+                )
+
+                if wallet_id is None:
+
+                    return {
+                        "success": False,
+                        "message":
+                            "Withdrawal is not linked to a host wallet."
+                    }
+
+                cur.execute(
+                    """
+                    SELECT
+                        id,
+                        user_id,
+                        available_balance,
+                        pending_balance,
+                        total_earned,
+                        total_withdrawn
+                    FROM host_wallets
+                    WHERE
+                        id = %s
+                        AND user_id = %s
+                    FOR UPDATE
+                    """,
+                    (
+                        wallet_id,
+                        host_id
+                    )
+                )
+
+                wallet_row = cur.fetchone()
+
+                if not wallet_row:
+
+                    return {
+                        "success": False,
+                        "message":
+                            "Host wallet not found."
+                    }
+
+                available_balance = int(
+                    wallet_row.get(
+                        "available_balance",
+                        0
+                    ) or 0
+                )
+
+                pending_balance = int(
+                    wallet_row.get(
+                        "pending_balance",
+                        0
+                    ) or 0
+                )
+
+                total_withdrawn = int(
+                    wallet_row.get(
+                        "total_withdrawn",
+                        0
+                    ) or 0
+                )
+
+                # ==================================================
+                # PROVIDER METADATA
+                # ==================================================
+
+                if flutterwave_transfer_id:
+
+                    metadata[
+                        "flutterwaveTransferId"
+                    ] = flutterwave_transfer_id
+
+                if flutterwave_reference:
+
+                    metadata[
+                        "flutterwaveReference"
+                    ] = flutterwave_reference
+
+                if flutterwave_response:
+
+                    metadata[
+                        "flutterwaveResponse"
+                    ] = flutterwave_response
+
+                now = datetime.now()
+
+                # ==================================================
+                # SUCCESSFUL WITHDRAWAL
+                # ==================================================
+
+                if target_status == "completed":
+
+                    if pending_balance < amount:
+
+                        return {
+                            "success": False,
+                            "message": (
+                                "Wallet pending balance "
+                                "is inconsistent."
+                            )
+                        }
+
+                    new_pending_balance = (
+                        pending_balance
+                        -
+                        amount
+                    )
+
+                    new_total_withdrawn = (
+                        total_withdrawn
+                        +
+                        amount
+                    )
+
+                    metadata[
+                        "providerStatus"
+                    ] = "successful"
+
+                    metadata[
+                        "accountingFinalized"
+                    ] = True
+
+                    metadata[
+                        "completedAt"
+                    ] = now.strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+
+                    cur.execute(
+                        """
+                        UPDATE host_wallets
+                        SET
+                            pending_balance = %s,
+                            total_withdrawn = %s,
+                            updated_at = NOW()
+                        WHERE id = %s
+                        """,
+                        (
+                            new_pending_balance,
+                            new_total_withdrawn,
+                            wallet_id
+                        )
+                    )
+
+                    cur.execute(
+                        """
+                        UPDATE withdrawals
+                        SET
+                            status = 'completed',
+                            provider_reference =
+                                COALESCE(
+                                    %s,
+                                    provider_reference
+                                ),
+                            processed_at = %s,
+                            failure_reason = NULL,
+                            metadata =
+                                COALESCE(
+                                    metadata,
+                                    '{}'::jsonb
+                                )
+                                || %s::jsonb
+                        WHERE
+                            id = %s
+                            AND user_id = %s
+                        """,
+                        (
+                            flutterwave_reference,
+                            now,
+                            json.dumps(
+                                metadata,
+                                default=str
+                            ),
+                            withdrawal_id,
+                            host_id
+                        )
+                    )
+
+                    # ----------------------------------------------
+                    # Update the normalized wallet transaction.
+                    # ----------------------------------------------
+
+                    cur.execute(
+                        """
+                        UPDATE wallet_transactions
+                        SET
+                            status = 'completed',
+                            metadata =
+                                COALESCE(
+                                    metadata,
+                                    '{}'::jsonb
+                                )
+                                || %s::jsonb
+                        WHERE
+                            wallet_id = %s
+                            AND (
+                                metadata ->> 'withdrawalId'
+                            ) = %s
+                        """,
+                        (
+                            json.dumps(
+                                {
+                                    "accountingFinalized":
+                                        True,
+
+                                    "flutterwaveTransferId":
+                                        flutterwave_transfer_id,
+
+                                    "flutterwaveReference":
+                                        flutterwave_reference,
+
+                                    "completedAt":
+                                        now.strftime(
+                                            "%Y-%m-%d %H:%M:%S"
+                                        )
+                                },
+                                default=str
+                            ),
+                            wallet_id,
+                            str(
+                                withdrawal_id
+                            )
+                        )
+                    )
+
+                    # Older migrated transactions may not have
+                    # withdrawalId in metadata. Fall back to the
+                    # withdrawal reference.
+
+                    if cur.rowcount == 0:
+
+                        cur.execute(
+                            """
+                            UPDATE wallet_transactions
+                            SET
+                                status = 'completed',
+                                metadata =
+                                    COALESCE(
+                                        metadata,
+                                        '{}'::jsonb
+                                    )
+                                    || %s::jsonb
+                            WHERE
+                                wallet_id = %s
+                                AND type = 'withdrawal'
+                                AND reference = %s
+                            """,
+                            (
+                                json.dumps(
+                                    {
+                                        "accountingFinalized":
+                                            True,
+
+                                        "flutterwaveTransferId":
+                                            flutterwave_transfer_id,
+
+                                        "flutterwaveReference":
+                                            flutterwave_reference,
+
+                                        "completedAt":
+                                            now.strftime(
+                                                "%Y-%m-%d %H:%M:%S"
+                                            )
+                                    },
+                                    default=str
+                                ),
+                                wallet_id,
+                                withdrawal_row.get(
+                                    "provider_reference"
+                                )
+                                or metadata.get(
+                                    "reference"
+                                )
+                            )
+                        )
+
+                    response_status = "completed"
+
+                # ==================================================
+                # FAILED WITHDRAWAL
+                # ==================================================
+
+                else:
+
+                    new_pending_balance = max(
+                        0,
+                        pending_balance - amount
+                    )
+
+                    new_available_balance = (
+                        available_balance
+                        +
+                        amount
+                    )
+
+                    failure_message = (
+                        metadata.get(
+                            "failureReason"
+                        )
+                        or
+                        "Flutterwave transfer failed."
+                    )
+
+                    if flutterwave_response:
+
+                        failure_message = (
+                            flutterwave_response.get(
+                                "message"
+                            )
+                            or
+                            flutterwave_response.get(
+                                "data",
+                                {}
+                            ).get(
+                                "complete_message"
+                            )
+                            or
+                            failure_message
+                        )
+
+                    metadata[
+                        "providerStatus"
+                    ] = "failed"
+
+                    metadata[
+                        "accountingFinalized"
+                    ] = True
+
+                    metadata[
+                        "failedAt"
+                    ] = now.strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+
+                    metadata[
+                        "failureReason"
+                    ] = failure_message
+
+                    cur.execute(
+                        """
+                        UPDATE host_wallets
+                        SET
+                            available_balance = %s,
+                            pending_balance = %s,
+                            updated_at = NOW()
+                        WHERE id = %s
+                        """,
+                        (
+                            new_available_balance,
+                            new_pending_balance,
+                            wallet_id
+                        )
+                    )
+
+                    cur.execute(
+                        """
+                        UPDATE withdrawals
+                        SET
+                            status = 'failed',
+                            provider_reference =
+                                COALESCE(
+                                    %s,
+                                    provider_reference
+                                ),
+                            processed_at = %s,
+                            failure_reason = %s,
+                            metadata =
+                                COALESCE(
+                                    metadata,
+                                    '{}'::jsonb
+                                )
+                                || %s::jsonb
+                        WHERE
+                            id = %s
+                            AND user_id = %s
+                        """,
+                        (
+                            flutterwave_reference,
+                            now,
+                            failure_message,
+                            json.dumps(
+                                metadata,
+                                default=str
+                            ),
+                            withdrawal_id,
+                            host_id
+                        )
+                    )
+
+                    # ----------------------------------------------
+                    # Update normalized wallet transaction.
+                    # ----------------------------------------------
+
+                    transaction_metadata = {
+                        "accountingFinalized":
+                            True,
+
+                        "flutterwaveTransferId":
+                            flutterwave_transfer_id,
+
+                        "flutterwaveReference":
+                            flutterwave_reference,
+
+                        "failedAt":
+                            now.strftime(
+                                "%Y-%m-%d %H:%M:%S"
+                            ),
+
+                        "failureReason":
+                            failure_message
+                    }
+
+                    cur.execute(
+                        """
+                        UPDATE wallet_transactions
+                        SET
+                            status = 'failed',
+                            metadata =
+                                COALESCE(
+                                    metadata,
+                                    '{}'::jsonb
+                                )
+                                || %s::jsonb
+                        WHERE
+                            wallet_id = %s
+                            AND (
+                                metadata ->> 'withdrawalId'
+                            ) = %s
+                        """,
+                        (
+                            json.dumps(
+                                transaction_metadata,
+                                default=str
+                            ),
+                            wallet_id,
+                            str(
+                                withdrawal_id
+                            )
+                        )
+                    )
+
+                    if cur.rowcount == 0:
+
+                        cur.execute(
+                            """
+                            UPDATE wallet_transactions
+                            SET
+                                status = 'failed',
+                                metadata =
+                                    COALESCE(
+                                        metadata,
+                                        '{}'::jsonb
+                                    )
+                                    || %s::jsonb
+                            WHERE
+                                wallet_id = %s
+                                AND type = 'withdrawal'
+                                AND reference = %s
+                            """,
+                            (
+                                json.dumps(
+                                    transaction_metadata,
+                                    default=str
+                                ),
+                                wallet_id,
+                                withdrawal_row.get(
+                                    "provider_reference"
+                                )
+                                or metadata.get(
+                                    "reference"
+                                )
+                            )
+                        )
+
+                    response_status = "failed"
+
+                # ==================================================
+                # READ FINAL WITHDRAWAL
+                # ==================================================
+
+                cur.execute(
+                    """
+                    SELECT
+                        id,
+                        user_id,
+                        wallet_id,
+                        amount,
+                        currency,
+                        status,
+                        method,
+                        provider,
+                        provider_reference,
+                        account_name,
+                        account_number,
+                        requested_at,
+                        processed_at,
+                        processed_by,
+                        failure_reason,
+                        idempotency_key,
+                        metadata
+                    FROM withdrawals
+                    WHERE
+                        id = %s
+                        AND user_id = %s
+                    """,
+                    (
+                        withdrawal_id,
+                        host_id
+                    )
+                )
+
+                final_withdrawal_row = (
+                    cur.fetchone()
+                )
+
+            conn.commit()
+
+        final_withdrawal = (
+            _host_wallet_legacy_withdrawal(
+                final_withdrawal_row
+            )
+        )
+
+        final_withdrawal["accountingFinalized"] = True
+
+        # ========================================================
+        # NOTIFICATION
+        # ========================================================
+
+        if response_status == "completed":
+
+            create_notification(
+                host_id,
+                "Withdrawal Completed",
+                (
+                    f"Your UGX {amount:,} withdrawal "
+                    f"has been successfully processed."
+                ),
+                "withdrawal_completed",
+                "/host-wallet"
             )
 
-            if result.get("success"):
-                save_wallet(wallet)
-                if result.get("status") == "completed":
-                    create_notification("admin", "Admin Withdrawal Completed", f"An admin payout of UGX {int(withdrawal.get('amount', 0) or 0):,} was successfully completed.", "admin_withdrawal_completed", "/admin/withdrawals")
-                elif result.get("status") == "failed":
-                    create_notification("admin", "Admin Withdrawal Failed", f"An admin payout of UGX {int(withdrawal.get('amount', 0) or 0):,} failed and the funds were restored.", "admin_withdrawal_failed", "/admin/withdrawals")
-                return result
+        else:
 
-            return result
+            create_notification(
+                host_id,
+                "Withdrawal Failed",
+                (
+                    f"Your UGX {amount:,} withdrawal "
+                    f"could not be completed. "
+                    f"The money has been returned "
+                    f"to your available balance."
+                ),
+                "withdrawal_failed",
+                "/host-wallet"
+            )
 
-        return {"success": False, "message": "Withdrawal not found."}
+        return {
+            "success": True,
+            "status": response_status,
+            "withdrawal": final_withdrawal,
+            "alreadyFinalized": False
+        }
 
+    except Exception as e:
+
+        print(
+            "FINALIZE HOST WITHDRAWAL ERROR:",
+            str(e)
+        )
+
+        return {
+            "success": False,
+            "message":
+                "Unable to finalize withdrawal."
+        }
+    
 # ============================================================
 # INITIATE FLUTTERWAVE HOST WITHDRAWAL
 # ============================================================
@@ -47003,28 +52132,6 @@ def initiate_host_flutterwave_transfer(
 
 
 
-# ============================================================
-# APPROVE HOST WITHDRAWAL
-#
-# FLOW:
-#
-# pending
-#    ↓
-# admin approves
-#    ↓
-# Flutterwave transfer created
-#    ↓
-# processing
-#    ↓
-# webhook OR manual status check
-#    ↓
-# completed OR failed
-#
-# IMPORTANT:
-# We DO NOT mark the withdrawal completed here.
-# We DO NOT increase totalWithdrawn here.
-# ============================================================
-
 @app.route(
     "/admin/host-withdrawals/approve/<int:host_id>/<int:withdrawal_id>",
     methods=["PUT"]
@@ -47036,94 +52143,625 @@ def approve_host_withdrawal(
 ):
 
     try:
-        users = load_json_file("users.json", [])
-        host = next((user for user in users if int(user.get("id", 0)) == host_id), None)
-        if not host:
-            return jsonify({"success": False, "message": "Host not found."}), 404
 
-        with eventwaa_file_lock("host_wallet_finalization"):
-            wallets = load_host_wallets()
-            wallet = None
-            withdrawal = None
-            for candidate in wallets:
-                if int(candidate.get("hostId", 0)) == host_id:
-                    wallet = candidate
-                    for item in candidate.get("withdrawals", []):
-                        if int(item.get("id", 0)) == withdrawal_id:
-                            withdrawal = item
-                            break
-                    break
+        # ====================================================
+        # LOAD HOST FROM POSTGRESQL
+        # ====================================================
 
-            if not wallet or not withdrawal:
-                return jsonify({"success": False, "message": "Withdrawal not found."}), 404
+        conn = get_db_connection()
 
-            if withdrawal.get("status") != "pending":
-                return jsonify({"success": False, "message": "This withdrawal has already been processed.", "status": withdrawal.get("status")}), 400
+        try:
 
-            if withdrawal.get("flutterwaveTransferId"):
-                return jsonify({"success": False, "message": "Flutterwave transfer already exists.", "flutterwaveTransferId": withdrawal.get("flutterwaveTransferId")}), 409
+            cur = conn.cursor()
 
-            amount = int(withdrawal.get("amount", 0) or 0)
+            cur.execute(
+                """
+                SELECT *
+                FROM users
+                WHERE id = %s
+                LIMIT 1
+                """,
+                (host_id,)
+            )
+
+            host_row = cur.fetchone()
+
+            if not host_row:
+
+                conn.rollback()
+
+                return jsonify({
+                    "success": False,
+                    "message": "Host not found."
+                }), 404
+
+            # =================================================
+            # LOCK WITHDRAWAL + HOST WALLET
+            #
+            # This prevents two admins from approving the
+            # same withdrawal simultaneously.
+            # =================================================
+
+            cur.execute(
+                """
+                SELECT
+                    w.*,
+                    hw.id AS host_wallet_id,
+                    hw.available_balance,
+                    hw.pending_balance
+                FROM withdrawals w
+                JOIN host_wallets hw
+                    ON hw.id = w.wallet_id
+                WHERE
+                    w.id = %s
+                    AND hw.user_id = %s
+                FOR UPDATE OF w, hw
+                """,
+                (
+                    withdrawal_id,
+                    host_id
+                )
+            )
+
+            withdrawal_row = cur.fetchone()
+
+            if not withdrawal_row:
+
+                conn.rollback()
+
+                return jsonify({
+                    "success": False,
+                    "message": "Withdrawal not found."
+                }), 404
+
+            # =================================================
+            # CONVERT ROW
+            # =================================================
+
+            if hasattr(withdrawal_row, "keys"):
+
+                withdrawal = dict(
+                    withdrawal_row
+                )
+
+                withdrawal_status = str(
+                    withdrawal.get("status", "")
+                ).lower()
+
+                amount = int(
+                    withdrawal.get("amount", 0)
+                    or 0
+                )
+
+                pending_balance = int(
+                    withdrawal.get("pending_balance", 0)
+                    or 0
+                )
+
+                existing_provider_reference = (
+                    withdrawal.get(
+                        "provider_reference"
+                    )
+                )
+
+                metadata = (
+                    withdrawal.get("metadata")
+                    or {}
+                )
+
+            else:
+
+                columns = [
+                    desc[0]
+                    for desc in cur.description
+                ]
+
+                withdrawal = dict(
+                    zip(
+                        columns,
+                        withdrawal_row
+                    )
+                )
+
+                withdrawal_status = str(
+                    withdrawal.get("status", "")
+                ).lower()
+
+                amount = int(
+                    withdrawal.get("amount", 0)
+                    or 0
+                )
+
+                pending_balance = int(
+                    withdrawal.get("pending_balance", 0)
+                    or 0
+                )
+
+                existing_provider_reference = (
+                    withdrawal.get(
+                        "provider_reference"
+                    )
+                )
+
+                metadata = (
+                    withdrawal.get("metadata")
+                    or {}
+                )
+
+            # =================================================
+            # VALIDATE WITHDRAWAL
+            # =================================================
+
+            if withdrawal_status != "pending":
+
+                conn.rollback()
+
+                return jsonify({
+                    "success": False,
+                    "message":
+                        "This withdrawal has already been processed.",
+                    "status":
+                        withdrawal_status
+                }), 400
+
+            if existing_provider_reference:
+
+                conn.rollback()
+
+                return jsonify({
+                    "success": False,
+                    "message":
+                        "Flutterwave transfer already exists.",
+                    "flutterwaveTransferId":
+                        existing_provider_reference
+                }), 409
+
             if amount <= 0:
-                return jsonify({"success": False, "message": "Invalid withdrawal amount."}), 400
 
-            if int(wallet.get("pendingPayouts", 0) or 0) < amount:
-                return jsonify({"success": False, "message": "Wallet pending payout balance is inconsistent."}), 400
+                conn.rollback()
 
-            withdrawal["status"] = "processing"
-            withdrawal["providerStatus"] = "pending"
-            withdrawal["approvedAt"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            save_host_wallets(wallets)
+                return jsonify({
+                    "success": False,
+                    "message":
+                        "Invalid withdrawal amount."
+                }), 400
+
+            if pending_balance < amount:
+
+                conn.rollback()
+
+                return jsonify({
+                    "success": False,
+                    "message":
+                        "Wallet pending payout balance is inconsistent."
+                }), 400
+
+            # =================================================
+            # PREPARE LEGACY-SHAPED WITHDRAWAL FOR THE
+            # EXISTING FLUTTERWAVE TRANSFER HELPER
+            # =================================================
+
+            if not isinstance(metadata, dict):
+                metadata = {}
+
+            withdrawal_payload = dict(
+                withdrawal
+            )
+
+            withdrawal_payload.update({
+                "id":
+                    withdrawal_id,
+
+                "hostId":
+                    host_id,
+
+                "amount":
+                    amount,
+
+                "status":
+                    "processing",
+
+                "providerStatus":
+                    "pending",
+
+                "approvedAt":
+                    datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+            })
+
+            # Preserve existing metadata fields.
+            withdrawal_payload.update(
+                metadata
+            )
+
+            # =================================================
+            # MARK PROCESSING IN DATABASE
+            #
+            # IMPORTANT:
+            # We do NOT change available/pending balances here.
+            #
+            # The amount is already reserved in pending_balance
+            # from withdrawal creation.
+            # =================================================
+
+            metadata.update({
+                "providerStatus":
+                    "pending",
+
+                "approvedAt":
+                    datetime.now().isoformat()
+            })
+
+            cur.execute(
+                """
+                UPDATE withdrawals
+                SET
+                    status = 'processing',
+                    metadata = %s::jsonb
+                WHERE id = %s
+                """,
+                (
+                    json.dumps(
+                        metadata,
+                        default=str
+                    ),
+                    withdrawal_id
+                )
+            )
+
+            conn.commit()
+
+        except Exception:
+
+            conn.rollback()
+            raise
+
+        finally:
+
+            try:
+                cur.close()
+            except Exception:
+                pass
+
+            conn.close()
+
+        # ====================================================
+        # INITIATE FLUTTERWAVE TRANSFER
+        #
+        # This happens AFTER the PostgreSQL state has been
+        # changed to processing.
+        # ====================================================
 
         transfer_result = initiate_host_flutterwave_transfer(
-            withdrawal,
+            withdrawal_payload,
             host_id,
             withdrawal_id,
-            host.get("name", "EventWaa Host")
+            host_row.get("name", "EventWaa Host")
+            if hasattr(host_row, "get")
+            else "EventWaa Host"
         )
 
-        if not transfer_result.get("success", False):
-            with eventwaa_file_lock("host_wallet_finalization"):
-                wallets = load_host_wallets()
-                wallet = next((candidate for candidate in wallets if int(candidate.get("hostId", 0)) == host_id), None)
-                if wallet:
-                    for item in wallet.get("withdrawals", []):
-                        if int(item.get("id", 0)) == withdrawal_id:
-                            item["providerStatus"] = "unknown"
-                            item["status"] = "processing"
-                            item["failureReason"] = transfer_result.get("message") or "Flutterwave transfer request was inconclusive."
-                            break
-                    save_host_wallets(wallets)
-            return jsonify({"success": True, "message": transfer_result.get("message", "Flutterwave payout is being reconciled."), "status": "processing"}), 202
+        # ====================================================
+        # FLUTTERWAVE REQUEST FAILED / INCONCLUSIVE
+        #
+        # Do NOT return the withdrawal to pending.
+        #
+        # The transfer may have been accepted by Flutterwave
+        # even if our HTTP request did not receive a clean
+        # response. The status-check/webhook path will reconcile
+        # it.
+        # ====================================================
 
-        flutterwave_transfer_id = transfer_result.get("transferId")
+        if not transfer_result.get(
+            "success",
+            False
+        ):
+
+            conn = get_db_connection()
+
+            try:
+
+                cur = conn.cursor()
+
+                cur.execute(
+                    """
+                    SELECT metadata
+                    FROM withdrawals
+                    WHERE id = %s
+                    FOR UPDATE
+                    """,
+                    (withdrawal_id,)
+                )
+
+                row = cur.fetchone()
+
+                current_metadata = {}
+
+                if row:
+
+                    if hasattr(row, "get"):
+                        current_metadata = (
+                            row.get("metadata")
+                            or {}
+                        )
+                    else:
+                        current_metadata = (
+                            row[0]
+                            or {}
+                        )
+
+                if not isinstance(
+                    current_metadata,
+                    dict
+                ):
+                    current_metadata = {}
+
+                current_metadata.update({
+                    "providerStatus":
+                        "unknown",
+
+                    "failureReason":
+                        transfer_result.get(
+                            "message"
+                        )
+                        or
+                        "Flutterwave transfer request was inconclusive.",
+
+                    "lastTransferAttemptAt":
+                        datetime.now().isoformat()
+                })
+
+                cur.execute(
+                    """
+                    UPDATE withdrawals
+                    SET
+                        status = 'processing',
+                        metadata = %s::jsonb
+                    WHERE id = %s
+                    """,
+                    (
+                        json.dumps(
+                            current_metadata,
+                            default=str
+                        ),
+                        withdrawal_id
+                    )
+                )
+
+                conn.commit()
+
+            except Exception:
+
+                conn.rollback()
+                raise
+
+            finally:
+
+                try:
+                    cur.close()
+                except Exception:
+                    pass
+
+                conn.close()
+
+            return jsonify({
+                "success": True,
+                "message":
+                    transfer_result.get(
+                        "message",
+                        "Flutterwave payout is being reconciled."
+                    ),
+                "status": "processing"
+            }), 202
+
+        # ====================================================
+        # GET FLUTTERWAVE TRANSFER ID
+        # ====================================================
+
+        flutterwave_transfer_id = (
+            transfer_result.get(
+                "transferId"
+            )
+        )
+
         if not flutterwave_transfer_id:
-            return jsonify({"success": False, "message": "Flutterwave did not return a transfer ID."}), 502
 
-        with eventwaa_file_lock("host_wallet_finalization"):
-            wallets = load_host_wallets()
-            wallet = next((candidate for candidate in wallets if int(candidate.get("hostId", 0)) == host_id), None)
-            if wallet:
-                for item in wallet.get("withdrawals", []):
-                    if int(item.get("id", 0)) == withdrawal_id:
-                        item["flutterwaveTransferId"] = flutterwave_transfer_id
-                        item["transferReference"] = transfer_result.get("reference")
-                        item["flutterwaveStatus"] = str(transfer_result.get("flutterwaveStatus", "PENDING")).upper()
-                        item["providerStatus"] = str(transfer_result.get("flutterwaveStatus", "PENDING")).upper()
-                        item["status"] = "processing"
-                        item["approvedAt"] = item.get("approvedAt") or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        break
-                save_host_wallets(wallets)
+            return jsonify({
+                "success": False,
+                "message":
+                    "Flutterwave did not return a transfer ID."
+            }), 502
 
-        create_notification(host_id, "Withdrawal Processing", f"Your UGX {amount:,} withdrawal is now being processed.", "withdrawal_processing", "/host-wallet")
+        flutterwave_reference = (
+            transfer_result.get(
+                "reference"
+            )
+        )
 
-        return jsonify({"success": True, "message": "Withdrawal approved and Flutterwave transfer initiated.", "status": "processing", "flutterwaveTransferId": flutterwave_transfer_id, "withdrawal": item if 'item' in locals() else withdrawal, "wallet": wallet}), 200
+        flutterwave_status = str(
+            transfer_result.get(
+                "flutterwaveStatus",
+                "PENDING"
+            )
+            or "PENDING"
+        ).upper()
+
+        # ====================================================
+        # SAVE FLUTTERWAVE TRANSFER DETAILS
+        #
+        # PostgreSQL only.
+        # ====================================================
+
+        conn = get_db_connection()
+
+        try:
+
+            cur = conn.cursor()
+
+            cur.execute(
+                """
+                SELECT metadata
+                FROM withdrawals
+                WHERE id = %s
+                FOR UPDATE
+                """,
+                (withdrawal_id,)
+            )
+
+            row = cur.fetchone()
+
+            metadata = {}
+
+            if row:
+
+                if hasattr(row, "get"):
+                    metadata = (
+                        row.get("metadata")
+                        or {}
+                    )
+                else:
+                    metadata = (
+                        row[0]
+                        or {}
+                    )
+
+            if not isinstance(
+                metadata,
+                dict
+            ):
+                metadata = {}
+
+            metadata.update({
+                "flutterwaveTransferId":
+                    str(
+                        flutterwave_transfer_id
+                    ),
+
+                "transferId":
+                    str(
+                        flutterwave_transfer_id
+                    ),
+
+                "transferReference":
+                    flutterwave_reference,
+
+                "flutterwaveReference":
+                    flutterwave_reference,
+
+                "flutterwaveStatus":
+                    flutterwave_status,
+
+                "providerStatus":
+                    flutterwave_status,
+
+                "approvedAt":
+                    metadata.get(
+                        "approvedAt"
+                    )
+                    or
+                    datetime.now().isoformat(),
+
+                "lastTransferAttemptAt":
+                    datetime.now().isoformat()
+            })
+
+            cur.execute(
+                """
+                UPDATE withdrawals
+                SET
+                    provider_reference = %s,
+                    status = 'processing',
+                    metadata = %s::jsonb
+                WHERE id = %s
+                """,
+                (
+                    str(
+                        flutterwave_transfer_id
+                    ),
+                    json.dumps(
+                        metadata,
+                        default=str
+                    ),
+                    withdrawal_id
+                )
+            )
+
+            conn.commit()
+
+        except Exception:
+
+            conn.rollback()
+            raise
+
+        finally:
+
+            try:
+                cur.close()
+            except Exception:
+                pass
+
+            conn.close()
+
+        # ====================================================
+        # NOTIFY HOST
+        # ====================================================
+
+        create_notification(
+            host_id,
+            "Withdrawal Processing",
+            f"Your UGX {amount:,} withdrawal is now being processed.",
+            "withdrawal_processing",
+            "/host-wallet"
+        )
+
+        # ====================================================
+        # RETURN
+        # ====================================================
+
+        withdrawal_payload.update({
+            "status":
+                "processing",
+
+            "providerStatus":
+                flutterwave_status,
+
+            "flutterwaveTransferId":
+                str(
+                    flutterwave_transfer_id
+                ),
+
+            "transferReference":
+                flutterwave_reference
+        })
+
+        return jsonify({
+            "success": True,
+            "message":
+                "Withdrawal approved and Flutterwave transfer initiated.",
+            "status":
+                "processing",
+            "flutterwaveTransferId":
+                str(
+                    flutterwave_transfer_id
+                ),
+            "withdrawal":
+                withdrawal_payload
+        }), 200
 
     except Exception as e:
-        print("APPROVE HOST WITHDRAWAL ERROR:", str(e))
-        return jsonify({"success": False, "message": "Unable to approve withdrawal."}), 500
 
+        print(
+            "APPROVE HOST WITHDRAWAL ERROR:",
+            str(e)
+        )
 
+        return jsonify({
+            "success": False,
+            "message":
+                "Unable to approve withdrawal."
+        }), 500
+    
 # ============================================================
 # FLUTTERWAVE TRANSFER STATUS FALLBACK
 # ============================================================
@@ -47137,6 +52775,8 @@ def get_host_withdrawal_transfer_status(
     host_id,
     withdrawal_id
 ):
+
+    conn = None
 
     try:
 
@@ -47152,127 +52792,93 @@ def get_host_withdrawal_transfer_status(
                     "Flutterwave secret key is not configured."
             }), 500
 
-
         # ====================================================
-        # LOAD HOST WALLETS
-        # ====================================================
-
-        wallets = load_host_wallets()
-
-
-        target_wallet = None
-        target_withdrawal = None
-
-
-        for wallet in wallets:
-
-            try:
-
-                wallet_host_id = int(
-                    wallet.get(
-                        "hostId",
-                        0
-                    )
-                )
-
-            except (
-                TypeError,
-                ValueError
-            ):
-
-                wallet_host_id = 0
-
-
-            if wallet_host_id != host_id:
-                continue
-
-
-            target_wallet = wallet
-
-
-            for withdrawal in wallet.get(
-                "withdrawals",
-                []
-            ):
-
-                try:
-
-                    current_withdrawal_id = int(
-                        withdrawal.get(
-                            "id",
-                            0
-                        )
-                    )
-
-                except (
-                    TypeError,
-                    ValueError
-                ):
-
-                    current_withdrawal_id = 0
-
-
-                if current_withdrawal_id == withdrawal_id:
-
-                    target_withdrawal = withdrawal
-
-                    break
-
-
-            break
-
-
-        # ====================================================
-        # WITHDRAWAL NOT FOUND
+        # LOAD WITHDRAWAL DIRECTLY FROM POSTGRESQL
         # ====================================================
 
-        if not target_wallet or not target_withdrawal:
+        conn = get_db_connection()
+        conn.autocommit = False
 
-            return jsonify({
+        cur = conn.cursor()
 
-                "success": False,
-
-                "message":
-                    "Withdrawal not found."
-
-            }), 404
-
-
-        # ====================================================
-        # CHECK TRANSFER ID
-        # ====================================================
-
-        transfer_id = (
-            target_withdrawal.get(
-                "flutterwaveTransferId"
+        cur.execute(
+            """
+            SELECT
+                w.id,
+                w.wallet_id,
+                w.amount,
+                w.status,
+                w.provider_reference,
+                w.metadata,
+                hw.user_id AS host_id
+            FROM withdrawals w
+            JOIN host_wallets hw
+                ON hw.id = w.wallet_id
+            WHERE w.id = %s
+              AND hw.user_id = %s
+            FOR UPDATE OF w
+            """,
+            (
+                int(withdrawal_id),
+                int(host_id)
             )
         )
 
+        withdrawal_row = cur.fetchone()
+
+        if not withdrawal_row:
+
+            conn.rollback()
+
+            return jsonify({
+                "success": False,
+                "message": "Withdrawal not found."
+            }), 404
+
+        (
+            db_withdrawal_id,
+            wallet_id,
+            amount,
+            current_status,
+            provider_reference,
+            metadata,
+            db_host_id
+        ) = withdrawal_row
+
+        amount = float(amount or 0)
+
+        if not isinstance(metadata, dict):
+            metadata = {}
+
+        # ====================================================
+        # GET FLUTTERWAVE TRANSFER ID
+        # ====================================================
+
+        transfer_id = (
+            metadata.get("flutterwaveTransferId")
+            or metadata.get("flutterwave_transfer_id")
+        )
+
+        if not transfer_id and provider_reference:
+            transfer_id = str(provider_reference)
 
         if not transfer_id:
 
+            conn.rollback()
+
             return jsonify({
-
                 "success": False,
-
                 "message":
                     "This withdrawal has no Flutterwave transfer ID.",
-
                 "status":
-                    target_withdrawal.get(
-                        "status",
-                        "pending"
-                    )
-
+                    current_status or "pending"
             }), 200
-
 
         # ====================================================
         # ASK FLUTTERWAVE FOR CURRENT STATUS
         # ====================================================
 
         headers = {
-
             "Authorization":
                 f"Bearer {FLW_SECRET_KEY}",
 
@@ -47281,32 +52887,18 @@ def get_host_withdrawal_transfer_status(
 
             "Accept":
                 "application/json"
-
         }
 
-
         response = requests.get(
-
-            f"{FLW_API_URL}/transfers/"
-            f"{transfer_id}",
-
+            f"{FLW_API_URL}/transfers/{transfer_id}",
             headers=headers,
-
             timeout=30
-
         )
 
-
         try:
-
-            flutterwave_data = (
-                response.json()
-            )
-
+            flutterwave_data = response.json()
         except Exception:
-
             flutterwave_data = {}
-
 
         print(
             "FLUTTERWAVE TRANSFER STATUS:",
@@ -47318,54 +52910,37 @@ def get_host_withdrawal_transfer_status(
             flutterwave_data
         )
 
-
         # ====================================================
         # FLUTTERWAVE ERROR
         # ====================================================
 
         if response.status_code >= 400:
 
+            conn.rollback()
+
             return jsonify({
-
                 "success": False,
-
                 "message":
                     (
-                        flutterwave_data.get(
-                            "message"
-                        )
-                        or
-                        "Unable to retrieve transfer status."
+                        flutterwave_data.get("message")
+                        or "Unable to retrieve transfer status."
                     ),
-
                 "status":
-                    target_withdrawal.get(
-                        "status",
-                        "processing"
-                    )
-
+                    current_status or "processing"
             }), 502
-
 
         # ====================================================
         # GET TRANSFER DATA
         # ====================================================
 
         transfer_data = (
-            flutterwave_data.get(
-                "data"
-            )
+            flutterwave_data.get("data")
             or {}
         )
 
-
         flutterwave_status = str(
-            transfer_data.get(
-                "status",
-                ""
-            )
+            transfer_data.get("status", "")
         ).strip().lower()
-
 
         # ====================================================
         # MAP FLUTTERWAVE STATUS TO EVENTWAA STATUS
@@ -47379,7 +52954,6 @@ def get_host_withdrawal_transfer_status(
 
             eventwaa_status = "completed"
 
-
         elif flutterwave_status in (
             "failed",
             "cancelled",
@@ -47388,74 +52962,208 @@ def get_host_withdrawal_transfer_status(
 
             eventwaa_status = "failed"
 
-
         else:
 
             eventwaa_status = "processing"
 
+        checked_at = datetime.utcnow().isoformat()
 
-        checked_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # ====================================================
+        # FINAL STATUS
+        # ====================================================
 
-        if eventwaa_status in ("completed", "failed"):
+        if eventwaa_status in (
+            "completed",
+            "failed"
+        ):
+
+            conn.rollback()
+            conn.close()
+            conn = None
+
             finalization = finalize_host_withdrawal(
                 host_id,
                 withdrawal_id,
-                "successful" if eventwaa_status == "completed" else "failed",
+                (
+                    "successful"
+                    if eventwaa_status == "completed"
+                    else "failed"
+                ),
                 flutterwave_transfer_id=transfer_id,
-                flutterwave_reference=transfer_data.get("reference"),
+                flutterwave_reference=transfer_data.get(
+                    "reference"
+                ),
                 flutterwave_response=flutterwave_data
             )
+
             if not finalization.get("success"):
-                return jsonify(finalization), 404
 
-            target_withdrawal = finalization.get("withdrawal", target_withdrawal)
-            eventwaa_status = finalization.get("status", eventwaa_status)
-            if not finalization.get("alreadyFinalized"):
-                with eventwaa_file_lock("host_wallet_finalization"):
-                    wallets = load_host_wallets()
-                    for wallet in wallets:
-                        if int(wallet.get("hostId", 0)) != host_id:
-                            continue
-                        for withdrawal in wallet.get("withdrawals", []):
-                            if int(withdrawal.get("id", 0)) == withdrawal_id:
-                                withdrawal["flutterwaveStatus"] = flutterwave_status
-                                withdrawal["lastCheckedAt"] = checked_at
-                                if eventwaa_status == "failed":
-                                    withdrawal["failureReason"] = (
-                                        flutterwave_data.get("message")
-                                        or transfer_data.get("complete_message")
-                                        or "Flutterwave transfer failed."
-                                    )
-                                target_withdrawal = withdrawal
-                                break
-                        save_host_wallets(wallets)
-                        break
+                return jsonify(
+                    finalization
+                ), 404
+
+            # ------------------------------------------------
+            # Update provider/status metadata only.
+            # Accounting itself was already finalized by
+            # finalize_host_withdrawal().
+            # ------------------------------------------------
+
+            conn = get_db_connection()
+            conn.autocommit = False
+
+            cur = conn.cursor()
+
+            cur.execute(
+                """
+                SELECT metadata
+                FROM withdrawals
+                WHERE id = %s
+                  AND wallet_id = %s
+                FOR UPDATE
+                """,
+                (
+                    int(withdrawal_id),
+                    int(wallet_id)
+                )
+            )
+
+            latest_row = cur.fetchone()
+
+            latest_metadata = {}
+
+            if latest_row and isinstance(
+                latest_row[0],
+                dict
+            ):
+                latest_metadata = dict(
+                    latest_row[0]
+                )
+
+            latest_metadata[
+                "flutterwaveStatus"
+            ] = flutterwave_status
+
+            latest_metadata[
+                "lastCheckedAt"
+            ] = checked_at
+
+            if eventwaa_status == "failed":
+
+                latest_metadata[
+                    "failureReason"
+                ] = (
+                    flutterwave_data.get("message")
+                    or transfer_data.get(
+                        "complete_message"
+                    )
+                    or "Flutterwave transfer failed."
+                )
+
+            cur.execute(
+                """
+                UPDATE withdrawals
+                SET
+                    metadata = %s
+                WHERE id = %s
+                """,
+                (
+                    Jsonb(latest_metadata),
+                    int(withdrawal_id)
+                )
+            )
+
+            conn.commit()
+
+            target_withdrawal = {
+                "id": int(withdrawal_id),
+                "hostId": int(host_id),
+                "amount": amount,
+                "status": eventwaa_status,
+                "providerStatus": eventwaa_status,
+                "flutterwaveTransferId": str(
+                    transfer_id
+                ),
+                "flutterwaveReference": (
+                    transfer_data.get("reference")
+                    or provider_reference
+                ),
+                "flutterwaveStatus":
+                    flutterwave_status,
+                "lastCheckedAt":
+                    checked_at
+            }
+
+            if eventwaa_status == "failed":
+                target_withdrawal[
+                    "failureReason"
+                ] = latest_metadata.get(
+                    "failureReason"
+                )
+
+        # ====================================================
+        # STILL PROCESSING / PENDING
+        # ====================================================
+
         else:
-            with eventwaa_file_lock("host_wallet_finalization"):
-                wallets = load_host_wallets()
-                target_wallet = None
-                target_withdrawal = None
-                for wallet in wallets:
-                    if int(wallet.get("hostId", 0)) != host_id:
-                        continue
-                    target_wallet = wallet
-                    for withdrawal in wallet.get("withdrawals", []):
-                        if int(withdrawal.get("id", 0)) == withdrawal_id:
-                            target_withdrawal = withdrawal
-                            break
-                    break
 
-                if not target_wallet or not target_withdrawal:
-                    return jsonify({"success": False, "message": "Withdrawal not found."}), 404
+            metadata[
+                "flutterwaveStatus"
+            ] = flutterwave_status or "processing"
 
-                if not target_withdrawal.get("accountingFinalized") and target_withdrawal.get("status") not in ("completed", "failed"):
-                    target_withdrawal["status"] = "processing"
-                    target_withdrawal["providerStatus"] = flutterwave_status or "processing"
-                target_withdrawal["flutterwaveStatus"] = flutterwave_status
-                target_withdrawal["lastCheckedAt"] = checked_at
-                eventwaa_status = target_withdrawal.get("status", "processing")
-                save_host_wallets(wallets)
+            metadata[
+                "lastCheckedAt"
+            ] = checked_at
 
+            # Do not touch balances here.
+            # The withdrawal remains processing until
+            # Flutterwave reports a terminal state.
+
+            if str(current_status or "").lower() not in (
+                "completed",
+                "failed"
+            ):
+                current_status = "processing"
+
+            metadata[
+                "providerStatus"
+            ] = flutterwave_status or "processing"
+
+            cur.execute(
+                """
+                UPDATE withdrawals
+                SET
+                    status = %s,
+                    metadata = %s
+                WHERE id = %s
+                """,
+                (
+                    current_status,
+                    Jsonb(metadata),
+                    int(withdrawal_id)
+                )
+            )
+
+            conn.commit()
+
+            target_withdrawal = {
+                "id": int(withdrawal_id),
+                "hostId": int(host_id),
+                "amount": amount,
+                "status": current_status,
+                "providerStatus":
+                    flutterwave_status or "processing",
+                "flutterwaveTransferId":
+                    str(transfer_id),
+                "flutterwaveReference":
+                    (
+                        transfer_data.get("reference")
+                        or provider_reference
+                    ),
+                "flutterwaveStatus":
+                    flutterwave_status,
+                "lastCheckedAt":
+                    checked_at
+            }
 
         # ====================================================
         # RESPONSE
@@ -47466,13 +53174,13 @@ def get_host_withdrawal_transfer_status(
             "success": True,
 
             "withdrawalId":
-                withdrawal_id,
+                int(withdrawal_id),
 
             "hostId":
-                host_id,
+                int(host_id),
 
             "transferId":
-                transfer_id,
+                str(transfer_id),
 
             "status":
                 eventwaa_status,
@@ -47485,23 +53193,26 @@ def get_host_withdrawal_transfer_status(
 
         }), 200
 
-
     except Exception as e:
+
+        if conn:
+            conn.rollback()
 
         print(
             "TRANSFER STATUS FALLBACK ERROR:",
             str(e)
         )
 
-
         return jsonify({
-
             "success": False,
-
             "message":
                 "Unable to check transfer status."
-
         }), 500
+
+    finally:
+
+        if conn:
+            conn.close()
 
 # ============================================================
 # FLUTTERWAVE TRANSFER WEBHOOK
@@ -47523,18 +53234,13 @@ def flutterwave_transfer_webhook():
             silent=True
         ) or {}
 
-
         print(
             "FLUTTERWAVE TRANSFER WEBHOOK:",
             data
         )
 
-
         # ====================================================
         # VERIFY WEBHOOK SECRET HASH
-        #
-        # Flutterwave sends the webhook secret hash in
-        # the request headers.
         # ====================================================
 
         webhook_hash = request.headers.get(
@@ -47542,11 +53248,9 @@ def flutterwave_transfer_webhook():
             ""
         ).strip()
 
-
         if (
             FLW_SECRET_HASH
-            and
-            webhook_hash != FLW_SECRET_HASH
+            and webhook_hash != FLW_SECRET_HASH
         ):
 
             print(
@@ -47554,59 +53258,23 @@ def flutterwave_transfer_webhook():
             )
 
             return jsonify({
-
-                "success":
-                    False,
-
-                "message":
-                    "Invalid webhook signature."
-
+                "success": False,
+                "message": "Invalid webhook signature."
             }), 401
 
-
         # ====================================================
-        # GET EVENT TYPE
+        # TRANSFER DATA
         # ====================================================
 
-        event_type = str(
-            data.get(
-                "event.type",
-                data.get(
-                    "type",
-                    ""
-                )
-            )
-        ).lower()
-
-
-        # Flutterwave transfer webhook data may be contained
-        # inside "data".
         transfer = (
-            data.get(
-                "data"
-            )
+            data.get("data")
             or {}
         )
 
-
-        # ====================================================
-        # TRANSFER ID
-        # ====================================================
-
         transfer_id = (
-
-            transfer.get(
-                "id"
-            )
-
-            or
-
-            transfer.get(
-                "transfer_id"
-            )
-
+            transfer.get("id")
+            or transfer.get("transfer_id")
         )
-
 
         if not transfer_id:
 
@@ -47615,177 +53283,313 @@ def flutterwave_transfer_webhook():
             )
 
             return jsonify({
-
-                "success":
-                    True,
-
-                "message":
-                    "Webhook received."
-
+                "success": True,
+                "message": "Webhook received."
             }), 200
 
+        transfer_id = str(
+            transfer_id
+        )
 
-        # ====================================================
-        # TRANSFER STATUS
-        # ====================================================
+        transfer_reference = str(
+            transfer.get(
+                "reference",
+                ""
+            )
+            or ""
+        )
 
         transfer_status = str(
-
             transfer.get(
                 "status",
                 ""
             )
-
+            or ""
         ).upper()
 
-
         # ====================================================
-        # FIND HOST OR ADMIN WITHDRAWAL
+        # FIND WITHDRAWAL DIRECTLY IN POSTGRESQL
+        #
+        # DO NOT use:
+        #
+        #     load_host_wallets()
+        #     load_wallet()
+        #
+        # The webhook must use the database as the
+        # authoritative source.
         # ====================================================
 
-        wallets = load_host_wallets()
-        admin_wallet = load_wallet()
+        conn = get_db_connection()
 
-        matched_kind = None
-        matched_host_id = None
-        matched_withdrawal_id = None
+        try:
 
-        for wallet in wallets:
-            for withdrawal in wallet.get("withdrawals", []):
-                saved_transfer_id = str(withdrawal.get("flutterwaveTransferId", ""))
-                saved_transfer_reference = str(withdrawal.get("transferReference", ""))
-                withdrawal_reference = str(withdrawal.get("reference", ""))
-                webhook_reference = str(transfer.get("reference", ""))
+            cur = conn.cursor()
 
-                if (
-                    saved_transfer_id == str(transfer_id)
-                    or (
-                        bool(webhook_reference)
-                        and webhook_reference in (withdrawal_reference, saved_transfer_reference)
+            # ------------------------------------------------
+            # First try Flutterwave transfer ID/reference.
+            # ------------------------------------------------
+
+            cur.execute(
+                """
+                SELECT
+                    w.id,
+                    w.wallet_id,
+                    w.user_id,
+                    w.amount,
+                    w.status,
+                    w.provider_reference,
+                    w.metadata,
+                    hw.user_id AS host_id
+                FROM withdrawals w
+                LEFT JOIN host_wallets hw
+                    ON hw.id = w.wallet_id
+                WHERE
+                    w.provider_reference = %s
+                    OR (
+                        w.metadata IS NOT NULL
+                        AND (
+                            w.metadata->>'flutterwaveTransferId' = %s
+                            OR w.metadata->>'transferId' = %s
+                            OR w.metadata->>'flutterwaveReference' = %s
+                            OR w.metadata->>'transferReference' = %s
+                        )
                     )
-                ):
-                    matched_kind = "host"
-                    matched_host_id = int(wallet.get("hostId", 0))
-                    matched_withdrawal_id = int(withdrawal.get("id", 0))
-                    break
-
-            if matched_kind is not None:
-                break
-
-        if matched_kind is None:
-            for withdrawal in admin_wallet.get("withdrawals", []):
-                saved_transfer_id = str(withdrawal.get("flutterwaveTransferId", ""))
-                saved_transfer_reference = str(withdrawal.get("transferReference", ""))
-                withdrawal_reference = str(withdrawal.get("reference", ""))
-                webhook_reference = str(transfer.get("reference", ""))
-
-                if (
-                    saved_transfer_id == str(transfer_id)
-                    or (
-                        bool(webhook_reference)
-                        and webhook_reference in (withdrawal_reference, saved_transfer_reference)
-                    )
-                ):
-                    matched_kind = "admin"
-                    matched_withdrawal_id = int(withdrawal.get("id", 0))
-                    break
-
-        # ====================================================
-        # UNKNOWN TRANSFER
-        # ====================================================
-
-        if matched_kind is None:
-            print(
-                "UNKNOWN FLUTTERWAVE TRANSFER:",
-                transfer_id
+                ORDER BY w.id DESC
+                LIMIT 1
+                """,
+                (
+                    transfer_id,
+                    transfer_id,
+                    transfer_id,
+                    transfer_reference,
+                    transfer_reference
+                )
             )
 
-            return jsonify({
+            row = cur.fetchone()
 
-                "success":
-                    True,
+            # ------------------------------------------------
+            # Some older withdrawals may not have the
+            # provider reference saved yet. In that case
+            # search by metadata reference only.
+            # ------------------------------------------------
 
-                "message":
-                    "Transfer not associated with EventWaa."
+            if not row and transfer_reference:
 
-            }), 200
+                cur.execute(
+                    """
+                    SELECT
+                        w.id,
+                        w.wallet_id,
+                        w.user_id,
+                        w.amount,
+                        w.status,
+                        w.provider_reference,
+                        w.metadata,
+                        hw.user_id AS host_id
+                    FROM withdrawals w
+                    LEFT JOIN host_wallets hw
+                        ON hw.id = w.wallet_id
+                    WHERE
+                        w.metadata IS NOT NULL
+                        AND (
+                            w.metadata->>'reference' = %s
+                            OR w.metadata->>'transferReference' = %s
+                            OR w.metadata->>'flutterwaveReference' = %s
+                        )
+                    ORDER BY w.id DESC
+                    LIMIT 1
+                    """,
+                    (
+                        transfer_reference,
+                        transfer_reference,
+                        transfer_reference
+                    )
+                )
 
+                row = cur.fetchone()
+
+            if not row:
+
+                conn.rollback()
+
+                print(
+                    "UNKNOWN FLUTTERWAVE TRANSFER:",
+                    transfer_id,
+                    transfer_reference
+                )
+
+                return jsonify({
+                    "success": True,
+                    "message":
+                        "Transfer not associated with EventWaa."
+                }), 200
+
+            # ------------------------------------------------
+            # Convert row safely.
+            # ------------------------------------------------
+
+            if hasattr(row, "keys"):
+
+                withdrawal_id = row["id"]
+                host_id = row.get("host_id")
+                current_status = row.get("status")
+                metadata = row.get("metadata") or {}
+
+            else:
+
+                withdrawal_id = row[0]
+                host_id = row[7]
+                current_status = row[4]
+                metadata = row[6] or {}
+
+            # ------------------------------------------------
+            # Persist latest Flutterwave transfer information.
+            #
+            # This does NOT change wallet balances.
+            # ------------------------------------------------
+
+            if not isinstance(metadata, dict):
+                metadata = {}
+
+            metadata.update({
+                "flutterwaveTransferId":
+                    transfer_id,
+
+                "transferId":
+                    transfer_id,
+
+                "flutterwaveReference":
+                    transfer_reference,
+
+                "transferReference":
+                    transfer_reference,
+
+                "flutterwaveStatus":
+                    transfer_status,
+
+                "providerStatus":
+                    transfer_status,
+
+                "lastWebhookAt":
+                    datetime.now().isoformat(),
+
+                "flutterwaveResponse":
+                    data
+            })
+
+            cur.execute(
+                """
+                UPDATE withdrawals
+                SET
+                    provider_reference = %s,
+                    metadata = %s::jsonb
+                WHERE id = %s
+                """,
+                (
+                    transfer_id,
+                    json.dumps(
+                        metadata,
+                        default=str
+                    ),
+                    withdrawal_id
+                )
+            )
+
+            conn.commit()
+
+        except Exception:
+
+            conn.rollback()
+            raise
+
+        finally:
+
+            try:
+                cur.close()
+            except Exception:
+                pass
+
+            conn.close()
 
         # ====================================================
-        # SUCCESSFUL
+        # SUCCESSFUL TRANSFER
+        #
+        # The finalizer owns all wallet accounting.
         # ====================================================
 
         if transfer_status == "SUCCESSFUL":
 
-            if matched_kind == "host":
+            if host_id is not None:
+
                 result = finalize_host_withdrawal(
-                    matched_host_id,
-                    matched_withdrawal_id,
+                    int(host_id),
+                    int(withdrawal_id),
                     "successful",
                     flutterwave_transfer_id=transfer_id,
-                    flutterwave_reference=transfer.get("reference"),
+                    flutterwave_reference=transfer_reference,
                     flutterwave_response=data
                 )
+
             else:
+
                 result = finalize_admin_withdrawal(
-                    matched_withdrawal_id,
+                    int(withdrawal_id),
                     "successful",
                     flutterwave_transfer_id=transfer_id,
-                    flutterwave_reference=transfer.get("reference"),
+                    flutterwave_reference=transfer_reference,
                     flutterwave_response=data
                 )
 
-            return jsonify(result), 200
-
+            return jsonify(
+                result
+            ), 200
 
         # ====================================================
-        # FAILED
+        # FAILED TRANSFER
         # ====================================================
 
         if transfer_status == "FAILED":
 
-            if matched_kind == "host":
+            if host_id is not None:
+
                 result = finalize_host_withdrawal(
-                    matched_host_id,
-                    matched_withdrawal_id,
+                    int(host_id),
+                    int(withdrawal_id),
                     "failed",
                     flutterwave_transfer_id=transfer_id,
-                    flutterwave_reference=transfer.get("reference"),
+                    flutterwave_reference=transfer_reference,
                     flutterwave_response=data
                 )
+
             else:
+
                 result = finalize_admin_withdrawal(
-                    matched_withdrawal_id,
+                    int(withdrawal_id),
                     "failed",
                     flutterwave_transfer_id=transfer_id,
-                    flutterwave_reference=transfer.get("reference"),
+                    flutterwave_reference=transfer_reference,
                     flutterwave_response=data
                 )
 
-            return jsonify(result), 200
-
+            return jsonify(
+                result
+            ), 200
 
         # ====================================================
         # PENDING / NEW / PROCESSING
+        #
+        # DO NOT touch wallet balances.
+        #
+        # The withdrawal remains reserved in pending balance.
         # ====================================================
 
-        # Do NOT alter wallet balances.
-        #
-        # The money remains reserved in pendingPayouts.
-
         return jsonify({
-
-            "success":
-                True,
-
-            "message":
-                "Transfer still processing.",
-
-            "status":
-                transfer_status
-
+            "success": True,
+            "message": "Transfer still processing.",
+            "status": transfer_status,
+            "withdrawalId": withdrawal_id
         }), 200
-
 
     except Exception as e:
 
@@ -47795,19 +53599,14 @@ def flutterwave_transfer_webhook():
         )
 
         return jsonify({
-
-            "success":
-                False,
-
-            "message":
-                "Webhook processing failed."
-
+            "success": False,
+            "message": "Webhook processing failed."
         }), 500
 
 # ============================================================
 # VERIFY HOST FLUTTERWAVE WITHDRAWAL
 #
-# This endpoint checks the actual Flutterwave transfer.
+# PostgreSQL-backed withdrawal verification.
 #
 # PROCESS:
 #
@@ -47817,17 +53616,24 @@ def flutterwave_transfer_webhook():
 #      ↓
 # SUCCESSFUL
 #      ↓
+# finalize_host_withdrawal()
+#      ↓
 # completed
 #
 # OR
 #
 # FAILED
 #      ↓
-# failed
+# finalize_host_withdrawal()
 #      ↓
-# return money to availableBalance
+# failed + funds returned
+#
+# NON-TERMINAL:
+#
+# NEW / PENDING
+#      ↓
+# PostgreSQL metadata update only
 # ============================================================
-
 @app.route(
     "/admin/host-withdrawals/verify/<int:host_id>/<int:withdrawal_id>",
     methods=["PUT"]
@@ -47837,789 +53643,577 @@ def verify_host_withdrawal(
     host_id,
     withdrawal_id
 ):
-
     return get_host_withdrawal_transfer_status(
         host_id,
         withdrawal_id
     )
-
+def get_host_withdrawal_transfer_status(
+    host_id,
+    withdrawal_id
+):
     try:
-
         # ====================================================
-        # CHECK FLUTTERWAVE CONFIGURATION
+        # CHECK FLUTTERWAVE SECRET KEY
         # ====================================================
-
         if not FLW_SECRET_KEY:
-
             return jsonify({
-
                 "success": False,
-
                 "message":
                     "Flutterwave secret key is not configured."
-
             }), 500
-
-
         # ====================================================
-        # LOAD HOST WALLETS
+        # LOAD WITHDRAWAL FROM POSTGRESQL
         # ====================================================
-
-        wallets = load_host_wallets()
-
-
-        # ====================================================
-        # FIND HOST WALLET
-        # ====================================================
-
-        host_wallet = None
-
-        for wallet in wallets:
-
-            try:
-
-                wallet_host_id = int(
-                    wallet.get(
-                        "hostId",
-                        0
-                    )
+        conn = get_db_connection()
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                """
+                SELECT
+                    id,
+                    user_id,
+                    wallet_id,
+                    amount,
+                    currency,
+                    status,
+                    method,
+                    provider,
+                    provider_reference,
+                    account_name,
+                    account_number,
+                    requested_at,
+                    processed_at,
+                    processed_by,
+                    failure_reason,
+                    idempotency_key,
+                    metadata
+                FROM withdrawals
+                WHERE id = %s
+                  AND user_id = %s
+                """,
+                (
+                    withdrawal_id,
+                    host_id
                 )
-
-            except (
-                TypeError,
-                ValueError
-            ):
-
-                wallet_host_id = 0
-
-
-            if wallet_host_id == host_id:
-
-                host_wallet = wallet
-
-                break
-
-
-        if not host_wallet:
-
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    "Host wallet not found."
-
-            }), 404
-
-
+            )
+            withdrawal_row = cur.fetchone()
+            cur.close()
+        finally:
+            conn.close()
         # ====================================================
-        # FIND WITHDRAWAL
+        # WITHDRAWAL NOT FOUND
         # ====================================================
-
-        withdrawal = None
-
-        for item in host_wallet.get(
-            "withdrawals",
-            []
-        ):
-
-            try:
-
-                item_id = int(
-                    item.get(
-                        "id",
-                        0
-                    )
-                )
-
-            except (
-                TypeError,
-                ValueError
-            ):
-
-                item_id = 0
-
-
-            if item_id == withdrawal_id:
-
-                withdrawal = item
-
-                break
-
-
-        if not withdrawal:
-
+        if not withdrawal_row:
             return jsonify({
-
                 "success": False,
-
                 "message":
                     "Withdrawal not found."
-
             }), 404
-
-
         # ====================================================
-        # CHECK CURRENT STATUS
+        # CONVERT DATABASE ROW
         # ====================================================
-
-        current_status = str(
-            withdrawal.get(
-                "status",
-                ""
+        if hasattr(
+            withdrawal_row,
+            "keys"
+        ):
+            withdrawal_data = dict(
+                withdrawal_row
             )
-        ).lower()
-
-
-        if current_status == "completed":
-
-            return jsonify({
-
-                "success": True,
-
-                "message":
-                    "Withdrawal is already completed.",
-
-                "alreadyProcessed":
-                    True,
-
-                "withdrawal":
-                    withdrawal
-
-            }), 200
-
-
-        if current_status != "processing":
-
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    (
-                        "This withdrawal is not currently "
-                        "being processed."
-                    ),
-
+        else:
+            withdrawal_data = {
+                "id":
+                    withdrawal_row[0],
+                "user_id":
+                    withdrawal_row[1],
+                "wallet_id":
+                    withdrawal_row[2],
+                "amount":
+                    withdrawal_row[3],
+                "currency":
+                    withdrawal_row[4],
                 "status":
-                    current_status
-
-            }), 400
-
-
+                    withdrawal_row[5],
+                "method":
+                    withdrawal_row[6],
+                "provider":
+                    withdrawal_row[7],
+                "provider_reference":
+                    withdrawal_row[8],
+                "account_name":
+                    withdrawal_row[9],
+                "account_number":
+                    withdrawal_row[10],
+                "requested_at":
+                    withdrawal_row[11],
+                "processed_at":
+                    withdrawal_row[12],
+                "processed_by":
+                    withdrawal_row[13],
+                "failure_reason":
+                    withdrawal_row[14],
+                "idempotency_key":
+                    withdrawal_row[15],
+                "metadata":
+                    withdrawal_row[16]
+            }
+        # ====================================================
+        # READ WITHDRAWAL METADATA
+        # ====================================================
+        metadata = (
+            withdrawal_data.get(
+                "metadata"
+            )
+            or {}
+        )
+        if not isinstance(
+            metadata,
+            dict
+        ):
+            metadata = {}
         # ====================================================
         # GET FLUTTERWAVE TRANSFER ID
         # ====================================================
-
-        transfer_id = withdrawal.get(
-            "transferId"
+        transfer_id = (
+            metadata.get(
+                "flutterwaveTransferId"
+            )
+            or
+            metadata.get(
+                "transferId"
+            )
+            or
+            withdrawal_data.get(
+                "provider_reference"
+            )
         )
-
-
         if not transfer_id:
-
             return jsonify({
-
                 "success": False,
-
                 "message":
-                    (
-                        "Flutterwave transfer ID "
-                        "is missing."
+                    "This withdrawal has no Flutterwave transfer ID.",
+                "status":
+                    withdrawal_data.get(
+                        "status",
+                        "pending"
+                    ),
+                "withdrawal":
+                    _host_wallet_legacy_withdrawal(
+                        withdrawal_data
                     )
-
-            }), 400
-
-
+            }), 200
         # ====================================================
         # QUERY FLUTTERWAVE
-        #
-        # Flutterwave provides:
-        #
-        # GET /v3/transfers/{id}
-        #
-        # to retrieve the actual transfer status.
         # ====================================================
-
         headers = {
-
             "Authorization":
                 f"Bearer {FLW_SECRET_KEY}",
-
             "Content-Type":
+                "application/json",
+            "Accept":
                 "application/json"
-
         }
-
-
+        response = requests.get(
+            f"{FLW_API_URL}/transfers/"
+            f"{transfer_id}",
+            headers=headers,
+            timeout=30
+        )
         try:
-
-            verification_response = requests.get(
-
-                f"{FLW_API_URL}/transfers/"
-                f"{transfer_id}",
-
-                headers=headers,
-
-                timeout=30
-
+            flutterwave_data = (
+                response.json()
             )
-
-            verification_data = (
-                verification_response.json()
-            )
-
-        except Exception as e:
-
-            print(
-                "FLUTTERWAVE TRANSFER VERIFY ERROR:",
-                str(e)
-            )
-
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    (
-                        "Unable to verify the "
-                        "Flutterwave transfer."
-                    )
-
-            }), 502
-
-
+        except Exception:
+            flutterwave_data = {}
+        print(
+            "FLUTTERWAVE TRANSFER STATUS:",
+            response.status_code
+        )
+        print(
+            "FLUTTERWAVE TRANSFER RESPONSE:",
+            flutterwave_data
+        )
         # ====================================================
         # FLUTTERWAVE API ERROR
         # ====================================================
-
-        if verification_response.status_code >= 400:
-
+        if response.status_code >= 400:
             return jsonify({
-
                 "success": False,
-
                 "message":
                     (
-                        verification_data.get(
+                        flutterwave_data.get(
                             "message"
                         )
                         or
-                        "Flutterwave transfer verification failed."
+                        "Unable to retrieve transfer status."
                     ),
-
-                "flutterwave":
-                    verification_data
-
-            }), 400
-
-
+                "status":
+                    withdrawal_data.get(
+                        "status",
+                        "processing"
+                    ),
+                "withdrawal":
+                    _host_wallet_legacy_withdrawal(
+                        withdrawal_data
+                    )
+            }), 502
         # ====================================================
         # GET TRANSFER DATA
         # ====================================================
-
-        transfer = (
-            verification_data.get(
+        transfer_data = (
+            flutterwave_data.get(
                 "data"
             )
             or {}
         )
-
-
         flutterwave_status = str(
-            transfer.get(
+            transfer_data.get(
                 "status",
                 ""
             )
-        ).upper()
-
-
-        # ====================================================
-        # STORE LATEST FLUTTERWAVE STATUS
-        # ====================================================
-
-        withdrawal["flutterwaveStatus"] = (
-            flutterwave_status
+        ).strip().lower()
+        checked_at = (
+            datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
         )
-
-
         # ====================================================
-        # TRANSFER STILL PROCESSING
+        # MAP FLUTTERWAVE STATUS
         # ====================================================
-
         if flutterwave_status in (
-            "NEW",
-            "PENDING"
+            "successful",
+            "success",
+            "completed"
         ):
-
-            withdrawal["status"] = (
-                "processing"
-            )
-
-            save_host_wallets(
-                wallets
-            )
-
-            return jsonify({
-
-                "success": True,
-
-                "message":
-                    (
-                        "Flutterwave is still "
-                        "processing the withdrawal."
-                    ),
-
-                "status":
-                    "processing",
-
-                "withdrawal":
-                    withdrawal
-
-            }), 200
-
-
-        # ====================================================
-        # TRANSFER FAILED
-        # ====================================================
-
-        if flutterwave_status in (
-            "FAILED",
-            "CANCELLED"
+            eventwaa_status = "completed"
+        elif flutterwave_status in (
+            "failed",
+            "cancelled",
+            "canceled"
         ):
-
-            amount = int(
-                withdrawal.get(
-                    "amount",
-                    0
-                )
-                or 0
-            )
-
-
-            # ----------------------------------------------
-            # RETURN MONEY TO AVAILABLE BALANCE
-            # ----------------------------------------------
-
-            host_wallet["availableBalance"] = (
-
-                int(
-                    host_wallet.get(
-                        "availableBalance",
-                        0
-                    )
-                    or 0
-                )
-                +
-                amount
-
-            )
-
-
-            # ----------------------------------------------
-            # REMOVE FROM PENDING
-            # ----------------------------------------------
-
-            host_wallet["pendingPayouts"] = max(
-
-                0,
-
-                int(
-                    host_wallet.get(
-                        "pendingPayouts",
-                        0
-                    )
-                    or 0
-                )
-                -
-                amount
-
-            )
-
-
-            # ----------------------------------------------
-            # MARK WITHDRAWAL FAILED
-            # ----------------------------------------------
-
-            withdrawal["status"] = (
-                "failed"
-            )
-
-            withdrawal["failedAt"] = (
-                datetime.now().strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                )
-            )
-
-            withdrawal["failureReason"] = (
-
-                transfer.get(
-                    "complete_message"
-                )
-                or
-                transfer.get(
-                    "message"
-                )
-                or
-                "Flutterwave transfer failed."
-
-            )
-
-
-            # ----------------------------------------------
-            # WALLET TRANSACTION
-            # ----------------------------------------------
-
-            host_wallet.setdefault(
-                "transactions",
-                []
-            ).append({
-
-                "id":
-                    (
-                        f"withdrawal_failed_"
-                        f"{withdrawal_id}"
-                    ),
-
-                "type":
-                    "withdrawal_failed",
-
-                "description":
-                    "Withdrawal failed - funds returned",
-
-                "amount":
-                    amount,
-
-                "method":
-                    withdrawal.get(
-                        "method"
-                    ),
-
-                "date":
-                    datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
-
-                "status":
-                    "failed"
-
-            })
-
-
-            save_host_wallets(
-                wallets
-            )
-
-
-            # ----------------------------------------------
-            # NOTIFY HOST
-            # ----------------------------------------------
-
-            create_notification(
-
-                host_id,
-
-                "Withdrawal Failed",
-
-                (
-                    f"Your UGX {amount:,} "
-                    f"withdrawal could not be completed. "
-                    f"The money has been returned "
-                    f"to your available balance."
-                ),
-
-                "withdrawal_failed",
-
-                "/host-wallet"
-
-            )
-
-
-            return jsonify({
-
-                "success": False,
-
-                "message":
-                    (
-                        "Flutterwave transfer failed. "
-                        "Funds have been returned "
-                        "to the host wallet."
-                    ),
-
-                "status":
-                    "failed",
-
-                "withdrawal":
-                    withdrawal
-
-            }), 400
-
-
+            eventwaa_status = "failed"
+        else:
+            eventwaa_status = "processing"
         # ====================================================
-        # SUCCESSFUL TRANSFER
+        # TERMINAL STATUS
+        #
+        # ALL WALLET ACCOUNTING goes through
+        # finalize_host_withdrawal().
         # ====================================================
-
-        if flutterwave_status == "SUCCESSFUL":
-
-            amount = int(
-                withdrawal.get(
-                    "amount",
-                    0
-                )
-                or 0
-            )
-
-
-            # ----------------------------------------------
-            # REMOVE FROM PENDING PAYOUTS
-            # ----------------------------------------------
-
-            host_wallet["pendingPayouts"] = max(
-
-                0,
-
-                int(
-                    host_wallet.get(
-                        "pendingPayouts",
-                        0
-                    )
-                    or 0
-                )
-                -
-                amount
-
-            )
-
-
-            # ----------------------------------------------
-            # ADD TO TOTAL WITHDRAWN
-            # ----------------------------------------------
-
-            host_wallet["totalWithdrawn"] = (
-
-                int(
-                    host_wallet.get(
-                        "totalWithdrawn",
-                        0
-                    )
-                    or 0
-                )
-                +
-                amount
-
-            )
-
-
-            # ----------------------------------------------
-            # MARK WITHDRAWAL COMPLETED
-            # ----------------------------------------------
-
-            withdrawal["status"] = (
-                "completed"
-            )
-
-            withdrawal["completedAt"] = (
-                datetime.now().strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                )
-            )
-
-
-            # ----------------------------------------------
-            # STORE PROOF IF AVAILABLE
-            # ----------------------------------------------
-
-            if transfer.get(
-                "payment_information"
-            ):
-
-                withdrawal["paymentProof"] = (
-                    transfer.get(
-                        "payment_information",
-                        {}
-                    ).get(
-                        "proof"
-                    )
-                )
-
-
-            # ----------------------------------------------
-            # UPDATE WALLET TRANSACTION
-            # ----------------------------------------------
-
-            withdrawal_transaction_id = (
-                f"withdrawal_{withdrawal_id}"
-            )
-
-
-            transaction_found = False
-
-
-            for transaction in host_wallet.get(
-                "transactions",
-                []
-            ):
-
-                if str(
-                    transaction.get(
-                        "id"
-                    )
-                ) == withdrawal_transaction_id:
-
-                    transaction["status"] = (
-                        "completed"
-                    )
-
-                    transaction["completedAt"] = (
-                        datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
+        if eventwaa_status in (
+            "completed",
+            "failed"
+        ):
+            finalization = (
+                finalize_host_withdrawal(
+                    host_id,
+                    withdrawal_id,
+                    (
+                        "successful"
+                        if eventwaa_status == "completed"
+                        else
+                        "failed"
+                    ),
+                    flutterwave_transfer_id=transfer_id,
+                    flutterwave_reference=(
+                        transfer_data.get(
+                            "reference"
                         )
-                    )
-
-                    transaction_found = True
-
-                    break
-
-
-            # ----------------------------------------------
-            # SAFETY:
-            # CREATE TRANSACTION IF MISSING
-            # ----------------------------------------------
-
-            if not transaction_found:
-
-                host_wallet.setdefault(
-                    "transactions",
-                    []
-                ).append({
-
-                    "id":
-                        withdrawal_transaction_id,
-
-                    "type":
-                        "withdrawal",
-
-                    "description":
-                        "Withdrawal completed",
-
-                    "amount":
-                        -amount,
-
-                    "method":
-                        withdrawal.get(
-                            "method"
-                        ),
-
-                    "date":
-                        withdrawal.get(
-                            "date"
-                        ),
-
-                    "completedAt":
-                        datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-
-                    "status":
-                        "completed"
-
-                })
-
-
-            # ----------------------------------------------
-            # SAVE WALLET
-            # ----------------------------------------------
-
-            save_host_wallets(
-                wallets
-            )
-
-
-            # ----------------------------------------------
-            # NOTIFY HOST
-            # ----------------------------------------------
-
-            create_notification(
-
-                host_id,
-
-                "Withdrawal Completed",
-
-                (
-                    f"Your UGX {amount:,} "
-                    f"withdrawal has been successfully "
-                    f"sent to your {withdrawal.get('method')}."
-                ),
-
-                "withdrawal_completed",
-
-                "/host-wallet"
-
-            )
-
-
-            return jsonify({
-
-                "success": True,
-
-                "message":
-                    (
-                        "Flutterwave confirmed the "
-                        "withdrawal successfully."
                     ),
-
-                "status":
-                    "completed",
-
-                "withdrawal":
-                    withdrawal
-
-            }), 200
-
-
+                    flutterwave_response=(
+                        flutterwave_data
+                    )
+                )
+            )
+            if not finalization.get(
+                "success"
+            ):
+                return jsonify(
+                    finalization
+                ), 400
+            eventwaa_status = (
+                finalization.get(
+                    "status",
+                    eventwaa_status
+                )
+            )
         # ====================================================
-        # UNKNOWN FLUTTERWAVE STATUS
+        # NON-TERMINAL STATUS
+        #
+        # No wallet balance changes happen here.
+        # We only store the provider status.
         # ====================================================
-
-        save_host_wallets(
-            wallets
-        )
-
-
-        return jsonify({
-
-            "success": False,
-
-            "message":
+        else:
+            conn = get_db_connection()
+            try:
+                cur = conn.cursor()
+                cur.execute(
+                    """
+                    UPDATE withdrawals
+                    SET
+                        status =
+                            CASE
+                                WHEN status IN (
+                                    'completed',
+                                    'failed'
+                                )
+                                THEN status
+                                ELSE 'processing'
+                            END,
+                        metadata =
+                            COALESCE(
+                                metadata,
+                                '{}'::jsonb
+                            )
+                            || %s::jsonb,
+                        updated_at = NOW()
+                    WHERE id = %s
+                      AND user_id = %s
+                    RETURNING
+                        id,
+                        user_id,
+                        wallet_id,
+                        amount,
+                        currency,
+                        status,
+                        method,
+                        provider,
+                        provider_reference,
+                        account_name,
+                        account_number,
+                        requested_at,
+                        processed_at,
+                        processed_by,
+                        failure_reason,
+                        idempotency_key,
+                        metadata
+                    """,
+                    (
+                        json.dumps(
+                            {
+                                "flutterwaveStatus":
+                                    (
+                                        flutterwave_status
+                                        or
+                                        "processing"
+                                    ),
+                                "providerStatus":
+                                    (
+                                        flutterwave_status
+                                        or
+                                        "processing"
+                                    ),
+                                "lastCheckedAt":
+                                    checked_at,
+                                "flutterwaveTransferId":
+                                    str(
+                                        transfer_id
+                                    )
+                            },
+                            default=str
+                        ),
+                        withdrawal_id,
+                        host_id
+                    )
+                )
+                updated_row = (
+                    cur.fetchone()
+                )
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
+            finally:
+                conn.close()
+            if updated_row:
+                if hasattr(
+                    updated_row,
+                    "keys"
+                ):
+                    updated_data = dict(
+                        updated_row
+                    )
+                else:
+                    updated_data = {
+                        "id":
+                            updated_row[0],
+                        "user_id":
+                            updated_row[1],
+                        "wallet_id":
+                            updated_row[2],
+                        "amount":
+                            updated_row[3],
+                        "currency":
+                            updated_row[4],
+                        "status":
+                            updated_row[5],
+                        "method":
+                            updated_row[6],
+                        "provider":
+                            updated_row[7],
+                        "provider_reference":
+                            updated_row[8],
+                        "account_name":
+                            updated_row[9],
+                        "account_number":
+                            updated_row[10],
+                        "requested_at":
+                            updated_row[11],
+                        "processed_at":
+                            updated_row[12],
+                        "processed_by":
+                            updated_row[13],
+                        "failure_reason":
+                            updated_row[14],
+                        "idempotency_key":
+                            updated_row[15],
+                        "metadata":
+                            updated_row[16]
+                    }
+                target_withdrawal = (
+                    _host_wallet_legacy_withdrawal(
+                        updated_data
+                    )
+                )
+                eventwaa_status = (
+                    target_withdrawal.get(
+                        "status",
+                        "processing"
+                    )
+                )
+            else:
+                target_withdrawal = (
+                    _host_wallet_legacy_withdrawal(
+                        withdrawal_data
+                    )
+                )
+        # ====================================================
+        # RELOAD FINAL WITHDRAWAL
+        #
+        # This ensures the response comes from PostgreSQL,
+        # not from stale in-memory wallet data.
+        # ====================================================
+        conn = get_db_connection()
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                """
+                SELECT
+                    id,
+                    user_id,
+                    wallet_id,
+                    amount,
+                    currency,
+                    status,
+                    method,
+                    provider,
+                    provider_reference,
+                    account_name,
+                    account_number,
+                    requested_at,
+                    processed_at,
+                    processed_by,
+                    failure_reason,
+                    idempotency_key,
+                    metadata
+                FROM withdrawals
+                WHERE id = %s
+                  AND user_id = %s
+                """,
                 (
-                    "Unknown Flutterwave transfer status."
-                ),
-
+                    withdrawal_id,
+                    host_id
+                )
+            )
+            final_row = cur.fetchone()
+            cur.close()
+        finally:
+            conn.close()
+        if final_row:
+            if hasattr(
+                final_row,
+                "keys"
+            ):
+                final_data = dict(
+                    final_row
+                )
+            else:
+                final_data = {
+                    "id":
+                        final_row[0],
+                    "user_id":
+                        final_row[1],
+                    "wallet_id":
+                        final_row[2],
+                    "amount":
+                        final_row[3],
+                    "currency":
+                        final_row[4],
+                    "status":
+                        final_row[5],
+                    "method":
+                        final_row[6],
+                    "provider":
+                        final_row[7],
+                    "provider_reference":
+                        final_row[8],
+                    "account_name":
+                        final_row[9],
+                    "account_number":
+                        final_row[10],
+                    "requested_at":
+                        final_row[11],
+                    "processed_at":
+                        final_row[12],
+                    "processed_by":
+                        final_row[13],
+                    "failure_reason":
+                        final_row[14],
+                    "idempotency_key":
+                        final_row[15],
+                    "metadata":
+                        final_row[16]
+                }
+            target_withdrawal = (
+                _host_wallet_legacy_withdrawal(
+                    final_data
+                )
+            )
+            eventwaa_status = (
+                final_data.get(
+                    "status",
+                    eventwaa_status
+                )
+            )
+        # ====================================================
+        # RESPONSE
+        # ====================================================
+        return jsonify({
+            "success":
+                True,
+            "withdrawalId":
+                withdrawal_id,
+            "hostId":
+                host_id,
+            "transferId":
+                transfer_id,
             "status":
+                eventwaa_status,
+            "flutterwaveStatus":
                 flutterwave_status,
-
             "withdrawal":
-                withdrawal
-
-        }), 400
-
-
+                target_withdrawal
+        }), 200
     except Exception as e:
-
         print(
-            "VERIFY HOST WITHDRAWAL ERROR:",
+            "TRANSFER STATUS ERROR:",
             str(e)
         )
-
         return jsonify({
-
-            "success": False,
-
+            "success":
+                False,
             "message":
-                "Unable to verify withdrawal."
-
+                "Unable to check transfer status."
         }), 500
-
 
 # ============================================================
 # REFUND SETTINGS CHECK
