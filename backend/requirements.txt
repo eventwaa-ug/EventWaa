@@ -9,4 +9,5 @@ Werkzeug
 itsdangerous
 Pillow
 gunicorn
+psycopg[binary]
 resend
