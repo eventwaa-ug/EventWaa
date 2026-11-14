@@ -3325,7 +3325,7 @@ def submit_pesapal_order(
         ""
     ).strip()
 
-    # PesaPal requires both fields; checkout does not collect a billing address.
+    # PesaPal requires populated billing fields; checkout does not collect an address.
     address_line_1 = "NA"
     address_line_2 = "NA"
 
@@ -3393,13 +3393,13 @@ def submit_pesapal_order(
                 "NA",
 
             "state":
-                "",
+                "NA",
 
             "postal_code":
-                "",
+                "NA",
 
             "zip_code":
-                ""
+                "NA"
         }
     }
 
