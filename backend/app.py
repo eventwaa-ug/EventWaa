@@ -20,7 +20,7 @@ from io import BytesIO
 from contextlib import contextmanager
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from flask_mail import Mail, Message
 from dotenv import load_dotenv
 load_dotenv()
@@ -16629,7 +16629,7 @@ def _table_columns(cur, table):
 
 
 def _json_safe(value):
-    if isinstance(value, (datetime,)):
+    if isinstance(value, (date, time)):
         return value.isoformat()
     if isinstance(value, dict):
         return {str(k): _json_safe(v) for k, v in value.items()}
@@ -16666,7 +16666,7 @@ def _row_to_legacy(row, table):
             result[_snake_to_camel(key)] = value
         else:
             result[_snake_to_camel(key)] = value
-    return result
+    return _json_safe(result)
 
 
 def _record_db_values(record, columns, meta_col):
