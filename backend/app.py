@@ -3303,6 +3303,12 @@ def submit_pesapal_order(
         else "Customer"
     )
 
+    middle_name = (
+        " ".join(name_parts[1:-1])
+        if len(name_parts) > 2
+        else "N/A"
+    )
+
     phone = str(
         buyer_phone
         or
@@ -3363,7 +3369,7 @@ def submit_pesapal_order(
                 first_name,
 
             "middle_name":
-                "",
+                middle_name,
 
             "last_name":
                 last_name,
