@@ -3390,7 +3390,7 @@ def submit_pesapal_order(
                 address_line_2,
 
             "city":
-                "",
+                "NA",
 
             "state":
                 "",
