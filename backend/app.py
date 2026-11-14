@@ -3412,18 +3412,39 @@ def submit_pesapal_order(
     except Exception:
         data = {}
 
-    if response.status_code >= 400:
+    api_error = data.get("error")
+
+    if response.status_code >= 400 or api_error:
+
+        if isinstance(api_error, dict):
+            error_message = (
+                api_error.get("message")
+                or data.get("message")
+            )
+            error_details = {
+                "type": api_error.get("type"),
+                "code": api_error.get("code"),
+                "message": error_message
+            }
+        else:
+            error_message = (
+                str(api_error)
+                if api_error
+                else data.get("message")
+            )
+            error_details = {
+                "message": error_message
+            }
 
         print(
             "PESAPAL ORDER ERROR:",
             response.status_code,
-            data
+            error_details
         )
 
         raise RuntimeError(
-            data.get("message")
-            or
-            "PesaPal order creation failed."
+            error_message
+            or "PesaPal order creation failed."
         )
 
     order_tracking_id = data.get(
@@ -3435,6 +3456,19 @@ def submit_pesapal_order(
     )
 
     if not order_tracking_id:
+
+        print(
+            "PESAPAL ORDER RESPONSE MISSING TRACKING ID:",
+            response.status_code,
+            {
+                "response_keys":
+                    sorted(data.keys()),
+                "status":
+                    data.get("status"),
+                "message":
+                    data.get("message")
+            }
+        )
 
         raise RuntimeError(
             "PesaPal did not return an order tracking ID."
