@@ -3303,11 +3303,16 @@ def submit_pesapal_order(
         else "Customer"
     )
 
-    middle_name = (
-        " ".join(name_parts[1:-1])
-        if len(name_parts) > 2
-        else "N/A"
+    middle_name = " ".join(
+        name_parts[1:-1]
     )
+    middle_name = re.sub(
+        r"[^A-Za-z0-9._:-]+",
+        "_",
+        middle_name
+    ).strip("_")
+    if not middle_name:
+        middle_name = "NA"
 
     phone = str(
         buyer_phone
