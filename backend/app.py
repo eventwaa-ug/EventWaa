@@ -3239,7 +3239,8 @@ def test_pesapal_auth():
 
 def submit_pesapal_order(
     payment,
-    buyer_phone=""
+    buyer_phone="",
+    buyer_address_line_1=""
 ):
 
     if not PESAPAL_IPN_ID:
@@ -3325,6 +3326,16 @@ def submit_pesapal_order(
         ""
     ).strip()
 
+    address_line_1 = str(
+        buyer_address_line_1
+        or ""
+    ).strip()
+
+    if not address_line_1:
+        raise RuntimeError(
+            "PesaPal billing address line 1 is required."
+        )
+
     payload = {
 
         "id":
@@ -3380,7 +3391,7 @@ def submit_pesapal_order(
                 last_name,
 
             "line_1":
-                "",
+                address_line_1,
 
             "line_2":
                 "",
@@ -26349,6 +26360,12 @@ def initialize_pesapal_payment():
             )
         ).strip()
 
+        buyer_address_line_1 = str(
+            buyer.get("addressLine1")
+            or buyer.get("address_line_1")
+            or ""
+        ).strip()
+
         # ====================================================
         # BASIC VALIDATION
         # ====================================================
@@ -26391,6 +26408,14 @@ def initialize_pesapal_payment():
                 "success": False,
                 "message":
                     "Buyer email is required."
+            }), 400
+
+        if not buyer_address_line_1:
+
+            return jsonify({
+                "success": False,
+                "message":
+                    "Billing address line 1 is required."
             }), 400
 
         # ====================================================
@@ -26642,7 +26667,8 @@ def initialize_pesapal_payment():
 
             pesapal_order = submit_pesapal_order(
                 payment_record,
-                buyer_phone
+                buyer_phone,
+                buyer_address_line_1
             )
 
         except Exception as e:
