@@ -28,6 +28,7 @@ function Booking() {
   const [paymentMethod, setPaymentMethod] = useState("mtn");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [billingAddressLine1, setBillingAddressLine1] = useState("");
+  const [billingAddressLine2, setBillingAddressLine2] = useState("");
   const [processing, setProcessing] = useState(false);
   const event = events.find(
     (item) => Number(item.id) === Number(id)
@@ -272,6 +273,8 @@ function Booking() {
             email: user.email,
             addressLine1:
               billingAddressLine1.trim(),
+            addressLine2:
+              billingAddressLine2.trim(),
           },
           paymentMethod,
           phoneNumber:
@@ -682,8 +685,26 @@ function Booking() {
               )
             }
           />
+          <label htmlFor="billing-address-line2">
+            Billing address line 2 (optional)
+          </label>
+          <input
+            id="billing-address-line2"
+            name="billingAddressLine2"
+            type="text"
+            autoComplete="address-line2"
+            maxLength={120}
+            placeholder="Apartment, suite, unit (optional)"
+            value={billingAddressLine2}
+            disabled={processing}
+            onChange={(e) =>
+              setBillingAddressLine2(
+                e.target.value
+              )
+            }
+          />
           <small>
-            Enter your actual billing address.
+            Enter your actual billing address; line 2 is optional.
           </small>
         </div>
         {/* ==================================================

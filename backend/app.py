@@ -3240,7 +3240,8 @@ def test_pesapal_auth():
 def submit_pesapal_order(
     payment,
     buyer_phone="",
-    buyer_address_line_1=""
+    buyer_address_line_1="",
+    buyer_address_line_2="NA"
 ):
 
     if not PESAPAL_IPN_ID:
@@ -3336,6 +3337,11 @@ def submit_pesapal_order(
             "PesaPal billing address line 1 is required."
         )
 
+    address_line_2 = str(
+        buyer_address_line_2
+        or ""
+    ).strip() or "NA"
+
     payload = {
 
         "id":
@@ -3394,7 +3400,7 @@ def submit_pesapal_order(
                 address_line_1,
 
             "line_2":
-                "",
+                address_line_2,
 
             "city":
                 "",
@@ -26366,6 +26372,12 @@ def initialize_pesapal_payment():
             or ""
         ).strip()
 
+        buyer_address_line_2 = str(
+            buyer.get("addressLine2")
+            or buyer.get("address_line_2")
+            or ""
+        ).strip()
+
         # ====================================================
         # BASIC VALIDATION
         # ====================================================
@@ -26668,7 +26680,8 @@ def initialize_pesapal_payment():
             pesapal_order = submit_pesapal_order(
                 payment_record,
                 buyer_phone,
-                buyer_address_line_1
+                buyer_address_line_1,
+                buyer_address_line_2
             )
 
         except Exception as e:
