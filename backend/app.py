@@ -3239,9 +3239,7 @@ def test_pesapal_auth():
 
 def submit_pesapal_order(
     payment,
-    buyer_phone="",
-    buyer_address_line_1="",
-    buyer_address_line_2="NA"
+    buyer_phone=""
 ):
 
     if not PESAPAL_IPN_ID:
@@ -3327,20 +3325,9 @@ def submit_pesapal_order(
         ""
     ).strip()
 
-    address_line_1 = str(
-        buyer_address_line_1
-        or ""
-    ).strip()
-
-    if not address_line_1:
-        raise RuntimeError(
-            "PesaPal billing address line 1 is required."
-        )
-
-    address_line_2 = str(
-        buyer_address_line_2
-        or ""
-    ).strip() or "NA"
+    # PesaPal requires both fields; checkout does not collect a billing address.
+    address_line_1 = "NA"
+    address_line_2 = "NA"
 
     payload = {
 
@@ -26366,18 +26353,6 @@ def initialize_pesapal_payment():
             )
         ).strip()
 
-        buyer_address_line_1 = str(
-            buyer.get("addressLine1")
-            or buyer.get("address_line_1")
-            or ""
-        ).strip()
-
-        buyer_address_line_2 = str(
-            buyer.get("addressLine2")
-            or buyer.get("address_line_2")
-            or ""
-        ).strip()
-
         # ====================================================
         # BASIC VALIDATION
         # ====================================================
@@ -26420,14 +26395,6 @@ def initialize_pesapal_payment():
                 "success": False,
                 "message":
                     "Buyer email is required."
-            }), 400
-
-        if not buyer_address_line_1:
-
-            return jsonify({
-                "success": False,
-                "message":
-                    "Billing address line 1 is required."
             }), 400
 
         # ====================================================
@@ -26679,9 +26646,7 @@ def initialize_pesapal_payment():
 
             pesapal_order = submit_pesapal_order(
                 payment_record,
-                buyer_phone,
-                buyer_address_line_1,
-                buyer_address_line_2
+                buyer_phone
             )
 
         except Exception as e:

@@ -27,8 +27,6 @@ function Booking() {
   const [quantity, setQuantity] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("mtn");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [billingAddressLine1, setBillingAddressLine1] = useState("");
-  const [billingAddressLine2, setBillingAddressLine2] = useState("");
   const [processing, setProcessing] = useState(false);
   const event = events.find(
     (item) => Number(item.id) === Number(id)
@@ -271,10 +269,6 @@ function Booking() {
           buyer: {
             name: user.name,
             email: user.email,
-            addressLine1:
-              billingAddressLine1.trim(),
-            addressLine2:
-              billingAddressLine2.trim(),
           },
           paymentMethod,
           phoneNumber:
@@ -342,12 +336,6 @@ function Booking() {
         `Only ${maxQuantity} ticket${
           maxQuantity === 1 ? "" : "s"
         } available.`
-      );
-      return;
-    }
-    if (!billingAddressLine1.trim()) {
-      alert(
-        "Please enter your billing address line 1."
       );
       return;
     }
@@ -661,51 +649,6 @@ function Booking() {
               Visa / Mastercard
             </span>
           </label>
-        </div>
-        {/* ==================================================
-            BILLING ADDRESS
-        ================================================== */}
-        <div className="phone-section billing-address-section">
-          <label htmlFor="billing-address-line1">
-            Billing address line 1
-          </label>
-          <input
-            id="billing-address-line1"
-            name="billingAddressLine1"
-            type="text"
-            autoComplete="address-line1"
-            maxLength={120}
-            required
-            placeholder="Street address, building, or area"
-            value={billingAddressLine1}
-            disabled={processing}
-            onChange={(e) =>
-              setBillingAddressLine1(
-                e.target.value
-              )
-            }
-          />
-          <label htmlFor="billing-address-line2">
-            Billing address line 2 (optional)
-          </label>
-          <input
-            id="billing-address-line2"
-            name="billingAddressLine2"
-            type="text"
-            autoComplete="address-line2"
-            maxLength={120}
-            placeholder="Apartment, suite, unit (optional)"
-            value={billingAddressLine2}
-            disabled={processing}
-            onChange={(e) =>
-              setBillingAddressLine2(
-                e.target.value
-              )
-            }
-          />
-          <small>
-            Enter your actual billing address; line 2 is optional.
-          </small>
         </div>
         {/* ==================================================
             PHONE NUMBER
