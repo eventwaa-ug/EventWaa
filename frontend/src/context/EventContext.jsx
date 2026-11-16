@@ -169,24 +169,39 @@ export function EventProvider({ children }) {
 
     const updateEvent = (updatedEvent) => {
 
-        if (!updatedEvent) {
+        if (
+            !updatedEvent ||
+            updatedEvent.id === undefined ||
+            updatedEvent.id === null
+        ) {
             return;
         }
 
         setEvents(
-            (previousEvents) =>
-                previousEvents.map(
+            (previousEvents) => {
+                const hasEvent = previousEvents.some(
                     (event) =>
                         Number(event.id) ===
                         Number(updatedEvent.id)
+                );
 
+                if (!hasEvent) {
+                    return [
+                        ...previousEvents,
+                        updatedEvent
+                    ];
+                }
+
+                return previousEvents.map(
+                    (event) =>
+                        Number(event.id) === Number(updatedEvent.id)
                             ? {
                                 ...event,
                                 ...updatedEvent
                             }
-
                             : event
-                )
+                );
+            }
         );
     };
 

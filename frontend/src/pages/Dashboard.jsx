@@ -73,9 +73,17 @@ function Dashboard() {
   ========================================================= */
 
   const myEvents = (events || []).filter(
-    (event) =>
-      String(event.hostEmail || "").toLowerCase() ===
-      String(user?.email || "").toLowerCase()
+    (event) => {
+      const eventHostId = String(event?.hostId ?? "").trim();
+      const userId = String(user?.id ?? "").trim();
+      const eventHostEmail = String(event?.hostEmail || "").toLowerCase();
+      const userEmail = String(user?.email || "").toLowerCase();
+
+      return (
+        (userId && eventHostId === userId) ||
+        (userEmail && eventHostEmail === userEmail)
+      );
+    }
   );
 
   /* =========================================================

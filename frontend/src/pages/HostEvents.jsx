@@ -58,14 +58,23 @@ function HostEvents() {
      */
 
     const myEvents = useMemo(() => {
-        if (!user?.email) return [];
+        const userId = String(user?.id ?? "").trim();
+        const userEmail = String(user?.email || "").toLowerCase();
+
+        if (!userId && !userEmail) return [];
 
         return (events || []).filter(
-            (event) =>
-                String(event?.hostEmail || "").toLowerCase() ===
-                String(user.email).toLowerCase()
+            (event) => {
+                const eventHostId = String(event?.hostId ?? "").trim();
+                const eventHostEmail = String(event?.hostEmail || "").toLowerCase();
+
+                return (
+                    (userId && eventHostId === userId) ||
+                    (userEmail && eventHostEmail === userEmail)
+                );
+            }
         );
-    }, [events, user?.email]);
+    }, [events, user?.id, user?.email]);
 
     /*
      * =========================================================
