@@ -7380,13 +7380,19 @@ def save_events(data):
                         # No ID supplied.
                         #
                         # The live events.id column has no database
-                        # default, so generate an explicit ID.
+                        # default, so generate an explicit ID. Lock
+                        # the table to serialize MAX(id) allocation.
                         # ------------------------------------------------
+                        cur.execute(
+                            """
+                            LOCK TABLE events
+                            IN SHARE ROW EXCLUSIVE MODE
+                            """
+                        )
                         cur.execute(
                             """
                             SELECT COALESCE(MAX(id), 0) + 1 AS next_id
                             FROM events
-                            FOR UPDATE
                             """
                         )
                         next_event = cur.fetchone()
@@ -7688,12 +7694,18 @@ def save_events(data):
                         # ---------------------------------------------
                         else:
                             # The live event_ticket_types.id column
-                            # also has no database default.
+                            # also has no database default. Lock the
+                            # table to serialize MAX(id) allocation.
+                            cur.execute(
+                                """
+                                LOCK TABLE event_ticket_types
+                                IN SHARE ROW EXCLUSIVE MODE
+                                """
+                            )
                             cur.execute(
                                 """
                                 SELECT COALESCE(MAX(id), 0) + 1 AS next_id
                                 FROM event_ticket_types
-                                FOR UPDATE
                                 """
                             )
                             next_ticket = cur.fetchone()
