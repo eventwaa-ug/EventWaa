@@ -29196,6 +29196,36 @@ def create_event():
             }), 400
 
         tickets = cleaned_tickets
+        capacity_value = str(
+            data.get(
+                "capacity",
+                ""
+            ) or ""
+        ).strip()
+
+        if capacity_value:
+            try:
+                parsed_capacity = float(
+                    capacity_value
+                )
+            except (ValueError, TypeError):
+                return jsonify({
+                    "success": False,
+                    "message": "Capacity must be a whole number."
+                }), 400
+
+            if (
+                not parsed_capacity.is_integer()
+                or parsed_capacity <= 0
+            ):
+                return jsonify({
+                    "success": False,
+                    "message": "Capacity must be a positive whole number."
+                }), 400
+
+            event_capacity = int(parsed_capacity)
+        else:
+            event_capacity = None
 
     else:
 
@@ -29250,6 +29280,7 @@ def create_event():
                 free_quantity
 
         }]
+        event_capacity = free_quantity
 
     # ========================================================
     # POSTER UPLOAD
@@ -29366,10 +29397,7 @@ def create_event():
             ),
 
         "capacity":
-            data.get(
-                "capacity",
-                ""
-            ),
+            event_capacity,
 
         "contact":
             data.get(
