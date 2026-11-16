@@ -7693,30 +7693,12 @@ def save_events(data):
                         # CREATE NEW TICKET TYPE
                         # ---------------------------------------------
                         else:
-                            # The live event_ticket_types.id column
-                            # also has no database default. Lock the
-                            # table to serialize MAX(id) allocation.
-                            cur.execute(
-                                """
-                                LOCK TABLE event_ticket_types
-                                IN SHARE ROW EXCLUSIVE MODE
-                                """
-                            )
-                            cur.execute(
-                                """
-                                SELECT COALESCE(MAX(id), 0) + 1 AS next_id
-                                FROM event_ticket_types
-                                """
-                            )
-                            next_ticket = cur.fetchone()
-                            ticket_id = int(
-                                next_ticket["next_id"]
-                            )
-                            ticket_values["id"] = (
-                                ticket_id
+                            ticket_values.pop(
+                                "id",
+                                None
                             )
                             insert_columns = list(
-                                ticket_values.keys()
+                                ticket_values
                             )
                             cur.execute(
                                 """
@@ -7740,11 +7722,15 @@ def save_events(data):
                                 +
                                 """
                                 )
+                                RETURNING id
                                 """,
                                 tuple(
                                     ticket_values[column]
                                     for column in insert_columns
                                 )
+                            )
+                            ticket_id = int(
+                                cur.fetchone()["id"]
                             )
                             ticket["id"] = ticket_id
                 # ====================================================
@@ -17799,12 +17785,7 @@ def create_pending_payment(
     """
     Create exactly one pending payment in PostgreSQL.
 
-    The database schema currently does not provide a default
-    sequence for payments.id, so ID generation is serialized
-    with a PostgreSQL transaction advisory lock.
-
-    This prevents two simultaneous payment initializations from
-    choosing the same MAX(id) + 1 value.
+    PostgreSQL generates payments.id through its identity column.
     """
 
     if not isinstance(
@@ -17904,9 +17885,7 @@ def create_pending_payment(
 
         with conn.cursor() as cur:
 
-            # ------------------------------------------------
-            # Serialize payment ID generation.
-            # ------------------------------------------------
+            # Serialize the duplicate tx_ref check and insert.
 
             cur.execute(
                 """
@@ -17942,26 +17921,6 @@ def create_pending_payment(
                     "A payment with this transaction reference "
                     "already exists."
                 )
-
-            # ------------------------------------------------
-            # Generate the next numeric payment ID safely.
-            # ------------------------------------------------
-
-            cur.execute(
-                """
-                SELECT COALESCE(
-                    MAX(id),
-                    0
-                ) + 1 AS next_id
-                FROM payments
-                """
-            )
-
-            next_id_row = cur.fetchone()
-
-            payment_id = int(
-                next_id_row["next_id"]
-            )
 
             # ------------------------------------------------
             # Provider-specific identifiers.
@@ -18008,7 +17967,6 @@ def create_pending_payment(
             cur.execute(
                 """
                 INSERT INTO payments (
-                    id,
                     provider,
                     tx_ref,
                     transaction_id,
@@ -18054,7 +18012,6 @@ def create_pending_payment(
                     %s,
                     %s,
                     %s,
-                    %s,
                     FALSE,
                     NULL,
                     %s::jsonb,
@@ -18064,7 +18021,6 @@ def create_pending_payment(
                 RETURNING *
                 """,
                 (
-                    payment_id,
                     provider,
                     tx_ref,
                     transaction_id,
@@ -21721,27 +21677,9 @@ def save_host_wallets(data):
                     )
 
                 else:
-
-                    cur.execute(
-                        """
-                        SELECT
-                            COALESCE(
-                                MAX(id),
-                                0
-                            ) + 1 AS next_id
-                        FROM host_wallets
-                        FOR UPDATE
-                        """
-                    )
-
-                    wallet_id = int(
-                        cur.fetchone()["next_id"]
-                    )
-
                     cur.execute(
                         """
                         INSERT INTO host_wallets (
-                            id,
                             user_id,
                             available_balance,
                             pending_balance,
@@ -21757,15 +21695,12 @@ def save_host_wallets(data):
                             %s,
                             %s,
                             %s,
-                            %s,
                             'UGX',
                             'active',
                             %s::jsonb
                         )
                         """,
                         (
-                            wallet_id,
-
                             host_id,
 
                             wallet.get(
@@ -47643,40 +47578,9 @@ def get_host_wallet(host_id):
                 row = cur.fetchone()
 
                 if not row:
-
-                    cur.execute(
-                        """
-                        SELECT COALESCE(
-                            MAX(id),
-                            0
-                        ) + 1
-                        FROM host_wallets
-                        """
-                    )
-
-                    wallet_id_row = cur.fetchone()
-
-                    if hasattr(
-                        wallet_id_row,
-                        "get"
-                    ):
-                        wallet_id = int(
-                            wallet_id_row.get(
-                                "?column?",
-                                1
-                            )
-                            or 1
-                        )
-                    else:
-                        wallet_id = int(
-                            wallet_id_row[0]
-                            or 1
-                        )
-
                     cur.execute(
                         """
                         INSERT INTO host_wallets (
-                            id,
                             user_id,
                             available_balance,
                             pending_balance,
@@ -47685,7 +47589,6 @@ def get_host_wallet(host_id):
                             metadata
                         )
                         VALUES (
-                            %s,
                             %s,
                             0,
                             0,
@@ -47703,7 +47606,6 @@ def get_host_wallet(host_id):
                             metadata
                         """,
                         (
-                            wallet_id,
                             host_id,
                             json.dumps(
                                 {}
@@ -48728,12 +48630,12 @@ def host_withdraw(user, host_id):
 
                 cur.execute(
                     """
-                    SELECT
-                        COALESCE(
-                            MAX(id),
-                            0
-                        ) + 1 AS next_id
-                    FROM withdrawals
+                    SELECT nextval(
+                        pg_get_serial_sequence(
+                            'public.withdrawals',
+                            'id'
+                        )
+                    ) AS next_id
                     """
                 )
 
@@ -48821,25 +48723,6 @@ def host_withdraw(user, host_id):
                     )
                 )
 
-                # ------------------------------------------------
-                # Generate wallet transaction ID safely.
-                # ------------------------------------------------
-
-                cur.execute(
-                    """
-                    SELECT
-                        COALESCE(
-                            MAX(id),
-                            0
-                        ) + 1 AS next_id
-                    FROM wallet_transactions
-                    """
-                )
-
-                transaction_id = int(
-                    cur.fetchone()["next_id"]
-                )
-
                 balance_before = (
                     available_balance
                 )
@@ -48871,7 +48754,6 @@ def host_withdraw(user, host_id):
                 cur.execute(
                     """
                     INSERT INTO wallet_transactions (
-                        id,
                         wallet_id,
                         user_id,
                         type,
@@ -48888,7 +48770,6 @@ def host_withdraw(user, host_id):
                     VALUES (
                         %s,
                         %s,
-                        %s,
                         'withdrawal',
                         %s,
                         'UGX',
@@ -48902,7 +48783,6 @@ def host_withdraw(user, host_id):
                     )
                     """,
                     (
-                        transaction_id,
                         wallet_id,
                         host_id,
                         -amount,
@@ -49640,19 +49520,6 @@ def delete_message(message_id):
     return jsonify({
         "success": True
     })
-
-
-# ============================================================
-# FOLLOWERS
-# ============================================================
-
-@app.route(
-    "/followers/<int:host_id>",
-    methods=["GET"]
-)
-def get_followers(host_id):
-    # Follower persistence is not part of the approved PostgreSQL schema.
-    return jsonify({"count": 0})
 
 
 # ============================================================

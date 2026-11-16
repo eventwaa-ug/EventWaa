@@ -6,7 +6,6 @@ import {
     FiCalendar,
     FiCheckCircle,
     FiEdit3,
-    FiHeart,
     FiMapPin,
     FiMessageCircle,
     FiSettings,
@@ -26,9 +25,6 @@ function HostProfile() {
     const [host, setHost] = useState(null);
     const [events, setEvents] = useState([]);
     const [bookings, setBookings] = useState([]);
-
-    const [followers, setFollowers] = useState(0);
-    const [following, setFollowing] = useState(false);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -205,71 +201,6 @@ function HostProfile() {
                     }
                 }
 
-                // ------------------------------------------------
-                // CHECK FOLLOWING STATUS
-                // ------------------------------------------------
-
-                if (user?.id) {
-                    try {
-                        const response =
-                            await fetch(
-                                `${BACKEND_URL}/follow/check/${id}/${user.id}`
-                            );
-
-                        if (response.ok) {
-                            const data =
-                                await response.json();
-
-                            if (!cancelled) {
-                                setFollowing(
-                                    Boolean(
-                                        data.following
-                                    )
-                                );
-                            }
-                        }
-                    } catch (followError) {
-                        console.error(
-                            "FOLLOW CHECK ERROR:",
-                            followError
-                        );
-                    }
-                }
-
-                // ------------------------------------------------
-                // LOAD FOLLOWERS
-                // ------------------------------------------------
-
-                try {
-                    const followersResponse =
-                        await fetch(
-                            `${BACKEND_URL}/followers/${id}`
-                        );
-
-                    if (followersResponse.ok) {
-                        const followersData =
-                            await followersResponse.json();
-
-                        if (!cancelled) {
-                            setFollowers(
-                                Number(
-                                    followersData?.count ||
-                                    0
-                                )
-                            );
-                        }
-                    }
-                } catch (followersError) {
-                    console.error(
-                        "FOLLOWERS ERROR:",
-                        followersError
-                    );
-
-                    if (!cancelled) {
-                        setFollowers(0);
-                    }
-                }
-
                 if (!cancelled) {
                     setLoading(false);
                 }
@@ -293,7 +224,7 @@ function HostProfile() {
         return () => {
             cancelled = true;
         };
-    }, [id, user?.id]);
+    }, [id]);
 
     // ============================================================
     // LOADING
@@ -393,98 +324,6 @@ function HostProfile() {
                     ),
                 0
             );
-
-    // ============================================================
-    // FOLLOW HOST
-    // ============================================================
-
-    const handleFollow = async () => {
-        if (!user) {
-            alert(
-                "Please login to follow this host."
-            );
-
-            navigate("/login", {
-                state: {
-                    from: `/host/${id}`,
-                },
-            });
-
-            return;
-        }
-
-        if (following) {
-            return;
-        }
-
-        try {
-            const response =
-                await fetch(
-                    `${BACKEND_URL}/follow`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type":
-                                "application/json",
-                        },
-                        body: JSON.stringify({
-                            hostId: Number(id),
-                            userId: user.id,
-                        }),
-                    }
-                );
-
-            const data =
-                await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    data?.message ||
-                    "Failed to follow host."
-                );
-            }
-
-            if (data.success) {
-                setFollowing(true);
-
-                try {
-                    const followersResponse =
-                        await fetch(
-                            `${BACKEND_URL}/followers/${id}`
-                        );
-
-                    if (
-                        followersResponse.ok
-                    ) {
-                        const followersData =
-                            await followersResponse.json();
-
-                        setFollowers(
-                            Number(
-                                followersData?.count ||
-                                0
-                            )
-                        );
-                    }
-                } catch (countError) {
-                    console.error(
-                        "FOLLOWER COUNT ERROR:",
-                        countError
-                    );
-                }
-            }
-        } catch (followError) {
-            console.error(
-                "FOLLOW ERROR:",
-                followError
-            );
-
-            alert(
-                followError.message ||
-                "Failed to follow host."
-            );
-        }
-    };
 
     // ============================================================
     // CONTACT HOST
@@ -606,44 +445,19 @@ function HostProfile() {
                             </button>
                         </>
                     ) : (
-                        <>
-                            <button
-                                type="button"
-                                className={
-                                    following
-                                        ? "host-profile-following-btn"
-                                        : "host-profile-primary-btn"
-                                }
-                                onClick={
-                                    handleFollow
-                                }
-                                aria-pressed={
-                                    following
-                                }
-                            >
-                                <FiHeart
-                                    aria-hidden="true"
-                                />
+                        <button
+                            type="button"
+                            className="host-profile-secondary-btn"
+                            onClick={
+                                handleContact
+                            }
+                        >
+                            <FiMessageCircle
+                                aria-hidden="true"
+                            />
 
-                                {following
-                                    ? "Following"
-                                    : "Follow"}
-                            </button>
-
-                            <button
-                                type="button"
-                                className="host-profile-secondary-btn"
-                                onClick={
-                                    handleContact
-                                }
-                            >
-                                <FiMessageCircle
-                                    aria-hidden="true"
-                                />
-
-                                Chat with Host
-                            </button>
-                        </>
+                            Chat with Host
+                        </button>
                     )}
                 </div>
             </section>
@@ -709,23 +523,6 @@ function HostProfile() {
                     </div>
                 </div>
 
-                <div className="host-profile-stat-card">
-                    <span className="host-profile-stat-icon">
-                        <FiHeart
-                            aria-hidden="true"
-                        />
-                    </span>
-
-                    <div>
-                        <h3>
-                            {followers}
-                        </h3>
-
-                        <p>
-                            Followers
-                        </p>
-                    </div>
-                </div>
             </section>
         </main>
     );

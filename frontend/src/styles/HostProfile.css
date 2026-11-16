@@ -311,7 +311,6 @@
 
 .host-profile-primary-btn,
 .host-profile-secondary-btn,
-.host-profile-following-btn,
 .host-profile-back-btn {
     display: inline-flex;
 
@@ -349,7 +348,6 @@
 
 .host-profile-primary-btn svg,
 .host-profile-secondary-btn svg,
-.host-profile-following-btn svg,
 .host-profile-back-btn svg {
     width: 17px;
     height: 17px;
@@ -438,36 +436,11 @@
 }
 
 /* ============================================================
-   FOLLOWING BUTTON
-   ============================================================ */
-
-.host-profile-following-btn {
-    color:
-        var(--host-orange);
-
-    background:
-        var(--host-orange-soft);
-
-    border:
-        1px solid
-        #ffd7bf;
-}
-
-.host-profile-following-btn:hover {
-    background:
-        #ffeadf;
-
-    border-color:
-        #ffc5a5;
-}
-
-/* ============================================================
    FOCUS STATES
    ============================================================ */
 
 .host-profile-primary-btn:focus-visible,
 .host-profile-secondary-btn:focus-visible,
-.host-profile-following-btn:focus-visible,
 .host-profile-back-btn:focus-visible {
     outline:
         3px solid
@@ -985,8 +958,7 @@
     }
 
     .host-profile-primary-btn,
-    .host-profile-secondary-btn,
-    .host-profile-following-btn {
+    .host-profile-secondary-btn {
         width: 100%;
 
         min-height: 43px;
@@ -999,8 +971,7 @@
     }
 
     .host-profile-primary-btn svg,
-    .host-profile-secondary-btn svg,
-    .host-profile-following-btn svg {
+    .host-profile-secondary-btn svg {
         width: 16px;
         height: 16px;
     }
@@ -1145,8 +1116,7 @@
     }
 
     .host-profile-primary-btn,
-    .host-profile-secondary-btn,
-    .host-profile-following-btn {
+    .host-profile-secondary-btn {
         min-height: 44px;
     }
 
@@ -1286,7 +1256,6 @@
 @media (prefers-reduced-motion: reduce) {
     .host-profile-primary-btn,
     .host-profile-secondary-btn,
-    .host-profile-following-btn,
     .host-profile-back-btn,
     .host-profile-stat-card {
         transition: none;
