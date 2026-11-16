@@ -3562,10 +3562,8 @@ def get_pesapal_transaction_status(
 # ============================================================
 # VERIFY ADMIN TEAM TOKEN
 #
-# Admin Team:
-#
-#     team_accounts.json
-#     admin_team_members.json
+# Admin Team memberships and credentials are stored in
+# admin_team and users.
 #
 # The signed token contains:
 #
@@ -9144,28 +9142,6 @@ def create_admin_team_invitation_link(
         f"/admin/team-invitation"
         f"?token={token}"
     )
-
-
-# ============================================================
-# HOST TEAM ACCOUNTS STORAGE
-# ============================================================
-TEAM_ACCOUNTS_FILE = "team_accounts.json"
-# ============================================================
-# ENSURE HOST TEAM ACCOUNTS FILE EXISTS
-# ============================================================
-def ensure_team_accounts_file():
-    return None
-# ============================================================
-# LOAD HOST TEAM ACCOUNTS
-# ============================================================
-def load_team_accounts():
-    return load_json_file("team_accounts.json", [])
-# ============================================================
-# SAVE HOST TEAM ACCOUNTS
-# ============================================================
-def save_team_accounts(data):
-    return save_json_file("team_accounts.json", data)
-
 
 
 # ============================================================
@@ -16615,8 +16591,6 @@ JSON_TABLE_MAP = {
     "password_resets.json": "password_resets",
     "admin_password_resets.json": "password_resets",
     "team_members.json": "team_members",
-    "team_accounts.json": "team_accounts",
-    "team_sessions.json": "team_sessions",
     "idempotency_keys.json": "idempotency_keys",
     # The old admin password file is now persisted in the approved
     # admin_settings record (or its metadata column when present).
@@ -22415,7 +22389,6 @@ def register():
 # Files:
 # - users.json
 # - team_members.json
-# - team_sessions.json
 # ============================================================
 
 
@@ -22424,7 +22397,6 @@ def register():
 # ============================================================
 
 TEAM_MEMBERS_FILE = "team_members.json"
-TEAM_SESSIONS_FILE = "team_sessions.json"
 
 
 # ============================================================
@@ -22437,15 +22409,6 @@ def load_team_members():
 
 def save_team_members(data):
     return save_json_file("team_members.json", data)
-
-
-def load_team_sessions():
-    return load_json_file("team_sessions.json", [])
-
-
-def save_team_sessions(data):
-    return save_json_file("team_sessions.json", data)
-
 
 
 # ============================================================
@@ -23394,19 +23357,14 @@ def get_host_team_events():
 #   ↓
 # Create login account
 #   ↓
-# Save account to TEAM_ACCOUNTS_FILE
-#   ↓
 # Create host team-member assignment
 #   ↓
 # Send login email
 #
 # IMPORTANT:
 #
-# team_members.json
-#     = host assignment / event access
-#
-# admin_team_accounts.json
-#     = actual team login accounts
+# users.json stores the login identity and password hash.
+# team_members.json stores the host assignment and event access.
 #
 # The plaintext temporary password is NEVER stored.
 # ============================================================
@@ -23727,58 +23685,9 @@ def add_host_team_member():
 
                 }), 409
 
-        # ====================================================
-        # LOAD TEAM ACCOUNTS
-        #
-        # THIS IS THE IMPORTANT PART.
-        #
-        # The actual login account is stored here.
-        # ====================================================
-
-        team_accounts = load_team_accounts()
-
-        if not isinstance(
-            team_accounts,
-            list
-        ):
-
-            team_accounts = []
-
-        # ====================================================
-        # CHECK EXISTING TEAM ACCOUNT
-        # ====================================================
-
-        existing_team_account = None
-
-        for account in team_accounts:
-
-            if not isinstance(
-                account,
-                dict
-            ):
-                continue
-
-            account_email = str(
-                account.get(
-                    "email",
-                    ""
-                ) or ""
-            ).strip().lower()
-
-            if account_email == email:
-
-                existing_team_account = account
-
-                break
-
-        # ====================================================
-        # IMPORTANT:
-        #
-        # A team account already belonging to another
-        # team member cannot be silently reused.
-        # ====================================================
-
-        if existing_team_account:
+        # A login identity is stored in users; do not create a
+        # duplicate identity for an existing email.
+        if find_user_by_email(email):
 
             return jsonify({
 
@@ -23809,17 +23718,9 @@ def add_host_team_member():
             }), 500
 
         # ====================================================
-        # CREATE TEAM ACCOUNT ID
-        # ====================================================
-
-        account_id = (
-            f"TEAM-{int(time.time() * 1000)}"
-        )
-
-        # ====================================================
         # CREATE USER ID
         #
-        # Used to connect the account to users.json.
+        # Used to connect the login identity to team_members.
         # ====================================================
 
         user_id = int(
@@ -23837,105 +23738,9 @@ def add_host_team_member():
         )
 
         # ====================================================
-        # CREATE TEAM ACCOUNT
-        #
-        # Plaintext password is NEVER stored.
-        # ====================================================
-
-        team_account = {
-
-            "id":
-                account_id,
-
-            "memberId":
-                account_id,
-
-            "userId":
-                user_id,
-
-            "name":
-                name,
-
-            "email":
-                email,
-
-            "password":
-                password_hash,
-
-            "role":
-                role,
-
-            "host":
-                host.get(
-                    "name",
-                    ""
-                ),
-
-            "hostId":
-                host.get(
-                    "id"
-                ),
-
-            "hostEmail":
-                host.get(
-                    "email",
-                    host_email
-                ),
-
-            "event":
-                (
-                    assigned_events[0].get(
-                        "title",
-                        assigned_events[0].get(
-                            "eventTitle",
-                            ""
-                        )
-                    )
-                    if assigned_events
-                    else ""
-                ),
-
-            "eventId":
-                (
-                    assigned_events[0].get(
-                        "id"
-                    )
-                    if assigned_events
-                    else None
-                ),
-
-            "eventIds":
-                event_ids,
-
-            "status":
-                "Active",
-
-            "teamMember":
-                True,
-
-            "createdAt":
-                datetime.now().isoformat()
-
-        }
-
-        # ====================================================
-        # SAVE TEAM ACCOUNT
-        # ====================================================
-
-        team_accounts.append(
-            team_account
-        )
-
-        save_team_accounts(
-            team_accounts
-        )
-
-        # ====================================================
         # CREATE / UPDATE USERS.JSON
         #
-        # This keeps the general user identity available,
-        # but the team login password is controlled by the
-        # team account above.
+        # The login password hash is stored with this user.
         # ====================================================
 
         users = load_json_file(
@@ -23977,10 +23782,7 @@ def add_host_team_member():
                 False,
 
             "teamMember":
-                True,
-
-            "teamAccountId":
-                account_id
+                True
 
         }
 
@@ -24033,9 +23835,6 @@ def add_host_team_member():
 
             "userId":
                 user_id,
-
-            "teamAccountId":
-                account_id,
 
             "hostId":
                 host.get(
@@ -24136,8 +23935,8 @@ def add_host_team_member():
         )
 
         print(
-            "TEAM ACCOUNT ID:",
-            account_id
+            "TEAM MEMBER ID:",
+            member_id
         )
 
         print(
@@ -25228,56 +25027,6 @@ def team_login():
     }), 200
 
 # ============================================================
-# VERIFY TEAM TOKEN
-#
-# Used by secure team-only endpoints.
-# ============================================================
-
-def get_team_session():
-
-    authorization =  request.headers.get(
-                "Authorization",
-                ""
-            )
-    
-    
-    if not authorization.startswith(
-        "Bearer "
-    ):
-
-        return None
-
-
-    token =  authorization.replace(
-                "Bearer ",
-                "",
-                1
-            ).strip()
-
-
-    if not token:
-
-        return None
-
-
-    sessions =  load_team_sessions()
-
-
-    for session in sessions:
-
-        if (
-            session.get("token")
-            ==
-            token
-        ):
-
-            return session
-
-
-    return None
-
-
-# ============================================================
 # GET TEAM MEMBER ASSIGNED EVENTS
 #
 # Authentication is handled by team_required().
@@ -25947,18 +25696,11 @@ def get_team_assigned_events(account):
 #
 # This endpoint uses the NEW team authentication system.
 #
-# The frontend sends:
+# The frontend sends a signed token:
 #
 # Authorization: Bearer <team-token>
 #
-# team_required() verifies the token and passes the
-# CURRENT team account into this route.
-#
-# Therefore we do NOT use:
-#
-# get_team_session()
-#
-# here anymore.
+# team_required() verifies it and passes the current account.
 # ============================================================
 @app.route(
     "/team-session",
@@ -29556,35 +29298,6 @@ def create_event():
     )
 
     # ========================================================
-    # GENERATE EVENT ID
-    # ========================================================
-
-    if events:
-
-        try:
-
-            event_id = max(
-                int(
-                    event.get(
-                        "id",
-                        0
-                    )
-                )
-                for event in events
-            ) + 1
-
-        except (
-            ValueError,
-            TypeError
-        ):
-
-            event_id = len(events) + 1
-
-    else:
-
-        event_id = 1
-
-    # ========================================================
     # FEATURED
     # ========================================================
 
@@ -29603,9 +29316,6 @@ def create_event():
     # ========================================================
 
     event = {
-
-        "id":
-            event_id,
 
         "title":
             data.get(
@@ -42183,9 +41893,8 @@ def get_team_accessible_event_ids(account):
     # ========================================================
     # IF TEAM TYPE IS MISSING
     #
-    # Some existing team_accounts.json records do not contain
-    # teamType. In that case, identify the member by checking
-    # Admin Team first, then Host Team.
+    # Legacy tokens may omit teamType. Identify the member by
+    # checking Admin Team first, then Host Team.
     # ========================================================
 
     else:
