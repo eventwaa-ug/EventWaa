@@ -26877,6 +26877,14 @@ def pesapal_callback():
                 "&status=failed"
             )
 
+        tx_ref = str(
+            payment.get(
+                "txRef",
+                ""
+            )
+            or ""
+        ).strip()
+
         # ====================================================
         # IF ALREADY PROCESSED
         # ====================================================
@@ -27107,13 +27115,6 @@ def pesapal_callback():
                     )
                 )
 
-                tx_ref = str(
-                    payment.get(
-                        "txRef",
-                        ""
-                    )
-                )
-
                 return redirect(
                     f"{FRONTEND_URL}"
                     "/payment-success"
@@ -27159,13 +27160,6 @@ def pesapal_callback():
                 tx_ref=tx_ref,
                 status=failed_status,
                 status_code=status_code
-            )
-
-            return redirect(
-                f"{FRONTEND_URL}"
-                "/payment-success"
-                "?provider=pesapal"
-                "&status=failed"
             )
 
             return redirect(
