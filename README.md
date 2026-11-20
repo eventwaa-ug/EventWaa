@@ -16,7 +16,7 @@ Live Demo: https://EventWaa.com
 - Frontend: React + Vite(hosted on vercel)
 - Backend: python  + flask (hosted on railway)
 - Database: supabase(postgresql)
-- Deployment: Vercel
+
 
 ## How to Run Locally
 1. Clone the repo: git clone https://github.com/eventwaa-ug/EventWaa
